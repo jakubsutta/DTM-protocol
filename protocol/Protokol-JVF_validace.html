@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Protokol o validaci JVF DTM</title>
+<style>
+    /* ---- Tisk / PDF ---- */
+    @media print {
+        body { background: #fff !important; }
+        
+        /* OPRAVA: Zrušíme grid rozložení při tisku, aby prázdný sloupec formuláře nezabíral místo */
+        .app { display: block !important; }
+        
+        .form-panel { display: none !important; }
+        
+        /* OPRAVA: Vynulujeme odsazení náhledu */
+        .preview-panel { 
+            display: block !important;
+            padding: 0 !important;
+            box-shadow: none !important; 
+            margin: 0 !important; 
+        }
+        
+        /* OPRAVA: Protokol zabere 100% dostupné tiskové plochy, ne natvrdo 210mm */
+        .protokol {
+            width: 100% !important;
+            min-height: auto !important; /* Zabrání prázdné druhé stránce */
+            padding: 0 !important; /* Okraje papíru řeší @page */
+            box-shadow: none !important;
+            margin: 0 !important;
+        }
+
+        .btn-row { display: none !important; }
+        
+        /* Skryjeme fixní číslo stránky, které by se mohlo špatně pozicovat (prohlížeč tiskne vlastní) */
+        .prot-page { display: none !important; }
+        
+        @page { size: A4; margin: 15mm 20mm; }
+    }
+
+    /* ---- Základní reset ---- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        font-size: 14px;
+        background: #f0f2f5;
+        color: #1a1a1a;
+        min-height: 100vh;
+    }
+
+    /* ---- Layout ---- */
+    .app {
+        display: grid;
+        grid-template-columns: 380px 1fr;
+        min-height: 100vh;
+    }
+
+    /* ---- Formulářový panel ---- */
+    .form-panel {
+        background: #e2ecff;
+        color: #4483fc;
+        padding: 28px 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        overflow-y: auto;
+    }
+
+    .form-panel h2 {
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #4483fc;
+        margin-bottom: 22px;
+    }
+
+    .section-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #000;
+        margin: 20px 0 10px;
+        padding-bottom: 5px;
+        border-bottom: 1px solid #0f3460;
+    }
+
+    .field { margin-bottom: 12px; }
+
+    .field label {
+        display: block;
+        font-size: 11px;
+        color: #000;
+        margin-bottom: 4px;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+        width: 100%;
+        background: #fff;
+        border: 1px solid #4483fc;
+        border-radius: 4px;
+        color: #ababab;
+        font-size: 12px;
+        font-family: inherit;
+        padding: 7px 10px;
+        outline: none;
+        transition: border-color 0.15s;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+        border-color: #4fc3f7;
+    }
+
+    .field select option { background: #1a1a2e; }
+    .field textarea { resize: vertical; min-height: 60px; }
+
+    .result-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    /* Tlačítka */
+    .btn-row {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 24px;
+    }
+
+    .btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 10px 16px;
+        border-radius: 5px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        font-family: inherit;
+        transition: background 0.15s;
+    }
+
+    .btn-primary {
+        background: #4483fc;
+        color: #fff;
+    }
+    .btn-primary:hover { background: #1a58cc; }
+
+    .btn-secondary {
+        background: #f8cfcf;
+        color: #9b0a0a;
+        border: none;
+    }
+    .btn-secondary:hover { background: #f3b8b8; color: #8a1212; }
+
+    /* Přidat soubor */
+    .add-file-btn {
+        background: none;
+        border: 1px dashed #4483fc;
+        border-radius: 4px;
+        color: #4483fc; 
+        font-size: 11px;
+        padding: 7px;
+        width: 100%;
+        cursor: pointer;
+        font-family: inherit;
+        margin-top: 4px;
+        transition: border-color 0.15s;
+    }
+    .add-file-btn:hover { border-color: #ea521f; color: #ea521f; }
+
+    .file-entry {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 6px;
+        align-items: start;
+        background: #ffffff;
+        border: 1px solid #4483fc;
+        border-radius: 4px;
+        padding: 8px 10px;
+        margin-bottom: 6px;
+    }
+
+    .file-entry input,
+    .file-entry select {
+        background: #fff;
+        border: 1px solid #4483fc;
+        border-radius: 3px;
+        color: #707070;
+        font-size: 11px;
+        font-family: inherit;
+        padding: 5px 8px;
+        width: 100%;
+        outline: none;
+        margin-bottom: 4px;
+    }
+    .file-entry input:focus, .file-entry select:focus { border-color: #2765d8; }
+
+    .file-remove {
+        background: none;
+        border: none;
+        color: #546e7a;
+        cursor: pointer;
+        font-size: 16px;
+        line-height: 1;
+        padding: 2px 4px;
+        align-self: center;
+    }
+    .file-remove:hover { color: #ff0000; }
+
+    .file-fields { flex: 1; }
+
+    /* ---- Preview panel ---- */
+    .preview-panel {
+        padding: 32px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        overflow-y: auto;
+    }
+
+    /* ---- Protokol (A4 simulace) ---- */
+    .protokol {
+        background: #fff;
+        width: 210mm;
+        min-height: 297mm;
+        padding: 18mm 20mm 20mm;
+        box-shadow: 0 4px 32px rgba(0,0,0,0.18);
+        position: relative;
+        color: #1a1a1a;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+
+    /* Hlavička */
+    .prot-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding-bottom: 10px;
+        border-bottom: 2.5px solid #1a1a2e;
+        margin-bottom: 14px;
+    }
+
+    .prot-org {
+        font-size: 11px;
+        color: #546e7a;
+        line-height: 1.5;
+    }
+
+    .prot-org strong {
+        display: block;
+        font-size: 14px;
+        color: #1a1a2e;
+        font-weight: 700;
+        margin-bottom: 2px;
+    }
+
+    .prot-badge {
+        text-align: right;
+        font-size: 10px;
+        color: #78909c;
+        line-height: 1.6;
+    }
+
+    .prot-badge .badge-num {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        color: #1a1a2e;
+        font-family: monospace;
+        letter-spacing: 0.05em;
+    }
+
+    /* Název */
+    .prot-title {
+        font-size: 17px;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 4px;
+        line-height: 1.3;
+    }
+
+    .prot-subtitle {
+        font-size: 11px;
+        color: #78909c;
+        margin-bottom: 20px;
+    }
+
+    /* Výsledek */
+    .prot-result {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 11px 16px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .prot-result.success {
+        background: #e8f5e9;
+        border-left: 4px solid #43a047;
+        color: #1b5e20;
+    }
+
+    .prot-result.warning {
+        background: #fff8e1;
+        border-left: 4px solid #f9a825;
+        color: #e65100;
+    }
+
+    .prot-result.error {
+        background: #ffebee;
+        border-left: 4px solid #e53935;
+        color: #b71c1c;
+    }
+
+    .result-icon {
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+
+    .result-text { line-height: 1.4; }
+    .result-text small { display: block; font-weight: 400; font-size: 11px; margin-top: 2px; opacity: 0.8; }
+
+    /* Sekce */
+    .prot-section {
+        margin-bottom: 18px;
+    }
+
+    .prot-section-title {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #78909c;
+        padding-bottom: 5px;
+        border-bottom: 1px solid #eceff1;
+        margin-bottom: 10px;
+    }
+
+    /* Tabulky */
+    .prot-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+    }
+
+    .prot-table td {
+        padding: 5px 8px;
+        vertical-align: top;
+        border-bottom: 1px solid #f5f5f5;
+    }
+
+    .prot-table td:first-child {
+        color: #78909c;
+        width: 38%;
+        font-size: 11px;
+        padding-right: 12px;
+    }
+
+    .prot-table td:last-child {
+        color: #1a1a1a;
+        font-weight: 500;
+    }
+
+    /* Soubory */
+    .files-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11px;
+    }
+
+    .files-table th {
+        background: #f5f7fa;
+        padding: 6px 10px;
+        text-align: left;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #78909c;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .files-table td {
+        padding: 7px 10px;
+        border-bottom: 1px solid #f5f5f5;
+        color: #333;
+        vertical-align: middle;
+    }
+
+    .files-table td.mono {
+        font-family: 'Consolas', 'Courier New', monospace;
+        font-size: 10.5px;
+        color: #1a1a2e;
+    }
+
+    .chip {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 10px;
+        font-weight: 600;
+    }
+
+    .chip-ok { background: #e8f5e9; color: #2e7d32; }
+    .chip-warn { background: #fff8e1; color: #e65100; }
+    .chip-err { background: #ffebee; color: #c62828; }
+
+    /* Poznámka */
+    .prot-note {
+        font-size: 11px;
+        color: #90a4ae;
+        font-style: italic;
+        background: #f9f9f9;
+        border-left: 3px solid #cfd8dc;
+        padding: 7px 12px;
+        border-radius: 0 4px 4px 0;
+        margin-bottom: 16px;
+    }
+
+    /* Pata */
+    .prot-footer {
+        margin-top: 30px;
+        padding-top: 12px;
+        border-top: 1px solid #eceff1;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        font-size: 10px;
+        color: #b0bec5;
+    }
+
+    .sign-block {
+        text-align: center;
+    }
+
+    .sign-line {
+        width: 150px;
+        border-top: 1px solid #b0bec5;
+        margin: 28px auto 4px;
+    }
+
+    .prot-stamp {
+        font-size: 10px;
+        color: #cfd8dc;
+        text-align: right;
+    }
+
+    /* Číslo stránky */
+    .prot-page {
+        position: absolute;
+        bottom: 12mm;
+        right: 20mm;
+        font-size: 9px;
+        color: #b0bec5;
+    }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+    <!-- ===== FORMULÁŘ ===== -->
+    <div class="form-panel">
+        <h2>Protokol o validaci JVF</h2>
+
+        <div class="section-label">Organizace</div>
+
+        <div class="field">
+            <label>Zpracovatel</label>
+            <input type="text" id="zpracovatel" value="Atomicon, s.r.o.">
+        </div>
+        <div class="field">
+            <label>IČO / kontakt</label>
+            <input type="text" id="ico" placeholder="např. IČO: 12345678">
+        </div>
+
+        <div class="section-label">Zakázka</div>
+
+        <div class="field">
+            <label>Název zakázky</label>
+            <input type="text" id="nazevZakazky" placeholder="např. zpracování TI ve městě Tovačov">
+        </div>
+        <div class="field">
+            <label>Číslo zakázky</label>
+            <input type="text" id="cisloZakazky" placeholder="např. 04-03-26">
+        </div>
+        <div class="field">
+            <label>Lokalita / investor</label>
+            <input type="text" id="lokalita" placeholder="např. Tovačov">
+        </div>
+
+        <div class="section-label">Validace</div>
+
+        <div class="result-row">
+            <div class="field">
+                <label>Číslo požadavku (DMVS)</label>
+                <input type="text" id="cisloValidace" placeholder="např. 28698144">
+            </div>
+            <div class="field">
+                <label>Datum validace</label>
+                <input type="date" id="datumValidace">
+            </div>
+        </div>
+
+        <div class="field">
+            <label>Výsledek validace</label>
+            <select id="vysledekValidace">
+                <option value="success">Validace proběhla úspěšně</option>
+                <option value="warning">Úspěšně s upozorněními</option>
+                <option value="error">Validace selhala</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label>Verze JVF DTM</label>
+            <input type="text" id="verzeJvf" value="1.4.3">
+        </div>
+
+        <div class="field">
+            <label>Poznámka (volitelné)</label>
+            <textarea id="poznamka" placeholder="Doplňující informace k validaci..."></textarea>
+        </div>
+
+        <div class="section-label">Soubory</div>
+        <div id="files-container"></div>
+        <button class="add-file-btn" onclick="addFile()">+ Přidat soubor</button>
+
+        <div class="btn-row">
+            <button class="btn btn-primary" onclick="window.print()">
+                ⬇ Uložit jako PDF (Ctrl+P)
+            </button>
+            <button class="btn btn-secondary" onclick="resetForm()">
+                Vymazat formulář
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== PROTOKOL (preview) ===== -->
+    <div class="preview-panel">
+        <div class="protokol" id="protokol">
+
+            <div class="prot-header">
+                <div class="prot-org">
+                    <strong id="p-zpracovatel">Atomicon, s.r.o.</strong>
+                    <span id="p-ico"></span>
+                </div>
+                <div class="prot-badge">
+                    Digitální technická mapa ČR<br>
+                    Validace JVF DTM · IS DMVS ČÚZK<br>
+                    <span class="badge-num" id="p-cisloValidace">#—</span>
+                </div>
+            </div>
+
+            <div class="prot-title">Protokol o validaci JVF DTM</div>
+            <div class="prot-subtitle" id="p-subtitle">Datum validace: —</div>
+
+            <!-- Výsledek -->
+            <div class="prot-result success" id="p-result">
+                <span class="result-icon">✓</span>
+                <span class="result-text">
+                    Validace proběhla úspěšně
+                    <small>Všechny soubory splňují požadavky JVF DTM 1.4.3</small>
+                </span>
+            </div>
+
+            <!-- Základní údaje -->
+            <div class="prot-section">
+                <div class="prot-section-title">Základní údaje</div>
+                <table class="prot-table">
+                    <tr><td>Zpracovatel</td><td id="p-zpracovatel2">—</td></tr>
+                    <tr><td>Název zakázky</td><td id="p-nazevZakazky">—</td></tr>
+                    <tr><td>Číslo zakázky</td><td id="p-cisloZakazky">—</td></tr>
+                    <tr><td>Lokalita / investor</td><td id="p-lokalita">—</td></tr>
+                    <tr><td>Číslo požadavku DMVS</td><td id="p-cisloValidace2">—</td></tr>
+                    <tr><td>Datum validace</td><td id="p-datumValidace2">—</td></tr>
+                    <tr><td>Verze JVF DTM</td><td id="p-verzeJvf">1.4.3</td></tr>
+                    <tr><td>Systém validace</td><td>IS DMVS ČÚZK (<a href="https://dmvs.cuzk.gov.cz" style="color:#1a1a2e">dmvs.cuzk.gov.cz</a>)</td></tr>
+                </table>
+            </div>
+
+            <!-- Soubory -->
+            <div class="prot-section">
+                <div class="prot-section-title">Soubory</div>
+                <table class="files-table">
+                    <thead>
+                        <tr>
+                            <th>Název souboru</th>
+                            <th>Typ objektu</th>
+                            <th>Obsahová část</th>
+                            <th>Výsledek</th>
+                        </tr>
+                    </thead>
+                    <tbody id="p-files">
+                        <tr><td colspan="4" style="color:#b0bec5;font-size:11px;padding:10px;">Přidejte soubory ve formuláři →</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Poznámka -->
+            <div class="prot-note" id="p-poznamka-wrap" style="display:none">
+                <strong>Poznámka:</strong> <span id="p-poznamka"></span>
+            </div>
+
+            <!-- Podpis -->
+            <div class="prot-section">
+                <div class="prot-section-title">Zpracoval</div>
+                <div style="display:flex;gap:40px;margin-top:8px;">
+                    <div class="sign-block">
+                        <div class="sign-line"></div>
+                        <div style="font-size:10px;color:#78909c;" id="p-sign-name">Zpracovatel</div>
+                        <div style="font-size:10px;color:#b0bec5;">podpis / razítko</div>
+                    </div>
+                    <div style="font-size:11px;color:#78909c;align-self:flex-end;padding-bottom:22px;line-height:1.7;">
+                        Datum:<br>
+                        <span id="p-datumValidace3" style="color:#1a1a1a;font-weight:500;">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="prot-footer">
+                <div>Protokol vygenerován nástrojem Atomicon JVF Validator Report</div>
+                <div class="prot-stamp" id="p-generated"></div>
+            </div>
+
+            <div class="prot-page">1 / 1</div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// ===================== DATA =====================
+
+const VYSLEDKY = {
+    success: {
+        cls: 'success',
+        icon: '✓',
+        text: 'Validace proběhla úspěšně',
+        sub: 'Všechny soubory splňují požadavky JVF DTM',
+        chip: 'chip-ok',
+        chipText: 'OK'
+    },
+    warning: {
+        cls: 'warning',
+        icon: '⚠',
+        text: 'Validace proběhla úspěšně s upozorněními',
+        sub: 'Soubory jsou přijatelné, doporučuje se přezkoumat upozornění',
+        chip: 'chip-warn',
+        chipText: 'Upozornění'
+    },
+    error: {
+        cls: 'error',
+        icon: '✕',
+        text: 'Validace selhala',
+        sub: 'Soubory nesplňují požadavky JVF DTM – je vyžadována oprava',
+        chip: 'chip-err',
+        chipText: 'Chyba'
+    }
+};
+
+let fileCount = 0;
+
+// ===================== PŘIDÁNÍ SOUBORU =====================
+
+function addFile() {
+    fileCount++;
+    const id = fileCount;
+    const container = document.getElementById('files-container');
+
+    const div = document.createElement('div');
+    div.className = 'file-entry';
+    div.id = 'file-' + id;
+    div.innerHTML = `
+        <div class="file-fields">
+            <input type="text" placeholder="Název souboru (*.jvf.xml)"
+                   oninput="updatePreview()" id="fname-${id}">
+            <input type="text" placeholder="Typ objektu (např. trasa elektrické sítě)"
+                   oninput="updatePreview()" id="ftyp-${id}">
+            <select onchange="updatePreview()" id="fcast-${id}">
+                <option value="TI">TI — technická infrastruktura</option>
+                <option value="DI">DI — dopravní infrastruktura</option>
+                <option value="ZPS">ZPS — základní prostorová situace</option>
+            </select>
+            <select onchange="updatePreview()" id="fvys-${id}">
+                <option value="success">OK — úspěšně</option>
+                <option value="warning">Upozornění</option>
+                <option value="error">Chyba</option>
+            </select>
+        </div>
+        <button class="file-remove" onclick="removeFile(${id})" title="Odebrat">×</button>
+    `;
+    container.appendChild(div);
+    updatePreview();
+}
+
+function removeFile(id) {
+    const el = document.getElementById('file-' + id);
+    if (el) el.remove();
+    updatePreview();
+}
+
+// ===================== RESET =====================
+
+function resetForm() {
+    if (!confirm('Vymazat celý formulář?')) return;
+    ['zpracovatel','ico','nazevZakazky','cisloZakazky','lokalita',
+     'cisloValidace','verzeJvf','poznamka'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = id === 'zpracovatel' ? 'Atomicon, s.r.o.' : id === 'verzeJvf' ? '1.4.3' : '';
+    });
+    document.getElementById('datumValidace').value = '';
+    document.getElementById('vysledekValidace').value = 'success';
+    document.getElementById('files-container').innerHTML = '';
+    fileCount = 0;
+    updatePreview();
+}
+
+// ===================== FORMÁTOVÁNÍ DATA =====================
+
+function formatDate(val) {
+    if (!val) return '—';
+    const d = new Date(val + 'T12:00:00');
+    return d.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function val(id) {
+    return (document.getElementById(id)?.value || '').trim();
+}
+
+function setText(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text || '—';
+}
+
+// ===================== UPDATE PREVIEW =====================
+
+function updatePreview() {
+    const zprac = val('zpracovatel') || 'Atomicon, s.r.o.';
+    const ico = val('ico');
+    const nazev = val('nazevZakazky');
+    const cislo = val('cisloZakazky');
+    const lokalita = val('lokalita');
+    const cisloVal = val('cisloValidace');
+    const datumVal = val('datumValidace');
+    const verze = val('verzeJvf') || '1.4.3';
+    const poznamka = val('poznamka');
+    const vysledekKey = val('vysledekValidace') || 'success';
+    const vys = VYSLEDKY[vysledekKey];
+
+    // Hlavička
+    setText('p-zpracovatel', zprac);
+    setText('p-zpracovatel2', zprac);
+    document.getElementById('p-ico').textContent = ico;
+    setText('p-sign-name', zprac);
+
+    document.getElementById('p-cisloValidace').textContent = cisloVal ? '#' + cisloVal : '#—';
+    setText('p-cisloValidace2', cisloVal || '—');
+    setText('p-subtitle', 'Datum validace: ' + formatDate(datumVal));
+    setText('p-datumValidace2', formatDate(datumVal));
+    setText('p-datumValidace3', formatDate(datumVal));
+
+    setText('p-nazevZakazky', nazev || '—');
+    setText('p-cisloZakazky', cislo || '—');
+    setText('p-lokalita', lokalita || '—');
+    setText('p-verzeJvf', verze);
+
+    // Výsledek
+    const resultEl = document.getElementById('p-result');
+    resultEl.className = 'prot-result ' + vys.cls;
+    resultEl.innerHTML = `
+        <span class="result-icon">${vys.icon}</span>
+        <span class="result-text">
+            ${vys.text}
+            <small>${vys.sub} ${verze}</small>
+        </span>
+    `;
+
+    // Poznámka
+    const pozWrap = document.getElementById('p-poznamka-wrap');
+    if (poznamka) {
+        pozWrap.style.display = 'block';
+        document.getElementById('p-poznamka').textContent = poznamka;
+    } else {
+        pozWrap.style.display = 'none';
+    }
+
+    // Soubory
+    const tbody = document.getElementById('p-files');
+    const entries = document.querySelectorAll('.file-entry');
+
+    if (entries.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="color:#b0bec5;font-size:11px;padding:10px;">Přidejte soubory ve formuláři →</td></tr>';
+    } else {
+        let rows = '';
+        entries.forEach(entry => {
+            const id = entry.id.replace('file-', '');
+            const fname = val('fname-' + id) || '—';
+            const ftyp  = val('ftyp-' + id) || '—';
+            const fcast = val('fcast-' + id) || 'TI';
+            const fvys  = val('fvys-' + id) || 'success';
+            const fv = VYSLEDKY[fvys];
+            rows += `<tr>
+                <td class="mono">${fname}</td>
+                <td>${ftyp}</td>
+                <td>${fcast}</td>
+                <td><span class="chip ${fv.chip}">${fv.chipText}</span></td>
+            </tr>`;
+        });
+        tbody.innerHTML = rows;
+    }
+
+    // Generováno
+    const now = new Date();
+    document.getElementById('p-generated').textContent =
+        'Vygenerováno: ' + now.toLocaleString('cs-CZ');
+}
+
+// ===================== INIT =====================
+
+// Výchozí datum = dnes
+document.getElementById('datumValidace').value = new Date().toISOString().slice(0, 10);
+
+// Live update při psaní
+['zpracovatel','ico','nazevZakazky','cisloZakazky','lokalita',
+ 'cisloValidace','datumValidace','verzeJvf','poznamka','vysledekValidace']
+    .forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', updatePreview);
+        if (el) el.addEventListener('change', updatePreview);
+    });
+
+updatePreview();
+</script>
+</body>
+</html>

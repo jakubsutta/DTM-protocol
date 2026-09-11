@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nástroje pro DTM - Atomicon</title>
+<style>
+    /* ---- Základní reset ---- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        background: #f0f2f5;
+        color: #1a1a1a;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .container {
+        text-align: center;
+        max-width: 800px;
+        width: 100%;
+    }
+
+    h1 {
+        font-size: 24px;
+        font-weight: 800;
+        color: #1a1a2e;
+        margin-bottom: 8px;
+        letter-spacing: 0.05em;
+    }
+
+    .subtitle {
+        font-size: 14px;
+        color: #78909c;
+        margin-bottom: 48px;
+    }
+
+    /* ---- Karty (Rozcestník) ---- */
+    .cards {
+        display: flex;
+        gap: 24px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .card {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        width: 320px;
+        padding: 40px 24px;
+        text-decoration: none;
+        color: inherit;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border-top: 5px solid transparent;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+    }
+
+    .card-icon {
+        font-size: 40px;
+        margin-bottom: 20px;
+        line-height: 1;
+    }
+
+    .card-title {
+        font-size: 16px;
+        font-weight: 800;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    .card-desc {
+        font-size: 13px;
+        color: #546e7a;
+        line-height: 1.5;
+    }
+
+    /* Téma pro Vložení (Oranžové) */
+    .card.vlozeni {
+        border-top-color: #ea521f;
+    }
+    .card.vlozeni .card-icon {
+        color: #ea521f;
+    }
+    .card.vlozeni .card-title {
+        color: #ea521f;
+    }
+    .card.vlozeni:hover {
+        background: #fff7f4;
+    }
+
+    /* Téma pro Validaci (Modré) */
+    .card.validace {
+        border-top-color: #4483fc;
+    }
+    .card.validace .card-icon {
+        color: #4483fc;
+    }
+    .card.validace .card-title {
+        color: #4483fc;
+    }
+    .card.validace:hover {
+        background: #e2ecff;
+    }
+
+    /* ---- Patička ---- */
+    .footer {
+        margin-top: 60px;
+        font-size: 11px;
+        color: #757575;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📄 Generátory protokolů DTM</h1>
+    <p class="subtitle">Vyberte nástroj, který chcete použít:</p>
+    
+    <div class="cards">
+        <!-- Odkaz na první soubor (Vložení) -->
+        <a href="./Protokol_DTM-vlozeni.html" class="card vlozeni">
+            <div class="card-icon">📥</div>
+            <div class="card-title">Vložení do DTM</div>
+            <div class="card-desc">
+                Vygenerujte PDF protokol o úspěšném vložení JVF dat do krajské DTM.
+            </div>
+        </a>
+        
+        <!-- Odkaz na druhý soubor (Validace) -->
+        <a href="./Protokol-JVF_validace.html" class="card validace">
+            <div class="card-icon">✔️</div>
+            <div class="card-title">Validace JVF</div>
+            <div class="card-desc">
+                Vygenerujte PDF protokol o validaci JVF dat v IS DMVS (ČÚZK).
+            </div>
+        </a>
+    </div>
+    
+    <div class="footer">
+        Výsledný protokol dej předej k elektronickému podpisu (Kubíčková/Šutta)!
+    </div>
+</div>
+
+</body>
+</html>
