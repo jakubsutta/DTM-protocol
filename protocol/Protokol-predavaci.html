@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Předávací protokol</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤝</text></svg>">
+<style>
+    /* ---- Tisk / PDF ---- */
+    @media print {
+        * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        body { background: #fff !important; }
+        .app { display: block !important; }
+        .form-panel { display: none !important; }
+        .preview-panel { display: block !important; padding: 0 !important; box-shadow: none !important; margin: 0 !important; }
+        .protokol { width: 100% !important; min-height: auto !important; padding: 0 !important; box-shadow: none !important; margin: 0 !important; }
+        .btn-row { display: none !important; }
+        @page { size: A4; margin: 15mm 20mm; }
+    }
+
+    /* ---- Základní reset ---- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; background: #f0f2f5; color: #1a1a1a; min-height: 100vh; }
+    .app { display: grid; grid-template-columns: 380px 1fr; min-height: 100vh; }
+
+    /* ---- Formulářový panel ---- */
+    .form-panel { background: #e8f5e9; color: #000; padding: 28px 24px; display: flex; flex-direction: column; gap: 0; overflow-y: auto; }
+    .form-panel h2 { font-size: 13px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: #43a047; margin-bottom: 22px; }
+    .section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #020000; margin: 20px 0 10px; padding-bottom: 5px; border-bottom: 1px solid #43a047; }
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-size: 11px; color: #000; margin-bottom: 4px; }
+    .field input, .field select, .field textarea { width: 100%; background: #fff; border: 1px solid #43a047; border-radius: 4px; color: #1a1a1a; font-size: 12px; font-family: inherit; padding: 7px 10px; outline: none; transition: border-color 0.15s; }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: #2e7d32; }
+    .field textarea { resize: vertical; min-height: 60px; font-family: inherit; }
+    
+    .btn-row { display: flex; flex-direction: column; gap: 8px; margin-top: 24px; }
+    .btn { display: flex; align-items: center; justify-content: center; gap: 7px; padding: 10px 16px; border-radius: 5px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; font-family: inherit; transition: background 0.15s; }
+    .btn-primary { background: #43a047; color: #fff; } .btn-primary:hover { background: #2e7d32; }
+    .btn-secondary { background: #c8e6c9; color: #1b5e20; } .btn-secondary:hover { background: #a5d6a7; color: #1b5e20; }
+
+    .add-file-btn { background: none; border: 1px dashed #43a047; border-radius: 4px; color: #43a047; font-size: 11px; padding: 7px; width: 100%; cursor: pointer; font-family: inherit; margin-top: 4px; transition: border-color 0.15s; }
+    .add-file-btn:hover { border-color: #2e7d32; color: #2e7d32; }
+    
+    .bullet-entry { display: flex; gap: 6px; align-items: center; margin-bottom: 8px; }
+    .bullet-entry input { flex-grow: 1; }
+    .file-remove { background: none; border: none; color: #546e7a; cursor: pointer; font-size: 16px; padding: 2px 4px; } .file-remove:hover { color: #ff0000; }
+
+    /* ---- Preview panel ---- */
+    .preview-panel { padding: 32px; display: flex; align-items: flex-start; justify-content: center; overflow-y: auto; }
+    .protokol { background: #fff; width: 210mm; min-height: 297mm; padding: 18mm 20mm 20mm; box-shadow: 0 4px 32px rgba(0,0,0,0.18); position: relative; color: #1a1a1a; }
+    
+    .prot-header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 10px; border-bottom: 2.5px solid #1a1a2e; margin-bottom: 14px; }
+    .prot-org { font-size: 11px; color: #546e7a; line-height: 1.5; } .prot-org strong { display: block; font-size: 14px; color: #1a1a2e; font-weight: 700; margin-bottom: 2px; }
+    .prot-badge { text-align: right; font-size: 10px; color: #78909c; line-height: 1.6; } 
+
+    .prot-title { font-size: 17px; font-weight: 700; color: #1a1a2e; margin-bottom: 4px; line-height: 1.3; }
+
+    .party-section { margin-bottom: 20px; }
+    .party-title { font-size: 14px; font-weight: 700; margin-bottom: 8px; color: #1a1a2e; }
+    .party-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 5px; }
+    .party-table td { padding: 4px 8px 4px 0; vertical-align: top; }
+    .party-table td:first-child { width: 180px; color: #546e7a; }
+    .party-table td:last-child { color: #1a1a1a; font-weight: 500; }
+    .party-note { font-size: 12px; font-style: italic; color: #78909c; text-align: left; }
+
+    .prot-text { margin-top: 30px; font-size: 13px; line-height: 1.5; text-align: justify; }
+    .prot-bullets { margin-top: 15px; padding-left: 20px; font-size: 13px; line-height: 1.6; }
+    .prot-bullets li { margin-bottom: 4px; }
+
+    .prot-footer { margin-top: 60px; display: flex; justify-content: space-between; align-items: flex-end; }
+    .sign-block { text-align: center; width: 45%; }
+    .sign-line { width: 100%; border-top: 1px solid #1a1a1a; margin: 40px auto 4px; }
+    .sign-label { font-size: 12px; font-weight: 600; color: #1a1a2e; }
+    .sign-hint { font-size: 10px; color: #b0bec5; }
+    
+    .date-place { font-size: 13px; margin-bottom: 30px; font-weight: 500; }
+
+</style>
+</head>
+<body>
+
+<div class="app">
+    <!-- ===== FORMULÁŘ ===== -->
+    <div class="form-panel">
+        <h2>Předávací protokol</h2>
+
+        <div class="field"><label>Nadpis protokolu</label><input type="text" id="nadpis" value="Předávací protokol"></div>
+
+        <div class="section-label">Předávající</div>
+        <div class="field"><label>Zpracovatel</label><input type="text" id="predZpracovatel" value="Atomicon, s.r.o."></div>
+        <div class="field"><label>Sídlo (Adresa)</label><input type="text" id="predSidlo" value=""></div>
+        <div class="field"><label>Za níž jedná jednatel</label><input type="text" id="predJednatel" value=""></div>
+        <div class="field"><label>IČO / DIČ</label><input type="text" id="predIco" value=""></div>
+        <div class="field"><label>Číslo účtu</label><input type="text" id="predUcet" value=""></div>
+
+        <div class="section-label">Přebírající</div>
+        <div class="field"><label>Objednatel</label><input type="text" id="prebObjednatel" value=""></div>
+        <div class="field"><label>Adresa</label><input type="text" id="prebAdresa" value=""></div>
+        <div class="field"><label>Zastoupený při převzetí</label><input type="text" id="prebZastupce" value=""></div>
+
+        <div class="section-label">Předmět předání</div>
+        <div class="field"><label>Text předání</label><textarea id="textPredani" rows="3">Dnešního dne předávající předal a přebírající zkontroloval a bez výhrad převzal v požadované kvalitě:</textarea></div>
+        
+        <div class="field"><label>Předmět (tučně)</label><input type="text" id="predmet" placeholder="např. Geodetická dokumentace"></div>
+
+        <label style="font-size: 11px; font-weight: bold; margin-bottom: 4px; display: block; color: #000;">Odrážky:</label>
+        <div id="bullets-container"></div>
+        <button class="add-file-btn" onclick="addBullet()">+ Přidat položku</button>
+
+        <div class="section-label">Místo a datum</div>
+        <div class="field"><label>V obci</label><input type="text" id="misto" placeholder="např. Olomouci"></div>
+        <div class="field"><label>Dne</label><input type="date" id="datumPredani"></div>
+
+        <div class="btn-row">
+            <button class="btn btn-primary" onclick="window.print()">⬇ Uložit jako PDF (Ctrl+P)</button>
+            <button class="btn btn-secondary" onclick="resetForm()">Vymazat formulář</button>
+        </div>
+    </div>
+
+    <!-- ===== PROTOKOL (preview) ===== -->
+    <div class="preview-panel">
+        <div class="protokol" id="protokol">
+            
+            <div class="prot-header">
+                <div class="prot-org"><strong id="p-headZpracovatel">Atomicon, s.r.o.</strong><span id="p-headIco"></span></div>
+                <div class="prot-badge">Předávací protokol<br>Záznam o předání<br></div>
+            </div>
+
+            <div class="prot-title" id="p-nadpis">Předávací protokol</div>
+
+            <div class="party-section">
+                <div class="party-title">Předávající:</div>
+                <table class="party-table">
+                    <tr><td>Zpracovatel:</td><td id="p-predZpracovatel">—</td></tr>
+                    <tr><td>Sídlo (Adresa):</td><td id="p-predSidlo">—</td></tr>
+                    <tr><td>Za níž jedná jednatel:</td><td id="p-predJednatel">—</td></tr>
+                    <tr><td>IČO / DIČ:</td><td id="p-predIco">—</td></tr>
+                    <tr><td>Číslo účtu:</td><td id="p-predUcet">—</td></tr>
+                </table>
+                <div class="party-note">(dále jen "předávající")</div>
+            </div>
+
+            <div class="party-section" style="margin-top: 30px;">
+                <div class="party-title">Přebírající:</div>
+                <table class="party-table">
+                    <tr><td>Objednatel:</td><td id="p-prebObjednatel">—</td></tr>
+                    <tr><td>Adresa:</td><td id="p-prebAdresa">—</td></tr>
+                    <tr><td>Zastoupený při převzetí:</td><td id="p-prebZastupce">—</td></tr>
+                </table>
+                <div class="party-note">(dále jen "přebírající")</div>
+            </div>
+
+            <div class="prot-text" id="p-textPredani">
+                Dnešního dne předávající předal a přebírající zkontroloval a bez výhrad převzal v požadované kvalitě:
+            </div>
+            
+            <div id="p-predmet-wrap" style="display: none; margin-top: 15px; margin-bottom: 5px;">
+                <span id="p-predmet" style="font-weight: 700; font-size: 14px;"></span>
+            </div>
+            
+            <ul class="prot-bullets" id="p-bullets">
+                <!-- generováno skriptem -->
+            </ul>
+
+            <div style="margin-top: 80px;">
+                <div class="date-place">
+                    V obci <span id="p-misto">.....</span>, dne <span id="p-datumPredani">.....</span>
+                </div>
+
+                <div class="prot-footer">
+                    <div class="sign-block">
+                        <div class="sign-label">Předávající</div>
+                        <div class="sign-line"></div>
+                        <div class="sign-hint">místo pro razítko a podpis</div>
+                    </div>
+                    <div class="sign-block">
+                        <div class="sign-label">Přebírající</div>
+                        <div class="sign-line"></div>
+                        <div class="sign-hint">místo pro razítko a podpis</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+let bulletCount = 0;
+
+function addBullet() {
+    bulletCount++; const id = bulletCount;
+    const div = document.createElement('div'); 
+    div.className = 'bullet-entry'; 
+    div.id = 'bullet-wrap-' + id;
+    div.innerHTML = `
+        <input type="text" placeholder="Text odrážky" oninput="updatePreview()" id="bullet-${id}">
+        <button class="file-remove" onclick="removeBullet(${id})" title="Odstranit">×</button>
+    `;
+    document.getElementById('bullets-container').appendChild(div); 
+    updatePreview();
+}
+
+function removeBullet(id) { 
+    document.getElementById('bullet-wrap-' + id)?.remove(); 
+    updatePreview(); 
+}
+
+function resetForm() {
+    if (!confirm('Vymazat formulář?')) return;
+    
+    const fields = [
+        'nadpis', 'predZpracovatel', 'predSidlo', 'predJednatel', 'predIco', 'predUcet',
+        'prebObjednatel', 'prebAdresa', 'prebZastupce', 'textPredani', 'predmet', 'misto'
+    ];
+    
+    fields.forEach(id => {
+        const el = document.getElementById(id); 
+        if (el) {
+            if (id === 'nadpis') el.value = 'Předávací protokol';
+            else if (id === 'predZpracovatel') el.value = 'Atomicon, s.r.o.';
+            else if (id === 'textPredani') el.value = 'Dnešního dne předávající předal a přebírající zkontroloval a bez výhrad převzal v požadované kvalitě:';
+            else el.value = '';
+        }
+    });
+    
+    document.getElementById('datumPredani').value = new Date().toISOString().slice(0, 10);
+    document.getElementById('bullets-container').innerHTML = ''; 
+    bulletCount = 0;
+    addBullet();
+    updatePreview();
+}
+
+function formatDate(val) { 
+    return val ? new Date(val + 'T12:00:00').toLocaleDateString('cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' }) : '.....'; 
+}
+
+function val(id) { return (document.getElementById(id)?.value || '').trim(); }
+function setText(id, text, defaultText = '—') { 
+    const el = document.getElementById(id); 
+    if (el) el.textContent = text || defaultText; 
+}
+
+function updatePreview() {
+    setText('p-nadpis', val('nadpis'), 'Předávací protokol');
+    
+    setText('p-headZpracovatel', val('predZpracovatel'), 'Atomicon, s.r.o.');
+    
+    let icoVal = val('predIco');
+    if (icoVal) {
+        document.getElementById('p-headIco').innerHTML = '<br>IČO/DIČ: ' + icoVal;
+    } else {
+        document.getElementById('p-headIco').innerHTML = '';
+    }
+
+    setText('p-predZpracovatel', val('predZpracovatel'));
+    setText('p-predSidlo', val('predSidlo'));
+    setText('p-predJednatel', val('predJednatel'));
+    setText('p-predIco', val('predIco'));
+    setText('p-predUcet', val('predUcet'));
+
+    setText('p-prebObjednatel', val('prebObjednatel'));
+    setText('p-prebAdresa', val('prebAdresa'));
+    setText('p-prebZastupce', val('prebZastupce'));
+
+    setText('p-textPredani', val('textPredani'), 'Dnešního dne předávající předal a přebírající zkontroloval a bez výhrad převzal v požadované kvalitě:');
+
+    let predm = val('predmet');
+    if (predm) {
+        document.getElementById('p-predmet-wrap').style.display = 'block';
+        setText('p-predmet', predm);
+    } else {
+        document.getElementById('p-predmet-wrap').style.display = 'none';
+    }
+
+    setText('p-misto', val('misto'), '.....');
+    setText('p-datumPredani', formatDate(val('datumPredani')), '.....');
+
+    // Bullets
+    const tbody = document.getElementById('p-bullets'); 
+    const entries = document.querySelectorAll('.bullet-entry input');
+    
+    let html = '';
+    entries.forEach(input => {
+        const text = input.value.trim();
+        if (text) {
+            html += `<li>${text}</li>`;
+        }
+    });
+    
+    if (!html) {
+        html = '<li style="color:#b0bec5; list-style-type:none; margin-left:-20px;">[Přidejte položky k předání]</li>';
+    }
+    tbody.innerHTML = html;
+}
+
+document.getElementById('datumPredani').value = new Date().toISOString().slice(0, 10);
+const allFields = [
+    'nadpis', 'predZpracovatel', 'predSidlo', 'predJednatel', 'predIco', 'predUcet',
+    'prebObjednatel', 'prebAdresa', 'prebZastupce', 'textPredani', 'predmet', 'misto', 'datumPredani'
+];
+allFields.forEach(id => { 
+    const el = document.getElementById(id); 
+    if (el) { 
+        el.addEventListener('input', updatePreview); 
+        el.addEventListener('change', updatePreview); 
+    }
+});
+
+addBullet(); 
+updatePreview();
+</script>
+</body>
+</html>
