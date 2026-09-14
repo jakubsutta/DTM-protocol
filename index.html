@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-<title>Protokoly pro DTM - Atomicon</title>
+<title>Generátor protokolů - Atomicon</title>
 <style>
     /* ---- Základní reset ---- */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -118,6 +118,20 @@
         background: #e2ecff;
     }
 
+    /* Téma pro Předání (Zelené) */
+    .card.predani {
+        border-top-color: #43a047;
+    }
+    .card.predani .card-icon {
+        color: #43a047;
+    }
+    .card.predani .card-title {
+        color: #43a047;
+    }
+    .card.predani:hover {
+        background: #e8f5e9;
+    }
+
     /* ---- Patička ---- */
     .footer {
         margin-top: 60px;
@@ -151,6 +165,15 @@
             <div class="card-title">Validace JVF</div>
             <div class="card-desc">
                 Vygenerujte PDF protokol o validaci JVF dat v IS DMVS (ČÚZK).
+            </div>
+        </a>
+
+        <!-- Odkaz na třetí soubor (Předání) -->
+        <a href="./protocol/Protokol-predavaci.html" class="card predani">
+            <div class="card-icon">🤝</div>
+            <div class="card-title">Předávací protokol</div>
+            <div class="card-desc">
+                Vygenerujte univerzální předávací protokol o předání a převzetí.
             </div>
         </a>
     </div>
