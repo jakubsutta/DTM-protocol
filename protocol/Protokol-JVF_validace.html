@@ -88,6 +88,15 @@
     .sign-block { text-align: center; } .sign-line { width: 150px; border-top: 1px solid #b0bec5; margin: 28px auto 4px; }
     .prot-stamp { font-size: 10px; color: #cfd8dc; text-align: right; }
     .prot-page { position: absolute; bottom: 12mm; right: 20mm; font-size: 9px; color: #b0bec5; }
+
+    /* ---- Našeptávač obcí ---- */
+    .autocomplete-wrap { position: relative; flex: 1; }
+    .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #4483fc; border-top: none; border-radius: 0 0 4px 4px; max-height: 180px; overflow-y: auto; z-index: 100; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+    .autocomplete-list.visible { display: block; }
+    .autocomplete-item { padding: 6px 10px; font-size: 12px; cursor: pointer; border-bottom: 1px solid #f5f5f5; color: #1a1a1a; }
+    .autocomplete-item:last-child { border-bottom: none; }
+    .autocomplete-item:hover, .autocomplete-item.active { background: #eef3ff; color: #4483fc; }
+    .autocomplete-item small { color: #90a4ae; font-size: 10px; margin-left: 6px; }
 </style>
 </head>
 <body>
@@ -109,7 +118,10 @@
         <div class="field">
             <label>Vyhledat obec v mapě</label>
             <div style="display: flex; gap: 6px;">
-                <input type="text" id="mapObec" placeholder="např. Tovačov" onkeypress="if(event.key==='Enter') locateCity()">
+                <div class="autocomplete-wrap">
+                    <input type="text" id="mapObec" placeholder="např. Tovačov" oninput="onObecInput()" onkeydown="onObecKeydown(event)" autocomplete="off">
+                    <div class="autocomplete-list" id="obecSuggestions"></div>
+                </div>
                 <button type="button" class="btn btn-primary" style="padding: 0 14px;" onclick="locateCity()">Najít</button>
             </div>
         </div>
@@ -211,21 +223,127 @@ function initMap() {
     mapInstance.scrollWheelZoom.disable();
 }
 
+// ==== NAŠEPTÁVAČ OBCÍ (ČÚZK RUIAN) ====
+let obecDebounce = null;
+let obecActiveIdx = -1;
+
+function onObecInput() {
+    clearTimeout(obecDebounce);
+    const q = document.getElementById('mapObec').value.trim();
+    if (q.length < 2) { hideObecSuggestions(); return; }
+    obecDebounce = setTimeout(() => fetchObecSuggestions(q), 300);
+}
+
+async function fetchObecSuggestions(q) {
+    try {
+        const url = `https://ags.cuzk.cz/arcgis/rest/services/RUIAN/MapServer/12/query`
+            + `?where=${encodeURIComponent("UPPER(nazev) LIKE UPPER('" + q.replace(/'/g, "''") + "%')")}`
+            + `&outFields=nazev,kod`
+            + `&returnGeometry=false`
+            + `&resultRecordCount=8`
+            + `&orderByFields=nazev`
+            + `&f=json`;
+        const resp = await fetch(url);
+        const data = await resp.json();
+        const list = document.getElementById('obecSuggestions');
+        if (!data.features || data.features.length === 0) { hideObecSuggestions(); return; }
+        obecActiveIdx = -1;
+        list.innerHTML = data.features.map((f, i) =>
+            `<div class="autocomplete-item" onmousedown="selectObec('${f.attributes.nazev.replace(/'/g, "\\'")}',${ f.attributes.kod})"
+                 data-index="${i}" data-kod="${f.attributes.kod}">${f.attributes.nazev}<small>${f.attributes.kod}</small></div>`
+        ).join('');
+        list.classList.add('visible');
+    } catch (e) { hideObecSuggestions(); }
+}
+
+let selectedObecKod = null;
+
+function selectObec(name, kod) {
+    document.getElementById('mapObec').value = name;
+    selectedObecKod = kod || null;
+    hideObecSuggestions();
+    locateCity();
+}
+
+function hideObecSuggestions() {
+    const list = document.getElementById('obecSuggestions');
+    list.classList.remove('visible');
+    list.innerHTML = '';
+    obecActiveIdx = -1;
+}
+
+function onObecKeydown(e) {
+    const list = document.getElementById('obecSuggestions');
+    const items = list.querySelectorAll('.autocomplete-item');
+    if (!list.classList.contains('visible') || items.length === 0) {
+        if (e.key === 'Enter') locateCity();
+        return;
+    }
+    if (e.key === 'ArrowDown') { e.preventDefault(); obecActiveIdx = Math.min(obecActiveIdx + 1, items.length - 1); updateObecActive(items); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); obecActiveIdx = Math.max(obecActiveIdx - 1, 0); updateObecActive(items); }
+    else if (e.key === 'Enter') { e.preventDefault(); if (obecActiveIdx >= 0 && items[obecActiveIdx]) items[obecActiveIdx].onmousedown(); else locateCity(); }
+    else if (e.key === 'Escape') { hideObecSuggestions(); }
+}
+
+function updateObecActive(items) {
+    items.forEach((it, i) => it.classList.toggle('active', i === obecActiveIdx));
+}
+
+document.addEventListener('click', (e) => { if (!e.target.closest('.autocomplete-wrap')) hideObecSuggestions(); });
+
 async function locateCity() {
+    hideObecSuggestions();
     let query = document.getElementById("mapObec").value.trim();
     if (!query) return;
+    
+    let useKod = selectedObecKod;
+    selectedObecKod = null;
+    
+    if (markerLayer) { mapInstance.removeLayer(markerLayer); markerLayer = null; }
+    
+    // 1. ČÚZK RUIAN – hranice obce
+    let boundaryFound = false;
     try {
-        let response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}+Czechia`);
-        let data = await response.json();
-        if (data && data.length > 0) {
-            let lat = parseFloat(data[0].lat); let lon = parseFloat(data[0].lon);
-            mapInstance.setView([lat, lon], 12);
-            if (markerLayer) mapInstance.removeLayer(markerLayer);
-            markerLayer = L.circleMarker([lat, lon], {
-                radius: 8, fillColor: "#4483fc", color: "#fff", weight: 2, opacity: 0, fillOpacity: 0
+        let whereClause = useKod
+            ? `kod=${useKod}`
+            : `nazev='${query.replace(/'/g, "''")}'`;
+        let ruianUrl = `https://ags.cuzk.cz/arcgis/rest/services/RUIAN/MapServer/12/query`
+            + `?where=${encodeURIComponent(whereClause)}`
+            + `&outFields=nazev`
+            + `&outSR=4326`
+            + `&returnGeometry=true`
+            + `&f=json`;
+        let ruianResp = await fetch(ruianUrl);
+        let ruianData = await ruianResp.json();
+        
+        if (ruianData.features && ruianData.features.length > 0) {
+            let rings = ruianData.features[0].geometry.rings;
+            let latlngs = rings.map(ring => ring.map(pt => [pt[1], pt[0]]));
+            markerLayer = L.polygon(latlngs, {
+                color: "#4483fc",
+                weight: 2,
+                fillColor: "#4483fc",
+                fillOpacity: 0.15
             }).addTo(mapInstance);
-        } else { alert("Obec nebyla nalezena."); }
-    } catch (e) { alert("Chyba při komunikaci se serverem map."); }
+            mapInstance.fitBounds(markerLayer.getBounds());
+            boundaryFound = true;
+        }
+    } catch (ruianErr) { /* ČÚZK nedostupný */ }
+    
+    // 2. Fallback – Nominatim
+    if (!boundaryFound) {
+        try {
+            let response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}+Czechia`);
+            let data = await response.json();
+            if (data && data.length > 0) {
+                mapInstance.setView([parseFloat(data[0].lat), parseFloat(data[0].lon)], 12);
+            } else {
+                alert("Obec nebyla nalezena.");
+            }
+        } catch (e) {
+            alert("Chyba při komunikaci se serverem map.");
+        }
+    }
 }
 window.onload = initMap;
 
