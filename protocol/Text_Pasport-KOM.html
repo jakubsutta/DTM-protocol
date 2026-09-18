@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Generátor textu – Pasport komunikací</title>
-<link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛣️</text></svg>">
-<script defer src="vendor/leaflet/leaflet.js"></script>
-<link href="vendor/quill/quill.snow.css" rel="stylesheet">
-<script defer src="vendor/quill/quill.min.js"></script>
+<title>GenerĂˇtor textu â€“ Pasport komunikacĂ­</title>
+<link rel="stylesheet" href="./vendor/leaflet/leaflet.css" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>đź›Łď¸Ź</text></svg>">
+<script defer src="./vendor/leaflet/leaflet.js"></script>
+<link href="./vendor/quill/quill.snow.css" rel="stylesheet">
+<script defer src="./vendor/quill/quill.min.js"></script>
 <style>
     /* ---- Tisk / PDF ---- */
     @media print {
@@ -25,12 +25,12 @@
         @page { size: A4; margin: 0; }
     }
 
-    /* ---- Základní reset ---- */
+    /* ---- ZĂˇkladnĂ­ reset ---- */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; background: #f0f2f5; color: #1a1a1a; min-height: 100vh; }
     .app { display: grid; grid-template-columns: 400px 1fr; min-height: 100vh; }
 
-    /* ---- Formulářový panel ---- */
+    /* ---- FormulĂˇĹ™ovĂ˝ panel ---- */
     .form-panel { background: #fff7f4; color: #000; padding: 24px 22px 60px; display: flex; flex-direction: column; gap: 0; overflow-y: auto; max-height: 100vh; position: sticky; top: 0; }
     .form-panel h2 { font-size: 13px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: #ea521f; margin-bottom: 8px; }
     .form-panel .sub { font-size: 10.5px; color: #78909c; margin-bottom: 18px; }
@@ -78,7 +78,7 @@
     .ptext p:last-child { margin-bottom: 0; }
     .ptext p.ph { color: #b0bec5; font-style: italic; }
 
-    /* ---- Titulní strana ---- */
+    /* ---- TitulnĂ­ strana ---- */
     .p1 { align-items: center; text-align: center; justify-content: flex-start; }
     .p1-title { font-size: 24px; font-weight: 800; color: #1a1a2e; letter-spacing: 0.02em; line-height: 1.35; text-transform: uppercase; margin-top: 20px; max-width: 140mm; border-bottom: 2px solid #ea521f; padding-bottom: 8px; margin-bottom: 12px; }
     .p1-obec { font-size: 17px; font-weight: 700; color: #ea521f; text-transform: uppercase; margin-top: 14px; letter-spacing: 0.05em; }
@@ -92,7 +92,7 @@
     .p1-address { font-size: 12px; color: #1a1a2e; text-align: center; line-height: 1.4; font-weight: 600; }
     .p1-year { font-size: 24px; font-weight: 800; color: #1a1a2e; margin-top: 8px; }
 
-    /* ---- Tabulka základních údajů ---- */
+    /* ---- Tabulka zĂˇkladnĂ­ch ĂşdajĹŻ ---- */
     .info-table { width: 100%; border-collapse: collapse; font-size: 12px; }
     .info-table td { padding: 6px 8px; vertical-align: top; border-bottom: 1px solid #f5f5f5; }
     .info-table td:first-child { color: #78909c; width: 42%; font-size: 11px; padding-right: 12px; }
@@ -108,7 +108,7 @@
     .autocomplete-item small { color: #90a4ae; font-size: 10px; margin-left: 6px; }
     .map-box-big { background: #eef2f5; border: 1px solid #cfd8dc; border-radius: 5px; overflow: hidden; width: 100%; height: 118mm; z-index: 1; margin-top: auto; }
 
-    /* ---- Tabulky nákladů ---- */
+    /* ---- Tabulky nĂˇkladĹŻ ---- */
     .cost-caption { font-size: 10.5px; color: #78909c; font-style: italic; margin: 10px 0 6px; }
     .cost-table { width: 100%; border-collapse: collapse; font-size: 11.5px; margin-bottom: 6px; }
     .cost-table th { background: #f5f7fa; padding: 6px 8px; text-align: center; font-size: 10px; font-weight: 700; color: #78909c; border: 1px solid #e0e0e0; }
@@ -129,27 +129,27 @@
 <body>
 
 <div class="app">
-    <!-- ===== FORMULÁŘ ===== -->
+    <!-- ===== FORMULĂĹ ===== -->
     <div class="form-panel" id="form-panel">
-        <h2>Generátor textu – Pasport komunikací</h2>
-        <div class="sub">Vyplňte pole vlevo, náhled dokumentu se aktualizuje vpravo.</div>
+        <h2>GenerĂˇtor textu â€“ Pasport komunikacĂ­</h2>
+        <div class="sub">VyplĹte pole vlevo, nĂˇhled dokumentu se aktualizuje vpravo.</div>
 
-        <div class="page-label">Strana 1 — Titulní strana</div>
-        <div class="field"><label>Nadpis</label><input type="text" id="nadpis" value="PASPORT MÍSTNÍCH A ÚČELOVÝCH KOMUNIKACÍ"></div>
-        <div class="field"><label>Název obce</label>
+        <div class="page-label">Strana 1 â€” TitulnĂ­ strana</div>
+        <div class="field"><label>Nadpis</label><input type="text" id="nadpis" value="PASPORT MĂŤSTNĂŤCH A ĂšÄŚELOVĂťCH KOMUNIKACĂŤ"></div>
+        <div class="field"><label>NĂˇzev obce</label>
             <div style="display:flex; gap:6px;">
                 <select id="typObce" style="width: 100px;">
                     <option value="Obec ">Obec</option>
-                    <option value="Městys ">Městys</option>
-                    <option value="Město ">Město</option>
-                    <option value="Část obce ">Část obce</option>
+                    <option value="MÄ›stys ">MÄ›stys</option>
+                    <option value="MÄ›sto ">MÄ›sto</option>
+                    <option value="ÄŚĂˇst obce ">ÄŚĂˇst obce</option>
                     <option value="Firma ">Firma</option>
                     <option value="">(nic)</option>
                 </select>
-                <input type="text" id="nazevObce" placeholder="např. Tovačov" style="flex:1;">
+                <input type="text" id="nazevObce" placeholder="napĹ™. TovaÄŤov" style="flex:1;">
             </div>
         </div>
-        <div class="field"><label>Logo obce</label><div class="file-field" onclick="document.getElementById('logoObecInput').click()">+ Vybrat obrázek loga obce</div>
+        <div class="field"><label>Logo obce</label><div class="file-field" onclick="document.getElementById('logoObecInput').click()">+ Vybrat obrĂˇzek loga obce</div>
             <input type="file" id="logoObecInput" accept="image/*" style="display:none" onchange="handleUpload(this,'p-logoObec')"></div>
         <div class="field"><label>Vypracoval (Adresa)</label>
             <textarea id="vypracoval" style="min-height: 45px;">ATOMICON s. r. o., Stupkova 952/18, Olomouc 779 00
@@ -159,136 +159,136 @@ tel. +420 778 481 700</textarea>
             <input type="file" id="logoFirmaInput" accept="image/*" style="display:none" onchange="handleUpload(this,'p-logoFirma')"></div>
         <div class="field"><label>Rok</label><input type="text" id="rok" value=""></div>
 
-        <div class="page-label">Strana 2 — Základní údaje a mapa</div>
-        <div class="section-label">Základní údaje o obci</div>
-        <div class="field"><label>Objednatel</label><input type="text" id="objednatel" placeholder="Obec [Název obce]"></div>
-        <div class="field"><label>Adresa</label><input type="text" id="adresa" placeholder="Ulice/č.p., PSČ Obec"></div>
-        <div class="field"><label>IČO/DIČ</label><input type="text" id="icoDic" placeholder="00000000/CZ00000000"></div>
+        <div class="page-label">Strana 2 â€” ZĂˇkladnĂ­ Ăşdaje a mapa</div>
+        <div class="section-label">ZĂˇkladnĂ­ Ăşdaje o obci</div>
+        <div class="field"><label>Objednatel</label><input type="text" id="objednatel" placeholder="Obec [NĂˇzev obce]"></div>
+        <div class="field"><label>Adresa</label><input type="text" id="adresa" placeholder="Ulice/ÄŤ.p., PSÄŚ Obec"></div>
+        <div class="field"><label>IÄŚO/DIÄŚ</label><input type="text" id="icoDic" placeholder="00000000/CZ00000000"></div>
         <div class="field"><label>E-mail</label><input type="text" id="email" placeholder="obec@obec.cz"></div>
         <div class="field"><label>Telefon</label><input type="text" id="telefon" placeholder="+420 000 000 000"></div>
-        <div class="field"><label>Místo řešení</label><input type="text" id="mistoReseni" placeholder="obec [Název obce]"></div>
-        <div class="field"><label>Obec s pověřeným úřadem</label><input type="text" id="povereny"></div>
-        <div class="field"><label>Obec s rozšířenou působností</label><input type="text" id="rozsirena"></div>
+        <div class="field"><label>MĂ­sto Ĺ™eĹˇenĂ­</label><input type="text" id="mistoReseni" placeholder="obec [NĂˇzev obce]"></div>
+        <div class="field"><label>Obec s povÄ›Ĺ™enĂ˝m ĂşĹ™adem</label><input type="text" id="povereny"></div>
+        <div class="field"><label>Obec s rozĹˇĂ­Ĺ™enou pĹŻsobnostĂ­</label><input type="text" id="rozsirena"></div>
         <div class="field"><label>Okres</label><input type="text" id="okres"></div>
         <div class="field"><label>Kraj</label><input type="text" id="kraj"></div>
 
-        <div class="section-label">Mapa — vyhledat obec</div>
+        <div class="section-label">Mapa â€” vyhledat obec</div>
         <div class="field">
             <div style="display:flex; gap:6px;">
                 <div class="autocomplete-wrap">
-                    <input type="text" id="mapObec" placeholder="např. Tovačov" oninput="onObecInput()" onkeydown="onObecKeydown(event)" autocomplete="off">
+                    <input type="text" id="mapObec" placeholder="napĹ™. TovaÄŤov" oninput="onObecInput()" onkeydown="onObecKeydown(event)" autocomplete="off">
                     <div class="autocomplete-list" id="obecSuggestions"></div>
                 </div>
-                <button type="button" class="btn btn-primary" style="padding: 0 14px;" onclick="locateCity()">Najít</button>
+                <button type="button" class="btn btn-primary" style="padding: 0 14px;" onclick="locateCity()">NajĂ­t</button>
             </div>
-            <div class="field-note">Nalezená obec se propíše do názvu obce, objednatele a místa řešení.</div>
+            <div class="field-note">NalezenĂˇ obec se propĂ­Ĺˇe do nĂˇzvu obce, objednatele a mĂ­sta Ĺ™eĹˇenĂ­.</div>
         </div>
 
-        <div class="page-label">Strana 3 — Pasport komunikací</div>
-        <div class="field"><label>Hlavní text (předvyplněno dle vzoru)</label>
-            <textarea id="pasportText">Dokument evidence komunikací v katastru obce [Název obce] je proveden v plném rozsahu dle zákona č. 13/1997 Sb., o pozemních komunikacích, ve znění pozdějších předpisů, a vyhlášky č. 104/1997 Sb., kterou se provádí zákon o pozemních komunikacích, ve znění pozdějších předpisů. Součástí pasportu jsou místní komunikace III. třídy – obslužné (c) a účelové komunikace (u) – polní nebo jiného významu vymezené katastrem obce.
+        <div class="page-label">Strana 3 â€” Pasport komunikacĂ­</div>
+        <div class="field"><label>HlavnĂ­ text (pĹ™edvyplnÄ›no dle vzoru)</label>
+            <textarea id="pasportText">Dokument evidence komunikacĂ­ v katastru obce [NĂˇzev obce] je proveden v plnĂ©m rozsahu dle zĂˇkona ÄŤ. 13/1997 Sb., o pozemnĂ­ch komunikacĂ­ch, ve znÄ›nĂ­ pozdÄ›jĹˇĂ­ch pĹ™edpisĹŻ, a vyhlĂˇĹˇky ÄŤ. 104/1997 Sb., kterou se provĂˇdĂ­ zĂˇkon o pozemnĂ­ch komunikacĂ­ch, ve znÄ›nĂ­ pozdÄ›jĹˇĂ­ch pĹ™edpisĹŻ. SouÄŤĂˇstĂ­ pasportu jsou mĂ­stnĂ­ komunikace III. tĹ™Ă­dy â€“ obsluĹľnĂ© (c) a ĂşÄŤelovĂ© komunikace (u) â€“ polnĂ­ nebo jinĂ©ho vĂ˝znamu vymezenĂ© katastrem obce.
 
-Místní komunikace I. třídy (a) a II. třídy (b) se v katastru obce nenacházejí. Součástí pasportu jsou také evidované krajské komunikace II. a III. třídy. Vlastníkem krajské komunikace je [Kraj]. Evidenční číslování je vedeno v souladu s obecně platnými pravidly evidence komunikací na území České republiky.
+MĂ­stnĂ­ komunikace I. tĹ™Ă­dy (a) a II. tĹ™Ă­dy (b) se v katastru obce nenachĂˇzejĂ­. SouÄŤĂˇstĂ­ pasportu jsou takĂ© evidovanĂ© krajskĂ© komunikace II. a III. tĹ™Ă­dy. VlastnĂ­kem krajskĂ© komunikace je [Kraj]. EvidenÄŤnĂ­ ÄŤĂ­slovĂˇnĂ­ je vedeno v souladu s obecnÄ› platnĂ˝mi pravidly evidence komunikacĂ­ na ĂşzemĂ­ ÄŚeskĂ© republiky.
 
-Pasport je vyhotoven v systému GIS a vytvořen dle pravidel a metodik platných v oblasti geografických informačních systémů. Obsahuje vektorové vrstvy v přenositelném datovém formátu ESRI Shapefile (*.shp) v souřadnicových systémech S-JTSK a WGS-84. Tato data jsou univerzální napříč GIS a lze s nimi dále pracovat v jiných systémech.
+Pasport je vyhotoven v systĂ©mu GIS a vytvoĹ™en dle pravidel a metodik platnĂ˝ch v oblasti geografickĂ˝ch informaÄŤnĂ­ch systĂ©mĹŻ. Obsahuje vektorovĂ© vrstvy v pĹ™enositelnĂ©m datovĂ©m formĂˇtu ESRI Shapefile (*.shp) v souĹ™adnicovĂ˝ch systĂ©mech S-JTSK a WGS-84. Tato data jsou univerzĂˇlnĂ­ napĹ™Ă­ÄŤ GIS a lze s nimi dĂˇle pracovat v jinĂ˝ch systĂ©mech.
 
-Dále pasport obsahuje tabulková data ve formě databázových tabulek přímo provázaných s jednotlivými entitami.
+DĂˇle pasport obsahuje tabulkovĂˇ data ve formÄ› databĂˇzovĂ˝ch tabulek pĹ™Ă­mo provĂˇzanĂ˝ch s jednotlivĂ˝mi entitami.
 
-Digitální verze pasportu je zaštiťována webově orientovaným mapovým systémem GISAdmin, který zajišťuje on-line přístup k datům a umožňuje jejich včasnou aktualizaci. Tento geografický informační systém je pro obce dostupný na vyžádání a je měsíčně zpoplatněn.</textarea>
+DigitĂˇlnĂ­ verze pasportu je zaĹˇtiĹĄovĂˇna webovÄ› orientovanĂ˝m mapovĂ˝m systĂ©mem GISAdmin, kterĂ˝ zajiĹˇĹĄuje on-line pĹ™Ă­stup k datĹŻm a umoĹľĹuje jejich vÄŤasnou aktualizaci. Tento geografickĂ˝ informaÄŤnĂ­ systĂ©m je pro obce dostupnĂ˝ na vyĹľĂˇdĂˇnĂ­ a je mÄ›sĂ­ÄŤnÄ› zpoplatnÄ›n.</textarea>
         </div>
-        <div class="field"><label>Závěrečný odstavec</label>
-            <textarea id="zaverecnyOdstavec" class="short">Pasport vychází z tohoto digitálního GIS systému. Pasport, který popisuje aktuální stav místních a účelových komunikací v obci, je platný k září 2026. Obsahuje textovou část, tabulkové informace, technické karty, a dále také grafické přílohy – soubor tematických map.</textarea>
-        </div>
-
-        <div class="page-label">Strana 4 — Přehled území, komunikace</div>
-        <div class="field"><label>Přehled území</label>
-            <textarea id="prehledUzemi" class="short">Obec [Název obce] leží v okrese [Okres] v [Kraj]i. Celková katastrální výměra obce je [X] km². K [datum] zde žilo [počet] obyvatel (zdroj: veřejná databáze ČSÚ, SLDB [rok]).</textarea>
-        </div>
-        <div class="field"><label>Krajské komunikace</label>
-            <textarea id="krajskeKomunikace" class="short">Katastrálním územím obce [Název obce] prochází krajská komunikace [třída] č. [číslo], která [popis trasy]. Dále [informace o případné další komunikaci]. Tyto komunikace jsou ve vlastnictví [Kraj]. Jejich údržbu zajišťuje Správa a údržba silnic [Kraj], a to včetně zimní údržby.</textarea>
-        </div>
-        <div class="field"><label>Místní komunikace</label>
-            <textarea id="mistniKomunikace">V evidenci je celkem [počet] místních komunikací III. třídy – obslužných (c), o celkové délce [délka] m. Některé komunikace byly rozděleny na více částí, a to z důvodu změny povrchu nebo charakteru. Stav komunikací je převážně [hodnocení], nevyhovující je komunikace [označení] a v havarijním stavu je komunikace [označení]. Povrch je tvořen [popis povrchu].
-
-Dále byly evidovány [počet] místní komunikace IV. třídy – stezky (d), označené jako chodník. [Popis stavu a povrchu jednotlivých komunikací]. Celková délka těchto komunikací je [délka] m.
-
-Zimní údržba se provádí na [rozsah] komunikací tohoto typu.
-
-Poloha všech těchto komunikací je zakreslena v mapové části pasportu.</textarea>
+        <div class="field"><label>ZĂˇvÄ›reÄŤnĂ˝ odstavec</label>
+            <textarea id="zaverecnyOdstavec" class="short">Pasport vychĂˇzĂ­ z tohoto digitĂˇlnĂ­ho GIS systĂ©mu. Pasport, kterĂ˝ popisuje aktuĂˇlnĂ­ stav mĂ­stnĂ­ch a ĂşÄŤelovĂ˝ch komunikacĂ­ v obci, je platnĂ˝ k zĂˇĹ™Ă­ 2026. Obsahuje textovou ÄŤĂˇst, tabulkovĂ© informace, technickĂ© karty, a dĂˇle takĂ© grafickĂ© pĹ™Ă­lohy â€“ soubor tematickĂ˝ch map.</textarea>
         </div>
 
-        <div class="page-label">Strana 5 — Účelové, mosty, plochy</div>
-        <div class="field"><label>Účelové komunikace</label>
-            <textarea id="ucelKomunikace">Bylo evidováno celkem [počet] účelových komunikací – (u), o celkové délce [délka] m. Jejich rozdělení bylo určeno dle charakteru – polní, lesní, soukromá nebo jiná. Komunikace byly ohodnoceny stavem [hodnocení]. Většina těchto komunikací má povrch ponechaný bez úpravy – jsou zde „vyježděné koleje“, střed komunikace je porostlý trávou nebo je komunikace zasypána štěrkem a makadamem. V ostatních případech je povrch tvořen asfaltem a štěrkodrtí. Zimní údržba se na komunikacích tohoto typu [neprovádí / provádí], kromě komunikací [výčet], které obec v zimě udržuje.
+        <div class="page-label">Strana 4 â€” PĹ™ehled ĂşzemĂ­, komunikace</div>
+        <div class="field"><label>PĹ™ehled ĂşzemĂ­</label>
+            <textarea id="prehledUzemi" class="short">Obec [NĂˇzev obce] leĹľĂ­ v okrese [Okres] v [Kraj]i. CelkovĂˇ katastrĂˇlnĂ­ vĂ˝mÄ›ra obce je [X] kmÂ˛. K [datum] zde Ĺľilo [poÄŤet] obyvatel (zdroj: veĹ™ejnĂˇ databĂˇze ÄŚSĂš, SLDB [rok]).</textarea>
+        </div>
+        <div class="field"><label>KrajskĂ© komunikace</label>
+            <textarea id="krajskeKomunikace" class="short">KatastrĂˇlnĂ­m ĂşzemĂ­m obce [NĂˇzev obce] prochĂˇzĂ­ krajskĂˇ komunikace [tĹ™Ă­da] ÄŤ. [ÄŤĂ­slo], kterĂˇ [popis trasy]. DĂˇle [informace o pĹ™Ă­padnĂ© dalĹˇĂ­ komunikaci]. Tyto komunikace jsou ve vlastnictvĂ­ [Kraj]. Jejich ĂşdrĹľbu zajiĹˇĹĄuje SprĂˇva a ĂşdrĹľba silnic [Kraj], a to vÄŤetnÄ› zimnĂ­ ĂşdrĹľby.</textarea>
+        </div>
+        <div class="field"><label>MĂ­stnĂ­ komunikace</label>
+            <textarea id="mistniKomunikace">V evidenci je celkem [poÄŤet] mĂ­stnĂ­ch komunikacĂ­ III. tĹ™Ă­dy â€“ obsluĹľnĂ˝ch (c), o celkovĂ© dĂ©lce [dĂ©lka] m. NÄ›kterĂ© komunikace byly rozdÄ›leny na vĂ­ce ÄŤĂˇstĂ­, a to z dĹŻvodu zmÄ›ny povrchu nebo charakteru. Stav komunikacĂ­ je pĹ™evĂˇĹľnÄ› [hodnocenĂ­], nevyhovujĂ­cĂ­ je komunikace [oznaÄŤenĂ­] a v havarijnĂ­m stavu je komunikace [oznaÄŤenĂ­]. Povrch je tvoĹ™en [popis povrchu].
 
-Poloha všech těchto komunikací je zakreslena v mapové části pasportu.</textarea>
-        </div>
-        <div class="field"><label>Mosty a dopravní stavby</label>
-            <textarea id="mosty" class="short">V katastru obce [Název obce] se nachází [počet] mostů a dalších dopravních staveb (propustky, opěrné zdi apod.). Stav těchto staveb je [hodnocení]. [Popis případných oprav nebo rekonstrukcí]. Poloha těchto staveb je zakreslena v mapové části pasportu.</textarea>
-        </div>
-        <div class="field"><label>Přidružené plochy</label>
-            <textarea id="pridruzenePlochy" class="short">K místním a účelovým komunikacím náleží přidružené plochy – zejména veřejná prostranství, parkoviště, chodníky a další plochy sloužící dopravní obsluze obce, o celkové výměře [X] m². Stav a využití těchto ploch je [hodnocení]. Poloha přidružených ploch je zakreslena v mapové části pasportu.</textarea>
+DĂˇle byly evidovĂˇny [poÄŤet] mĂ­stnĂ­ komunikace IV. tĹ™Ă­dy â€“ stezky (d), oznaÄŤenĂ© jako chodnĂ­k. [Popis stavu a povrchu jednotlivĂ˝ch komunikacĂ­]. CelkovĂˇ dĂ©lka tÄ›chto komunikacĂ­ je [dĂ©lka] m.
+
+ZimnĂ­ ĂşdrĹľba se provĂˇdĂ­ na [rozsah] komunikacĂ­ tohoto typu.
+
+Poloha vĹˇech tÄ›chto komunikacĂ­ je zakreslena v mapovĂ© ÄŤĂˇsti pasportu.</textarea>
         </div>
 
-        <div class="page-label">Strana 6 — Shrnutí, náklady, podpis</div>
-        <div class="field"><label>Shrnutí stavu komunikací</label>
-            <textarea id="shrnuti" class="short">Evidovaná silniční síť obce [Název obce] měří celkově [délka] m. Z toho je evidováno [délka] m krajských silnic, [délka] m místních komunikací a [délka] m účelových komunikací. Vše je podrobně rozepsáno v tabulkové části a v technických kartách jednotlivých komunikací. Doprava na místních komunikacích má většinou [charakter dopravy], z nákladní dopravy se objevují [výčet].</textarea>
+        <div class="page-label">Strana 5 â€” ĂšÄŤelovĂ©, mosty, plochy</div>
+        <div class="field"><label>ĂšÄŤelovĂ© komunikace</label>
+            <textarea id="ucelKomunikace">Bylo evidovĂˇno celkem [poÄŤet] ĂşÄŤelovĂ˝ch komunikacĂ­ â€“ (u), o celkovĂ© dĂ©lce [dĂ©lka] m. Jejich rozdÄ›lenĂ­ bylo urÄŤeno dle charakteru â€“ polnĂ­, lesnĂ­, soukromĂˇ nebo jinĂˇ. Komunikace byly ohodnoceny stavem [hodnocenĂ­]. VÄ›tĹˇina tÄ›chto komunikacĂ­ mĂˇ povrch ponechanĂ˝ bez Ăşpravy â€“ jsou zde â€žvyjeĹľdÄ›nĂ© kolejeâ€ś, stĹ™ed komunikace je porostlĂ˝ trĂˇvou nebo je komunikace zasypĂˇna ĹˇtÄ›rkem a makadamem. V ostatnĂ­ch pĹ™Ă­padech je povrch tvoĹ™en asfaltem a ĹˇtÄ›rkodrtĂ­. ZimnĂ­ ĂşdrĹľba se na komunikacĂ­ch tohoto typu [neprovĂˇdĂ­ / provĂˇdĂ­], kromÄ› komunikacĂ­ [vĂ˝ÄŤet], kterĂ© obec v zimÄ› udrĹľuje.
+
+Poloha vĹˇech tÄ›chto komunikacĂ­ je zakreslena v mapovĂ© ÄŤĂˇsti pasportu.</textarea>
+        </div>
+        <div class="field"><label>Mosty a dopravnĂ­ stavby</label>
+            <textarea id="mosty" class="short">V katastru obce [NĂˇzev obce] se nachĂˇzĂ­ [poÄŤet] mostĹŻ a dalĹˇĂ­ch dopravnĂ­ch staveb (propustky, opÄ›rnĂ© zdi apod.). Stav tÄ›chto staveb je [hodnocenĂ­]. [Popis pĹ™Ă­padnĂ˝ch oprav nebo rekonstrukcĂ­]. Poloha tÄ›chto staveb je zakreslena v mapovĂ© ÄŤĂˇsti pasportu.</textarea>
+        </div>
+        <div class="field"><label>PĹ™idruĹľenĂ© plochy</label>
+            <textarea id="pridruzenePlochy" class="short">K mĂ­stnĂ­m a ĂşÄŤelovĂ˝m komunikacĂ­m nĂˇleĹľĂ­ pĹ™idruĹľenĂ© plochy â€“ zejmĂ©na veĹ™ejnĂˇ prostranstvĂ­, parkoviĹˇtÄ›, chodnĂ­ky a dalĹˇĂ­ plochy slouĹľĂ­cĂ­ dopravnĂ­ obsluze obce, o celkovĂ© vĂ˝mÄ›Ĺ™e [X] mÂ˛. Stav a vyuĹľitĂ­ tÄ›chto ploch je [hodnocenĂ­]. Poloha pĹ™idruĹľenĂ˝ch ploch je zakreslena v mapovĂ© ÄŤĂˇsti pasportu.</textarea>
         </div>
 
-        <div class="section-label">Náklady na výstavbu a údržbu</div>
-        <div class="field"><label>Úvodní text</label>
-            <textarea id="nakladyText" class="short">V posledních pěti letech bylo investováno do údržby komunikací celkem _______ Kč (viz Tab. 1). Jednalo se především o [popis – běžná údržba, rekonstrukce apod.].</textarea>
+        <div class="page-label">Strana 6 â€” ShrnutĂ­, nĂˇklady, podpis</div>
+        <div class="field"><label>ShrnutĂ­ stavu komunikacĂ­</label>
+            <textarea id="shrnuti" class="short">EvidovanĂˇ silniÄŤnĂ­ sĂ­ĹĄ obce [NĂˇzev obce] mÄ›Ĺ™Ă­ celkovÄ› [dĂ©lka] m. Z toho je evidovĂˇno [dĂ©lka] m krajskĂ˝ch silnic, [dĂ©lka] m mĂ­stnĂ­ch komunikacĂ­ a [dĂ©lka] m ĂşÄŤelovĂ˝ch komunikacĂ­. VĹˇe je podrobnÄ› rozepsĂˇno v tabulkovĂ© ÄŤĂˇsti a v technickĂ˝ch kartĂˇch jednotlivĂ˝ch komunikacĂ­. Doprava na mĂ­stnĂ­ch komunikacĂ­ch mĂˇ vÄ›tĹˇinou [charakter dopravy], z nĂˇkladnĂ­ dopravy se objevujĂ­ [vĂ˝ÄŤet].</textarea>
         </div>
-        <div class="field"><label>Popisek tabulky 1</label><input type="text" id="tab1Caption" value="Tab. 1: Náklady na výstavbu a opravy komunikací v obci [Název obce]."></div>
+
+        <div class="section-label">NĂˇklady na vĂ˝stavbu a ĂşdrĹľbu</div>
+        <div class="field"><label>ĂšvodnĂ­ text</label>
+            <textarea id="nakladyText" class="short">V poslednĂ­ch pÄ›ti letech bylo investovĂˇno do ĂşdrĹľby komunikacĂ­ celkem _______ KÄŤ (viz Tab. 1). Jednalo se pĹ™edevĹˇĂ­m o [popis â€“ bÄ›ĹľnĂˇ ĂşdrĹľba, rekonstrukce apod.].</textarea>
+        </div>
+        <div class="field"><label>Popisek tabulky 1</label><input type="text" id="tab1Caption" value="Tab. 1: NĂˇklady na vĂ˝stavbu a opravy komunikacĂ­ v obci [NĂˇzev obce]."></div>
         <div class="field"><label>Roky</label>
             <div class="result-row5">
                 <input type="text" id="rok1" value="2024"><input type="text" id="rok2" value="2023"><input type="text" id="rok3" value="2022"><input type="text" id="rok4" value="2021"><input type="text" id="rok5" value="2020">
             </div>
         </div>
-        <div class="field"><label>Náklady (Kč) po letech + celkem</label>
+        <div class="field"><label>NĂˇklady (KÄŤ) po letech + celkem</label>
             <div class="result-row5">
-                <input type="text" id="naklad1" placeholder="Kč"><input type="text" id="naklad2" placeholder="Kč"><input type="text" id="naklad3" placeholder="Kč"><input type="text" id="naklad4" placeholder="Kč"><input type="text" id="naklad5" placeholder="Kč">
+                <input type="text" id="naklad1" placeholder="KÄŤ"><input type="text" id="naklad2" placeholder="KÄŤ"><input type="text" id="naklad3" placeholder="KÄŤ"><input type="text" id="naklad4" placeholder="KÄŤ"><input type="text" id="naklad5" placeholder="KÄŤ">
             </div>
-            <div style="margin-top:6px;"><input type="text" id="nakladCelkem" placeholder="Celkem Kč"></div>
+            <div style="margin-top:6px;"><input type="text" id="nakladCelkem" placeholder="Celkem KÄŤ"></div>
         </div>
 
-        <div class="section-label">Zimní údržba komunikací</div>
+        <div class="section-label">ZimnĂ­ ĂşdrĹľba komunikacĂ­</div>
         <div class="field"><label>Text</label>
-            <textarea id="zimniText">Krajská komunikace [třída] je udržována Správou a údržbou silnic [Kraj]. Zimní údržba na všech místních komunikacích probíhá formou [popis – standardní prohrnování a posyp apod.]. Roční náklady na zimní údržbu se odvíjí od konkrétních počtů výjezdů.
+            <textarea id="zimniText">KrajskĂˇ komunikace [tĹ™Ă­da] je udrĹľovĂˇna SprĂˇvou a ĂşdrĹľbou silnic [Kraj]. ZimnĂ­ ĂşdrĹľba na vĹˇech mĂ­stnĂ­ch komunikacĂ­ch probĂ­hĂˇ formou [popis â€“ standardnĂ­ prohrnovĂˇnĂ­ a posyp apod.]. RoÄŤnĂ­ nĂˇklady na zimnĂ­ ĂşdrĹľbu se odvĂ­jĂ­ od konkrĂ©tnĂ­ch poÄŤtĹŻ vĂ˝jezdĹŻ.
 
-Maximální roční náklady za posledních pět let zahrnující palivo, mzdy a posypový materiál dosahují _______ Kč (viz Tab. 2). Celková délka komunikací, na kterých obec provádí zimní údržbu, je [délka] m.</textarea>
+MaximĂˇlnĂ­ roÄŤnĂ­ nĂˇklady za poslednĂ­ch pÄ›t let zahrnujĂ­cĂ­ palivo, mzdy a posypovĂ˝ materiĂˇl dosahujĂ­ _______ KÄŤ (viz Tab. 2). CelkovĂˇ dĂ©lka komunikacĂ­, na kterĂ˝ch obec provĂˇdĂ­ zimnĂ­ ĂşdrĹľbu, je [dĂ©lka] m.</textarea>
         </div>
-        <div class="field"><label>Popisek tabulky 2</label><input type="text" id="tab2Caption" value="Tab. 2: Náklady na zimní údržbu komunikací v obci [Název obce]."></div>
+        <div class="field"><label>Popisek tabulky 2</label><input type="text" id="tab2Caption" value="Tab. 2: NĂˇklady na zimnĂ­ ĂşdrĹľbu komunikacĂ­ v obci [NĂˇzev obce]."></div>
         <div class="field"><label>Roky</label>
             <div class="result-row5">
                 <input type="text" id="zRok1" value="2024"><input type="text" id="zRok2" value="2023"><input type="text" id="zRok3" value="2022"><input type="text" id="zRok4" value="2021"><input type="text" id="zRok5" value="2020">
             </div>
         </div>
-        <div class="field"><label>Náklady (Kč) po letech + celkem</label>
+        <div class="field"><label>NĂˇklady (KÄŤ) po letech + celkem</label>
             <div class="result-row5">
-                <input type="text" id="zNaklad1" placeholder="Kč"><input type="text" id="zNaklad2" placeholder="Kč"><input type="text" id="zNaklad3" placeholder="Kč"><input type="text" id="zNaklad4" placeholder="Kč"><input type="text" id="zNaklad5" placeholder="Kč">
+                <input type="text" id="zNaklad1" placeholder="KÄŤ"><input type="text" id="zNaklad2" placeholder="KÄŤ"><input type="text" id="zNaklad3" placeholder="KÄŤ"><input type="text" id="zNaklad4" placeholder="KÄŤ"><input type="text" id="zNaklad5" placeholder="KÄŤ">
             </div>
-            <div style="margin-top:6px;"><input type="text" id="zNakladCelkem" placeholder="Celkem Kč"></div>
+            <div style="margin-top:6px;"><input type="text" id="zNakladCelkem" placeholder="Celkem KÄŤ"></div>
         </div>
 
-        <div class="section-label">Podpis / razítko</div>
-        <div class="field"><label>Obrázek podpisu / razítka</label><div class="file-field" onclick="document.getElementById('stampInput').click()">+ Vybrat obrázek</div>
+        <div class="section-label">Podpis / razĂ­tko</div>
+        <div class="field"><label>ObrĂˇzek podpisu / razĂ­tka</label><div class="file-field" onclick="document.getElementById('stampInput').click()">+ Vybrat obrĂˇzek</div>
             <input type="file" id="stampInput" accept="image/*" style="display:none" onchange="handleUpload(this,'p-stamp')"></div>
         <div class="field"><label>Datum</label><input type="date" id="signDate"></div>
 
         <div class="btn-row">
-            <button class="btn btn-primary" onclick="window.print()">⬇ Uložit jako PDF (Ctrl+P)</button>
-            <button class="btn btn-secondary" onclick="resetForm()">Vymazat formulář</button>
+            <button class="btn btn-primary" onclick="window.print()">â¬‡ UloĹľit jako PDF (Ctrl+P)</button>
+            <button class="btn btn-secondary" onclick="resetForm()">Vymazat formulĂˇĹ™</button>
         </div>
     </div>
 
-    <!-- ===== NÁHLED ===== -->
+    <!-- ===== NĂHLED ===== -->
     <div class="preview-panel">
 
         <!-- STRANA 1 -->
         <div class="page p1">
-            <div class="p1-title" id="p-nadpis">PASPORT MÍSTNÍCH A ÚČELOVÝCH KOMUNIKACÍ</div>
-            <div class="p1-obec" id="p-nazevObec">OBEC —</div>
+            <div class="p1-title" id="p-nadpis">PASPORT MĂŤSTNĂŤCH A ĂšÄŚELOVĂťCH KOMUNIKACĂŤ</div>
+            <div class="p1-obec" id="p-nazevObec">OBEC â€”</div>
             <div class="logo-obec-box" id="p-logoObec"><span class="logo-placeholder">logo obce</span></div>
             <div class="p1-footer">
                 <div class="lbl">Vypracoval</div>
@@ -300,87 +300,87 @@ Maximální roční náklady za posledních pět let zahrnující palivo, mzdy a
 
         <!-- STRANA 2 -->
         <div class="page">
-            <div class="sec-title">Základní údaje o obci</div>
+            <div class="sec-title">ZĂˇkladnĂ­ Ăşdaje o obci</div>
             <table class="info-table">
-                <tr><td>Objednatel:</td><td id="p-objednatel">—</td></tr>
-                <tr><td>Adresa:</td><td id="p-adresa">—</td></tr>
-                <tr><td>IČO/DIČ:</td><td id="p-icoDic">—</td></tr>
-                <tr><td>E-mail:</td><td id="p-email">—</td></tr>
-                <tr><td>Telefon:</td><td id="p-telefon">—</td></tr>
-                <tr><td>Místo řešení:</td><td id="p-mistoReseni">—</td></tr>
-                <tr><td>Obec s pověřeným úřadem:</td><td id="p-povereny">—</td></tr>
-                <tr><td>Obec s rozšířenou působností:</td><td id="p-rozsirena">—</td></tr>
-                <tr><td>Okres:</td><td id="p-okres">—</td></tr>
-                <tr><td>Kraj:</td><td id="p-kraj">—</td></tr>
+                <tr><td>Objednatel:</td><td id="p-objednatel">â€”</td></tr>
+                <tr><td>Adresa:</td><td id="p-adresa">â€”</td></tr>
+                <tr><td>IÄŚO/DIÄŚ:</td><td id="p-icoDic">â€”</td></tr>
+                <tr><td>E-mail:</td><td id="p-email">â€”</td></tr>
+                <tr><td>Telefon:</td><td id="p-telefon">â€”</td></tr>
+                <tr><td>MĂ­sto Ĺ™eĹˇenĂ­:</td><td id="p-mistoReseni">â€”</td></tr>
+                <tr><td>Obec s povÄ›Ĺ™enĂ˝m ĂşĹ™adem:</td><td id="p-povereny">â€”</td></tr>
+                <tr><td>Obec s rozĹˇĂ­Ĺ™enou pĹŻsobnostĂ­:</td><td id="p-rozsirena">â€”</td></tr>
+                <tr><td>Okres:</td><td id="p-okres">â€”</td></tr>
+                <tr><td>Kraj:</td><td id="p-kraj">â€”</td></tr>
             </table>
-            <div class="sec-title">Mapa zájmového území</div>
+            <div class="sec-title">Mapa zĂˇjmovĂ©ho ĂşzemĂ­</div>
             <div class="map-box-big" id="map-container"></div>
-            <div class="page-footer"><div>Pasport komunikací</div><div>2</div></div>
+            <div class="page-footer"><div>Pasport komunikacĂ­</div><div>2</div></div>
         </div>
 
         <!-- STRANA 3 -->
         <div class="page">
-            <div class="sec-title" style="font-size:13px; text-transform:none; letter-spacing:0; color:#1a1a2e; border-bottom:2px solid #ea521f; padding-bottom:8px; margin-bottom:16px;">Pasport komunikací</div>
+            <div class="sec-title" style="font-size:13px; text-transform:none; letter-spacing:0; color:#1a1a2e; border-bottom:2px solid #ea521f; padding-bottom:8px; margin-bottom:16px;">Pasport komunikacĂ­</div>
             <div class="ptext" id="p-pasportText"></div>
-            <div class="sec-title" style="margin-top:20px;">Závěrečný odstavec</div>
+            <div class="sec-title" style="margin-top:20px;">ZĂˇvÄ›reÄŤnĂ˝ odstavec</div>
             <div class="ptext" id="p-zaverecnyOdstavec"></div>
-            <div class="page-footer"><div>Pasport komunikací</div><div>3</div></div>
+            <div class="page-footer"><div>Pasport komunikacĂ­</div><div>3</div></div>
         </div>
 
         <!-- STRANA 4 -->
         <div class="page">
-            <div class="sec-title">Přehled území</div>
+            <div class="sec-title">PĹ™ehled ĂşzemĂ­</div>
             <div class="ptext" id="p-prehledUzemi"></div>
-            <div class="sec-title">Krajské komunikace</div>
+            <div class="sec-title">KrajskĂ© komunikace</div>
             <div class="ptext" id="p-krajskeKomunikace"></div>
-            <div class="sec-title">Místní komunikace</div>
+            <div class="sec-title">MĂ­stnĂ­ komunikace</div>
             <div class="ptext" id="p-mistniKomunikace"></div>
-            <div class="page-footer"><div>Pasport komunikací</div><div>4</div></div>
+            <div class="page-footer"><div>Pasport komunikacĂ­</div><div>4</div></div>
         </div>
 
         <!-- STRANA 5 -->
         <div class="page">
-            <div class="sec-title">Účelové komunikace</div>
+            <div class="sec-title">ĂšÄŤelovĂ© komunikace</div>
             <div class="ptext" id="p-ucelKomunikace"></div>
-            <div class="sec-title">Mosty a dopravní stavby</div>
+            <div class="sec-title">Mosty a dopravnĂ­ stavby</div>
             <div class="ptext" id="p-mosty"></div>
-            <div class="sec-title">Přidružené plochy</div>
+            <div class="sec-title">PĹ™idruĹľenĂ© plochy</div>
             <div class="ptext" id="p-pridruzenePlochy"></div>
-            <div class="page-footer"><div>Pasport komunikací</div><div>5</div></div>
+            <div class="page-footer"><div>Pasport komunikacĂ­</div><div>5</div></div>
         </div>
 
         <!-- STRANA 6 -->
         <div class="page">
-            <div class="sec-title">Shrnutí stavu komunikací</div>
+            <div class="sec-title">ShrnutĂ­ stavu komunikacĂ­</div>
             <div class="ptext" id="p-shrnuti"></div>
 
-            <div class="sec-title">Náklady na výstavbu a údržbu komunikací</div>
+            <div class="sec-title">NĂˇklady na vĂ˝stavbu a ĂşdrĹľbu komunikacĂ­</div>
             <div class="ptext" id="p-nakladyText"></div>
             <div class="cost-caption" id="p-tab1Caption"></div>
             <table class="cost-table">
                 <tr><th>Rok</th><th id="p-rok1">2024</th><th id="p-rok2">2023</th><th id="p-rok3">2022</th><th id="p-rok4">2021</th><th id="p-rok5">2020</th><th>Celkem</th></tr>
-                <tr><td>Náklady</td><td id="p-naklad1">—</td><td id="p-naklad2">—</td><td id="p-naklad3">—</td><td id="p-naklad4">—</td><td id="p-naklad5">—</td><td id="p-nakladCelkem">—</td></tr>
+                <tr><td>NĂˇklady</td><td id="p-naklad1">â€”</td><td id="p-naklad2">â€”</td><td id="p-naklad3">â€”</td><td id="p-naklad4">â€”</td><td id="p-naklad5">â€”</td><td id="p-nakladCelkem">â€”</td></tr>
             </table>
 
-            <div class="sec-title">Zimní údržba komunikací</div>
+            <div class="sec-title">ZimnĂ­ ĂşdrĹľba komunikacĂ­</div>
             <div class="ptext" id="p-zimniText"></div>
             <div class="cost-caption" id="p-tab2Caption"></div>
             <table class="cost-table">
                 <tr><th>Rok</th><th id="p-zRok1">2024</th><th id="p-zRok2">2023</th><th id="p-zRok3">2022</th><th id="p-zRok4">2021</th><th id="p-zRok5">2020</th><th>Celkem</th></tr>
-                <tr><td>Náklady</td><td id="p-zNaklad1">—</td><td id="p-zNaklad2">—</td><td id="p-zNaklad3">—</td><td id="p-zNaklad4">—</td><td id="p-zNaklad5">—</td><td id="p-zNakladCelkem">—</td></tr>
+                <tr><td>NĂˇklady</td><td id="p-zNaklad1">â€”</td><td id="p-zNaklad2">â€”</td><td id="p-zNaklad3">â€”</td><td id="p-zNaklad4">â€”</td><td id="p-zNaklad5">â€”</td><td id="p-zNakladCelkem">â€”</td></tr>
             </table>
 
             <div style="margin-top: auto; width: 100%;">
                 <div class="sign-row" style="margin-top: 0; margin-bottom: 25px;">
                     <div class="sign-block">
-                        <div class="stamp-box" id="p-stamp"><span class="logo-placeholder">podpis / razítko</span></div>
+                        <div class="stamp-box" id="p-stamp"><span class="logo-placeholder">podpis / razĂ­tko</span></div>
                         <div class="sign-line"></div>
                         <div class="sign-label" id="p-signName">Atomicon, s.r.o.</div>
-                        <div class="sign-sub">podpis / razítko</div>
+                        <div class="sign-sub">podpis / razĂ­tko</div>
                     </div>
-                    <div class="sign-date">Datum:<br><span id="p-signDate">—</span></div>
+                    <div class="sign-date">Datum:<br><span id="p-signDate">â€”</span></div>
                 </div>
-                <div class="page-footer" style="margin-top: 0;"><div>Pasport komunikací</div><div>6</div></div>
+                <div class="page-footer" style="margin-top: 0;"><div>Pasport komunikacĂ­</div><div>6</div></div>
             </div>
         </div>
 
@@ -388,13 +388,13 @@ Maximální roční náklady za posledních pět let zahrnující palivo, mzdy a
 </div>
 
 <script>
-// ==== NAHRÁVÁNÍ LOGA / RAZÍTKA ====
+// ==== NAHRĂVĂNĂŤ LOGA / RAZĂŤTKA ====
 function handleUpload(input, targetId) {
     const file = input.files && input.files[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = function(e) {
-        document.getElementById(targetId).innerHTML = '<img src="' + e.target.result + '" alt="obrázek">';
+        document.getElementById(targetId).innerHTML = '<img src="' + e.target.result + '" alt="obrĂˇzek">';
     };
     reader.readAsDataURL(file);
 }
@@ -407,12 +407,12 @@ function initMap() {
     mapInstance = L.map('map-container').setView([49.8023, 15.4730], 7);
     L.tileLayer('https://ags.cuzk.cz/arcgis1/rest/services/ZTM_WM/MapServer/tile/{z}/{y}/{x}', {
         opacity: 0.7,
-        attribution: '&copy; ČÚZK'
+        attribution: '&copy; ÄŚĂšZK'
     }).addTo(mapInstance);
     mapInstance.scrollWheelZoom.disable();
 }
 
-// ==== NAŠEPTÁVAČ OBCÍ (ČÚZK RUIAN) ====
+// ==== NAĹ EPTĂVAÄŚ OBCĂŤ (ÄŚĂšZK RUIAN) ====
 let obecDebounce = null;
 let obecActiveIdx = -1;
 let selectedObecKod = null;
@@ -517,7 +517,7 @@ async function locateCity() {
             boundaryFound = true;
             fillObecName(nazev);
             
-            // Doplňující údaje z RÚIAN (POU, ORP, Okres, Kraj)
+            // DoplĹujĂ­cĂ­ Ăşdaje z RĂšIAN (POU, ORP, Okres, Kraj)
             try {
                 let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
                 rings.forEach(ring => ring.forEach(pt => {
@@ -556,7 +556,7 @@ async function locateCity() {
                     fetchInfo(13), // POU
                     fetchInfo(14), // ORP
                     fetchInfo(15), // Okres
-                    fetchInfo(17)  // Kraj (VÚSC)
+                    fetchInfo(17)  // Kraj (VĂšSC)
                 ]).then(results => {
                     const [pou, orp, okres, kraj] = results;
                     if (pou) { const el = document.getElementById('povereny'); if (el) el.value = pou; }
@@ -570,7 +570,7 @@ async function locateCity() {
             } catch (err) {}
         }
     } catch (ruianErr) {
-        // ČÚZK nedostupný
+        // ÄŚĂšZK nedostupnĂ˝
     }
 
     if (!boundaryFound) {
@@ -584,23 +584,23 @@ async function locateCity() {
                 alert("Obec nebyla nalezena.");
             }
         } catch (e) {
-            alert("Chyba při komunikaci se serverem map.");
+            alert("Chyba pĹ™i komunikaci se serverem map.");
         }
     }
 }
 
-let currentObecName = '[Název obce]';
+let currentObecName = '[NĂˇzev obce]';
 let currentOkresName = '[Okres]';
 let currentKrajName = '[Kraj]';
 
-// Propíše nalezenou obec do formuláře (a nyní vždy přepíše staré hodnoty)
+// PropĂ­Ĺˇe nalezenou obec do formulĂˇĹ™e (a nynĂ­ vĹľdy pĹ™epĂ­Ĺˇe starĂ© hodnoty)
 function fillObecName(nazev) {
     if (!nazev) return;
     
-    // Projdeme všechny textové vstupy a textarea a nahradíme starý název novým všude, kde to jde
+    // Projdeme vĹˇechny textovĂ© vstupy a textarea a nahradĂ­me starĂ˝ nĂˇzev novĂ˝m vĹˇude, kde to jde
     const inputs = document.querySelectorAll('.form-panel input[type="text"], .form-panel textarea');
     inputs.forEach(el => {
-        // Nepřepisujeme pole, kde by to mohlo dělat neplechu, nebo ty které se plní natvrdo
+        // NepĹ™episujeme pole, kde by to mohlo dÄ›lat neplechu, nebo ty kterĂ© se plnĂ­ natvrdo
         if (el.id === 'nazevObce' || el.id === 'objednatel' || el.id === 'mistoReseni') return;
         
         if (currentObecName && el.value.includes(currentObecName)) {
@@ -610,7 +610,7 @@ function fillObecName(nazev) {
     });
     currentObecName = nazev;
 
-    // Natvrdo přepíšeme základní pole
+    // Natvrdo pĹ™epĂ­Ĺˇeme zĂˇkladnĂ­ pole
     const nazevEl = document.getElementById('nazevObce');
     if (nazevEl) nazevEl.value = nazev;
     
@@ -626,7 +626,7 @@ function fillObecName(nazev) {
     updatePreview();
 }
 
-// Provede to samé pro okres a kraj v připravených textech
+// Provede to samĂ© pro okres a kraj v pĹ™ipravenĂ˝ch textech
 function fillOkresKraj(okres, kraj) {
     const inputs = document.querySelectorAll('.form-panel input[type="text"], .form-panel textarea');
     inputs.forEach(el => {
@@ -647,38 +647,38 @@ function fillOkresKraj(okres, kraj) {
     if (kraj) currentKrajName = kraj;
 }
 
-// ==== POMOCNÉ FUNKCE ====
+// ==== POMOCNĂ‰ FUNKCE ====
 function escapeHtml(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 function textToHtml(text) {
     if (!text || !text.trim()) return '';
     return text.split(/\n\s*\n/).map(p => '<p>' + escapeHtml(p.trim()).replace(/\n/g, '<br>') + '</p>').join('');
 }
 function val(id) { return (document.getElementById(id)?.value || '').trim(); }
-function setText(id, text) { const el = document.getElementById(id); if (el) el.textContent = text || '—'; }
+function setText(id, text) { const el = document.getElementById(id); if (el) el.textContent = text || 'â€”'; }
 function setHtml(id, text) { 
     const el = document.getElementById(id); 
     if (el) {
         if (!text || text === '<p><br></p>') {
-            el.innerHTML = '<p class="ph">— nevyplněno —</p>';
+            el.innerHTML = '<p class="ph">â€” nevyplnÄ›no â€”</p>';
         } else {
             el.innerHTML = text;
         }
     }
 }
 
-// ==== HLAVNÍ AKTUALIZACE NÁHLEDU ====
+// ==== HLAVNĂŤ AKTUALIZACE NĂHLEDU ====
 function updatePreview() {
-    setText('p-nadpis', val('nadpis') || 'PASPORT MÍSTNÍCH A ÚČELOVÝCH KOMUNIKACÍ');
+    setText('p-nadpis', val('nadpis') || 'PASPORT MĂŤSTNĂŤCH A ĂšÄŚELOVĂťCH KOMUNIKACĂŤ');
     
     const typSelect = document.getElementById('typObce');
     const typVal = typSelect ? typSelect.value : 'Obec ';
-    const n = val('nazevObce') ? val('nazevObce') : '—';
+    const n = val('nazevObce') ? val('nazevObce') : 'â€”';
     setText('p-nazevObec', (typVal + n).toUpperCase());
     
     const vyprac = val('vypracoval') || 'ATOMICON s. r. o.';
     document.getElementById('p-vypracoval').innerHTML = vyprac.replace(/\n/g, '<br>');
     setText('p-signName', vyprac.split(',')[0]);
-    setText('p-rok', val('rok') || '—');
+    setText('p-rok', val('rok') || 'â€”');
 
     setText('p-objednatel', val('objednatel'));
     setText('p-adresa', val('adresa'));
@@ -714,11 +714,11 @@ function updatePreview() {
     ['zNaklad1','zNaklad2','zNaklad3','zNaklad4','zNaklad5','zNakladCelkem'].forEach(id => setText('p-'+id, val(id)));
 
     const d = val('signDate');
-    setText('p-signDate', d ? new Date(d + 'T12:00:00').toLocaleDateString('cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' }) : '—');
+    setText('p-signDate', d ? new Date(d + 'T12:00:00').toLocaleDateString('cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' }) : 'â€”');
 }
 
 function resetForm() {
-    if (!confirm('Vymazat a obnovit formulář do výchozího stavu?')) return;
+    if (!confirm('Vymazat a obnovit formulĂˇĹ™ do vĂ˝chozĂ­ho stavu?')) return;
     location.reload();
 }
 
@@ -730,7 +730,7 @@ window.onload = function() {
     document.getElementById('signDate').value = new Date().toISOString().slice(0, 10);
     document.getElementById('rok').value = new Date().getFullYear();
     
-    // Inicializace Quill editorů pro hlavní textová pole
+    // Inicializace Quill editorĹŻ pro hlavnĂ­ textovĂˇ pole
     const richTextIds = ['pasportText', 'zaverecnyOdstavec', 'prehledUzemi', 'krajskeKomunikace', 'mistniKomunikace', 'ucelKomunikace', 'mosty', 'pridruzenePlochy', 'shrnuti', 'nakladyText', 'zimniText'];
     richTextIds.forEach(id => {
         const textarea = document.getElementById(id);
@@ -743,7 +743,7 @@ window.onload = function() {
                 theme: 'snow',
                 modules: { toolbar: [ ['bold', 'italic', 'underline'], [{ 'list': 'bullet' }] ] }
             });
-            // Konvertujeme počáteční text na HTML, vložíme do Quillu a syncneme zpět
+            // Konvertujeme poÄŤĂˇteÄŤnĂ­ text na HTML, vloĹľĂ­me do Quillu a syncneme zpÄ›t
             quill.clipboard.dangerouslyPasteHTML(textToHtml(textarea.value));
             textarea.value = quill.root.innerHTML;
             

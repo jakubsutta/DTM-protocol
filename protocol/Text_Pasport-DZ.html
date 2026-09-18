@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Generátor textu – Pasport DZ</title>
-<link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛑</text></svg>">
-<script defer src="vendor/leaflet/leaflet.js"></script>
-<link href="vendor/quill/quill.snow.css" rel="stylesheet">
-<script defer src="vendor/quill/quill.min.js"></script>
+<title>GenerĂˇtor textu â€“ Pasport DZ</title>
+<link rel="stylesheet" href="./vendor/leaflet/leaflet.css" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>đź›‘</text></svg>">
+<script defer src="./vendor/leaflet/leaflet.js"></script>
+<link href="./vendor/quill/quill.snow.css" rel="stylesheet">
+<script defer src="./vendor/quill/quill.min.js"></script>
 <style>
     /* ---- Tisk / PDF ---- */
     @media print {
@@ -25,12 +25,12 @@
         @page { size: A4; margin: 0; }
     }
 
-    /* ---- Základní reset ---- */
+    /* ---- ZĂˇkladnĂ­ reset ---- */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; background: #f0f2f5; color: #1a1a1a; min-height: 100vh; }
     .app { display: grid; grid-template-columns: 400px 1fr; min-height: 100vh; }
 
-    /* ---- Formulářový panel ---- */
+    /* ---- FormulĂˇĹ™ovĂ˝ panel ---- */
     .form-panel { background: #fff5f5; color: #000; padding: 24px 22px 60px; display: flex; flex-direction: column; gap: 0; overflow-y: auto; max-height: 100vh; position: sticky; top: 0; }
     .form-panel h2 { font-size: 13px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: #d32f2f; margin-bottom: 8px; }
     .form-panel .sub { font-size: 10.5px; color: #78909c; margin-bottom: 18px; }
@@ -78,7 +78,7 @@
     .ptext p:last-child { margin-bottom: 0; }
     .ptext p.ph { color: #b0bec5; font-style: italic; }
 
-    /* ---- Titulní strana ---- */
+    /* ---- TitulnĂ­ strana ---- */
     .p1 { align-items: center; text-align: center; justify-content: flex-start; }
     .p1-title { font-size: 24px; font-weight: 800; color: #1a1a2e; letter-spacing: 0.02em; line-height: 1.35; text-transform: uppercase; margin-top: 20px; max-width: 140mm; border-bottom: 2px solid #ea521f; padding-bottom: 8px; margin-bottom: 12px; }
     .p1-obec { font-size: 17px; font-weight: 700; color: #ea521f; text-transform: uppercase; margin-top: 14px; letter-spacing: 0.05em; }
@@ -92,7 +92,7 @@
     .p1-address { font-size: 12px; color: #1a1a2e; text-align: center; line-height: 1.4; font-weight: 600; }
     .p1-year { font-size: 24px; font-weight: 800; color: #1a1a2e; margin-top: 8px; }
 
-    /* ---- Tabulka základních údajů ---- */
+    /* ---- Tabulka zĂˇkladnĂ­ch ĂşdajĹŻ ---- */
     .info-table { width: 100%; border-collapse: collapse; font-size: 12px; }
     .info-table td { padding: 6px 8px; vertical-align: top; border-bottom: 1px solid #f5f5f5; }
     .info-table td:first-child { color: #78909c; width: 42%; font-size: 11px; padding-right: 12px; }
@@ -108,7 +108,7 @@
     .autocomplete-item small { color: #90a4ae; font-size: 10px; margin-left: 6px; }
     .map-box-big { background: #eef2f5; border: 1px solid #cfd8dc; border-radius: 5px; overflow: hidden; width: 100%; height: 118mm; z-index: 1; margin-top: auto; }
 
-    /* ---- Tabulky nákladů ---- */
+    /* ---- Tabulky nĂˇkladĹŻ ---- */
     .cost-caption { font-size: 10.5px; color: #78909c; font-style: italic; margin: 10px 0 6px; }
     .cost-table { width: 100%; border-collapse: collapse; font-size: 11.5px; margin-bottom: 6px; }
     .cost-table th { background: #f5f7fa; padding: 6px 8px; text-align: center; font-size: 10px; font-weight: 700; color: #78909c; border: 1px solid #e0e0e0; }
@@ -129,27 +129,27 @@
 <body>
 
 <div class="app">
-    <!-- ===== FORMULÁŘ ===== -->
+    <!-- ===== FORMULĂĹ ===== -->
     <div class="form-panel" id="form-panel">
-        <h2>Generátor textu – Pasport DZ</h2>
-        <div class="sub">Vyplňte pole vlevo, náhled dokumentu se aktualizuje vpravo.</div>
+        <h2>GenerĂˇtor textu â€“ Pasport DZ</h2>
+        <div class="sub">VyplĹte pole vlevo, nĂˇhled dokumentu se aktualizuje vpravo.</div>
 
-        <div class="page-label">Strana 1 — Titulní strana</div>
-        <div class="field"><label>Nadpis</label><input type="text" id="nadpis" value="PASPORT SVISLÉHO DOPRAVNÍHO ZNAČENÍ"></div>
-        <div class="field"><label>Název obce</label>
+        <div class="page-label">Strana 1 â€” TitulnĂ­ strana</div>
+        <div class="field"><label>Nadpis</label><input type="text" id="nadpis" value="PASPORT SVISLĂ‰HO DOPRAVNĂŤHO ZNAÄŚENĂŤ"></div>
+        <div class="field"><label>NĂˇzev obce</label>
             <div style="display:flex; gap:6px;">
                 <select id="typObce" style="width: 100px;">
                     <option value="Obec ">Obec</option>
-                    <option value="Městys ">Městys</option>
-                    <option value="Město ">Město</option>
-                    <option value="Část obce ">Část obce</option>
+                    <option value="MÄ›stys ">MÄ›stys</option>
+                    <option value="MÄ›sto ">MÄ›sto</option>
+                    <option value="ÄŚĂˇst obce ">ÄŚĂˇst obce</option>
                     <option value="Firma ">Firma</option>
                     <option value="">(nic)</option>
                 </select>
-                <input type="text" id="nazevObce" placeholder="např. Tovačov" style="flex:1;">
+                <input type="text" id="nazevObce" placeholder="napĹ™. TovaÄŤov" style="flex:1;">
             </div>
         </div>
-        <div class="field"><label>Logo obce</label><div class="file-field" onclick="document.getElementById('logoObecInput').click()">+ Vybrat obrázek loga obce</div>
+        <div class="field"><label>Logo obce</label><div class="file-field" onclick="document.getElementById('logoObecInput').click()">+ Vybrat obrĂˇzek loga obce</div>
             <input type="file" id="logoObecInput" accept="image/*" style="display:none" onchange="handleUpload(this,'p-logoObec')"></div>
         <div class="field"><label>Vypracoval (Adresa)</label>
             <textarea id="vypracoval" style="min-height: 45px;">ATOMICON s. r. o., Stupkova 952/18, Olomouc 779 00
@@ -159,68 +159,68 @@ tel. +420 778 481 700</textarea>
             <input type="file" id="logoFirmaInput" accept="image/*" style="display:none" onchange="handleUpload(this,'p-logoFirma')"></div>
         <div class="field"><label>Rok</label><input type="text" id="rok" value=""></div>
 
-        <div class="page-label">Strana 2 — Základní údaje a mapa</div>
-        <div class="section-label">Základní údaje o obci</div>
-        <div class="field"><label>Objednatel</label><input type="text" id="objednatel" placeholder="Obec [Název obce]"></div>
-        <div class="field"><label>Adresa</label><input type="text" id="adresa" placeholder="Ulice/č.p., PSČ Obec"></div>
-        <div class="field"><label>IČO/DIČ</label><input type="text" id="icoDic" placeholder="00000000/CZ00000000"></div>
+        <div class="page-label">Strana 2 â€” ZĂˇkladnĂ­ Ăşdaje a mapa</div>
+        <div class="section-label">ZĂˇkladnĂ­ Ăşdaje o obci</div>
+        <div class="field"><label>Objednatel</label><input type="text" id="objednatel" placeholder="Obec [NĂˇzev obce]"></div>
+        <div class="field"><label>Adresa</label><input type="text" id="adresa" placeholder="Ulice/ÄŤ.p., PSÄŚ Obec"></div>
+        <div class="field"><label>IÄŚO/DIÄŚ</label><input type="text" id="icoDic" placeholder="00000000/CZ00000000"></div>
         <div class="field"><label>E-mail</label><input type="text" id="email" placeholder="obec@obec.cz"></div>
         <div class="field"><label>Telefon</label><input type="text" id="telefon" placeholder="+420 000 000 000"></div>
-        <div class="field"><label>Místo řešení</label><input type="text" id="mistoReseni" placeholder="obec [Název obce]"></div>
-        <div class="field"><label>Obec s pověřeným úřadem</label><input type="text" id="povereny"></div>
-        <div class="field"><label>Obec s rozšířenou působností</label><input type="text" id="rozsirena"></div>
+        <div class="field"><label>MĂ­sto Ĺ™eĹˇenĂ­</label><input type="text" id="mistoReseni" placeholder="obec [NĂˇzev obce]"></div>
+        <div class="field"><label>Obec s povÄ›Ĺ™enĂ˝m ĂşĹ™adem</label><input type="text" id="povereny"></div>
+        <div class="field"><label>Obec s rozĹˇĂ­Ĺ™enou pĹŻsobnostĂ­</label><input type="text" id="rozsirena"></div>
         <div class="field"><label>Okres</label><input type="text" id="okres"></div>
         <div class="field"><label>Kraj</label><input type="text" id="kraj"></div>
 
-        <div class="section-label">Mapa — vyhledat obec</div>
+        <div class="section-label">Mapa â€” vyhledat obec</div>
         <div class="field">
             <div style="display:flex; gap:6px;">
                 <div class="autocomplete-wrap">
-                    <input type="text" id="mapObec" placeholder="např. Tovačov" oninput="onObecInput()" onkeydown="onObecKeydown(event)" autocomplete="off">
+                    <input type="text" id="mapObec" placeholder="napĹ™. TovaÄŤov" oninput="onObecInput()" onkeydown="onObecKeydown(event)" autocomplete="off">
                     <div class="autocomplete-list" id="obecSuggestions"></div>
                 </div>
-                <button type="button" class="btn btn-primary" style="padding: 0 14px;" onclick="locateCity()">Najít</button>
+                <button type="button" class="btn btn-primary" style="padding: 0 14px;" onclick="locateCity()">NajĂ­t</button>
             </div>
-            <div class="field-note">Nalezená obec se propíše do názvu obce, objednatele a místa řešení.</div>
+            <div class="field-note">NalezenĂˇ obec se propĂ­Ĺˇe do nĂˇzvu obce, objednatele a mĂ­sta Ĺ™eĹˇenĂ­.</div>
         </div>
 
-        <div class="page-label">Strana 3 — Pasport dopravního značení</div>
-        <div class="field"><label>Úvod a legislativa</label>
-            <textarea id="dzUvod">Dokument evidence dopravního značení v katastru obce [Název obce] je proveden v plném rozsahu dle zákona č. 361/2000 Sb., o pozemních komunikacích ve znění pozdějších změn a Vyhlášky Ministerstva dopravy č. 294/2015 Sb., kterou se provádí zákon o dopravním značení, v platném znění. Součástí pasportu je svislé dopravní značení v majetku obce vymezené katastrem obce. Evidenční číslování je vedeno v souladu s obecně platnými pravidly evidence dopravního značení na území České republiky.</textarea>
+        <div class="page-label">Strana 3 â€” Pasport dopravnĂ­ho znaÄŤenĂ­</div>
+        <div class="field"><label>Ăšvod a legislativa</label>
+            <textarea id="dzUvod">Dokument evidence dopravnĂ­ho znaÄŤenĂ­ v katastru obce [NĂˇzev obce] je proveden v plnĂ©m rozsahu dle zĂˇkona ÄŤ. 361/2000 Sb., o pozemnĂ­ch komunikacĂ­ch ve znÄ›nĂ­ pozdÄ›jĹˇĂ­ch zmÄ›n a VyhlĂˇĹˇky Ministerstva dopravy ÄŤ. 294/2015 Sb., kterou se provĂˇdĂ­ zĂˇkon o dopravnĂ­m znaÄŤenĂ­, v platnĂ©m znÄ›nĂ­. SouÄŤĂˇstĂ­ pasportu je svislĂ© dopravnĂ­ znaÄŤenĂ­ v majetku obce vymezenĂ© katastrem obce. EvidenÄŤnĂ­ ÄŤĂ­slovĂˇnĂ­ je vedeno v souladu s obecnÄ› platnĂ˝mi pravidly evidence dopravnĂ­ho znaÄŤenĂ­ na ĂşzemĂ­ ÄŚeskĂ© republiky.</textarea>
         </div>
         <div class="field"><label>Metodika a GIS</label>
-            <textarea id="dzMetodika">Dopravní značení bylo fyzicky zaměřeno technologií GNSS s přesností +/- 2 cm, během tvorby původního pasportu v roce 2019. V roce [rok] byl pasport doplněn o nové dopravní značení a byly aktualizovány informace stávajících dopravních značek. Byla pořízena fotodokumentace a zapsány informace o stavu objektů (stav nosiče a stav značky). Dále je pasport vyhotoven v systému GIS a vytvořen dle pravidel a metodik platných v oblasti geografických informačních systémů a kartografie. Obsahuje vektorové vrstvy v přenositelném datovém formátu ESRI Shapefile v souřadnicových systémech S-JTSK a WGS-84. Kromě grafické podoby obsahuje tabulkové informace ve formě databázových tabulek přímo provázaných s jednotlivými entitami.</textarea>
+            <textarea id="dzMetodika">DopravnĂ­ znaÄŤenĂ­ bylo fyzicky zamÄ›Ĺ™eno technologiĂ­ GNSS s pĹ™esnostĂ­ +/- 2 cm, bÄ›hem tvorby pĹŻvodnĂ­ho pasportu v roce 2019. V roce [rok] byl pasport doplnÄ›n o novĂ© dopravnĂ­ znaÄŤenĂ­ a byly aktualizovĂˇny informace stĂˇvajĂ­cĂ­ch dopravnĂ­ch znaÄŤek. Byla poĹ™Ă­zena fotodokumentace a zapsĂˇny informace o stavu objektĹŻ (stav nosiÄŤe a stav znaÄŤky). DĂˇle je pasport vyhotoven v systĂ©mu GIS a vytvoĹ™en dle pravidel a metodik platnĂ˝ch v oblasti geografickĂ˝ch informaÄŤnĂ­ch systĂ©mĹŻ a kartografie. Obsahuje vektorovĂ© vrstvy v pĹ™enositelnĂ©m datovĂ©m formĂˇtu ESRI Shapefile v souĹ™adnicovĂ˝ch systĂ©mech S-JTSK a WGS-84. KromÄ› grafickĂ© podoby obsahuje tabulkovĂ© informace ve formÄ› databĂˇzovĂ˝ch tabulek pĹ™Ă­mo provĂˇzanĂ˝ch s jednotlivĂ˝mi entitami.</textarea>
         </div>
-        <div class="field"><label>Systém GISAdmin</label>
-            <textarea id="dzGisAdmin">Digitální verze pasportu je zaštiťována webově orientovaným systémem GISAdmin, který zajišťuje on-line přístup k datům a umožňuje včasnou aktualizaci. Tento systém je pro obce k dispozici na vyžádání a je zpoplatněn měsíčním paušálním poplatkem (obec [Název obce] není uživatelem systému GISAdmin).</textarea>
-        </div>
-
-        <div class="page-label">Strana 4 — Shrnutí a podpis</div>
-        <div class="field"><label>Závěrečný odstavec</label>
-            <textarea id="dzZaver">Výstupní pasport popisuje aktuální stav svislého dopravního značení ve vlastnictví obce, platný k lednu [rok]. Obsahuje textovou část, tabulkové výstupy, technické karty objektů a grafické přílohy – soubor tematických map.</textarea>
-        </div>
-        <div class="field"><label>Souhrn stavu značení</label>
-            <textarea id="dzShrnuti">Celkově je v evidenci [počet] objektů svislého dopravního značení. Většina značení je nově osazena, dopravní zrcadlo a značení č. 01 jsou ve vyhovujícím stavu, v havarijním stavu je č. 03. Podrobný stav jednotlivého značení je uveden v tabulkové části pasportu. Materiál, ze kterého jsou tyto dopravní značky vytvořeny, je plech (dopravní zrcadlo je z plastu). Většina dopravního značení má reflexní povrch, který speciálně odráží viditelné záření. Podrobnější informace lze nalézt v tabulkové části pasportu.</textarea>
+        <div class="field"><label>SystĂ©m GISAdmin</label>
+            <textarea id="dzGisAdmin">DigitĂˇlnĂ­ verze pasportu je zaĹˇtiĹĄovĂˇna webovÄ› orientovanĂ˝m systĂ©mem GISAdmin, kterĂ˝ zajiĹˇĹĄuje on-line pĹ™Ă­stup k datĹŻm a umoĹľĹuje vÄŤasnou aktualizaci. Tento systĂ©m je pro obce k dispozici na vyĹľĂˇdĂˇnĂ­ a je zpoplatnÄ›n mÄ›sĂ­ÄŤnĂ­m pauĹˇĂˇlnĂ­m poplatkem (obec [NĂˇzev obce] nenĂ­ uĹľivatelem systĂ©mu GISAdmin).</textarea>
         </div>
 
-        <div class="section-label">Podpis / razítko</div>
-        <div class="field"><label>Obrázek podpisu / razítka</label><div class="file-field" onclick="document.getElementById('stampInput').click()">+ Vybrat obrázek</div>
+        <div class="page-label">Strana 4 â€” ShrnutĂ­ a podpis</div>
+        <div class="field"><label>ZĂˇvÄ›reÄŤnĂ˝ odstavec</label>
+            <textarea id="dzZaver">VĂ˝stupnĂ­ pasport popisuje aktuĂˇlnĂ­ stav svislĂ©ho dopravnĂ­ho znaÄŤenĂ­ ve vlastnictvĂ­ obce, platnĂ˝ k lednu [rok]. Obsahuje textovou ÄŤĂˇst, tabulkovĂ© vĂ˝stupy, technickĂ© karty objektĹŻ a grafickĂ© pĹ™Ă­lohy â€“ soubor tematickĂ˝ch map.</textarea>
+        </div>
+        <div class="field"><label>Souhrn stavu znaÄŤenĂ­</label>
+            <textarea id="dzShrnuti">CelkovÄ› je v evidenci [poÄŤet] objektĹŻ svislĂ©ho dopravnĂ­ho znaÄŤenĂ­. VÄ›tĹˇina znaÄŤenĂ­ je novÄ› osazena, dopravnĂ­ zrcadlo a znaÄŤenĂ­ ÄŤ. 01 jsou ve vyhovujĂ­cĂ­m stavu, v havarijnĂ­m stavu je ÄŤ. 03. PodrobnĂ˝ stav jednotlivĂ©ho znaÄŤenĂ­ je uveden v tabulkovĂ© ÄŤĂˇsti pasportu. MateriĂˇl, ze kterĂ©ho jsou tyto dopravnĂ­ znaÄŤky vytvoĹ™eny, je plech (dopravnĂ­ zrcadlo je z plastu). VÄ›tĹˇina dopravnĂ­ho znaÄŤenĂ­ mĂˇ reflexnĂ­ povrch, kterĂ˝ speciĂˇlnÄ› odrĂˇĹľĂ­ viditelnĂ© zĂˇĹ™enĂ­. PodrobnÄ›jĹˇĂ­ informace lze nalĂ©zt v tabulkovĂ© ÄŤĂˇsti pasportu.</textarea>
+        </div>
+
+        <div class="section-label">Podpis / razĂ­tko</div>
+        <div class="field"><label>ObrĂˇzek podpisu / razĂ­tka</label><div class="file-field" onclick="document.getElementById('stampInput').click()">+ Vybrat obrĂˇzek</div>
             <input type="file" id="stampInput" accept="image/*" style="display:none" onchange="handleUpload(this,'p-stamp')"></div>
         <div class="field"><label>Datum</label><input type="date" id="signDate"></div>
 
         <div class="btn-row">
-            <button class="btn btn-primary" onclick="window.print()">⬇ Uložit jako PDF (Ctrl+P)</button>
-            <button class="btn btn-secondary" onclick="resetForm()">Vymazat formulář</button>
+            <button class="btn btn-primary" onclick="window.print()">â¬‡ UloĹľit jako PDF (Ctrl+P)</button>
+            <button class="btn btn-secondary" onclick="resetForm()">Vymazat formulĂˇĹ™</button>
         </div>
     </div>
 
-    <!-- ===== NÁHLED ===== -->
+    <!-- ===== NĂHLED ===== -->
     <div class="preview-panel">
 
         <!-- STRANA 1 -->
         <div class="page p1">
-            <div class="p1-title" id="p-nadpis">PASPORT SVISLÉHO DOPRAVNÍHO ZNAČENÍ</div>
-            <div class="p1-obec" id="p-nazevObec">OBEC —</div>
+            <div class="p1-title" id="p-nadpis">PASPORT SVISLĂ‰HO DOPRAVNĂŤHO ZNAÄŚENĂŤ</div>
+            <div class="p1-obec" id="p-nazevObec">OBEC â€”</div>
             <div class="logo-obec-box" id="p-logoObec"><span class="logo-placeholder">logo obce</span></div>
             <div class="p1-footer">
                 <div class="lbl">Vypracoval</div>
@@ -232,50 +232,50 @@ tel. +420 778 481 700</textarea>
 
         <!-- STRANA 2 -->
         <div class="page">
-            <div class="sec-title">Základní údaje o obci</div>
+            <div class="sec-title">ZĂˇkladnĂ­ Ăşdaje o obci</div>
             <table class="info-table">
-                <tr><td>Objednatel:</td><td id="p-objednatel">—</td></tr>
-                <tr><td>Adresa:</td><td id="p-adresa">—</td></tr>
-                <tr><td>IČO/DIČ:</td><td id="p-icoDic">—</td></tr>
-                <tr><td>E-mail:</td><td id="p-email">—</td></tr>
-                <tr><td>Telefon:</td><td id="p-telefon">—</td></tr>
-                <tr><td>Místo řešení:</td><td id="p-mistoReseni">—</td></tr>
-                <tr><td>Obec s pověřeným úřadem:</td><td id="p-povereny">—</td></tr>
-                <tr><td>Obec s rozšířenou působností:</td><td id="p-rozsirena">—</td></tr>
-                <tr><td>Okres:</td><td id="p-okres">—</td></tr>
-                <tr><td>Kraj:</td><td id="p-kraj">—</td></tr>
+                <tr><td>Objednatel:</td><td id="p-objednatel">â€”</td></tr>
+                <tr><td>Adresa:</td><td id="p-adresa">â€”</td></tr>
+                <tr><td>IÄŚO/DIÄŚ:</td><td id="p-icoDic">â€”</td></tr>
+                <tr><td>E-mail:</td><td id="p-email">â€”</td></tr>
+                <tr><td>Telefon:</td><td id="p-telefon">â€”</td></tr>
+                <tr><td>MĂ­sto Ĺ™eĹˇenĂ­:</td><td id="p-mistoReseni">â€”</td></tr>
+                <tr><td>Obec s povÄ›Ĺ™enĂ˝m ĂşĹ™adem:</td><td id="p-povereny">â€”</td></tr>
+                <tr><td>Obec s rozĹˇĂ­Ĺ™enou pĹŻsobnostĂ­:</td><td id="p-rozsirena">â€”</td></tr>
+                <tr><td>Okres:</td><td id="p-okres">â€”</td></tr>
+                <tr><td>Kraj:</td><td id="p-kraj">â€”</td></tr>
             </table>
-            <div class="sec-title">Mapa zájmového území</div>
+            <div class="sec-title">Mapa zĂˇjmovĂ©ho ĂşzemĂ­</div>
             <div class="map-box-big" id="map-container"></div>
-            <div class="page-footer"><div>Pasport dopravního značení</div><div>2</div></div>
+            <div class="page-footer"><div>Pasport dopravnĂ­ho znaÄŤenĂ­</div><div>2</div></div>
         </div>
 
         <!-- STRANA 3 -->
         <div class="page">
-            <div class="sec-title" style="font-size:13px; text-transform:none; letter-spacing:0; color:#1a1a2e; border-bottom:2px solid #ea521f; padding-bottom:8px; margin-bottom:16px;">Pasport dopravního značení</div>
+            <div class="sec-title" style="font-size:13px; text-transform:none; letter-spacing:0; color:#1a1a2e; border-bottom:2px solid #ea521f; padding-bottom:8px; margin-bottom:16px;">Pasport dopravnĂ­ho znaÄŤenĂ­</div>
             <div class="ptext" id="p-dzUvod"></div>
             <div class="ptext" id="p-dzMetodika"></div>
             <div class="ptext" id="p-dzGisAdmin"></div>
-            <div class="page-footer"><div>Pasport dopravního značení</div><div>3</div></div>
+            <div class="page-footer"><div>Pasport dopravnĂ­ho znaÄŤenĂ­</div><div>3</div></div>
         </div>
 
         <!-- STRANA 4 -->
         <div class="page">
-            <div class="sec-title" style="font-size:13px; text-transform:none; letter-spacing:0; color:#1a1a2e; border-bottom:2px solid #ea521f; padding-bottom:8px; margin-bottom:16px;">Shrnutí stavu značení</div>
+            <div class="sec-title" style="font-size:13px; text-transform:none; letter-spacing:0; color:#1a1a2e; border-bottom:2px solid #ea521f; padding-bottom:8px; margin-bottom:16px;">ShrnutĂ­ stavu znaÄŤenĂ­</div>
             <div class="ptext" id="p-dzZaver"></div>
             <div class="ptext" id="p-dzShrnuti"></div>
             
             <div style="margin-top: auto; width: 100%;">
                 <div class="sign-row" style="margin-top: 0; margin-bottom: 25px;">
                     <div class="sign-block">
-                        <div class="stamp-box" id="p-stamp"><span class="logo-placeholder">podpis / razítko</span></div>
+                        <div class="stamp-box" id="p-stamp"><span class="logo-placeholder">podpis / razĂ­tko</span></div>
                         <div class="sign-line"></div>
                         <div class="sign-label" id="p-signName">Atomicon, s.r.o.</div>
-                        <div class="sign-sub">podpis / razítko</div>
+                        <div class="sign-sub">podpis / razĂ­tko</div>
                     </div>
-                    <div class="sign-date">Datum:<br><span id="p-signDate">—</span></div>
+                    <div class="sign-date">Datum:<br><span id="p-signDate">â€”</span></div>
                 </div>
-                <div class="page-footer" style="margin-top: 0;"><div>Pasport dopravního značení</div><div>4</div></div>
+                <div class="page-footer" style="margin-top: 0;"><div>Pasport dopravnĂ­ho znaÄŤenĂ­</div><div>4</div></div>
             </div>
         </div>
 
@@ -283,13 +283,13 @@ tel. +420 778 481 700</textarea>
 </div>
 
 <script>
-// ==== NAHRÁVÁNÍ LOGA / RAZÍTKA ====
+// ==== NAHRĂVĂNĂŤ LOGA / RAZĂŤTKA ====
 function handleUpload(input, targetId) {
     const file = input.files && input.files[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = function(e) {
-        document.getElementById(targetId).innerHTML = '<img src="' + e.target.result + '" alt="obrázek">';
+        document.getElementById(targetId).innerHTML = '<img src="' + e.target.result + '" alt="obrĂˇzek">';
     };
     reader.readAsDataURL(file);
 }
@@ -302,12 +302,12 @@ function initMap() {
     mapInstance = L.map('map-container').setView([49.8023, 15.4730], 7);
     L.tileLayer('https://ags.cuzk.cz/arcgis1/rest/services/ZTM_WM/MapServer/tile/{z}/{y}/{x}', {
         opacity: 0.7,
-        attribution: '&copy; ČÚZK'
+        attribution: '&copy; ÄŚĂšZK'
     }).addTo(mapInstance);
     mapInstance.scrollWheelZoom.disable();
 }
 
-// ==== NAŠEPTÁVAČ OBCÍ (ČÚZK RUIAN) ====
+// ==== NAĹ EPTĂVAÄŚ OBCĂŤ (ÄŚĂšZK RUIAN) ====
 let obecDebounce = null;
 let obecActiveIdx = -1;
 let selectedObecKod = null;
@@ -412,7 +412,7 @@ async function locateCity() {
             boundaryFound = true;
             fillObecName(nazev);
             
-            // Doplňující údaje z RÚIAN (POU, ORP, Okres, Kraj)
+            // DoplĹujĂ­cĂ­ Ăşdaje z RĂšIAN (POU, ORP, Okres, Kraj)
             try {
                 let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
                 rings.forEach(ring => ring.forEach(pt => {
@@ -451,7 +451,7 @@ async function locateCity() {
                     fetchInfo(13), // POU
                     fetchInfo(14), // ORP
                     fetchInfo(15), // Okres
-                    fetchInfo(17)  // Kraj (VÚSC)
+                    fetchInfo(17)  // Kraj (VĂšSC)
                 ]).then(results => {
                     const [pou, orp, okres, kraj] = results;
                     if (pou) { const el = document.getElementById('povereny'); if (el) el.value = pou; }
@@ -465,7 +465,7 @@ async function locateCity() {
             } catch (err) {}
         }
     } catch (ruianErr) {
-        // ČÚZK nedostupný
+        // ÄŚĂšZK nedostupnĂ˝
     }
 
     if (!boundaryFound) {
@@ -479,23 +479,23 @@ async function locateCity() {
                 alert("Obec nebyla nalezena.");
             }
         } catch (e) {
-            alert("Chyba při komunikaci se serverem map.");
+            alert("Chyba pĹ™i komunikaci se serverem map.");
         }
     }
 }
 
-let currentObecName = '[Název obce]';
+let currentObecName = '[NĂˇzev obce]';
 let currentOkresName = '[Okres]';
 let currentKrajName = '[Kraj]';
 
-// Propíše nalezenou obec do formuláře (a nyní vždy přepíše staré hodnoty)
+// PropĂ­Ĺˇe nalezenou obec do formulĂˇĹ™e (a nynĂ­ vĹľdy pĹ™epĂ­Ĺˇe starĂ© hodnoty)
 function fillObecName(nazev) {
     if (!nazev) return;
     
-    // Projdeme všechny textové vstupy a textarea a nahradíme starý název novým všude, kde to jde
+    // Projdeme vĹˇechny textovĂ© vstupy a textarea a nahradĂ­me starĂ˝ nĂˇzev novĂ˝m vĹˇude, kde to jde
     const inputs = document.querySelectorAll('.form-panel input[type="text"], .form-panel textarea');
     inputs.forEach(el => {
-        // Nepřepisujeme pole, kde by to mohlo dělat neplechu, nebo ty které se plní natvrdo
+        // NepĹ™episujeme pole, kde by to mohlo dÄ›lat neplechu, nebo ty kterĂ© se plnĂ­ natvrdo
         if (el.id === 'nazevObce' || el.id === 'objednatel' || el.id === 'mistoReseni') return;
         
         if (currentObecName && el.value.includes(currentObecName)) {
@@ -505,7 +505,7 @@ function fillObecName(nazev) {
     });
     currentObecName = nazev;
 
-    // Natvrdo přepíšeme základní pole
+    // Natvrdo pĹ™epĂ­Ĺˇeme zĂˇkladnĂ­ pole
     const nazevEl = document.getElementById('nazevObce');
     if (nazevEl) nazevEl.value = nazev;
     
@@ -521,7 +521,7 @@ function fillObecName(nazev) {
     updatePreview();
 }
 
-// Provede to samé pro okres a kraj v připravených textech
+// Provede to samĂ© pro okres a kraj v pĹ™ipravenĂ˝ch textech
 function fillOkresKraj(okres, kraj) {
     const inputs = document.querySelectorAll('.form-panel input[type="text"], .form-panel textarea');
     inputs.forEach(el => {
@@ -542,38 +542,38 @@ function fillOkresKraj(okres, kraj) {
     if (kraj) currentKrajName = kraj;
 }
 
-// ==== POMOCNÉ FUNKCE ====
+// ==== POMOCNĂ‰ FUNKCE ====
 function escapeHtml(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 function textToHtml(text) {
     if (!text || !text.trim()) return '';
     return text.split(/\n\s*\n/).map(p => '<p>' + escapeHtml(p.trim()).replace(/\n/g, '<br>') + '</p>').join('');
 }
 function val(id) { return (document.getElementById(id)?.value || '').trim(); }
-function setText(id, text) { const el = document.getElementById(id); if (el) el.textContent = text || '—'; }
+function setText(id, text) { const el = document.getElementById(id); if (el) el.textContent = text || 'â€”'; }
 function setHtml(id, text) { 
     const el = document.getElementById(id); 
     if (el) {
         if (!text || text === '<p><br></p>') {
-            el.innerHTML = '<p class="ph">— nevyplněno —</p>';
+            el.innerHTML = '<p class="ph">â€” nevyplnÄ›no â€”</p>';
         } else {
             el.innerHTML = text;
         }
     }
 }
 
-// ==== HLAVNÍ AKTUALIZACE NÁHLEDU ====
+// ==== HLAVNĂŤ AKTUALIZACE NĂHLEDU ====
 function updatePreview() {
-    setText('p-nadpis', val('nadpis') || 'PASPORT SVISLÉHO DOPRAVNÍHO ZNAČENÍ');
+    setText('p-nadpis', val('nadpis') || 'PASPORT SVISLĂ‰HO DOPRAVNĂŤHO ZNAÄŚENĂŤ');
     
     const typSelect = document.getElementById('typObce');
     const typVal = typSelect ? typSelect.value : 'Obec ';
-    const n = val('nazevObce') ? val('nazevObce') : '—';
+    const n = val('nazevObce') ? val('nazevObce') : 'â€”';
     setText('p-nazevObec', (typVal + n).toUpperCase());
     
     const vyprac = val('vypracoval') || 'ATOMICON s. r. o.';
     document.getElementById('p-vypracoval').innerHTML = vyprac.replace(/\n/g, '<br>');
     setText('p-signName', vyprac.split(',')[0]);
-    setText('p-rok', val('rok') || '—');
+    setText('p-rok', val('rok') || 'â€”');
 
     setText('p-objednatel', val('objednatel'));
     setText('p-adresa', val('adresa'));
@@ -593,11 +593,11 @@ function updatePreview() {
     setHtml('p-dzShrnuti', val('dzShrnuti'));
 
     const d = val('signDate');
-    setText('p-signDate', d ? new Date(d + 'T12:00:00').toLocaleDateString('cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' }) : '—');
+    setText('p-signDate', d ? new Date(d + 'T12:00:00').toLocaleDateString('cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' }) : 'â€”');
 }
 
 function resetForm() {
-    if (!confirm('Vymazat a obnovit formulář do výchozího stavu?')) return;
+    if (!confirm('Vymazat a obnovit formulĂˇĹ™ do vĂ˝chozĂ­ho stavu?')) return;
     location.reload();
 }
 
@@ -609,7 +609,7 @@ window.onload = function() {
     document.getElementById('signDate').value = new Date().toISOString().slice(0, 10);
     document.getElementById('rok').value = new Date().getFullYear();
     
-    // Inicializace Quill editorů pro hlavní textová pole
+    // Inicializace Quill editorĹŻ pro hlavnĂ­ textovĂˇ pole
     const richTextIds = ['dzUvod', 'dzMetodika', 'dzGisAdmin', 'dzZaver', 'dzShrnuti'];
     richTextIds.forEach(id => {
         const textarea = document.getElementById(id);
@@ -622,7 +622,7 @@ window.onload = function() {
                 theme: 'snow',
                 modules: { toolbar: [ ['bold', 'italic', 'underline'], [{ 'list': 'bullet' }] ] }
             });
-            // Konvertujeme počáteční text na HTML, vložíme do Quillu a syncneme zpět
+            // Konvertujeme poÄŤĂˇteÄŤnĂ­ text na HTML, vloĹľĂ­me do Quillu a syncneme zpÄ›t
             quill.clipboard.dangerouslyPasteHTML(textToHtml(textarea.value));
             textarea.value = quill.root.innerHTML;
             
