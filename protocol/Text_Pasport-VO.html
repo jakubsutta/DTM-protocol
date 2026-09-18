@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Generátor textu – Pasport KAN</title>
-<link rel="stylesheet" href="./vendor/leaflet/leaflet.css" />
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💡</text></svg>">
-<script defer src="./vendor/leaflet/leaflet.js"></script>
-<link href="./vendor/quill/quill.snow.css" rel="stylesheet">
-<script defer src="./vendor/quill/quill.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 <style>
     /* ---- Tisk / PDF ---- */
     @media print {
@@ -125,6 +125,8 @@
     .sign-sub { font-size: 10px; color: #b0bec5; }
     .sign-date { font-size: 11px; color: #78909c; line-height: 1.7; }
 </style>
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23a62cbe%22 stroke-width=%221.6%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><circle cx=%2212%22 cy=%229.5%22 r=%225%22/><path d=%22M9.8 8.8l1.1 2.4 1.1-2.4 1.1 2.4 1.1-2.4%22/><path d=%22M9.8 14.3h4.4%22/><path d=%22M10.2 16.1h3.6%22/><path d=%22M10.6 17.9h2.8%22/><path d=%22M11.3 19.7h1.4%22/></svg>">
 </head>
 <body>
 
@@ -243,7 +245,7 @@ Veřejné osvětlení je v obci pravidelně kontrolováno a udržováno.</textar
             <div class="logo-obec-box" id="p-logoObec"><span class="logo-placeholder">logo obce</span></div>
             <div class="p1-footer">
                 <div class="lbl">Vypracoval</div>
-                <div class="logo-firma-box" id="p-logoFirma"><img src="./img/logo3.png" alt="logo firmy"></div>
+                <div class="logo-firma-box" id="p-logoFirma"><img src="https://gisadmin.atomicon.cz/static/images/logo3.png" alt="logo firmy"></div>
                 <div class="p1-address" id="p-vypracoval">ATOMICON s. r. o., Stupkova 952/18, Olomouc 779 00<br>tel. +420 778 481 700</div>
                 <div class="p1-year" id="p-rok">2025</div>
             </div>
@@ -271,7 +273,7 @@ Veřejné osvětlení je v obci pravidelně kontrolováno a udržováno.</textar
 
         <!-- STRANA 3 -->
         <div class="page">
-            <div class="sec-title" style="font-size:13px; text-transform:none; letter-spacing:0; color:#1a1a2e; border-bottom:2px solid #ea521f; padding-bottom:8px; margin-bottom:16px;">1) Svítidla, světelné zdroje</div>
+            <div class="sec-title" style="font-size:13px; text-transform:none; letter-spacing:0; color:#1a1a2e; border-bottom:2px solid #9c27b0; padding-bottom:8px; margin-bottom:16px;">1) Svítidla, světelné zdroje</div>
             <div class="ptext" id="p-voSvitidla"></div>
             
             <div class="cost-caption" style="margin-top:20px; font-weight:700;">Tab. 1 – Přehled všech svítidel v obci <span id="p-tabObec"></span></div>
@@ -291,10 +293,10 @@ Veřejné osvětlení je v obci pravidelně kontrolováno a udržováno.</textar
 
         <!-- STRANA 4 -->
         <div class="page">
-            <div class="sec-title" style="font-size:13px; text-transform:none; letter-spacing:0; color:#1a1a2e; border-bottom:2px solid #ea521f; padding-bottom:8px; margin-bottom:16px;">2) Rozvaděče, řízení, regulace</div>
+            <div class="sec-title" style="font-size:13px; text-transform:none; letter-spacing:0; color:#1a1a2e; border-bottom:2px solid #9c27b0; padding-bottom:8px; margin-bottom:16px;">2) Rozvaděče, řízení, regulace</div>
             <div class="ptext" id="p-voRozvadece"></div>
             
-            <div class="sec-title" style="font-size:13px; text-transform:none; letter-spacing:0; color:#1a1a2e; border-bottom:2px solid #ea521f; padding-bottom:8px; margin-bottom:16px; margin-top:20px;">3) Vedení, nosné prvky</div>
+            <div class="sec-title" style="font-size:13px; text-transform:none; letter-spacing:0; color:#1a1a2e; border-bottom:2px solid #9c27b0; padding-bottom:8px; margin-bottom:16px; margin-top:20px;">3) Vedení, nosné prvky</div>
             <div class="ptext" id="p-voVedeni"></div>
 
             <div class="page-footer"><div>Pasport veřejného osvětlení</div><div>4</div></div>
@@ -302,7 +304,7 @@ Veřejné osvětlení je v obci pravidelně kontrolováno a udržováno.</textar
 
         <!-- STRANA 5 -->
         <div class="page">
-            <div class="sec-title" style="font-size:13px; text-transform:none; letter-spacing:0; color:#1a1a2e; border-bottom:2px solid #ea521f; padding-bottom:8px; margin-bottom:16px;">4) Závěr</div>
+            <div class="sec-title" style="font-size:13px; text-transform:none; letter-spacing:0; color:#1a1a2e; border-bottom:2px solid #9c27b0; padding-bottom:8px; margin-bottom:16px;">4) Závěr</div>
             <div class="ptext" id="p-voZaver"></div>
             
             <div style="margin-top: auto; width: 100%;">
@@ -422,7 +424,7 @@ async function locateCity() {
     let useKod = selectedObecKod;
     selectedObecKod = null;
 
-    if (markerLayer && typeof mapInstance !== "undefined") { mapInstance.removeLayer(markerLayer); markerLayer = null; }
+    if (markerLayer) { mapInstance.removeLayer(markerLayer); markerLayer = null; }
 
     let boundaryFound = false;
     try {
@@ -712,7 +714,7 @@ window.onload = function() {
             textarea.parentNode.insertBefore(container, textarea);
             textarea.style.display = 'none';
             
-            try { const quill = new Quill(container, {
+            const quill = new Quill(container, {
                 theme: 'snow',
                 modules: { toolbar: [ ['bold', 'italic', 'underline'], [{ 'list': 'bullet' }] ] }
             });
@@ -724,7 +726,8 @@ window.onload = function() {
                 textarea.value = quill.root.innerHTML;
                 updatePreview();
             });
-            quillEditors[id] = quill; } catch (qe) { console.error("Chyba Quill:", qe); textarea.style.display = "block"; container.style.display="none"; } }
+            quillEditors[id] = quill;
+        }
     });
 
     document.querySelectorAll('.form-panel input, .form-panel textarea, .form-panel select').forEach(el => {
@@ -738,7 +741,3 @@ window.onload = function() {
 </script>
 </body>
 </html>
-
-
-
-

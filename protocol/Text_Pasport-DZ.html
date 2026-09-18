@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Generátor textu – Pasport DZ</title>
-<link rel="stylesheet" href="./vendor/leaflet/leaflet.css" />
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛑</text></svg>">
-<script defer src="./vendor/leaflet/leaflet.js"></script>
-<link href="./vendor/quill/quill.snow.css" rel="stylesheet">
-<script defer src="./vendor/quill/quill.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 <style>
     /* ---- Tisk / PDF ---- */
     @media print {
@@ -125,6 +125,8 @@
     .sign-sub { font-size: 10px; color: #b0bec5; }
     .sign-date { font-size: 11px; color: #78909c; line-height: 1.7; }
 </style>
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23ff0400%22 stroke-width=%221.6%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M9 4H15L18.5 7.5V13.5L15 17H9L5.5 13.5V7.5Z%22/><path d=%22M12 17v4%22/><path d=%22M9.5 21h5%22/></svg>">
 </head>
 <body>
 
@@ -224,7 +226,7 @@ tel. +420 778 481 700</textarea>
             <div class="logo-obec-box" id="p-logoObec"><span class="logo-placeholder">logo obce</span></div>
             <div class="p1-footer">
                 <div class="lbl">Vypracoval</div>
-                <div class="logo-firma-box" id="p-logoFirma"><img src="./img/logo3.png" alt="logo firmy"></div>
+                <div class="logo-firma-box" id="p-logoFirma"><img src="https://gisadmin.atomicon.cz/static/images/logo3.png" alt="logo firmy"></div>
                 <div class="p1-address" id="p-vypracoval">ATOMICON s. r. o., Stupkova 952/18, Olomouc 779 00<br>tel. +420 778 481 700</div>
                 <div class="p1-year" id="p-rok">2025</div>
             </div>
@@ -382,7 +384,7 @@ async function locateCity() {
     let useKod = selectedObecKod;
     selectedObecKod = null;
 
-    if (markerLayer && typeof mapInstance !== "undefined") { mapInstance.removeLayer(markerLayer); markerLayer = null; }
+    if (markerLayer) { mapInstance.removeLayer(markerLayer); markerLayer = null; }
 
     let boundaryFound = false;
     try {
@@ -605,7 +607,7 @@ function resetForm() {
 let quillEditors = {};
 
 window.onload = function() {
-    try { initMap(); } catch (e) { console.error("Chyba Leaflet:", e); }
+    initMap();
     document.getElementById('signDate').value = new Date().toISOString().slice(0, 10);
     document.getElementById('rok').value = new Date().getFullYear();
     
@@ -618,7 +620,7 @@ window.onload = function() {
             textarea.parentNode.insertBefore(container, textarea);
             textarea.style.display = 'none';
             
-            try { const quill = new Quill(container, {
+            const quill = new Quill(container, {
                 theme: 'snow',
                 modules: { toolbar: [ ['bold', 'italic', 'underline'], [{ 'list': 'bullet' }] ] }
             });
@@ -630,7 +632,8 @@ window.onload = function() {
                 textarea.value = quill.root.innerHTML;
                 updatePreview();
             });
-            quillEditors[id] = quill; } catch (qe) { console.error("Chyba Quill:", qe); textarea.style.display = "block"; container.style.display="none"; } }
+            quillEditors[id] = quill;
+        }
     });
 
     document.querySelectorAll('.form-panel input, .form-panel textarea, .form-panel select').forEach(el => {
@@ -644,7 +647,3 @@ window.onload = function() {
 </script>
 </body>
 </html>
-
-
-
-

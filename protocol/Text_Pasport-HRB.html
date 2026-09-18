@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Generátor textu – Pasport HRB</title>
 <link rel="stylesheet" href="./vendor/leaflet/leaflet.css" />
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🪦</text></svg>">
+
 <script defer src="./vendor/leaflet/leaflet.js"></script>
 <link href="./vendor/quill/quill.snow.css" rel="stylesheet">
 <script defer src="./vendor/quill/quill.min.js"></script>
@@ -129,6 +129,8 @@
     .sign-sub { font-size: 10px; color: #b0bec5; }
     .sign-date { font-size: 11px; color: #78909c; line-height: 1.7; }
 </style>
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23424242%22 stroke-width=%221.6%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M8.5 21V12A3.5 3.5 0 0 1 15.5 12V21%22/><path d=%22M12 7.2V10%22/><path d=%22M10.3 8.6h3.4%22/><path d=%22M5 21h14%22/></svg>">
 </head>
 <body>
 
@@ -210,14 +212,14 @@ tel. +420 778 481 700</textarea>
         <div class="field">
             <label>Obrázek 1: Přihlášení</label>
             <label class="file-field">
-                <input type="file" id="file-gis1" accept="image/*" style="display:none;" onchange="loadGisImage(this, 'p-gis1-img')">
+                <input type="file" id="file-gis1" accept="image/*" style="display:none;" onchange="loadGisImage(this, 'p-gis1-box')">
                 Vybrat obrázek...
             </label>
         </div>
         <div class="field">
             <label>Obrázek 2: Rozhraní</label>
             <label class="file-field">
-                <input type="file" id="file-gis2" accept="image/*" style="display:none;" onchange="loadGisImage(this, 'p-gis2-img')">
+                <input type="file" id="file-gis2" accept="image/*" style="display:none;" onchange="loadGisImage(this, 'p-gis2-box')">
                 Vybrat obrázek...
             </label>
         </div>
@@ -248,7 +250,7 @@ tel. +420 778 481 700</textarea>
             <div class="logo-obec-box" id="p-logoObec"><span class="logo-placeholder">logo obce</span></div>
             <div class="p1-footer">
                 <div class="lbl">Vypracoval</div>
-                <div class="logo-firma-box" id="p-logoFirma"><img src="./img/logo3.png" alt="logo firmy"></div>
+                <div class="logo-firma-box" id="p-logoFirma"><img src="https://gisadmin.atomicon.cz/static/images/logo3.png" alt="logo firmy"></div>
                 <div class="p1-address" id="p-vypracoval">ATOMICON s. r. o., Stupkova 952/18, Olomouc 779 00<br>tel. +420 778 481 700</div>
                 <div class="p1-year" id="p-rok">2025</div>
             </div>
@@ -654,7 +656,7 @@ function resetForm() {
 // ==== INIT ====
 let quillEditors = {};
 
-window.onload = function() {
+document.addEventListener("DOMContentLoaded", function() {
     try { initMap(); } catch (e) { console.error("Chyba Leaflet:", e); }
     document.getElementById('signDate').value = new Date().toISOString().slice(0, 10);
     document.getElementById('rok').value = new Date().getFullYear();
@@ -690,11 +692,7 @@ window.onload = function() {
         }
     });
     updatePreview();
-};
+});
 </script>
 </body>
 </html>
-
-
-
-

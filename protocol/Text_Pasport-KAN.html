@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Generátor textu – Pasport KAN</title>
-<link rel="stylesheet" href="./vendor/leaflet/leaflet.css" />
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🕳️</text></svg>">
-<script defer src="./vendor/leaflet/leaflet.js"></script>
-<link href="./vendor/quill/quill.snow.css" rel="stylesheet">
-<script defer src="./vendor/quill/quill.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 <style>
     /* ---- Tisk / PDF ---- */
     @media print {
@@ -125,6 +125,8 @@
     .sign-sub { font-size: 10px; color: #b0bec5; }
     .sign-date { font-size: 11px; color: #78909c; line-height: 1.7; }
 </style>
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%238b5638%22 stroke-width=%221.6%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><circle cx=%2212%22 cy=%2212%22 r=%229%22/><circle cx=%2212%22 cy=%2212%22 r=%225.6%22/><path d=%22M12 3v3.4%22/><path d=%22M12 17.6V21%22/><path d=%22M3 12h3.4%22/><path d=%22M17.6 12H21%22/><path d=%22M5.6 5.6l2.4 2.4%22/><path d=%22M16 16l2.4 2.4%22/><path d=%22M18.4 5.6L16 8%22/><path d=%22M8 16l-2.4 2.4%22/></svg>">
 </head>
 <body>
 
@@ -203,8 +205,18 @@ V rámci přesnosti je v tabulkové části uveden zdroj dat – „vlastní mě
         </div>
         
         <div class="field"><label>Tab. 1 - Přehled zařízení v obci</label>
-            <div id="kanTableRows"></div>
-            <button type="button" class="btn btn-secondary" onclick="addKanTableRow()" style="margin-top:8px; padding:6px 12px; font-size:11px;">+ Přidat řádek</button>
+            <div class="result-row5" style="grid-template-columns: 1fr 2fr 2fr 1fr; margin-bottom:4px;">
+                <input type="text" id="t1r1c1" value="46 ks"><input type="text" id="t1r1c2" value="Objekt kanalizace"><input type="text" id="t1r1c3" value="Šachta dešťová"><input type="text" id="t1r1c4" value="S">
+            </div>
+            <div class="result-row5" style="grid-template-columns: 1fr 2fr 2fr 1fr; margin-bottom:4px;">
+                <input type="text" id="t1r2c1" value="41 ks"><input type="text" id="t1r2c2" value="Objekt kanalizace"><input type="text" id="t1r2c3" value="Objekt vyústění"><input type="text" id="t1r2c4" value="V, Vyústění">
+            </div>
+            <div class="result-row5" style="grid-template-columns: 1fr 2fr 2fr 1fr; margin-bottom:4px;">
+                <input type="text" id="t1r3c1" value="14 ks"><input type="text" id="t1r3c2" value="Povrchový znak"><input type="text" id="t1r3c3" value="Uliční vpusť"><input type="text" id="t1r3c4" value="UV">
+            </div>
+            <div class="result-row5" style="grid-template-columns: 1fr 2fr 2fr 1fr; margin-bottom:4px;">
+                <input type="text" id="t1r4c1" value="1 ks"><input type="text" id="t1r4c2" value="Ostatní zařízení"><input type="text" id="t1r4c3" value="Místo zaústění"><input type="text" id="t1r4c4" value="Zaústění">
+            </div>
         </div>
 
         <div class="field"><label>Text pod tabulkou</label>
@@ -241,7 +253,7 @@ Kanalizace odpovídá stavem době, kdy byla vybudována/zřízena. Šachty na k
             <div class="logo-obec-box" id="p-logoObec"><span class="logo-placeholder">logo obce</span></div>
             <div class="p1-footer">
                 <div class="lbl">Vypracoval</div>
-                <div class="logo-firma-box" id="p-logoFirma"><img src="./img/logo3.png" alt="logo firmy"></div>
+                <div class="logo-firma-box" id="p-logoFirma"><img src="https://gisadmin.atomicon.cz/static/images/logo3.png" alt="logo firmy"></div>
                 <div class="p1-address" id="p-vypracoval">ATOMICON s. r. o., Stupkova 952/18, Olomouc 779 00<br>tel. +420 778 481 700</div>
                 <div class="p1-year" id="p-rok">2025</div>
             </div>
@@ -289,7 +301,10 @@ Kanalizace odpovídá stavem době, kdy byla vybudována/zřízena. Šachty na k
                     <th style="padding:6px; border:1px solid #ddd; text-align:left;">Popis</th>
                     <th style="padding:6px; border:1px solid #ddd; text-align:left;">Označení</th>
                 </tr>
-                <tbody id="p-kanTableBody"></tbody>
+                <tr><td id="p-t1r1c1" style="padding:6px; border:1px solid #ddd;"></td><td id="p-t1r1c2" style="padding:6px; border:1px solid #ddd;"></td><td id="p-t1r1c3" style="padding:6px; border:1px solid #ddd;"></td><td id="p-t1r1c4" style="padding:6px; border:1px solid #ddd;"></td></tr>
+                <tr><td id="p-t1r2c1" style="padding:6px; border:1px solid #ddd;"></td><td id="p-t1r2c2" style="padding:6px; border:1px solid #ddd;"></td><td id="p-t1r2c3" style="padding:6px; border:1px solid #ddd;"></td><td id="p-t1r2c4" style="padding:6px; border:1px solid #ddd;"></td></tr>
+                <tr><td id="p-t1r3c1" style="padding:6px; border:1px solid #ddd;"></td><td id="p-t1r3c2" style="padding:6px; border:1px solid #ddd;"></td><td id="p-t1r3c3" style="padding:6px; border:1px solid #ddd;"></td><td id="p-t1r3c4" style="padding:6px; border:1px solid #ddd;"></td></tr>
+                <tr><td id="p-t1r4c1" style="padding:6px; border:1px solid #ddd;"></td><td id="p-t1r4c2" style="padding:6px; border:1px solid #ddd;"></td><td id="p-t1r4c3" style="padding:6px; border:1px solid #ddd;"></td><td id="p-t1r4c4" style="padding:6px; border:1px solid #ddd;"></td></tr>
             </table>
 
             <div class="ptext" id="p-kanZarizeniPod"></div>
@@ -418,7 +433,7 @@ async function locateCity() {
     let useKod = selectedObecKod;
     selectedObecKod = null;
 
-    if (markerLayer && typeof mapInstance !== "undefined") { mapInstance.removeLayer(markerLayer); markerLayer = null; }
+    if (markerLayer) { mapInstance.removeLayer(markerLayer); markerLayer = null; }
 
     let boundaryFound = false;
     try {
@@ -596,42 +611,6 @@ function setHtml(id, text) {
         }
     }
 }
-let kanTableData = [
-    ["46 ks", "Objekt kanalizace", "Šachta dešťová", "S"],
-    ["41 ks", "Objekt kanalizace", "Objekt vyústění", "V, Vyústění"],
-    ["14 ks", "Povrchový znak", "Uliční vpusť", "UV"],
-    ["1 ks", "Ostatní zařízení", "Místo zaústění", "Zaústění"]
-];
-
-function renderKanTable() {
-    const container = document.getElementById('kanTableRows');
-    container.innerHTML = '';
-    kanTableData.forEach((row, i) => {
-        const div = document.createElement('div');
-        div.className = 'result-row5';
-        div.style.gridTemplateColumns = '1fr 2fr 2fr 1fr 30px';
-        div.style.marginBottom = '4px';
-        div.innerHTML = `
-            <input type="text" value="${row[0]}" onchange="kanTableData[${i}][0]=this.value; updatePreview()" placeholder="Počet">
-            <input type="text" value="${row[1]}" onchange="kanTableData[${i}][1]=this.value; updatePreview()" placeholder="Typ">
-            <input type="text" value="${row[2]}" onchange="kanTableData[${i}][2]=this.value; updatePreview()" placeholder="Popis">
-            <input type="text" value="${row[3]}" onchange="kanTableData[${i}][3]=this.value; updatePreview()" placeholder="Označení">
-            <button type="button" onclick="removeKanTableRow(${i})" style="background:#f44336; color:#fff; border:none; border-radius:4px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px;" title="Smazat">×</button>
-        `;
-        container.appendChild(div);
-    });
-    updatePreview();
-}
-
-function addKanTableRow() {
-    kanTableData.push(["", "", "", ""]);
-    renderKanTable();
-}
-
-function removeKanTableRow(i) {
-    kanTableData.splice(i, 1);
-    renderKanTable();
-}
 
 // ==== HLAVNÍ AKTUALIZACE NÁHLEDU ====
 function updatePreview() {
@@ -666,19 +645,10 @@ function updatePreview() {
     setHtml('p-kanKanalizace', val('kanKanalizace'));
     setText('p-tabObec', val('nazevObce') || '—');
     
-    const tbody = document.getElementById('p-kanTableBody');
-    if (tbody) {
-        tbody.innerHTML = '';
-        kanTableData.forEach(row => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td style="padding:6px; border:1px solid #ddd;">${row[0]}</td>
-                <td style="padding:6px; border:1px solid #ddd;">${row[1]}</td>
-                <td style="padding:6px; border:1px solid #ddd;">${row[2]}</td>
-                <td style="padding:6px; border:1px solid #ddd;">${row[3]}</td>
-            `;
-            tbody.appendChild(tr);
-        });
+    for(let r=1; r<=4; r++) {
+        for(let c=1; c<=4; c++) {
+            setText(`p-t1r${r}c${c}`, val(`t1r${r}c${c}`));
+        }
     }
 
     const d = val('signDate');
@@ -695,7 +665,6 @@ let quillEditors = {};
 
 window.onload = function() {
     initMap();
-    renderKanTable();
     document.getElementById('signDate').value = new Date().toISOString().slice(0, 10);
     document.getElementById('rok').value = new Date().getFullYear();
     
@@ -708,7 +677,7 @@ window.onload = function() {
             textarea.parentNode.insertBefore(container, textarea);
             textarea.style.display = 'none';
             
-            try { const quill = new Quill(container, {
+            const quill = new Quill(container, {
                 theme: 'snow',
                 modules: { toolbar: [ ['bold', 'italic', 'underline'], [{ 'list': 'bullet' }] ] }
             });
@@ -720,7 +689,8 @@ window.onload = function() {
                 textarea.value = quill.root.innerHTML;
                 updatePreview();
             });
-            quillEditors[id] = quill; } catch (qe) { console.error("Chyba Quill:", qe); textarea.style.display = "block"; container.style.display="none"; } }
+            quillEditors[id] = quill;
+        }
     });
 
     document.querySelectorAll('.form-panel input, .form-panel textarea, .form-panel select').forEach(el => {
@@ -734,7 +704,3 @@ window.onload = function() {
 </script>
 </body>
 </html>
-
-
-
-

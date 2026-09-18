@@ -4,11 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Generátor textu – Pasport komunikací</title>
-<link rel="stylesheet" href="./vendor/leaflet/leaflet.css" />
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛣️</text></svg>">
-<script defer src="./vendor/leaflet/leaflet.js"></script>
-<link href="./vendor/quill/quill.snow.css" rel="stylesheet">
-<script defer src="./vendor/quill/quill.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
     /* ---- Tisk / PDF ---- */
     @media print {
@@ -63,24 +61,13 @@
     .sec-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #78909c; padding-bottom: 5px; border-bottom: 2px solid #ea521f; margin: 18px 0 10px; }
     .sec-title:first-child { margin-top: 0; }
     .ptext { font-size: 12.5px; line-height: 1.6; color: #1a1a1a; }
-    .cost-caption { font-size: 11px; text-align: left; margin-bottom: 4px; }
-    
-    /* Quill JS styling */
-    .ql-toolbar.ql-snow { border: 1px solid rgba(0,0,0,0.15); border-bottom: none; background: #fafbfc; border-radius: 4px 4px 0 0; padding: 4px 8px; font-family: inherit; }
-    .ql-container.ql-snow { border: 1px solid rgba(0,0,0,0.15); border-radius: 0 0 4px 4px; background: #fff; height: auto !important; }
-    .ql-editor { font-family: inherit; font-size: 13px; color: #1a1a2e; line-height: 1.5; min-height: 120px; height: auto !important; padding: 10px; overflow-y: auto; }
-    .ql-editor p { margin-bottom: 8px; }
-    .ql-editor p:last-child { margin-bottom: 0; }
-    .ql-snow .ql-toolbar button:hover .ql-stroke, .ql-snow .ql-toolbar button.ql-active .ql-stroke { stroke: #ea521f; }
-    .ql-snow .ql-toolbar button:hover .ql-fill, .ql-snow .ql-toolbar button.ql-active .ql-fill { fill: #ea521f; }
-
     .ptext p { margin-bottom: 8px; }
     .ptext p:last-child { margin-bottom: 0; }
     .ptext p.ph { color: #b0bec5; font-style: italic; }
 
     /* ---- Titulní strana ---- */
     .p1 { align-items: center; text-align: center; justify-content: flex-start; }
-    .p1-title { font-size: 24px; font-weight: 800; color: #1a1a2e; letter-spacing: 0.02em; line-height: 1.35; text-transform: uppercase; margin-top: 20px; max-width: 140mm; border-bottom: 2px solid #ea521f; padding-bottom: 8px; margin-bottom: 12px; }
+    .p1-title { font-size: 24px; font-weight: 800; color: #1a1a2e; letter-spacing: 0.02em; line-height: 1.35; text-transform: uppercase; margin-top: 20px; max-width: 140mm; }
     .p1-obec { font-size: 17px; font-weight: 700; color: #ea521f; text-transform: uppercase; margin-top: 14px; letter-spacing: 0.05em; }
     .logo-obec-box { width: 60mm; height: 60mm; border: 2px dashed #cfd8dc; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 46px auto; overflow: hidden; background: #fafbfc; flex-shrink: 0; }
     .logo-obec-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
@@ -125,6 +112,8 @@
     .sign-sub { font-size: 10px; color: #b0bec5; }
     .sign-date { font-size: 11px; color: #78909c; line-height: 1.7; }
 </style>
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23e78d36%22 stroke-width=%221.6%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M9 21L11 5%22/><path d=%22M15 21L13 5%22/><path d=%22M12 18.5v-2.5%22/><path d=%22M12 13.5v-2%22/><path d=%22M12 9v-1.5%22/></svg>">
 </head>
 <body>
 
@@ -136,19 +125,7 @@
 
         <div class="page-label">Strana 1 — Titulní strana</div>
         <div class="field"><label>Nadpis</label><input type="text" id="nadpis" value="PASPORT MÍSTNÍCH A ÚČELOVÝCH KOMUNIKACÍ"></div>
-        <div class="field"><label>Název obce</label>
-            <div style="display:flex; gap:6px;">
-                <select id="typObce" style="width: 100px;">
-                    <option value="Obec ">Obec</option>
-                    <option value="Městys ">Městys</option>
-                    <option value="Město ">Město</option>
-                    <option value="Část obce ">Část obce</option>
-                    <option value="Firma ">Firma</option>
-                    <option value="">(nic)</option>
-                </select>
-                <input type="text" id="nazevObce" placeholder="např. Tovačov" style="flex:1;">
-            </div>
-        </div>
+        <div class="field"><label>Název obce</label><input type="text" id="nazevObce" placeholder="např. Tovačov"></div>
         <div class="field"><label>Logo obce</label><div class="file-field" onclick="document.getElementById('logoObecInput').click()">+ Vybrat obrázek loga obce</div>
             <input type="file" id="logoObecInput" accept="image/*" style="display:none" onchange="handleUpload(this,'p-logoObec')"></div>
         <div class="field"><label>Vypracoval (Adresa)</label>
@@ -157,7 +134,7 @@ tel. +420 778 481 700</textarea>
         </div>
         <div class="field"><label>Logo firmy</label><div class="file-field" onclick="document.getElementById('logoFirmaInput').click()">+ Vybrat logo firmy</div>
             <input type="file" id="logoFirmaInput" accept="image/*" style="display:none" onchange="handleUpload(this,'p-logoFirma')"></div>
-        <div class="field"><label>Rok</label><input type="text" id="rok" value=""></div>
+        <div class="field"><label>Rok</label><input type="text" id="rok" value="2025"></div>
 
         <div class="page-label">Strana 2 — Základní údaje a mapa</div>
         <div class="section-label">Základní údaje o obci</div>
@@ -196,8 +173,8 @@ Dále pasport obsahuje tabulková data ve formě databázových tabulek přímo 
 
 Digitální verze pasportu je zaštiťována webově orientovaným mapovým systémem GISAdmin, který zajišťuje on-line přístup k datům a umožňuje jejich včasnou aktualizaci. Tento geografický informační systém je pro obce dostupný na vyžádání a je měsíčně zpoplatněn.</textarea>
         </div>
-        <div class="field"><label>Závěrečný odstavec</label>
-            <textarea id="zaverecnyOdstavec" class="short">Pasport vychází z tohoto digitálního GIS systému. Pasport, který popisuje aktuální stav místních a účelových komunikací v obci, je platný k září 2026. Obsahuje textovou část, tabulkové informace, technické karty, a dále také grafické přílohy – soubor tematických map.</textarea>
+        <div class="field"><label>Závěrečný odstavec (doplňte sami)</label>
+            <textarea id="zaverecnyOdstavec" class="short" placeholder="Např.: Pasport vychází z tohoto digitálního GIS systému a popisuje aktuální stav místních a účelových komunikací v obci, platný k … Obsahuje textovou část, tabulkové informace, technické karty a grafické přílohy."></textarea>
         </div>
 
         <div class="page-label">Strana 4 — Přehled území, komunikace</div>
@@ -292,7 +269,7 @@ Maximální roční náklady za posledních pět let zahrnující palivo, mzdy a
             <div class="logo-obec-box" id="p-logoObec"><span class="logo-placeholder">logo obce</span></div>
             <div class="p1-footer">
                 <div class="lbl">Vypracoval</div>
-                <div class="logo-firma-box" id="p-logoFirma"><img src="./img/logo3.png" alt="logo firmy"></div>
+                <div class="logo-firma-box" id="p-logoFirma"><span class="logo-placeholder" style="font-size:10px;">logo firmy</span></div>
                 <div class="p1-address" id="p-vypracoval">ATOMICON s. r. o., Stupkova 952/18, Olomouc 779 00<br>tel. +420 778 481 700</div>
                 <div class="p1-year" id="p-rok">2025</div>
             </div>
@@ -487,7 +464,7 @@ async function locateCity() {
     let useKod = selectedObecKod;
     selectedObecKod = null;
 
-    if (markerLayer && typeof mapInstance !== "undefined") { mapInstance.removeLayer(markerLayer); markerLayer = null; }
+    if (markerLayer) { mapInstance.removeLayer(markerLayer); markerLayer = null; }
 
     let boundaryFound = false;
     try {
@@ -563,8 +540,6 @@ async function locateCity() {
                     if (orp) { const el = document.getElementById('rozsirena'); if (el) el.value = orp; }
                     if (okres) { const el = document.getElementById('okres'); if (el) el.value = okres; }
                     if (kraj) { const el = document.getElementById('kraj'); if (el) el.value = kraj; }
-                    
-                    fillOkresKraj(okres, kraj);
                     updatePreview();
                 });
             } catch (err) {}
@@ -589,62 +564,15 @@ async function locateCity() {
     }
 }
 
-let currentObecName = '[Název obce]';
-let currentOkresName = '[Okres]';
-let currentKrajName = '[Kraj]';
-
 // Propíše nalezenou obec do formuláře (a nyní vždy přepíše staré hodnoty)
 function fillObecName(nazev) {
-    if (!nazev) return;
-    
-    // Projdeme všechny textové vstupy a textarea a nahradíme starý název novým všude, kde to jde
-    const inputs = document.querySelectorAll('.form-panel input[type="text"], .form-panel textarea');
-    inputs.forEach(el => {
-        // Nepřepisujeme pole, kde by to mohlo dělat neplechu, nebo ty které se plní natvrdo
-        if (el.id === 'nazevObce' || el.id === 'objednatel' || el.id === 'mistoReseni') return;
-        
-        if (currentObecName && el.value.includes(currentObecName)) {
-            el.value = el.value.split(currentObecName).join(nazev);
-            if (quillEditors[el.id]) quillEditors[el.id].root.innerHTML = el.value;
-        }
-    });
-    currentObecName = nazev;
-
-    // Natvrdo přepíšeme základní pole
     const nazevEl = document.getElementById('nazevObce');
     if (nazevEl) nazevEl.value = nazev;
-    
-    const typSelect = document.getElementById('typObce');
-    const typVal = typSelect ? typSelect.value : 'Obec ';
-    const typLower = typVal.toLowerCase();
-    
     const objEl = document.getElementById('objednatel');
-    if (objEl) objEl.value = (typVal + nazev).trim();
+    if (objEl) objEl.value = 'Obec ' + nazev;
     const mistoEl = document.getElementById('mistoReseni');
-    if (mistoEl) mistoEl.value = (typLower + nazev).trim();
-    
+    if (mistoEl) mistoEl.value = 'obec ' + nazev;
     updatePreview();
-}
-
-// Provede to samé pro okres a kraj v připravených textech
-function fillOkresKraj(okres, kraj) {
-    const inputs = document.querySelectorAll('.form-panel input[type="text"], .form-panel textarea');
-    inputs.forEach(el => {
-        let changed = false;
-        if (okres && currentOkresName && el.value.includes(currentOkresName)) {
-            el.value = el.value.split(currentOkresName).join(okres);
-            changed = true;
-        }
-        if (kraj && currentKrajName && el.value.includes(currentKrajName)) {
-            el.value = el.value.split(currentKrajName).join(kraj);
-            changed = true;
-        }
-        if (changed && quillEditors[el.id]) {
-            quillEditors[el.id].root.innerHTML = el.value;
-        }
-    });
-    if (okres) currentOkresName = okres;
-    if (kraj) currentKrajName = kraj;
 }
 
 // ==== POMOCNÉ FUNKCE ====
@@ -655,26 +583,12 @@ function textToHtml(text) {
 }
 function val(id) { return (document.getElementById(id)?.value || '').trim(); }
 function setText(id, text) { const el = document.getElementById(id); if (el) el.textContent = text || '—'; }
-function setHtml(id, text) { 
-    const el = document.getElementById(id); 
-    if (el) {
-        if (!text || text === '<p><br></p>') {
-            el.innerHTML = '<p class="ph">— nevyplněno —</p>';
-        } else {
-            el.innerHTML = text;
-        }
-    }
-}
+function setHtml(id, text) { const el = document.getElementById(id); if (el) el.innerHTML = textToHtml(text) || '<p class="ph">— nevyplněno —</p>'; }
 
 // ==== HLAVNÍ AKTUALIZACE NÁHLEDU ====
 function updatePreview() {
     setText('p-nadpis', val('nadpis') || 'PASPORT MÍSTNÍCH A ÚČELOVÝCH KOMUNIKACÍ');
-    
-    const typSelect = document.getElementById('typObce');
-    const typVal = typSelect ? typSelect.value : 'Obec ';
-    const n = val('nazevObce') ? val('nazevObce') : '—';
-    setText('p-nazevObec', (typVal + n).toUpperCase());
-    
+    setText('p-nazevObec', 'OBEC ' + (val('nazevObce') ? val('nazevObce').toUpperCase() : '—'));
     const vyprac = val('vypracoval') || 'ATOMICON s. r. o.';
     document.getElementById('p-vypracoval').innerHTML = vyprac.replace(/\n/g, '<br>');
     setText('p-signName', vyprac.split(',')[0]);
@@ -723,49 +637,15 @@ function resetForm() {
 }
 
 // ==== INIT ====
-let quillEditors = {};
-
 window.onload = function() {
-    try { initMap(); } catch (e) { console.error("Chyba Leaflet:", e); }
+    initMap();
     document.getElementById('signDate').value = new Date().toISOString().slice(0, 10);
-    document.getElementById('rok').value = new Date().getFullYear();
-    
-    // Inicializace Quill editorů pro hlavní textová pole
-    const richTextIds = ['pasportText', 'zaverecnyOdstavec', 'prehledUzemi', 'krajskeKomunikace', 'mistniKomunikace', 'ucelKomunikace', 'mosty', 'pridruzenePlochy', 'shrnuti', 'nakladyText', 'zimniText'];
-    richTextIds.forEach(id => {
-        const textarea = document.getElementById(id);
-        if (textarea) {
-            const container = document.createElement('div');
-            textarea.parentNode.insertBefore(container, textarea);
-            textarea.style.display = 'none';
-            
-            try { const quill = new Quill(container, {
-                theme: 'snow',
-                modules: { toolbar: [ ['bold', 'italic', 'underline'], [{ 'list': 'bullet' }] ] }
-            });
-            // Konvertujeme počáteční text na HTML, vložíme do Quillu a syncneme zpět
-            quill.clipboard.dangerouslyPasteHTML(textToHtml(textarea.value));
-            textarea.value = quill.root.innerHTML;
-            
-            quill.on('text-change', function() {
-                textarea.value = quill.root.innerHTML;
-                updatePreview();
-            });
-            quillEditors[id] = quill; } catch (qe) { console.error("Chyba Quill:", qe); textarea.style.display = "block"; container.style.display="none"; } }
-    });
-
-    document.querySelectorAll('.form-panel input, .form-panel textarea, .form-panel select').forEach(el => {
-        if (el.style.display !== 'none') {
-            el.addEventListener('input', updatePreview);
-            el.addEventListener('change', updatePreview);
-        }
+    document.querySelectorAll('.form-panel input[type=text], .form-panel input[type=date], .form-panel textarea').forEach(el => {
+        el.addEventListener('input', updatePreview);
+        el.addEventListener('change', updatePreview);
     });
     updatePreview();
 };
 </script>
 </body>
 </html>
-
-
-
-
