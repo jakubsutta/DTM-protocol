@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+?<!DOCTYPE html>
 <html lang="cs">
 <head>
 <meta charset="UTF-8">
@@ -7,8 +7,8 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🪦</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
-<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
-<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+<link href="https://unpkg.com/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
+<script src="https://unpkg.com/quill@1.3.7/dist/quill.min.js"></script>
 <style>
     /* ---- Tisk / PDF ---- */
     @media print {
@@ -423,7 +423,7 @@ async function locateCity() {
     let useKod = selectedObecKod;
     selectedObecKod = null;
 
-    if (markerLayer) { mapInstance.removeLayer(markerLayer); markerLayer = null; }
+    if (markerLayer && typeof mapInstance !== "undefined") { mapInstance.removeLayer(markerLayer); markerLayer = null; }
 
     let boundaryFound = false;
     try {
@@ -695,3 +695,5 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
+
