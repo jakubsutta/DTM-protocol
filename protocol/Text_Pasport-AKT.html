@@ -281,8 +281,9 @@ let markerLayer;
 
 function initMap() {
     mapInstance = L.map('map-container').setView([49.8023, 15.4730], 7);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap'
+    L.tileLayer('https://ags.cuzk.cz/arcgis1/rest/services/ZTM_WM/MapServer/tile/{z}/{y}/{x}', {
+        opacity: 0.7,
+        attribution: '&copy; ČÚZK'
     }).addTo(mapInstance);
     mapInstance.scrollWheelZoom.disable();
 }
