@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-<title>Generátor protokolů - Atomicon</title>
+<title>Rozcestník generátorů - Atomicon</title>
 <style>
     /* ---- Základní reset ---- */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -17,17 +17,24 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 20px;
+        padding: 40px 20px;
     }
 
     .container {
-        text-align: center;
-        max-width: 800px;
+        max-width: 1200px;
         width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .header-text {
+        text-align: center;
+        margin-bottom: 40px;
     }
 
     h1 {
-        font-size: 24px;
+        font-size: 26px;
         font-weight: 800;
         color: #1a1a2e;
         margin-bottom: 8px;
@@ -35,102 +42,98 @@
     }
 
     .subtitle {
-        font-size: 14px;
+        font-size: 15px;
         color: #78909c;
-        margin-bottom: 48px;
+    }
+
+    /* ---- Sloupce ---- */
+    .columns-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        width: 100%;
+        align-items: start;
+    }
+
+    @media (max-width: 900px) {
+        .columns-wrapper {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .column-title {
+        font-size: 16px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #1a1a2e;
+        margin-bottom: 20px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #cfd8dc;
+        letter-spacing: 0.05em;
     }
 
     /* ---- Karty (Rozcestník) ---- */
     .cards {
-        display: flex;
-        gap: 24px;
-        justify-content: center;
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 16px;
     }
 
     .card {
         background: #fff;
         border-radius: 8px;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.06);
-        width: 320px;
-        padding: 40px 24px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        padding: 20px 16px;
         text-decoration: none;
         color: inherit;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
         display: flex;
         flex-direction: column;
         align-items: center;
-        border-top: 5px solid transparent;
+        border-top: 4px solid transparent;
         position: relative;
-        overflow: hidden;
+        text-align: center;
     }
 
     .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.1);
     }
 
     .card-icon {
-        font-size: 40px;
-        margin-bottom: 20px;
+        font-size: 28px;
+        margin-bottom: 12px;
         line-height: 1;
     }
 
     .card-title {
-        font-size: 16px;
+        font-size: 13px;
         font-weight: 800;
-        margin-bottom: 12px;
+        margin-bottom: 8px;
         text-transform: uppercase;
-        letter-spacing: 0.1em;
+        letter-spacing: 0.05em;
     }
 
     .card-desc {
-        font-size: 13px;
+        font-size: 11px;
         color: #546e7a;
-        line-height: 1.5;
+        line-height: 1.4;
     }
 
-    /* Téma pro Vložení (Oranžové) */
-    .card.vlozeni {
-        border-top-color: #ea521f;
-    }
-    .card.vlozeni .card-icon {
-        color: #ea521f;
-    }
-    .card.vlozeni .card-title {
-        color: #ea521f;
-    }
-    .card.vlozeni:hover {
-        background: #fff7f4;
-    }
+    /* Témata Protokolů */
+    .card.vlozeni { border-top-color: #ea521f; } .card.vlozeni .card-title { color: #ea521f; } .card.vlozeni:hover { background: #fff7f4; }
+    .card.validace { border-top-color: #4483fc; } .card.validace .card-title { color: #4483fc; } .card.validace:hover { background: #e2ecff; }
+    .card.predani { border-top-color: #43a047; } .card.predani .card-title { color: #43a047; } .card.predani:hover { background: #e8f5e9; }
 
-    /* Téma pro Validaci (Modré) */
-    .card.validace {
-        border-top-color: #4483fc;
-    }
-    .card.validace .card-icon {
-        color: #4483fc;
-    }
-    .card.validace .card-title {
-        color: #4483fc;
-    }
-    .card.validace:hover {
-        background: #e2ecff;
-    }
-
-    /* Téma pro Předání (Zelené) */
-    .card.predani {
-        border-top-color: #43a047;
-    }
-    .card.predani .card-icon {
-        color: #43a047;
-    }
-    .card.predani .card-title {
-        color: #43a047;
-    }
-    .card.predani:hover {
-        background: #e8f5e9;
-    }
+    /* Témata Pasportů */
+    .card.kom { border-top-color: #e78d36; } .card.kom .card-title { color: #e78d36; } .card.kom:hover { background: #fff7f4; }
+    .card.dz { border-top-color: #ff0400; } .card.dz .card-title { color: #ff0400; } .card.dz:hover { background: #ffebee; }
+    .card.kan { border-top-color: #8b5638; } .card.kan .card-title { color: #8b5638; } .card.kan:hover { background: #efebe9; }
+    .card.vod { border-top-color: #6da7ff; } .card.vod .card-title { color: #6da7ff; } .card.vod:hover { background: #e3f2fd; }
+    .card.vo { border-top-color: #a62cbe; } .card.vo .card-title { color: #a62cbe; } .card.vo:hover { background: #f3e5f5; }
+    .card.or { border-top-color: #ff4186; } .card.or .card-title { color: #ff4186; } .card.or:hover { background: #fce4ec; }
+    .card.hrb { border-top-color: #424242; } .card.hrb .card-title { color: #424242; } .card.hrb:hover { background: #f5f5f5; }
+    .card.akt { border-top-color: #f9a825; } .card.akt .card-title { color: #f9a825; } .card.akt:hover { background: #fffde7; }
 
     /* ---- Patička ---- */
     .footer {
@@ -140,46 +143,91 @@
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.1em;
+        text-align: center;
     }
 </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>📄 Generátory protokolů</h1>
-    <p class="subtitle">Vyberte nástroj, který chcete použít:</p>
+    <div class="header-text">
+        <h1>🗂️ Rozcestník Generátorů</h1>
+        <p class="subtitle">Vyberte nástroj, který chcete použít pro generování PDF</p>
+    </div>
     
-    <div class="cards">
-        <!-- Odkaz na první soubor (Vložení) -->
-        <a href="./protocol/Protokol_DTM-vlozeni.html" class="card vlozeni">
-            <div class="card-icon">📥</div>
-            <div class="card-title">Vložení do DTM</div>
-            <div class="card-desc">
-                Vygenerujte PDF protokol o úspěšném vložení JVF dat do krajské DTM.
+    <div class="columns-wrapper">
+        <!-- LEVÝ SLOUPEC -->
+        <div class="column">
+            <div class="column-title">Generátory Protokolů</div>
+            <div class="cards">
+                <a href="./protocol/Protokol_DTM-vlozeni.html" class="card vlozeni">
+                    <div class="card-icon">📤</div>
+                    <div class="card-title">Protokol o vložení DTM</div>
+                    <div class="card-desc">PDF protokol o úspěšném vložení JVF dat do DTM.</div>
+                </a>
+                <a href="./protocol/Protokol-JVF_validace.html" class="card validace">
+                    <div class="card-icon">✅</div>
+                    <div class="card-title">Protokol o validaci JVF</div>
+                    <div class="card-desc">PDF protokol o validaci JVF dat v IS DMVS.</div>
+                </a>
+                <a href="./protocol/Protokol-predavaci.html" class="card predani">
+                    <div class="card-icon">🤝</div>
+                    <div class="card-title">Předávací protokol</div>
+                    <div class="card-desc">Univerzální protokol o předání a převzetí.</div>
+                </a>
             </div>
-        </a>
-        
-        <!-- Odkaz na druhý soubor (Validace) -->
-        <a href="./protocol/Protokol-JVF_validace.html" class="card validace">
-            <div class="card-icon">✔️</div>
-            <div class="card-title">Validace JVF</div>
-            <div class="card-desc">
-                Vygenerujte PDF protokol o validaci JVF dat v IS DMVS (ČÚZK).
-            </div>
-        </a>
+        </div>
 
-        <!-- Odkaz na třetí soubor (Předání) -->
-        <a href="./protocol/Protokol-predavaci.html" class="card predani">
-            <div class="card-icon">🤝</div>
-            <div class="card-title">Předávací protokol</div>
-            <div class="card-desc">
-                Vygenerujte univerzální předávací protokol o předání a převzetí.
+        <!-- PRAVÝ SLOUPEC -->
+        <div class="column">
+            <div class="column-title">Generátory Textových částí pasportů</div>
+            <div class="cards">
+                <a href="./protocol/Text_Pasport-KOM.html" class="card kom">
+                    <div class="card-icon">🛣️</div>
+                    <div class="card-title">Komunikace (KOM)</div>
+                    <div class="card-desc">Textová část pasportu místních komunikací.</div>
+                </a>
+                <a href="./protocol/Text_Pasport-DZ.html" class="card dz">
+                    <div class="card-icon">🛑</div>
+                    <div class="card-title">Dopravní Značení (DZ)</div>
+                    <div class="card-desc">Textová část pasportu dopravního značení.</div>
+                </a>
+                <a href="./protocol/Text_Pasport-KAN.html" class="card kan">
+                    <div class="card-icon">🕳️</div>
+                    <div class="card-title">Kanalizace (KAN)</div>
+                    <div class="card-desc">Textová část pasportu kanalizace.</div>
+                </a>
+                <a href="./protocol/Text_Pasport-VOD.html" class="card vod">
+                    <div class="card-icon">💧</div>
+                    <div class="card-title">Vodovod (VOD)</div>
+                    <div class="card-desc">Textová část pasportu vodovodu.</div>
+                </a>
+                <a href="./protocol/Text_Pasport-VO.html" class="card vo">
+                    <div class="card-icon">💡</div>
+                    <div class="card-title">Osvětlení (VO)</div>
+                    <div class="card-desc">Textová část pasportu veřejného osvětlení.</div>
+                </a>
+                <a href="./protocol/Text_Pasport-OR.html" class="card or">
+                    <div class="card-icon">📢</div>
+                    <div class="card-title">Rozhlas (OR)</div>
+                    <div class="card-desc">Textová část pasportu místního rozhlasu.</div>
+                </a>
+                <a href="./protocol/Text_Pasport-HRB.html" class="card hrb">
+                    <div class="card-icon">🪦</div>
+                    <div class="card-title">Hřbitov (HŘB)</div>
+                    <div class="card-desc">Textová část pasportu hřbitova.</div>
+                </a>
+                <a href="./protocol/Text_Pasport-AKT.html" class="card akt">
+                    <div class="card-icon">🔄</div>
+                    <div class="card-title">Aktualizace - univerzální</div>
+                    <div class="card-desc">Univerzální textová část k aktualizaci pasportu.</div>
+                </a>
             </div>
-        </a>
+        </div>
     </div>
     
     <div class="footer">
-        Výsledný protokol předej k elektronickému podpisu (Kubíčková/Šutta)!
+        Výsledné PDF dokumenty se generují pomocí vestavěného tisku v prohlížeči. Pokud chceš PDF podepsat ty, musíš ho vytisknout. Pokud chceš elektronický podpis, před Kubovi nebo Báře.
     </div>
 </div>
 
