@@ -1,4 +1,4 @@
-?<!DOCTYPE html>
+??<!DOCTYPE html>
 <html lang="cs">
 <head>
 <meta charset="UTF-8">
@@ -6,7 +6,7 @@
 <title>Generátor textu – Aktualizace</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔄</text></svg>">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <link href="https://unpkg.com/quill@1.3.7/dist/quill.snow.css" rel="stylesheet">
 <script src="https://unpkg.com/quill@1.3.7/dist/quill.min.js"></script>
 <style>
@@ -588,7 +588,7 @@ function resetForm() {
 let quillEditors = {};
 
 window.onload = function() {
-    initMap();
+    try { initMap(); } catch (e) { console.error("Chyba Leaflet:", e); }
     document.getElementById('signDate').value = new Date().toISOString().slice(0, 10);
     document.getElementById('rok').value = new Date().getFullYear();
     
@@ -601,7 +601,7 @@ window.onload = function() {
             textarea.parentNode.insertBefore(container, textarea);
             textarea.style.display = 'none';
             
-            const quill = new Quill(container, {
+            try { const quill = new Quill(container, {
                 theme: 'snow',
                 modules: { toolbar: [ ['bold', 'italic', 'underline'], [{ 'list': 'bullet' }] ] }
             });
@@ -613,8 +613,7 @@ window.onload = function() {
                 textarea.value = quill.root.innerHTML;
                 updatePreview();
             });
-            quillEditors[id] = quill;
-        }
+            quillEditors[id] = quill; } catch (qe) { console.error("Chyba Quill:", qe); textarea.style.display = "block"; container.style.display="none"; } }
     });
 
     document.querySelectorAll('.form-panel input, .form-panel textarea, .form-panel select').forEach(el => {
@@ -628,5 +627,6 @@ window.onload = function() {
 </script>
 </body>
 </html>
+
 
 
