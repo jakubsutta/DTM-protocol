@@ -1,0 +1,1886 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Export tabulek – Pasport</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%234b5563%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><rect x=%223%22 y=%223%22 width=%2218%22 height=%2218%22 rx=%222%22/><path d=%22M3 9h18%22/><path d=%22M3 15h18%22/><path d=%22M9 3v18%22/><path d=%22M15 3v18%22/></svg>">
+
+<style>
+    /* ==========================================================================
+       TISK / PDF (A4 NA ŠÍŘKU - LANDSCAPE, PŘESNĚ 1 TABULKA = 1 STRANA A4)
+       ========================================================================== */
+    @page {
+        size: A4 landscape;
+        margin: 0;
+    }
+
+    @media print {
+        * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        html, body {
+            background: #fff !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 297mm !important;
+        }
+        .app {
+            display: block !important;
+        }
+        .form-panel, .no-print {
+            display: none !important;
+        }
+        .preview-panel {
+            display: block !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            overflow: visible !important;
+        }
+        .page {
+            width: 297mm !important;
+            height: 210mm !important;
+            min-height: 210mm !important;
+            max-height: 210mm !important;
+            padding: 12mm 15mm 10mm 15mm !important;
+            box-shadow: none !important;
+            margin: 0 !important;
+            border: none !important;
+            outline: none !important;
+            page-break-after: always !important;
+            break-after: page !important;
+            box-sizing: border-box !important;
+            overflow: hidden !important;
+        }
+        .page:last-child {
+            page-break-after: auto !important;
+            break-after: auto !important;
+        }
+        .table-data th {
+            background-color: #f5f7fa !important;
+            color: #78909c !important;
+            border: 1px solid #e0e0e0 !important;
+        }
+        .table-data thead tr.tr-groups th {
+            background-color: #eef2f6 !important;
+            color: #546e7a !important;
+            border: 1px solid #e0e0e0 !important;
+        }
+        .table-data tbody tr:nth-child(even) {
+            background-color: #f8fafc !important;
+        }
+        .table-data tbody tr:nth-child(odd) {
+            background-color: #ffffff !important;
+        }
+        .table-data td {
+            border: 1px solid #e0e0e0 !important;
+        }
+        .table-data tbody td:first-child {
+            color: #78909c !important;
+            background-color: #fafbfc !important;
+        }
+        .summary-box {
+            border: 1px solid #e0e0e0 !important;
+        }
+        .summary-top-row {
+            background-color: #f5f7fa !important;
+            border-bottom: 1px solid #e0e0e0 !important;
+        }
+        .summary-count-cell {
+            border-right: 1px solid #e0e0e0 !important;
+            color: #78909c !important;
+        }
+        .summary-label-cell {
+            color: #78909c !important;
+        }
+        .summary-date-cell {
+            border-left: 1px solid #e0e0e0 !important;
+            color: #546e7a !important;
+        }
+        [contenteditable] {
+            outline: none !important;
+        }
+    }
+
+    /* ==========================================================================
+       ZÁKLADNÍ RESET & PÍSMO
+       ========================================================================== */
+    *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        font-size: 13px;
+        background: #f0f2f5;
+        color: #1a1a1a;
+        min-height: 100vh;
+        line-height: 1.4;
+    }
+
+    .app {
+        display: grid;
+        grid-template-columns: 440px 1fr;
+        min-height: 100vh;
+    }
+
+    @media (max-width: 1200px) {
+        .app {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* ==========================================================================
+       OVLÁDACÍ PANEL (MOTIV SVĚTLE ŠEDÁ)
+       ========================================================================== */
+    .form-panel {
+        background: #f5f6f8;
+        color: #1a1a1a;
+        padding: 22px 20px 80px;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        overflow-y: auto;
+        max-height: 100vh;
+        position: sticky;
+        top: 0;
+        border-right: 1px solid #d1d5db;
+    }
+
+    .form-panel h2 {
+        font-size: 13.5px;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #1a1a1a;
+        margin-bottom: 4px;
+        border-bottom: 2.5px solid #4b5563;
+        padding-bottom: 5px;
+    }
+
+    .form-panel .sub {
+        font-size: 10.5px;
+        color: #64748b;
+        margin-bottom: 16px;
+    }
+
+    /* Navigační box stránek */
+    .page-nav-box {
+        background: #ffffff;
+        border: 1px solid #d1d5db;
+        border-radius: 5px;
+        padding: 10px 12px;
+        margin-bottom: 14px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .page-nav-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .page-counter-text {
+        font-size: 12px;
+        font-weight: 700;
+        color: #1a1a1a;
+    }
+
+    .page-counter-badge {
+        background: #e2e8f0;
+        color: #1a1a1a;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 3px;
+        border: 1px solid #cbd5e1;
+        margin-left: 4px;
+    }
+
+    .page-nav-btns {
+        display: flex;
+        gap: 5px;
+    }
+
+    .btn-page-nav {
+        background: #f1f5f9;
+        color: #1a1a1a;
+        border: 1px solid #cbd5e1;
+        border-radius: 3px;
+        padding: 3px 8px;
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.15s;
+    }
+
+    .btn-page-nav:hover:not(:disabled) {
+        background: #e2e8f0;
+    }
+
+    .btn-page-nav:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+
+    .page-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .page-pill {
+        padding: 2px 8px;
+        font-size: 11px;
+        font-weight: 700;
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 3px;
+        color: #334155;
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+
+    .page-pill:hover {
+        background: #f8fafc;
+    }
+
+    .page-pill.active {
+        background: #334155;
+        color: #ffffff;
+        border-color: #1e293b;
+    }
+
+    .page-mgmt-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 6px;
+        margin-top: 8px;
+    }
+
+    /* Oddíly v panelu */
+    .page-label {
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #ffffff;
+        background: #1e293b;
+        padding: 7px 10px;
+        border-radius: 4px;
+        margin: 14px 0 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        user-select: none;
+        border-left: 3px solid #64748b;
+        transition: background 0.15s;
+    }
+
+    .page-label:hover {
+        background: #0f172a;
+    }
+
+    .page-label:first-of-type {
+        margin-top: 4px;
+    }
+
+    .section-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #334155;
+        margin: 12px 0 6px;
+        padding-bottom: 3px;
+        border-bottom: 1.5px solid #cbd5e1;
+    }
+
+    /* Formulářové prvky */
+    .field {
+        margin-bottom: 9px;
+    }
+
+    .field label {
+        display: block;
+        font-size: 11px;
+        color: #1e293b;
+        margin-bottom: 3px;
+        font-weight: 600;
+    }
+
+    .field input, .field select, .field textarea {
+        width: 100%;
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+        color: #1a1a1a;
+        font-size: 12px;
+        font-family: inherit;
+        padding: 6px 9px;
+        outline: none;
+        transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .field input:focus, .field select:focus, .field textarea:focus {
+        border-color: #475569;
+        box-shadow: 0 0 0 2px rgba(71, 85, 105, 0.12);
+        background: #ffffff;
+    }
+
+    .field-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .field-note {
+        font-size: 10px;
+        color: #64748b;
+        margin-top: 3px;
+    }
+
+    /* Tlačítka */
+    .btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        font-family: inherit;
+        transition: all 0.15s;
+    }
+
+    .btn-primary {
+        background: #334155;
+        color: #ffffff;
+        font-weight: 700;
+        border: 1px solid #1e293b;
+    }
+
+    .btn-primary:hover {
+        background: #1e293b;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.2);
+    }
+
+    .btn-secondary {
+        background: #ffffff;
+        color: #1e293b;
+        border: 1px solid #cbd5e1;
+    }
+
+    .btn-secondary:hover {
+        background: #f1f5f9;
+        border-color: #94a3b8;
+    }
+
+    .btn-danger {
+        background: #fef2f2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+    }
+
+    .btn-danger:hover {
+        background: #fee2e2;
+        border-color: #f87171;
+    }
+
+    .btn-add-item {
+        background: #ffffff;
+        border: 1px dashed #94a3b8;
+        color: #334155;
+        border-radius: 4px;
+        padding: 6px 8px;
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 4px;
+        margin-bottom: 10px;
+        transition: all 0.15s;
+    }
+
+    .btn-add-item:hover {
+        background: #f1f5f9;
+        border-color: #475569;
+        color: #0f172a;
+    }
+
+    .file-field {
+        border: 1px dashed #94a3b8;
+        border-radius: 4px;
+        padding: 7px 10px;
+        font-size: 11px;
+        color: #334155;
+        cursor: pointer;
+        text-align: center;
+        background: #ffffff;
+        transition: background 0.15s, border-color 0.15s;
+    }
+
+    .file-field:hover {
+        background: #f1f5f9;
+        border-color: #475569;
+    }
+
+    .icon-preview-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 6px;
+        padding: 6px 8px;
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+    }
+
+    .icon-preview-box img {
+        height: 32px;
+        max-width: 48px;
+        object-fit: contain;
+    }
+
+    .btn-sticky-box {
+        position: sticky;
+        bottom: 0;
+        background: #f5f6f8;
+        padding-top: 10px;
+        margin-top: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        border-top: 1.5px solid #d1d5db;
+    }
+
+    /* Editor sloupců */
+    .col-edit-item {
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+        padding: 8px 10px;
+        margin-bottom: 6px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+
+    .col-edit-row {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+    }
+
+    .col-edit-row input {
+        flex: 1;
+        background: #f8fafc;
+        border: 1px solid #cbd5e1;
+        color: #1a1a1a;
+        padding: 4px 6px;
+        font-size: 11px;
+        border-radius: 3px;
+    }
+
+    .col-edit-row select {
+        width: 140px;
+        background: #f8fafc;
+        border: 1px solid #cbd5e1;
+        color: #1a1a1a;
+        padding: 4px 6px;
+        font-size: 11px;
+        border-radius: 3px;
+    }
+
+    .btn-del-mini {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #b91c1c;
+        cursor: pointer;
+        font-size: 11px;
+        padding: 4px 8px;
+        border-radius: 3px;
+    }
+
+    .btn-del-mini:hover {
+        background: #fee2e2;
+    }
+
+    /* Seznam řádků v panelu */
+    .row-list-container {
+        max-height: 220px;
+        overflow-y: auto;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+        background: #ffffff;
+        margin-bottom: 8px;
+    }
+
+    .row-list-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 5px 8px;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 11px;
+        color: #1a1a1a;
+    }
+
+    .row-list-item:last-child {
+        border-bottom: none;
+    }
+
+    .row-list-item:hover {
+        background: #f8fafc;
+    }
+
+    /* ==========================================================================
+       NÁHLED STRÁNEK A4 (LANDSCAPE NA ŠÍŘKU)
+       ========================================================================== */
+    .preview-panel {
+        padding: 30px 20px 60px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 26px;
+        overflow-y: auto;
+        background: #f0f2f5;
+    }
+
+    .page {
+        background: #fff;
+        width: 297mm;
+        height: 210mm;
+        min-height: 210mm;
+        max-height: 210mm;
+        padding: 12mm 15mm 10mm 15mm;
+        box-shadow: 0 4px 32px rgba(0,0,0,0.18);
+        position: relative;
+        color: #1a1a1a;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-sizing: border-box;
+        overflow: hidden;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        border: none !important;
+        outline: none !important;
+    }
+
+    .page * {
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    /* 1. Záhlaví tabulky */
+    .table-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        min-height: 44px;
+        margin-bottom: 10px;
+    }
+
+    .table-header-left {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .table-header-title {
+        font-size: 15px;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #1a1a2e;
+        line-height: 1.25;
+    }
+
+    .table-header-subtitle {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: #78909c;
+        margin-top: 3px;
+        line-height: 1.2;
+    }
+
+    .table-header-center {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+    }
+
+    .table-header-center .lbl-obec {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #78909c;
+    }
+
+    .table-header-center .val-obec {
+        font-size: 11.5px;
+        color: #1a1a2e;
+        line-height: 1.25;
+    }
+
+    .table-header-center .val-obec strong {
+        font-weight: 700;
+        color: #1a1a2e;
+    }
+
+    .table-header-icon-box {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        min-width: 44px;
+    }
+
+    .table-header-icon-box img {
+        max-height: 100%;
+        max-width: 100%;
+        object-fit: contain;
+    }
+
+    .table-header-icon-box svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+
+    /* 2. Hlavní tabulka (vzhled dle Pasportu KOM: #f5f7fa, #78909c, #e0e0e0) */
+    .table-scroll-container {
+        width: 100%;
+        flex: 1;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .table-data {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 10.5px;
+        table-layout: fixed;
+        color: #1a1a1a;
+        border: 1px solid #e0e0e0;
+    }
+
+    .table-data th, .table-data td {
+        border: 1px solid #e0e0e0;
+        box-sizing: border-box;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    /* První řádek thead: Skupiny */
+    .table-data thead tr.tr-groups th {
+        background: #eef2f6;
+        font-weight: 800;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        text-align: center;
+        padding: 5px 3px;
+        line-height: 1.25;
+        color: #546e7a;
+        border: 1px solid #e0e0e0;
+    }
+
+    /* Druhý řádek thead: Jednotlivé sloupce */
+    .table-data thead tr.tr-cols th {
+        background: #f5f7fa;
+        font-weight: 700;
+        font-size: 9.5px;
+        text-transform: uppercase;
+        text-align: center;
+        padding: 6px 4px;
+        line-height: 1.3;
+        color: #78909c;
+        border: 1px solid #e0e0e0;
+    }
+
+    /* Tělo tabulky: Střídavé světle šedé a bílé řádky */
+    .table-data tbody tr:nth-child(even) {
+        background-color: #f8fafc;
+    }
+
+    .table-data tbody tr:nth-child(odd) {
+        background-color: #ffffff;
+    }
+
+    .table-data tbody td {
+        padding: 5.5px 6px;
+        line-height: 1.3;
+        vertical-align: middle;
+        font-size: 10px;
+        border: 1px solid #e0e0e0;
+        color: #1a1a1a;
+    }
+
+    /* První sloupec se zvýrazněným textem a podbarvením dle vzoru Pasportu KOM */
+    .table-data tbody td:first-child {
+        color: #78909c;
+        font-weight: 700;
+        background-color: #fafbfc;
+    }
+
+    .table-data tbody td[contenteditable="true"]:focus {
+        outline: 2px solid #78909c !important;
+        background: #f1f5f9 !important;
+    }
+
+    /* 3. Souhrnný blok (Razítko / Vyhotovení) pod tabulkou */
+    .table-summary-wrap {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 10px;
+        margin-bottom: 6px;
+    }
+
+    .summary-box {
+        width: 320px;
+        border: 1px solid #e0e0e0;
+        box-sizing: border-box;
+        background: #fff;
+    }
+
+    .summary-top-row {
+        display: flex;
+        background: #f5f7fa;
+        border-bottom: 1px solid #e0e0e0;
+        height: 24px;
+    }
+
+    .summary-count-cell {
+        width: 46px;
+        border-right: 1px solid #e0e0e0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 11px;
+        color: #78909c;
+    }
+
+    .summary-label-cell {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        padding-left: 10px;
+        font-size: 10px;
+        font-weight: 700;
+        color: #78909c;
+        text-transform: none;
+    }
+
+    .summary-main-box {
+        display: flex;
+        height: 44px;
+    }
+
+    .summary-left-sub {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 5px 8px;
+    }
+
+    .summary-author-txt {
+        font-size: 9.5px;
+        color: #78909c;
+        font-weight: 600;
+    }
+
+    .summary-logo-sub img {
+        height: 19px;
+        max-height: 21px;
+        object-fit: contain;
+    }
+
+    .summary-date-cell {
+        width: 85px;
+        border-left: 1px solid #e0e0e0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 600;
+        color: #546e7a;
+    }
+
+    /* 4. Fixní patička stránky */
+    .table-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 6px;
+        border-top: none;
+        margin-top: auto;
+    }
+
+    .footer-logo-box img {
+        height: 25px;
+        max-height: 28px;
+        object-fit: contain;
+    }
+
+    .footer-company-text {
+        text-align: right;
+        color: #ea521f;
+        font-size: 10.5px;
+        font-weight: 600;
+        line-height: 1.35;
+    }
+</style>
+</head>
+<body>
+
+<div class="app">
+    <!-- ======================================================================
+         FORMULÁŘOVÝ PANEL (TMAVĚ FIALOVÁ)
+         ====================================================================== -->
+    <div class="form-panel" id="form-panel">
+        
+        <h2>Export tabulek pasportu</h2>
+        <div class="sub">Generátor přehledných A4 tabulek dle vzoru Atomicon</div>
+
+        <!-- Správa a listování stránkami -->
+        <div class="page-nav-box">
+            <div class="page-nav-top">
+                <div class="page-counter-text">
+                    Aktivní stránka:
+                    <span class="page-counter-badge" id="lbl-page-active">1 z 1</span>
+                </div>
+                <div class="page-nav-btns">
+                    <button type="button" class="btn-page-nav" id="btn-prev-page" onclick="prevPage()">Předchozí</button>
+                    <button type="button" class="btn-page-nav" id="btn-next-page" onclick="nextPage()">Další</button>
+                </div>
+            </div>
+
+            <div class="field" style="margin-bottom: 6px;">
+                <select id="sel-active-page" onchange="switchPage(parseInt(this.value, 10))"></select>
+            </div>
+
+            <div class="page-mgmt-row">
+                <button type="button" class="btn btn-primary" onclick="addNewPage()" style="font-size:11px;">Přidat stranu</button>
+                <button type="button" class="btn btn-secondary" onclick="duplicateCurrentPage()" style="font-size:11px;">Duplikovat</button>
+                <button type="button" class="btn btn-danger" id="btn-del-page" onclick="deleteCurrentPage()" style="font-size:11px;">Smazat</button>
+            </div>
+
+            <div class="page-pills" id="page-pills-container"></div>
+        </div>
+
+        <!-- 1. Záhlaví tabulky a ikona -->
+        <div class="page-label" onclick="toggleSec('sec-header-fields')">
+            <span>Záhlaví tabulky a obec</span>
+            <span id="arr-sec-header-fields">Rozbalit</span>
+        </div>
+        <div id="sec-header-fields">
+            <div class="field">
+                <label>Hlavní nadpis tabulky</label>
+                <input type="text" id="inp-header-title" oninput="updateCurrentPageHeader()" placeholder="PASPORT VĚŘEJNÉHO OSVĚTLENÍ">
+            </div>
+
+            <div class="field">
+                <label>Podnadpis tabulky</label>
+                <input type="text" id="inp-header-subtitle" oninput="updateCurrentPageHeader()" placeholder="SOUPIS SVĚTELNÝCH BODŮ (SB) V OBCI">
+            </div>
+
+            <div class="field-row">
+                <div class="field">
+                    <label>Název obce</label>
+                    <input type="text" id="inp-obec-name" oninput="updateCurrentPageHeader()" placeholder="Svésedlice">
+                </div>
+                <div class="field">
+                    <label>Kód obce (ZÚJ)</label>
+                    <input type="text" id="inp-obec-code" oninput="updateCurrentPageHeader()" placeholder="(552429)">
+                </div>
+            </div>
+
+            <div class="field">
+                <label>Ikona vpravo v záhlaví</label>
+                <div class="file-field" onclick="document.getElementById('file-header-icon').click()">+ Vybrat vlastní obrázek ikony</div>
+                <input type="file" id="file-header-icon" accept="image/*" style="display:none" onchange="handleHeaderIconUpload(this)">
+                
+                <div id="icon-preview-container" class="icon-preview-box" style="display:none;">
+                    <img id="icon-preview-img" src="" alt="Náhled ikony">
+                    <span id="icon-preview-desc" style="font-size:11px; color:#64748b;">Vlastní obrázek ikony</span>
+                </div>
+
+                <div style="display:flex; gap:6px; margin-top:6px;">
+                    <button type="button" class="btn btn-secondary" style="flex:1; font-size:11px;" onclick="resetHeaderIconToLamp()">Výchozí lampa (SVG)</button>
+                    <button type="button" class="btn btn-secondary" style="font-size:11px;" onclick="removeHeaderIcon()">Bez ikony</button>
+                </div>
+            </div>
+
+            <div class="field">
+                <label>Výška ikony (px)</label>
+                <input type="number" id="inp-icon-size" min="20" max="65" value="38" oninput="updateCurrentPageHeader()">
+            </div>
+        </div>
+
+        <!-- 2. Správa sloupců tabulky -->
+        <div class="page-label" onclick="toggleSec('sec-columns-fields')">
+            <span>Sloupce tabulky</span>
+            <span id="arr-sec-columns-fields">Rozbalit</span>
+        </div>
+        <div id="sec-columns-fields">
+            <div class="section-label">Definice sloupců</div>
+            <div id="container-columns-editor"></div>
+            <button type="button" class="btn-add-item" onclick="addNewColumnPrompt()">+ Přidat nový sloupec</button>
+            <button type="button" class="btn btn-secondary" style="width:100%; font-size:11px; margin-top:2px;" onclick="resetColumnsToDefaultVO()">Obnovit výchozí sloupce VO (12 sloupců)</button>
+        </div>
+
+        <!-- 3. Správa řádků aktivní stránky -->
+        <div class="page-label" onclick="toggleSec('sec-rows-fields')">
+            <span>Řádky tabulky</span>
+            <span id="arr-sec-rows-fields">Rozbalit</span>
+        </div>
+        <div id="sec-rows-fields">
+            <div class="field-note" style="margin-bottom: 8px; color:#475569;">
+                Poznámka: Buňky v tabulce lze editovat také přímo kliknutím do kterékoliv buňky v náhledu vpravo.
+            </div>
+
+            <div class="field-row" style="margin-bottom: 8px;">
+                <button type="button" class="btn btn-primary" onclick="addRowToCurrentPage()" style="font-size:11px;">+ Přidat řádek</button>
+                <button type="button" class="btn btn-secondary" onclick="addSampleRows(5)" style="font-size:11px;">+ Přidat 5 vzorových</button>
+            </div>
+
+            <div class="section-label">Seznam řádků na stránce (<span id="lbl-rows-count">0</span>)</div>
+            <div class="row-list-container" id="row-list-container"></div>
+
+            <button type="button" class="btn btn-danger" style="width:100%; font-size:11px; margin-top:4px;" onclick="clearAllRowsCurrentPage()">Smazat všechny řádky této stránky</button>
+        </div>
+
+        <!-- 4. Souhrnný blok (Razítko / Vyhotovení) -->
+        <div class="page-label" onclick="toggleSec('sec-summary-fields')">
+            <span>Souhrn a razítko</span>
+            <span id="arr-sec-summary-fields">Rozbalit</span>
+        </div>
+        <div id="sec-summary-fields">
+            <div class="field">
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                    <input type="checkbox" id="chk-show-summary" style="width:auto;" onchange="updateSummaryData()">
+                    <span>Zobrazit souhrnný blok na této stránce</span>
+                </label>
+            </div>
+
+            <div class="field-row">
+                <div class="field">
+                    <label>Počet (hodnota)</label>
+                    <input type="text" id="inp-summary-count" oninput="updateSummaryData()" placeholder="Automaticky">
+                </div>
+                <div class="field">
+                    <label>Popis součtu</label>
+                    <input type="text" id="inp-summary-label" oninput="updateSummaryData()" placeholder="Počet světelných bodů">
+                </div>
+            </div>
+
+            <div class="field-row">
+                <div class="field">
+                    <label>Vyhotovil</label>
+                    <input type="text" id="inp-summary-author" oninput="updateSummaryData()" placeholder="Atomicon s. r. o.">
+                </div>
+                <div class="field">
+                    <label>Datum vyhotovení</label>
+                    <input type="text" id="inp-summary-date" oninput="updateSummaryData()" placeholder="24. 09. 2026">
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Patička -->
+        <div class="page-label" onclick="toggleSec('sec-footer-fields')">
+            <span>Patička stránky</span>
+            <span id="arr-sec-footer-fields">Rozbalit</span>
+        </div>
+        <div id="sec-footer-fields">
+            <div class="field">
+                <label>Logo firmy v patičce</label>
+                <div class="file-field" onclick="document.getElementById('file-footer-logo').click()">Vybrat jiné logo (výchozí: logo3.png)</div>
+                <input type="file" id="file-footer-logo" accept="image/*" style="display:none" onchange="handleFooterLogoUpload(this)">
+                <button type="button" class="btn btn-secondary" style="width:100%; margin-top:4px; font-size:11px;" onclick="resetFooterLogo()">Obnovit výchozí logo Atomicon</button>
+            </div>
+            <div class="field">
+                <label>Firma a adresa</label>
+                <input type="text" id="inp-footer-company" oninput="updateFooterData()" value="ATOMICON s. r. o. Stupkova 952/18, Olomouc 779 00">
+            </div>
+            <div class="field">
+                <label>Telefon a kontakt</label>
+                <input type="text" id="inp-footer-phone" oninput="updateFooterData()" value="tel. +420 778 481 700">
+            </div>
+        </div>
+
+        <!-- 6. Záloha a projekt -->
+        <div class="page-label" onclick="toggleSec('sec-backup-fields')">
+            <span>Záloha a projekt</span>
+            <span id="arr-sec-backup-fields">Rozbalit</span>
+        </div>
+        <div id="sec-backup-fields">
+            <div class="field-row">
+                <button type="button" class="btn btn-secondary" onclick="exportTablesToJson()">Export do JSON</button>
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('file-import-json').click()">Načíst z JSON</button>
+                <input type="file" id="file-import-json" accept=".json" style="display:none" onchange="importTablesFromJson(this)">
+            </div>
+            <button type="button" class="btn btn-danger" style="width:100%; margin-top:8px; font-size:11px;" onclick="resetAllToDefault()">Obnovit výchozí vzor Svésedlice</button>
+        </div>
+
+        <!-- Tlačítka dole -->
+        <div class="btn-sticky-box">
+            <button class="btn btn-primary" style="padding:11px 16px; font-size:13px; font-weight:700;" onclick="window.print()">
+                Uložit jako PDF / Tisk (Ctrl+P)
+            </button>
+        </div>
+
+    </div>
+
+    <!-- ======================================================================
+         PRAVOSTRANNÝ NÁHLED A4 LANDSCAPE
+         ====================================================================== -->
+    <div class="preview-panel" id="preview-panel"></div>
+</div>
+
+<script>
+/* ==========================================================================
+   VÝCHOZÍ MODEL (DATOVÝ VZOR DLE Tabulka-vzor.pdf)
+   ========================================================================== */
+const DEFAULT_COLUMNS = [
+    { id: 'c1', title: 'ČÍSLO SB', group: 'IDENTIFIKACE', width: '50px', align: 'center' },
+    { id: 'c2', title: 'RVO', group: 'IDENTIFIKACE', width: '130px', align: 'center' },
+    { id: 'c3', title: 'VĚTEV ROZVADĚČE', group: 'IDENTIFIKACE', width: '70px', align: 'center' },
+    { id: 'c4', title: 'STOŽÁR', group: 'KONSTRUKCE SVĚTELNÉHO BODU', width: '70px', align: 'center' },
+    { id: 'c5', title: 'VÝŠKA STOŽÁR', group: 'KONSTRUKCE SVĚTELNÉHO BODU', width: '60px', align: 'center' },
+    { id: 'c6', title: 'POČET', group: 'KONSTRUKCE SVĚTELNÉHO BODU', width: '50px', align: 'center' },
+    { id: 'c7', title: 'VÝLOŽNÍK DÉLKA', group: 'KONSTRUKCE SVĚTELNÉHO BODU', width: '65px', align: 'center' },
+    { id: 'c8', title: 'TYP SVĚTELNÉHO ZDROJE', group: 'SVÍTIDLO', width: '90px', align: 'center' },
+    { id: 'c9', title: 'PŘÍKON', group: 'SVÍTIDLO', width: '55px', align: 'center' },
+    { id: 'c10', title: 'DRUH SVÍTIDLA', group: 'SVÍTIDLO', width: '75px', align: 'center' },
+    { id: 'c11', title: 'TYP ELEKTRICKÉHO KABELU', group: 'ELEKTRICKÝ KABEL', width: '110px', align: 'center' },
+    { id: 'c12', title: 'VEDENÍ EL. KABELU', group: 'ELEKTRICKÝ KABEL', width: '65px', align: 'center' }
+];
+
+const DEFAULT_PAGE = {
+    id: 1,
+    headerTitle: 'PASPORT VĚŘEJNÉHO OSVĚTLENÍ',
+    headerSubtitle: 'SOUPIS SVĚTELNÝCH BODŮ (SB) V OBCI',
+    obecName: 'Svésedlice',
+    obecCode: '(552429)',
+    headerIconType: 'lamp', // 'lamp', 'custom', 'none'
+    headerCustomIconSrc: '',
+    headerIconSize: 38,
+
+    columns: JSON.parse(JSON.stringify(DEFAULT_COLUMNS)),
+    rows: [
+        {
+            c1: '01',
+            c2: 'Svésedlice - RVO - RVO',
+            c3: '1',
+            c4: 'ocelový',
+            c5: '',
+            c6: '0',
+            c7: '',
+            c8: '',
+            c9: '',
+            c10: '',
+            c11: '',
+            c12: ''
+        }
+    ],
+
+    summary: {
+        show: true,
+        countAuto: true,
+        countManual: '',
+        label: 'Počet světelných bodů',
+        author: 'Atomicon s. r. o.',
+        date: '24. 09. 2026',
+        logo: './img/logo3.png'
+    },
+
+    footer: {
+        logo: './img/logo3.png',
+        company: 'ATOMICON s. r. o. Stupkova 952/18, Olomouc 779 00',
+        phone: 'tel. +420 778 481 700'
+    }
+};
+
+let pagesData = [];
+let activePageIdx = 0;
+
+/* ==========================================================================
+   INICIALIZACE A UKLÁDÁNÍ
+   ========================================================================== */
+window.addEventListener('DOMContentLoaded', () => {
+    loadPagesFromStorage();
+    renderPageNavigation();
+    renderAllPages();
+    populateFormWithActivePage();
+});
+
+function savePagesToStorage() {
+    try {
+        localStorage.setItem('atomicon_table_export_data', JSON.stringify(pagesData));
+    } catch (e) {}
+}
+
+function loadPagesFromStorage() {
+    try {
+        const saved = localStorage.getItem('atomicon_table_export_data');
+        if (saved) pagesData = JSON.parse(saved);
+    } catch (e) {
+        pagesData = [];
+    }
+
+    if (!Array.isArray(pagesData) || pagesData.length === 0) {
+        pagesData = [JSON.parse(JSON.stringify(DEFAULT_PAGE))];
+    } else {
+        pagesData.forEach(p => {
+            if (!p.columns) p.columns = JSON.parse(JSON.stringify(DEFAULT_COLUMNS));
+            if (!p.rows) p.rows = [];
+            if (!p.summary) p.summary = JSON.parse(JSON.stringify(DEFAULT_PAGE.summary));
+            if (!p.footer) p.footer = JSON.parse(JSON.stringify(DEFAULT_PAGE.footer));
+        });
+    }
+    activePageIdx = 0;
+}
+
+/* ==========================================================================
+   NAVIGACE MEZI STRÁNKAMI
+   ========================================================================== */
+function renderPageNavigation() {
+    const total = pagesData.length;
+    if (activePageIdx >= total) activePageIdx = Math.max(0, total - 1);
+
+    document.getElementById('lbl-page-active').textContent = `${activePageIdx + 1} z ${total}`;
+    document.getElementById('btn-prev-page').disabled = (activePageIdx === 0);
+    document.getElementById('btn-next-page').disabled = (activePageIdx === total - 1);
+    document.getElementById('btn-del-page').disabled = (total <= 1);
+
+    const sel = document.getElementById('sel-active-page');
+    sel.innerHTML = pagesData.map((p, i) =>
+        `<option value="${i}" ${i === activePageIdx ? 'selected' : ''}>Stránka ${i + 1}: ${escapeHtml(p.headerTitle || 'Tabulka')}</option>`
+    ).join('');
+
+    const pills = document.getElementById('page-pills-container');
+    pills.innerHTML = pagesData.map((p, i) =>
+        `<button type="button" class="page-pill ${i === activePageIdx ? 'active' : ''}" onclick="switchPage(${i})">${i + 1}</button>`
+    ).join('');
+}
+
+function switchPage(index) {
+    if (index < 0 || index >= pagesData.length) return;
+    activePageIdx = index;
+    renderPageNavigation();
+    populateFormWithActivePage();
+    scrollToActivePage();
+}
+
+function prevPage() {
+    if (activePageIdx > 0) switchPage(activePageIdx - 1);
+}
+
+function nextPage() {
+    if (activePageIdx < pagesData.length - 1) switchPage(activePageIdx + 1);
+}
+
+function addNewPage() {
+    const newPage = JSON.parse(JSON.stringify(DEFAULT_PAGE));
+    newPage.id = Date.now();
+    const curr = pagesData[activePageIdx];
+    if (curr) {
+        newPage.headerTitle = curr.headerTitle;
+        newPage.headerSubtitle = curr.headerSubtitle;
+        newPage.obecName = curr.obecName;
+        newPage.obecCode = curr.obecCode;
+        newPage.headerIconType = curr.headerIconType;
+        newPage.headerCustomIconSrc = curr.headerCustomIconSrc;
+        newPage.headerIconSize = curr.headerIconSize;
+        newPage.columns = JSON.parse(JSON.stringify(curr.columns));
+        newPage.rows = []; // nová čistá tabulka
+        newPage.summary = JSON.parse(JSON.stringify(curr.summary));
+        newPage.footer = JSON.parse(JSON.stringify(curr.footer));
+    }
+    pagesData.push(newPage);
+    activePageIdx = pagesData.length - 1;
+    savePagesToStorage();
+    renderPageNavigation();
+    renderAllPages();
+    populateFormWithActivePage();
+    scrollToActivePage();
+}
+
+function duplicateCurrentPage() {
+    const curr = pagesData[activePageIdx];
+    const dupl = JSON.parse(JSON.stringify(curr));
+    dupl.id = Date.now();
+    pagesData.splice(activePageIdx + 1, 0, dupl);
+    activePageIdx = activePageIdx + 1;
+    savePagesToStorage();
+    renderPageNavigation();
+    renderAllPages();
+    populateFormWithActivePage();
+    scrollToActivePage();
+}
+
+function deleteCurrentPage() {
+    if (pagesData.length <= 1) {
+        alert('V dokumentu musí zůstat alespoň jedna stránka.');
+        return;
+    }
+    if (!confirm(`Opravdu smazat Stránku ${activePageIdx + 1}?`)) return;
+
+    pagesData.splice(activePageIdx, 1);
+    if (activePageIdx >= pagesData.length) activePageIdx = pagesData.length - 1;
+    savePagesToStorage();
+    renderPageNavigation();
+    renderAllPages();
+    populateFormWithActivePage();
+}
+
+function scrollToActivePage() {
+    const pageEl = document.getElementById(`page-table-${pagesData[activePageIdx].id}`);
+    if (pageEl) {
+        pageEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
+/* ==========================================================================
+   PLNĚNÍ FORMULÁŘE
+   ========================================================================== */
+function populateFormWithActivePage() {
+    const page = pagesData[activePageIdx];
+    if (!page) return;
+
+    // Záhlaví
+    document.getElementById('inp-header-title').value = page.headerTitle || '';
+    document.getElementById('inp-header-subtitle').value = page.headerSubtitle || '';
+    document.getElementById('inp-obec-name').value = page.obecName || '';
+    document.getElementById('inp-obec-code').value = page.obecCode || '';
+    document.getElementById('inp-icon-size').value = page.headerIconSize || 38;
+
+    updateIconPreviewInPanel();
+
+    // Sloupce
+    renderColumnsEditor();
+
+    // Řádky
+    renderRowsListInPanel();
+
+    // Souhrn
+    document.getElementById('chk-show-summary').checked = (page.summary && page.summary.show !== false);
+    document.getElementById('inp-summary-count').value = (page.summary && page.summary.countManual) || '';
+    document.getElementById('inp-summary-label').value = (page.summary && page.summary.label) || 'Počet světelných bodů';
+    document.getElementById('inp-summary-author').value = (page.summary && page.summary.author) || 'Atomicon s. r. o.';
+    document.getElementById('inp-summary-date').value = (page.summary && page.summary.date) || '24. 09. 2026';
+
+    // Patička
+    document.getElementById('inp-footer-company').value = (page.footer && page.footer.company) || '';
+    document.getElementById('inp-footer-phone').value = (page.footer && page.footer.phone) || '';
+}
+
+function updateCurrentPageHeader() {
+    const page = pagesData[activePageIdx];
+    if (!page) return;
+    page.headerTitle = document.getElementById('inp-header-title').value;
+    page.headerSubtitle = document.getElementById('inp-header-subtitle').value;
+    page.obecName = document.getElementById('inp-obec-name').value;
+    page.obecCode = document.getElementById('inp-obec-code').value;
+    page.headerIconSize = parseInt(document.getElementById('inp-icon-size').value, 10) || 38;
+
+    savePagesToStorage();
+    renderPageNavigation();
+    updatePageDOM(activePageIdx);
+}
+
+function updateSummaryData() {
+    const page = pagesData[activePageIdx];
+    if (!page) return;
+    if (!page.summary) page.summary = {};
+
+    page.summary.show = document.getElementById('chk-show-summary').checked;
+    page.summary.countManual = document.getElementById('inp-summary-count').value.trim();
+    page.summary.label = document.getElementById('inp-summary-label').value;
+    page.summary.author = document.getElementById('inp-summary-author').value;
+    page.summary.date = document.getElementById('inp-summary-date').value;
+
+    savePagesToStorage();
+    updatePageDOM(activePageIdx);
+}
+
+function updateFooterData() {
+    const page = pagesData[activePageIdx];
+    if (!page) return;
+    if (!page.footer) page.footer = {};
+
+    page.footer.company = document.getElementById('inp-footer-company').value;
+    page.footer.phone = document.getElementById('inp-footer-phone').value;
+
+    savePagesToStorage();
+    updatePageDOM(activePageIdx);
+}
+
+/* ==========================================================================
+   SPRÁVA IKONY
+   ========================================================================== */
+function updateIconPreviewInPanel() {
+    const page = pagesData[activePageIdx];
+    const previewWrap = document.getElementById('icon-preview-container');
+    const previewImg = document.getElementById('icon-preview-img');
+    const previewDesc = document.getElementById('icon-preview-desc');
+
+    if (page.headerIconType === 'custom' && page.headerCustomIconSrc) {
+        previewWrap.style.display = 'flex';
+        previewImg.src = page.headerCustomIconSrc;
+        previewDesc.textContent = 'Aktivní vlastní ikona';
+    } else {
+        previewWrap.style.display = 'none';
+    }
+}
+
+function handleHeaderIconUpload(input) {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        pagesData[activePageIdx].headerCustomIconSrc = e.target.result;
+        pagesData[activePageIdx].headerIconType = 'custom';
+        savePagesToStorage();
+        updatePageDOM(activePageIdx);
+        updateIconPreviewInPanel();
+    };
+    reader.readAsDataURL(file);
+    input.value = '';
+}
+
+function resetHeaderIconToLamp() {
+    pagesData[activePageIdx].headerIconType = 'lamp';
+    pagesData[activePageIdx].headerCustomIconSrc = '';
+    savePagesToStorage();
+    updatePageDOM(activePageIdx);
+    updateIconPreviewInPanel();
+}
+
+function removeHeaderIcon() {
+    pagesData[activePageIdx].headerIconType = 'none';
+    pagesData[activePageIdx].headerCustomIconSrc = '';
+    savePagesToStorage();
+    updatePageDOM(activePageIdx);
+    updateIconPreviewInPanel();
+}
+
+function handleFooterLogoUpload(input) {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        pagesData[activePageIdx].footer.logo = e.target.result;
+        if (pagesData[activePageIdx].summary) {
+            pagesData[activePageIdx].summary.logo = e.target.result;
+        }
+        savePagesToStorage();
+        updatePageDOM(activePageIdx);
+    };
+    reader.readAsDataURL(file);
+    input.value = '';
+}
+
+function resetFooterLogo() {
+    pagesData[activePageIdx].footer.logo = './img/logo3.png';
+    if (pagesData[activePageIdx].summary) {
+        pagesData[activePageIdx].summary.logo = './img/logo3.png';
+    }
+    savePagesToStorage();
+    updatePageDOM(activePageIdx);
+}
+
+/* ==========================================================================
+   SPRÁVA SLOUPCŮ
+   ========================================================================== */
+function renderColumnsEditor() {
+    const container = document.getElementById('container-columns-editor');
+    if (!container) return;
+    const page = pagesData[activePageIdx];
+    const columns = page.columns || [];
+
+    container.innerHTML = columns.map((col, idx) => `
+        <div class="col-edit-item">
+            <div style="font-size:10px; color:#475569; font-weight:700; margin-bottom:3px;">Sloupec ${idx + 1}</div>
+            <div class="col-edit-row">
+                <input type="text" value="${escapeHtml(col.title)}" placeholder="Název sloupce" oninput="updateColumnProp(${idx}, 'title', this.value)">
+                <input type="text" value="${escapeHtml(col.group || '')}" placeholder="Skupina záhlaví" oninput="updateColumnProp(${idx}, 'group', this.value)" style="width:130px; flex:none;">
+                <button type="button" class="btn-del-mini" onclick="removeColumn(${idx})" title="Smazat sloupec">✕</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function updateColumnProp(colIdx, prop, val) {
+    const page = pagesData[activePageIdx];
+    if (!page || !page.columns[colIdx]) return;
+    page.columns[colIdx][prop] = val;
+    savePagesToStorage();
+    updatePageDOM(activePageIdx);
+}
+
+function addNewColumnPrompt() {
+    const title = prompt('Zadejte název nového sloupce:', 'NOVÝ SLOUPCE');
+    if (!title) return;
+    const group = prompt('Zadejte skupinu záhlaví (nepovinné):', 'IDENTIFIKACE') || '';
+
+    const page = pagesData[activePageIdx];
+    const newId = 'c_' + Date.now();
+    page.columns.push({
+        id: newId,
+        title: title.trim(),
+        group: group.trim(),
+        width: '80px',
+        align: 'center'
+    });
+
+    savePagesToStorage();
+    renderColumnsEditor();
+    updatePageDOM(activePageIdx);
+}
+
+function removeColumn(colIdx) {
+    const page = pagesData[activePageIdx];
+    if (!page || page.columns.length <= 1) {
+        alert('V tabulce musí zůstat alespoň jeden sloupec.');
+        return;
+    }
+    if (!confirm(`Opravdu smazat sloupec "${page.columns[colIdx].title}"?`)) return;
+
+    page.columns.splice(colIdx, 1);
+    savePagesToStorage();
+    renderColumnsEditor();
+    updatePageDOM(activePageIdx);
+}
+
+function resetColumnsToDefaultVO() {
+    if (!confirm('Obnovit výchozí sloupce veřejného osvětlení dle vzoru?')) return;
+    const page = pagesData[activePageIdx];
+    page.columns = JSON.parse(JSON.stringify(DEFAULT_COLUMNS));
+    savePagesToStorage();
+    renderColumnsEditor();
+    updatePageDOM(activePageIdx);
+}
+
+/* ==========================================================================
+   SPRÁVA ŘÁDKŮ
+   ========================================================================== */
+function renderRowsListInPanel() {
+    const container = document.getElementById('row-list-container');
+    const lblCount = document.getElementById('lbl-rows-count');
+    const page = pagesData[activePageIdx];
+    const rows = page.rows || [];
+
+    if (lblCount) lblCount.textContent = rows.length;
+    if (!container) return;
+
+    if (rows.length === 0) {
+        container.innerHTML = '<div style="padding:10px; text-align:center; color:#9f8bb8; font-size:11px;">Žádné řádky na stránce.</div>';
+        return;
+    }
+
+    container.innerHTML = rows.map((r, idx) => {
+        const firstColId = (page.columns[0] && page.columns[0].id) || 'c1';
+        const secColId = (page.columns[1] && page.columns[1].id) || 'c2';
+        const label = `${r[firstColId] || ''} ${r[secColId] ? '- ' + r[secColId] : ''}`.trim() || `(Řádek ${idx + 1})`;
+
+        return `
+            <div class="row-list-item">
+                <span style="font-weight:600; color:#f3e8ff;">${idx + 1}. ${escapeHtml(label.substring(0, 32))}</span>
+                <div style="display:flex; gap:4px;">
+                    <button type="button" class="btn-del-mini" onclick="deleteRow(${idx})">Smazat</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function addRowToCurrentPage() {
+    const page = pagesData[activePageIdx];
+    if (!page) return;
+    if (!page.rows) page.rows = [];
+
+    const newRow = {};
+    page.columns.forEach((c, idx) => {
+        if (idx === 0) {
+            const nextNum = String(page.rows.length + 1).padStart(2, '0');
+            newRow[c.id] = nextNum;
+        } else {
+            newRow[c.id] = '';
+        }
+    });
+
+    page.rows.push(newRow);
+    savePagesToStorage();
+    renderRowsListInPanel();
+    updatePageDOM(activePageIdx);
+}
+
+function addSampleRows(count) {
+    const page = pagesData[activePageIdx];
+    if (!page) return;
+    if (!page.rows) page.rows = [];
+
+    const startIdx = page.rows.length + 1;
+    for (let i = 0; i < count; i++) {
+        const num = String(startIdx + i).padStart(2, '0');
+        const row = {};
+        page.columns.forEach((c, cIdx) => {
+            if (cIdx === 0) row[c.id] = num;
+            else if (cIdx === 1) row[c.id] = `${page.obecName || 'Obec'} - RVO - RVO`;
+            else if (cIdx === 2) row[c.id] = '1';
+            else if (cIdx === 3) row[c.id] = (i % 2 === 0 ? 'ocelový' : 'betonový');
+            else if (cIdx === 5) row[c.id] = '0';
+            else row[c.id] = '';
+        });
+        page.rows.push(row);
+    }
+
+    savePagesToStorage();
+    renderRowsListInPanel();
+    updatePageDOM(activePageIdx);
+}
+
+function deleteRow(idx) {
+    const page = pagesData[activePageIdx];
+    if (!page || !page.rows) return;
+    page.rows.splice(idx, 1);
+    savePagesToStorage();
+    renderRowsListInPanel();
+    updatePageDOM(activePageIdx);
+}
+
+function clearAllRowsCurrentPage() {
+    const page = pagesData[activePageIdx];
+    if (!page || !page.rows || page.rows.length === 0) return;
+    if (!confirm('Opravdu chcete vymazat všechny řádky z této stránky?')) return;
+    page.rows = [];
+    savePagesToStorage();
+    renderRowsListInPanel();
+    updatePageDOM(activePageIdx);
+}
+
+/* Přímá synchronizace z editovatelných buněk náhledu */
+function onCellInput(pageIdx, rowIdx, colId, cellEl) {
+    const page = pagesData[pageIdx];
+    if (page && page.rows && page.rows[rowIdx]) {
+        page.rows[rowIdx][colId] = cellEl.innerText.trim();
+        savePagesToStorage();
+        if (pageIdx === activePageIdx) {
+            renderRowsListInPanel();
+        }
+    }
+}
+
+/* ==========================================================================
+   VYKRESLOVÁNÍ STRÁNEK V NÁHLEDU (A4 LANDSCAPE)
+   ========================================================================== */
+function renderAllPages() {
+    const preview = document.getElementById('preview-panel');
+    preview.innerHTML = '';
+
+    pagesData.forEach((page, idx) => {
+        const pageEl = document.createElement('div');
+        pageEl.className = 'page';
+        pageEl.id = `page-table-${page.id}`;
+        pageEl.onclick = (e) => {
+            if (activePageIdx !== idx && !e.target.isContentEditable) {
+                switchPage(idx);
+            }
+        };
+
+        pageEl.innerHTML = buildPageHTML(page, idx);
+        preview.appendChild(pageEl);
+    });
+}
+
+function updatePageDOM(idx) {
+    const page = pagesData[idx];
+    if (!page) return;
+    const pageEl = document.getElementById(`page-table-${page.id}`);
+    if (!pageEl) {
+        renderAllPages();
+        return;
+    }
+    pageEl.innerHTML = buildPageHTML(page, idx);
+}
+
+function buildPageHTML(page, pageIdx) {
+    const iconHtml = renderLampIconHtml(page);
+    const tableHeaderHtml = buildTableHeaderHTML(page);
+    const tableBodyHtml = buildTableBodyHTML(page, pageIdx);
+    const summaryHtml = buildSummaryHTML(page);
+    const footerHtml = buildFooterHTML(page);
+
+    return `
+        <!-- 1. Fixní záhlaví tabulky -->
+        <div class="table-header-row">
+            <div class="table-header-left">
+                <div class="table-header-title">${escapeHtml(page.headerTitle || '')}</div>
+                <div class="table-header-subtitle">${escapeHtml(page.headerSubtitle || '')}</div>
+            </div>
+
+            <div class="table-header-center">
+                <span class="lbl-obec">OBEC</span>
+                <span class="val-obec">
+                    <strong>${escapeHtml(page.obecName || '')}</strong><br>
+                    <span>${escapeHtml(page.obecCode || '')}</span>
+                </span>
+            </div>
+
+            <div class="table-header-icon-box" style="height:${page.headerIconSize || 38}px; width:${(page.headerIconSize || 38) * 1.1}px;">
+                ${iconHtml}
+            </div>
+        </div>
+
+        <!-- 2. Tabulka s daty -->
+        <div class="table-scroll-container">
+            <table class="table-data">
+                <thead>
+                    ${tableHeaderHtml}
+                </thead>
+                <tbody>
+                    ${tableBodyHtml}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 3. Souhrnné razítko (volitelné) -->
+        ${summaryHtml}
+
+        <!-- 4. Fixní patička s logem Atomicon -->
+        ${footerHtml}
+    `;
+}
+
+function buildTableHeaderHTML(page) {
+    const cols = page.columns || [];
+    if (cols.length === 0) return '';
+
+    // Skupinové záhlaví
+    const groups = [];
+    let curGroup = null;
+
+    cols.forEach(col => {
+        const grpName = col.group || '';
+        if (curGroup && curGroup.name === grpName) {
+            curGroup.span += 1;
+        } else {
+            curGroup = { name: grpName, span: 1 };
+            groups.push(curGroup);
+        }
+    });
+
+    const trGroups = groups.map(g => `
+        <th colspan="${g.span}">${escapeHtml(g.name)}</th>
+    `).join('');
+
+    const trCols = cols.map(c => `
+        <th style="width:${c.width || 'auto'};">${escapeHtml(c.title)}</th>
+    `).join('');
+
+    return `
+        <tr class="tr-groups">${trGroups}</tr>
+        <tr class="tr-cols">${trCols}</tr>
+    `;
+}
+
+function buildTableBodyHTML(page, pageIdx) {
+    const cols = page.columns || [];
+    const rows = page.rows || [];
+
+    if (rows.length === 0) {
+        return `
+            <tr>
+                <td colspan="${cols.length}" style="text-align:center; padding:18px; color:#888; font-style:italic;">
+                    Žádná data v tabulce. Řádky můžete přidat v levém panelu tlačítkem "+ Přidat řádek".
+                </td>
+            </tr>
+        `;
+    }
+
+    return rows.map((row, rIdx) => {
+        const cells = cols.map(c => `
+            <td contenteditable="true" 
+                style="text-align:${c.align || 'center'};"
+                oninput="onCellInput(${pageIdx}, ${rIdx}, '${c.id}', this)"
+                spellcheck="false">${escapeHtml(row[c.id] || '')}</td>
+        `).join('');
+
+        return `<tr>${cells}</tr>`;
+    }).join('');
+}
+
+function buildSummaryHTML(page) {
+    const s = page.summary;
+    if (!s || s.show === false) return '';
+
+    const countVal = s.countManual ? s.countManual : ((page.rows && page.rows.length) || 0);
+
+    return `
+        <div class="table-summary-wrap">
+            <div class="summary-box">
+                <div class="summary-top-row">
+                    <div class="summary-count-cell">${escapeHtml(String(countVal))}</div>
+                    <div class="summary-label-cell">${escapeHtml(s.label || 'Počet světelných bodů')}</div>
+                </div>
+                <div class="summary-main-box">
+                    <div class="summary-left-sub">
+                        <div class="summary-author-txt">Vyhotovil: ${escapeHtml(s.author || 'Atomicon s. r. o.')}</div>
+                        <div class="summary-logo-sub">
+                            <img src="${s.logo || './img/logo3.png'}" alt="Logo" onerror="this.onerror=null; this.src='./img/logo3.png';">
+                        </div>
+                    </div>
+                    <div class="summary-date-cell">
+                        ${escapeHtml(s.date || '24. 09. 2026')}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function buildFooterHTML(page) {
+    const f = page.footer || {};
+    return `
+        <div class="table-footer">
+            <div class="footer-logo-box">
+                <img src="${f.logo || './img/logo3.png'}" alt="Logo" onerror="this.onerror=null; this.src='./img/logo3.png';">
+            </div>
+            <div class="footer-company-text">
+                <div><strong>${escapeHtml(f.company || '')}</strong></div>
+                <div>${escapeHtml(f.phone || '')}</div>
+            </div>
+        </div>
+    `;
+}
+
+function renderLampIconHtml(page) {
+    const type = page.headerIconType || 'lamp';
+    if (type === 'none') return '';
+    if (type === 'custom' && page.headerCustomIconSrc) {
+        return `<img src="${page.headerCustomIconSrc}" alt="Ikona">`;
+    }
+
+    // Výchozí vektorová ikona pouliční lampy (3 svítidla) dle Tabulka-vzor.pdf
+    return `
+        <svg viewBox="0 0 64 64" fill="none" stroke="#1a1a1a" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Podstavec a sloup -->
+            <path d="M26 60h12" stroke-width="2.6"/>
+            <path d="M29 60l1.2-5h3.6l1.2 5" stroke-width="1.8"/>
+            <line x1="32" y1="55" x2="32" y2="18" stroke-width="2.4"/>
+            <!-- Výložníky / ramena do stran -->
+            <path d="M32 30 C25 30 19 26 17 21" stroke-width="2"/>
+            <path d="M32 30 C39 30 45 26 47 21" stroke-width="2"/>
+            <!-- Levé svítidlo -->
+            <path d="M14 21h6" stroke-width="2"/>
+            <path d="M13 21 C13 27 21 27 21 21" stroke-width="1.8" fill="#ffffff"/>
+            <path d="M15 17c0-2 4-2 4 0" stroke-width="1.8"/>
+            <circle cx="17" cy="21" r="1.3" fill="#1a1a1a"/>
+            <!-- Pravé svítidlo -->
+            <path d="M44 21h6" stroke-width="2"/>
+            <path d="M43 21 C43 27 51 27 51 21" stroke-width="1.8" fill="#ffffff"/>
+            <path d="M45 17c0-2 4-2 4 0" stroke-width="1.8"/>
+            <circle cx="47" cy="21" r="1.3" fill="#1a1a1a"/>
+            <!-- Horní centrální svítidlo -->
+            <path d="M28 17h8" stroke-width="2"/>
+            <path d="M27 17 C27 9 37 9 37 17" stroke-width="1.8" fill="#ffffff"/>
+            <path d="M29 17 C29 23 35 23 35 17" stroke-width="1.8" fill="#ffffff"/>
+            <path d="M30 9c0-2 4-2 4 0" stroke-width="1.8"/>
+            <circle cx="32" cy="17" r="1.4" fill="#1a1a1a"/>
+        </svg>
+    `;
+}
+
+/* ==========================================================================
+   EXPORT & IMPORT DO JSON
+   ========================================================================== */
+function exportTablesToJson() {
+    const jsonStr = JSON.stringify(pagesData, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Tabulky-export-${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function importTablesFromJson(input) {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            if (Array.isArray(data) && data.length > 0) {
+                pagesData = data;
+                activePageIdx = 0;
+                savePagesToStorage();
+                renderPageNavigation();
+                renderAllPages();
+                populateFormWithActivePage();
+                alert(`Úspěšně načteno ${data.length} stránek.`);
+            } else {
+                alert('Neplatný formát souboru tabulek.');
+            }
+        } catch(err) {
+            alert('Chyba při čtení JSON souboru: ' + err.message);
+        }
+        input.value = '';
+    };
+    reader.readAsText(file);
+}
+
+function resetAllToDefault() {
+    if (!confirm('Opravdu chcete obnovit všechny stránky na výchozí vzor Svésedlice? Rozpracované změny budou přepsány.')) return;
+    pagesData = [JSON.parse(JSON.stringify(DEFAULT_PAGE))];
+    activePageIdx = 0;
+    savePagesToStorage();
+    renderPageNavigation();
+    renderAllPages();
+    populateFormWithActivePage();
+}
+
+/* ==========================================================================
+   POMOCNÉ FUNKCE
+   ========================================================================== */
+function toggleSec(secId) {
+    const sec = document.getElementById(secId);
+    const arr = document.getElementById(`arr-${secId}`);
+    if (!sec) return;
+    if (sec.style.display === 'none') {
+        sec.style.display = 'block';
+        if (arr) arr.textContent = 'Sbalit';
+    } else {
+        sec.style.display = 'none';
+        if (arr) arr.textContent = 'Rozbalit';
+    }
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+</script>
+
+</body>
+</html>

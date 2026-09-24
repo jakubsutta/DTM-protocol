@@ -1,0 +1,2229 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Export technických karet – Pasport</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23bfa700%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><rect x=%223%22 y=%223%22 width=%2218%22 height=%2218%22 rx=%222%22/><path d=%22M7 8h10%22/><path d=%22M7 12h6%22/><path d=%22M7 16h8%22/></svg>">
+
+<!-- Leaflet CSS & JS (Offline first from vendor, CDN fallback) -->
+<link rel="stylesheet" href="./vendor/leaflet/leaflet.css" onerror="this.onerror=null;this.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';" />
+<script src="./vendor/leaflet/leaflet.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';document.head.appendChild(s);"></script>
+
+<style>
+    /* ==========================================================================
+       TISK / PDF (PŘESNĚ 1 KARTA = 1 STRANA A4)
+       ========================================================================== */
+    @page {
+        size: A4 portrait;
+        margin: 0;
+    }
+
+    @media print {
+        * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        html, body {
+            background: #fff !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 210mm !important;
+        }
+        .app {
+            display: block !important;
+        }
+        .form-panel, .no-print {
+            display: none !important;
+        }
+        .preview-panel {
+            display: block !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            overflow: visible !important;
+        }
+        .page {
+            width: 210mm !important;
+            height: 297mm !important;
+            min-height: 297mm !important;
+            max-height: 297mm !important;
+            padding: 18mm 20mm 16mm !important;
+            box-shadow: none !important;
+            margin: 0 !important;
+            border: none !important;
+            outline: none !important;
+            page-break-after: always !important;
+            break-after: page !important;
+            box-sizing: border-box !important;
+            overflow: hidden !important;
+        }
+        .page:last-child {
+            page-break-after: auto !important;
+            break-after: auto !important;
+        }
+        .card-map-wrapper {
+            border-radius: 6px !important;
+            overflow: hidden !important;
+            border: 1.5px solid #1a1a1a !important;
+        }
+        .card-map-wrapper img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            display: block !important;
+        }
+        .leaflet-control-zoom {
+            display: none !important;
+        }
+        .leaflet-control-scale {
+            display: block !important;
+            font-size: 8px !important;
+        }
+        .leaflet-control-attribution {
+            display: block !important;
+            font-size: 7px !important;
+            background: rgba(255,255,255,0.75) !important;
+            transform: scale(0.85);
+            transform-origin: bottom right;
+        }
+    }
+
+    /* ==========================================================================
+       ZÁKLADNÍ RESET
+       ========================================================================== */
+    *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        font-size: 13px;
+        background: #f0f2f5;
+        color: #1a1a1a;
+        min-height: 100vh;
+        line-height: 1.4;
+    }
+
+    .app {
+        display: grid;
+        grid-template-columns: 430px 1fr;
+        min-height: 100vh;
+    }
+
+    @media (max-width: 1100px) {
+        .app {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* ==========================================================================
+       OVLÁDACÍ PANEL (HLAVNÍ MOTIV #FCF55F)
+       ========================================================================== */
+    .form-panel {
+        background: #fffeed;
+        color: #1a1a1a;
+        padding: 22px 20px 70px;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        overflow-y: auto;
+        max-height: 100vh;
+        position: sticky;
+        top: 0;
+        border-right: 1px solid #d4cc30;
+    }
+
+    .form-panel h2 {
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #1a1a1a;
+        margin-bottom: 4px;
+        border-bottom: 2.5px solid #FCF55F;
+        padding-bottom: 4px;
+    }
+
+    .form-panel .sub {
+        font-size: 10.5px;
+        color: #78909c;
+        margin-bottom: 16px;
+    }
+
+    /* Stránková navigace v panelu */
+    .page-nav-box {
+        background: #fff;
+        border: 1px solid #d4cc30;
+        border-radius: 4px;
+        padding: 10px 12px;
+        margin-bottom: 14px;
+    }
+
+    .page-nav-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .page-counter-text {
+        font-size: 12px;
+        font-weight: 700;
+        color: #1a1a1a;
+    }
+
+    .page-counter-badge {
+        background: #FCF55F;
+        color: #1a1a1a;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 3px;
+        border: 1px solid #d4cc30;
+        margin-left: 4px;
+    }
+
+    .page-nav-btns {
+        display: flex;
+        gap: 5px;
+    }
+
+    .btn-page-nav {
+        background: #FCF55F;
+        color: #1a1a1a;
+        border: 1px solid #d4cc30;
+        border-radius: 3px;
+        padding: 3px 8px;
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.15s;
+    }
+
+    .btn-page-nav:hover:not(:disabled) {
+        background: #f0e84b;
+    }
+
+    .btn-page-nav:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+
+    .page-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid #e0d84c;
+    }
+
+    .page-pill {
+        padding: 2px 8px;
+        font-size: 11px;
+        font-weight: 700;
+        background: #fff;
+        border: 1px solid #d4cc30;
+        border-radius: 3px;
+        color: #1a1a1a;
+        cursor: pointer;
+    }
+
+    .page-pill.active {
+        background: #FCF55F;
+        color: #1a1a1a;
+        border-color: #b8af1a;
+    }
+
+    .page-mgmt-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 6px;
+        margin-top: 8px;
+    }
+
+    /* Oddíly v panelu */
+    .page-label {
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #fff;
+        background: #1a1a2e;
+        padding: 6px 10px;
+        border-radius: 4px;
+        margin: 18px 0 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .page-label:first-of-type {
+        margin-top: 4px;
+    }
+
+    .section-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #1a1a1a;
+        margin: 12px 0 6px;
+        padding-bottom: 4px;
+        border-bottom: 2px solid #FCF55F;
+    }
+
+    /* Formulářové prvky */
+    .field {
+        margin-bottom: 9px;
+    }
+
+    .field label {
+        display: block;
+        font-size: 11px;
+        color: #1a1a1a;
+        margin-bottom: 3px;
+        font-weight: 600;
+    }
+
+    .field input, .field select, .field textarea {
+        width: 100%;
+        background: #fff;
+        border: 1px solid #d4cc30;
+        border-radius: 4px;
+        color: #1a1a1a;
+        font-size: 12px;
+        font-family: inherit;
+        padding: 6px 9px;
+        outline: none;
+        transition: border-color 0.15s;
+    }
+
+    .field input:focus, .field select:focus, .field textarea:focus {
+        border-color: #4fc3f7;
+    }
+
+    .field-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .field-note {
+        font-size: 10px;
+        color: #78909c;
+        margin-top: 3px;
+    }
+
+    /* Editor položek tabulky */
+    .kv-edit-row {
+        display: grid;
+        grid-template-columns: 130px 1fr 24px;
+        gap: 5px;
+        align-items: center;
+        margin-bottom: 5px;
+    }
+
+    .kv-edit-row input {
+        background: #fff;
+        border: 1px solid #d4cc30;
+        border-radius: 3px;
+        font-size: 11px;
+        padding: 5px 7px;
+        outline: none;
+    }
+
+    .btn-del-item {
+        background: #fff;
+        border: 1px solid #ef5350;
+        color: #d32f2f;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: bold;
+        line-height: 1;
+        padding: 4px;
+        text-align: center;
+        border-radius: 3px;
+    }
+
+    .btn-del-item:hover {
+        background: #ffebee;
+    }
+
+    .btn-add-item {
+        background: #fff;
+        border: 1px dashed #b8af1a;
+        color: #1a1a1a;
+        border-radius: 4px;
+        padding: 5px 8px;
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 3px;
+        margin-bottom: 10px;
+        transition: background 0.15s;
+    }
+
+    .btn-add-item:hover {
+        background: #FCF55F;
+    }
+
+    /* Tlačítka */
+    .btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 8px 12px;
+        border-radius: 5px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        font-family: inherit;
+        transition: background 0.15s;
+    }
+
+    .btn-primary {
+        background: #FCF55F;
+        color: #1a1a1a;
+        font-weight: 700;
+        border: 1px solid #d4cc30;
+    }
+
+    .btn-primary:hover {
+        background: #f0e84b;
+    }
+
+    .btn-secondary {
+        background: #fff;
+        color: #1a1a1a;
+        border: 1px solid #d4cc30;
+    }
+
+    .btn-secondary:hover {
+        background: #fffee6;
+    }
+
+    .btn-danger {
+        background: #ffebee;
+        color: #c62828;
+        border: 1px solid #ef9a9a;
+    }
+
+    .btn-danger:hover {
+        background: #ffcdd2;
+    }
+
+    .file-field {
+        border: 1px dashed #b8af1a;
+        border-radius: 4px;
+        padding: 7px 10px;
+        font-size: 11px;
+        color: #1a1a1a;
+        cursor: pointer;
+        text-align: center;
+        background: #fff;
+        transition: background 0.15s;
+    }
+
+    .file-field:hover {
+        background: #FCF55F;
+    }
+
+    .btn-sticky-box {
+        position: sticky;
+        bottom: 0;
+        background: #fffeed;
+        padding-top: 10px;
+        margin-top: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        border-top: 1.5px solid #d4cc30;
+    }
+
+    /* Našeptávač obcí */
+    .autocomplete-wrap {
+        position: relative;
+        flex: 1;
+    }
+
+    .autocomplete-list {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: #fff;
+        border: 1px solid #d4cc30;
+        border-top: none;
+        border-radius: 0 0 4px 4px;
+        max-height: 180px;
+        overflow-y: auto;
+        z-index: 100;
+        display: none;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+
+    .autocomplete-list.visible {
+        display: block;
+    }
+
+    .autocomplete-item {
+        padding: 6px 10px;
+        font-size: 12px;
+        cursor: pointer;
+        border-bottom: 1px solid #f5f5f5;
+        color: #1a1a1a;
+    }
+
+    .autocomplete-item:last-child {
+        border-bottom: none;
+    }
+
+    .autocomplete-item:hover, .autocomplete-item.active {
+        background: #FCF55F;
+        color: #1a1a1a;
+    }
+
+    .autocomplete-item small {
+        color: #90a4ae;
+        font-size: 10px;
+        margin-left: 6px;
+    }
+
+    /* Tlačítka mapových nástrojů */
+    .map-tool-group {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 6px;
+    }
+
+    .map-tool-btn {
+        flex: 1;
+        padding: 6px 4px;
+        font-size: 11px;
+        font-weight: 600;
+        background: #fff;
+        border: 1px solid #d4cc30;
+        border-radius: 3px;
+        cursor: pointer;
+        color: #1a1a1a;
+        transition: all 0.15s;
+    }
+
+    .map-tool-btn.active {
+        background: #FCF55F;
+        color: #1a1a1a;
+        border-color: #b8af1a;
+    }
+
+    /* Náhled nahrané ikony v panelu */
+    .icon-preview-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 6px;
+        padding: 6px 8px;
+        background: #fff;
+        border: 1px solid #d4cc30;
+        border-radius: 4px;
+    }
+
+    .icon-preview-box img {
+        height: 32px;
+        max-width: 48px;
+        object-fit: contain;
+    }
+
+    /* ==========================================================================
+       NÁHLED STRÁNEK A4 (BEZ BAREVNÉHO OHRANIČENÍ, POUZE PŘIROZENÝ STÍN)
+       ========================================================================== */
+    .preview-panel {
+        padding: 30px 10px 60px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 26px;
+        overflow-y: auto;
+        background: #f0f2f5;
+    }
+
+    .page {
+        background: #fff;
+        width: 210mm;
+        height: 297mm;
+        min-height: 297mm;
+        max-height: 297mm;
+        padding: 18mm 20mm 16mm;
+        box-shadow: 0 4px 32px rgba(0,0,0,0.18);
+        position: relative;
+        color: #1a1a1a;
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+        overflow: hidden;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        border: none !important;
+        outline: none !important;
+    }
+
+    .page * {
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    /* 1. Záhlaví karty (Nadpis přesně uprostřed, ikona vlevo) */
+    .card-header-row {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        margin-bottom: 6px;
+        width: 100%;
+    }
+
+    .card-header-icon-box {
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;
+    }
+
+    .card-header-icon-box img {
+        max-height: 100%;
+        max-width: 100%;
+        object-fit: contain;
+    }
+
+    .card-header-icon-box svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+
+    .card-header-title {
+        font-size: 19px;
+        font-weight: 800;
+        letter-spacing: 0.03em;
+        color: #1a1a1a;
+        text-transform: uppercase;
+        text-align: center;
+        width: 100%;
+        line-height: 1.25;
+    }
+
+    .header-divider-line {
+        width: 100%;
+        border-top: 2px solid #1a1a1a;
+        margin-bottom: 16px;
+    }
+
+    /* 2. Sekce: Základní údaje & Mapa */
+    .sec-top-grid {
+        display: grid;
+        grid-template-columns: 1fr 78mm;
+        gap: 20px;
+        align-items: start;
+    }
+
+    .basic-info-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+    }
+
+    .basic-info-table td {
+        padding: 5px 0;
+        vertical-align: top;
+        line-height: 1.45;
+        color: #1a1a1a;
+    }
+
+    .basic-info-table td.label-col {
+        font-weight: 700;
+        color: #1a1a1a;
+        width: 145px;
+        padding-right: 12px;
+    }
+
+    .basic-info-table td.val-col {
+        font-weight: 400;
+        color: #1a1a1a;
+    }
+
+    /* Rámeček mapy (border-radius, overflow hidden) */
+    .card-map-wrapper {
+        width: 78mm;
+        height: 78mm;
+        border: 1.5px solid #1a1a1a;
+        border-radius: 6px;
+        overflow: hidden;
+        position: relative;
+        background: #eef2f5;
+        box-sizing: border-box;
+        -webkit-mask-image: -webkit-radial-gradient(white, black);
+        mask-image: radial-gradient(white, black);
+        isolation: isolate;
+    }
+
+    .card-map-wrapper .leaflet-container {
+        width: 100% !important;
+        height: 100% !important;
+        border-radius: 5px;
+        font-family: inherit;
+    }
+
+    .card-map-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .sec-divider-line {
+        width: 100%;
+        border-top: 1.5px solid #1a1a1a;
+        margin: 16px 0;
+    }
+
+    .sub-divider-line {
+        width: 100%;
+        border-top: 1px solid #78909c;
+        margin: 13px 0;
+    }
+
+    /* Nadpisy sekcí */
+    .sec-title {
+        font-size: 13.5px;
+        font-weight: 800;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #1a1a1a;
+        margin-bottom: 12px;
+    }
+
+    /* 3. Sekce SPRÁVA */
+    .sprava-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        font-size: 12px;
+    }
+
+    .sprava-item {
+        display: flex;
+        gap: 12px;
+        line-height: 1.45;
+        color: #1a1a1a;
+    }
+
+    .sprava-item .kv-label {
+        font-weight: 700;
+        color: #1a1a1a;
+        min-width: 120px;
+    }
+
+    .sprava-item .kv-value {
+        font-weight: 400;
+        color: #1a1a1a;
+    }
+
+    /* 4. Sekce TECHNICKÉ ÚDAJE */
+    .tech-grid-2col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 7px 20px;
+        font-size: 12px;
+    }
+
+    .tech-grid-row {
+        display: flex;
+        gap: 10px;
+        line-height: 1.45;
+        color: #1a1a1a;
+    }
+
+    .tech-grid-row .kv-label {
+        font-weight: 700;
+        color: #1a1a1a;
+        min-width: 150px;
+    }
+
+    .tech-grid-row .kv-value {
+        font-weight: 400;
+        color: #1a1a1a;
+    }
+
+    /* 5. Patička */
+    .card-footer {
+        margin-top: auto;
+        padding-top: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .footer-logo-box img {
+        height: 29px;
+        max-height: 32px;
+        object-fit: contain;
+    }
+
+    .footer-company-text {
+        text-align: right;
+        color: #ea521f;
+        font-size: 11px;
+        font-weight: 600;
+        line-height: 1.45;
+    }
+
+    .footer-company-text strong {
+        font-weight: 800;
+    }
+</style>
+</head>
+<body>
+
+<div class="app">
+    <!-- ======================================================================
+         FORMULÁŘOVÝ PANEL
+         ====================================================================== -->
+    <div class="form-panel" id="form-panel">
+        
+        <h2>Export technických karet</h2>
+        <div class="sub">Generátor PDF technických karet dle vzoru Atomicon</div>
+
+        <!-- Správa a přepínání stránek -->
+        <div class="page-nav-box">
+            <div class="page-nav-top">
+                <div class="page-counter-text">
+                    Aktivní karta:
+                    <span class="page-counter-badge" id="lbl-page-active">1 z 1</span>
+                </div>
+                <div class="page-nav-btns">
+                    <button type="button" class="btn-page-nav" id="btn-prev-page" onclick="prevCard()">Předchozí</button>
+                    <button type="button" class="btn-page-nav" id="btn-next-page" onclick="nextCard()">Další</button>
+                </div>
+            </div>
+
+            <div class="field" style="margin-bottom: 6px;">
+                <select id="sel-active-card" onchange="switchCard(parseInt(this.value, 10))"></select>
+            </div>
+
+            <div class="page-mgmt-row">
+                <button type="button" class="btn btn-primary" onclick="addNewCard()" style="font-size:11px;">Přidat kartu</button>
+                <button type="button" class="btn btn-secondary" onclick="duplicateCurrentCard()" style="font-size:11px;">Duplikovat</button>
+                <button type="button" class="btn btn-danger" id="btn-del-card" onclick="deleteCurrentCard()" style="font-size:11px;">Smazat</button>
+            </div>
+
+            <div class="page-pills" id="page-pills-container"></div>
+        </div>
+
+        <!-- 1. Záhlaví karty -->
+        <div class="page-label" onclick="toggleSec('sec-header-fields')">
+            <span>Záhlaví karty a ikona</span>
+            <span id="arr-sec-header-fields">Rozbalit</span>
+        </div>
+        <div id="sec-header-fields">
+            <div class="field">
+                <label>Nadpis karty (uprostřed)</label>
+                <input type="text" id="inp-card-title" oninput="updateCurrentCardData()" placeholder="PASPORT KOMUNIKACE Č. 01B">
+            </div>
+
+            <div class="field">
+                <label>Ikona v levém rohu karty</label>
+                <div class="file-field" onclick="document.getElementById('file-header-icon').click()">+ Vybrat vlastní obrázek ikony</div>
+                <input type="file" id="file-header-icon" accept="image/*" style="display:none" onchange="handleHeaderIconUpload(this)">
+                
+                <div id="icon-preview-container" class="icon-preview-box" style="display:none;">
+                    <img id="icon-preview-img" src="" alt="Náhled ikony">
+                    <span id="icon-preview-desc" style="font-size:11px; color:#555;">Vlastní obrázek ikony</span>
+                </div>
+
+                <div style="display:flex; gap:6px; margin-top:6px;">
+                    <button type="button" class="btn btn-secondary" style="flex:1; font-size:11px;" onclick="resetHeaderIconToRoad()">Výchozí ikona (Silnice)</button>
+                    <button type="button" class="btn btn-secondary" style="font-size:11px;" onclick="removeHeaderIcon()">Bez ikony</button>
+                </div>
+            </div>
+
+            <div class="field">
+                <label>Výška ikony (px)</label>
+                <input type="number" id="inp-icon-size" min="20" max="60" value="38" oninput="updateCurrentCardData()">
+            </div>
+        </div>
+
+        <!-- 2. Základní údaje & Mapa -->
+        <div class="page-label" onclick="toggleSec('sec-basic-fields')">
+            <span>Základní údaje a mapa</span>
+            <span id="arr-sec-basic-fields">Rozbalit</span>
+        </div>
+        <div id="sec-basic-fields">
+            <div class="section-label">Položky základních údajů</div>
+            <div id="container-basic-fields"></div>
+            <button type="button" class="btn-add-item" onclick="addKvItem('basicInfo')">+ Přidat položku</button>
+
+            <div class="section-label">Zobrazení mapy</div>
+            <div class="field">
+                <div style="display:flex; gap:6px; margin-bottom:8px;">
+                    <button type="button" class="btn btn-secondary" id="btn-mode-interactive" style="flex:1; font-size:11px;" onclick="setMapDisplayMode('interactive')">Interaktivní OSM mapa</button>
+                    <button type="button" class="btn btn-secondary" id="btn-mode-image" style="flex:1; font-size:11px;" onclick="setMapDisplayMode('image')">Vlastní obrázek mapy</button>
+                </div>
+            </div>
+
+            <!-- Sekce pro nahrání vlastního obrázku mapy -->
+            <div id="wrap-map-image-upload" style="display:none; margin-bottom:12px;">
+                <div class="field">
+                    <label>Vlastní obrázek mapy (PNG, JPG, SVG)</label>
+                    <div class="file-field" onclick="document.getElementById('file-map-image').click()">+ Vybrat soubor obrázku mapy</div>
+                    <input type="file" id="file-map-image" accept="image/*" style="display:none" onchange="handleMapImageUpload(this)">
+                </div>
+                <div id="map-image-preview-box" style="display:none; align-items:center; justify-content:space-between; padding:6px 10px; background:#fff; border:1px solid #d4cc30; border-radius:4px; margin-top:6px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <img id="map-image-thumb" src="" alt="Náhled" style="width:36px; height:36px; object-fit:cover; border-radius:3px; border:1px solid #ccc;">
+                        <span style="font-size:11px; color:#1a1a1a; font-weight:600;">Obrázek aktivní</span>
+                    </div>
+                    <button type="button" class="btn btn-danger" style="padding:3px 8px; font-size:11px;" onclick="removeMapImage()">Smazat obrázek</button>
+                </div>
+                <div class="field-note">Obrázek se přesně přizpůsobí rozměrům 78 × 78 mm s rámečkem.</div>
+            </div>
+
+            <!-- Nástroje pro interaktivní mapu (OSM + ČÚZK WMS) -->
+            <div id="wrap-interactive-map-tools">
+                <div class="field">
+                    <label>Vyhledat obec (ČÚZK RÚIAN)</label>
+                    <div style="display:flex; gap:6px;">
+                        <div class="autocomplete-wrap">
+                            <input type="text" id="mapObec" placeholder="např. Svésedlice" oninput="onObecInput()" onkeydown="onObecKeydown(event)" autocomplete="off">
+                            <div class="autocomplete-list" id="obecSuggestions"></div>
+                        </div>
+                        <button type="button" class="btn btn-primary" style="padding: 0 12px;" onclick="locateCity()">Najít</button>
+                    </div>
+                    <div class="field-note">Výběr obce vycentruje mapu a propíše název do tabulky.</div>
+                </div>
+
+                <div class="field">
+                    <label>Režim interakce s mapou</label>
+                    <div class="map-tool-group">
+                        <button type="button" class="map-tool-btn active" id="tool-pan" onclick="setMapTool('pan')">Posun</button>
+                        <button type="button" class="map-tool-btn" id="tool-line" onclick="setMapTool('line')">Kreslit trasu</button>
+                        <button type="button" class="map-tool-btn" id="tool-point" onclick="setMapTool('point')">Umístit bod</button>
+                    </div>
+                </div>
+
+                <div class="field-row">
+                    <button type="button" class="btn btn-secondary" style="font-size:11px;" onclick="undoLastMapPoint()">Zpět bod</button>
+                    <button type="button" class="btn btn-secondary" style="font-size:11px;" onclick="clearMapGeometry()">Smazat geometrii</button>
+                </div>
+
+                <div class="field-row" style="margin-top: 8px;">
+                    <div class="field">
+                        <label>Barva čáry</label>
+                        <input type="color" id="inp-line-color" value="#d32f2f" style="height:32px; padding:2px 4px;" onchange="updateMapStyle()">
+                    </div>
+                    <div class="field">
+                        <label>Šířka čáry (px)</label>
+                        <input type="number" id="inp-line-width" min="1" max="10" step="0.5" value="4.5" oninput="updateMapStyle()">
+                    </div>
+                </div>
+
+                <div class="field-row">
+                    <div class="field">
+                        <label>Zoom mapy</label>
+                        <input type="number" id="inp-map-zoom" min="10" max="19" value="17" oninput="onMapZoomInput()">
+                    </div>
+                    <div class="field" style="display:flex; align-items:flex-end;">
+                        <button type="button" class="btn btn-secondary" style="width:100%; height:32px; font-size:11px;" onclick="fitMapToGeometry()">Na prvek</button>
+                    </div>
+                </div>
+
+                <div class="section-label">Katastrální mapa ČÚZK (WMS)</div>
+                <div class="field" style="margin-bottom: 6px;">
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                        <input type="checkbox" id="chk-cuzk-wms" style="width:auto;" onchange="onCuzkWmsChange()" checked>
+                        <span>Zobrazit hranice parcel ČÚZK</span>
+                    </label>
+                </div>
+                <div class="field-row" id="wrap-cuzk-options">
+                    <div class="field">
+                        <label>Čísla parcel</label>
+                        <select id="sel-cuzk-numbers" onchange="onCuzkWmsChange()">
+                            <option value="yes" selected>Včetně parcelních čísel</option>
+                            <option value="no">Pouze hranice parcel</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Průhlednost (%)</label>
+                        <input type="range" id="rng-cuzk-opacity" min="20" max="100" value="85" oninput="onCuzkWmsChange()" style="padding:0; height:28px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Správa -->
+        <div class="page-label" onclick="toggleSec('sec-sprava-fields')">
+            <span>Sekce Správa</span>
+            <span id="arr-sec-sprava-fields">Rozbalit</span>
+        </div>
+        <div id="sec-sprava-fields">
+            <div class="field">
+                <label>Nadpis sekce</label>
+                <input type="text" id="inp-sec2-title" oninput="updateCurrentCardData()" value="SPRÁVA">
+            </div>
+            <div id="container-sprava-fields"></div>
+            <button type="button" class="btn-add-item" onclick="addKvItem('spravaInfo')">+ Přidat položku správy</button>
+        </div>
+
+        <!-- 4. Technické údaje -->
+        <div class="page-label" onclick="toggleSec('sec-tech-fields')">
+            <span>Sekce Technické údaje</span>
+            <span id="arr-sec-tech-fields">Rozbalit</span>
+        </div>
+        <div id="sec-tech-fields">
+            <div class="field">
+                <label>Nadpis sekce</label>
+                <input type="text" id="inp-sec3-title" oninput="updateCurrentCardData()" value="TECHNICKÉ ÚDAJE">
+            </div>
+
+            <div class="section-label">Podblok 1 (Délka, šířka, mosty)</div>
+            <div id="container-tech1-fields"></div>
+            <button type="button" class="btn-add-item" onclick="addKvItem('techBlock1')">+ Přidat do bloku 1</button>
+
+            <div class="section-label">Podblok 2 (Údržba, vozovka, provoz, pruhy)</div>
+            <div id="container-tech2-fields"></div>
+            <button type="button" class="btn-add-item" onclick="addKvItem('techBlock2')">+ Přidat do bloku 2</button>
+
+            <div class="section-label">Podblok 3 (Vytížení, povrch)</div>
+            <div id="container-tech3-fields"></div>
+            <button type="button" class="btn-add-item" onclick="addKvItem('techBlock3')">+ Přidat do bloku 3</button>
+        </div>
+
+        <!-- 5. Patička -->
+        <div class="page-label" onclick="toggleSec('sec-footer-fields')">
+            <span>Patička karty</span>
+            <span id="arr-sec-footer-fields">Rozbalit</span>
+        </div>
+        <div id="sec-footer-fields">
+            <div class="field">
+                <label>Logo firmy v patičce</label>
+                <div class="file-field" onclick="document.getElementById('file-footer-logo').click()">Vybrat jiné logo (výchozí: logo3.png)</div>
+                <input type="file" id="file-footer-logo" accept="image/*" style="display:none" onchange="handleFooterLogoUpload(this)">
+                <button type="button" class="btn btn-secondary" style="width:100%; margin-top:4px; font-size:11px;" onclick="resetFooterLogo()">Obnovit výchozí logo Atomicon</button>
+            </div>
+            <div class="field">
+                <label>Firma a adresa</label>
+                <input type="text" id="inp-footer-company" oninput="updateCurrentCardData()" value="ATOMICON s. r. o. Stupkova 952/18, Olomouc 779 00">
+            </div>
+            <div class="field">
+                <label>Telefon a kontakt</label>
+                <input type="text" id="inp-footer-phone" oninput="updateCurrentCardData()" value="tel. +420 778 481 700">
+            </div>
+        </div>
+
+        <!-- 6. Zálohování dat -->
+        <div class="page-label" onclick="toggleSec('sec-backup-fields')">
+            <span>Záloha a projekt</span>
+            <span id="arr-sec-backup-fields">Rozbalit</span>
+        </div>
+        <div id="sec-backup-fields">
+            <div class="field-row">
+                <button type="button" class="btn btn-secondary" onclick="exportCardsToJson()">Export do JSON</button>
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('file-import-json').click()">Načíst z JSON</button>
+                <input type="file" id="file-import-json" accept=".json" style="display:none" onchange="importCardsFromJson(this)">
+            </div>
+            <button type="button" class="btn btn-danger" style="width:100%; margin-top:8px; font-size:11px;" onclick="resetAllToDefault()">Obnovit výchozí vzor Svésedlice</button>
+        </div>
+
+        <!-- Tlačítka dole -->
+        <div class="btn-sticky-box">
+            <button class="btn btn-primary" style="padding:11px 16px; font-size:13px; font-weight:700;" onclick="window.print()">
+                Uložit jako PDF / Tisk (Ctrl+P)
+            </button>
+        </div>
+
+    </div>
+
+    <!-- ======================================================================
+         PRAVOSTRANNÝ NÁHLED A4 (BEZ BAREVNÉHO OHRANIČENÍ)
+         ====================================================================== -->
+    <div class="preview-panel" id="preview-panel"></div>
+</div>
+
+<script>
+/* ==========================================================================
+   DATOVÝ MODEL (VÝCHOZÍ VZOR DLE Karta-vzor.pdf)
+   ========================================================================== */
+const DEFAULT_CARD = {
+    id: 1,
+    cardTitle: 'PASPORT KOMUNIKACE Č. 01B',
+    headerIconType: 'road', // 'road', 'custom', 'none'
+    headerCustomIconSrc: '',
+    headerIconSize: 38,
+
+    // Sekce 1: Základní údaje & Mapa
+    basicInfo: [
+        { label: 'Obec:', value: 'Svésedlice' },
+        { label: 'Část obce:', value: 'Svésedlice' },
+        { label: 'Katastrální území:', value: 'Svésedlice' },
+        { label: 'Třída komunikace:', value: 'Místní komunikace - významná (b)' }
+    ],
+    map: {
+        type: 'interactive', // 'interactive' nebo 'image'
+        imageSrc: '',
+        lat: 49.5772,
+        lng: 17.3828,
+        zoom: 17,
+        showCuzkParcels: true,
+        cuzkIncludeNumbers: true,
+        cuzkOpacity: 0.85,
+        lineColor: '#d32f2f',
+        lineWidth: 4.5,
+        polyline: [
+            [49.57595, 17.3813],
+            [49.57655, 17.3821],
+            [49.57715, 17.3830],
+            [49.57775, 17.3840]
+        ],
+        marker: null
+    },
+
+    // Sekce 2: Správa
+    sec2Title: 'SPRÁVA',
+    spravaInfo: [
+        { label: 'Vlastník parcely*:', value: 'Obec' },
+        { label: 'Správce:', value: 'Obec' }
+    ],
+
+    // Sekce 3: Technické údaje
+    sec3Title: 'TECHNICKÉ ÚDAJE',
+    techBlock1: [
+        { label: 'Délka komunikace (m):', value: '275,7' },
+        { label: 'Počet mostů:', value: '-' },
+        { label: 'Průměrná šířka (m):', value: '4,5' },
+        { label: 'Délka mostů (m):', value: '-' }
+    ],
+    techBlock2: [
+        { label: 'Zimní údržba:', value: 'ano' },
+        { label: 'Stav vozovky:', value: 'Velmi dobrý' },
+        { label: 'Typ krajnice:', value: 'bez krajnice' },
+        { label: 'Provoz na komunikaci:', value: 'Obousměrný' },
+        { label: 'Počet pruhů:', value: '2' }
+    ],
+    techBlock3: [
+        { label: 'Vytížení komunikace:', value: '1 - TDZ VI' },
+        { label: 'Povrch komunikace:', value: 'asfalt' }
+    ],
+
+    // Patička
+    footerLogo: './img/logo3.png',
+    footerCompany: 'ATOMICON s. r. o. Stupkova 952/18, Olomouc 779 00',
+    footerPhone: 'tel. +420 778 481 700'
+};
+
+let cardsData = [];
+let activeCardIdx = 0;
+let mapInstances = {};
+let currentMapTool = 'pan';
+
+/* ==========================================================================
+   INICIALIZACE
+   ========================================================================== */
+window.addEventListener('DOMContentLoaded', () => {
+    loadCardsFromStorage();
+    renderPageNavigation();
+    renderAllCards();
+    populateFormWithActiveCard();
+});
+
+function saveCardsToStorage() {
+    try {
+        localStorage.setItem('atomicon_cards_export_data', JSON.stringify(cardsData));
+    } catch (e) {}
+}
+
+function loadCardsFromStorage() {
+    try {
+        const saved = localStorage.getItem('atomicon_cards_export_data');
+        if (saved) cardsData = JSON.parse(saved);
+    } catch (e) {
+        cardsData = [];
+    }
+
+    if (!Array.isArray(cardsData) || cardsData.length === 0) {
+        cardsData = [JSON.parse(JSON.stringify(DEFAULT_CARD))];
+    } else {
+        cardsData.forEach(c => {
+            if (c.map) {
+                if (c.map.type === undefined) c.map.type = 'interactive';
+                if (c.map.imageSrc === undefined) c.map.imageSrc = '';
+                if (c.map.showCuzkParcels === undefined) c.map.showCuzkParcels = true;
+                if (c.map.cuzkIncludeNumbers === undefined) c.map.cuzkIncludeNumbers = true;
+                if (c.map.cuzkOpacity === undefined) c.map.cuzkOpacity = 0.85;
+            }
+        });
+    }
+    activeCardIdx = 0;
+}
+
+/* ==========================================================================
+   NAVIGACE MEZI STRÁNKAMI
+   ========================================================================== */
+function renderPageNavigation() {
+    const total = cardsData.length;
+    if (activeCardIdx >= total) activeCardIdx = Math.max(0, total - 1);
+
+    document.getElementById('lbl-page-active').textContent = `${activeCardIdx + 1} z ${total}`;
+    document.getElementById('btn-prev-page').disabled = (activeCardIdx === 0);
+    document.getElementById('btn-next-page').disabled = (activeCardIdx === total - 1);
+    document.getElementById('btn-del-card').disabled = (total <= 1);
+
+    const sel = document.getElementById('sel-active-card');
+    sel.innerHTML = cardsData.map((c, i) =>
+        `<option value="${i}" ${i === activeCardIdx ? 'selected' : ''}>Karta ${i + 1}: ${escapeHtml(c.cardTitle || 'Bez názvu')}</option>`
+    ).join('');
+
+    const pills = document.getElementById('page-pills-container');
+    pills.innerHTML = cardsData.map((c, i) =>
+        `<button type="button" class="page-pill ${i === activeCardIdx ? 'active' : ''}" onclick="switchCard(${i})">${i + 1}</button>`
+    ).join('');
+}
+
+function switchCard(index) {
+    if (index < 0 || index >= cardsData.length) return;
+    activeCardIdx = index;
+    renderPageNavigation();
+    populateFormWithActiveCard();
+    scrollToActivePage();
+}
+
+function prevCard() {
+    if (activeCardIdx > 0) switchCard(activeCardIdx - 1);
+}
+
+function nextCard() {
+    if (activeCardIdx < cardsData.length - 1) switchCard(activeCardIdx + 1);
+}
+
+function addNewCard() {
+    const newCard = JSON.parse(JSON.stringify(DEFAULT_CARD));
+    newCard.id = Date.now();
+    newCard.cardTitle = `PASPORT KOMUNIKACE Č. 0${cardsData.length + 1}B`;
+    if (cardsData[activeCardIdx]) {
+        newCard.basicInfo = JSON.parse(JSON.stringify(cardsData[activeCardIdx].basicInfo));
+        newCard.map.type = cardsData[activeCardIdx].map.type || 'interactive';
+        newCard.map.imageSrc = cardsData[activeCardIdx].map.imageSrc || '';
+        newCard.map.lat = cardsData[activeCardIdx].map.lat;
+        newCard.map.lng = cardsData[activeCardIdx].map.lng;
+        newCard.map.zoom = cardsData[activeCardIdx].map.zoom;
+        newCard.map.polyline = [];
+        newCard.map.marker = null;
+    }
+    cardsData.push(newCard);
+    activeCardIdx = cardsData.length - 1;
+    saveCardsToStorage();
+    renderPageNavigation();
+    renderAllCards();
+    populateFormWithActiveCard();
+    scrollToActivePage();
+}
+
+function duplicateCurrentCard() {
+    const curr = cardsData[activeCardIdx];
+    const dupl = JSON.parse(JSON.stringify(curr));
+    dupl.id = Date.now();
+    dupl.cardTitle = `${dupl.cardTitle} (Kopie)`;
+    cardsData.splice(activeCardIdx + 1, 0, dupl);
+    activeCardIdx = activeCardIdx + 1;
+    saveCardsToStorage();
+    renderPageNavigation();
+    renderAllCards();
+    populateFormWithActiveCard();
+    scrollToActivePage();
+}
+
+function deleteCurrentCard() {
+    if (cardsData.length <= 1) {
+        alert('V dokumentu musí zůstat alespoň jedna karta.');
+        return;
+    }
+    if (!confirm(`Opravdu smazat Kartu ${activeCardIdx + 1}?`)) return;
+
+    const delId = cardsData[activeCardIdx].id;
+    if (mapInstances[delId]) {
+        try { mapInstances[delId].remove(); } catch(e){}
+        delete mapInstances[delId];
+    }
+
+    cardsData.splice(activeCardIdx, 1);
+    if (activeCardIdx >= cardsData.length) activeCardIdx = cardsData.length - 1;
+    saveCardsToStorage();
+    renderPageNavigation();
+    renderAllCards();
+    populateFormWithActiveCard();
+}
+
+function scrollToActivePage() {
+    const pageEl = document.getElementById(`page-card-${cardsData[activeCardIdx].id}`);
+    if (pageEl) {
+        pageEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    setTimeout(() => {
+        Object.values(mapInstances).forEach(m => {
+            try { m.invalidateSize(); } catch(e){}
+        });
+    }, 150);
+}
+
+/* ==========================================================================
+   PLNĚNÍ FORMULÁŘE
+   ========================================================================== */
+function populateFormWithActiveCard() {
+    const card = cardsData[activeCardIdx];
+    if (!card) return;
+
+    document.getElementById('inp-card-title').value = card.cardTitle || '';
+    document.getElementById('inp-icon-size').value = card.headerIconSize || 38;
+
+    updateIconPreviewInPanel();
+
+    document.getElementById('inp-sec2-title').value = card.sec2Title || 'SPRÁVA';
+    document.getElementById('inp-sec3-title').value = card.sec3Title || 'TECHNICKÉ ÚDAJE';
+
+    // Přepínač režimu mapy (interaktivní OSM vs vlastní nahraný obrázek)
+    const isImageMode = (card.map.type === 'image');
+    const wrapImage = document.getElementById('wrap-map-image-upload');
+    const wrapInteractive = document.getElementById('wrap-interactive-map-tools');
+    const btnInteractive = document.getElementById('btn-mode-interactive');
+    const btnImage = document.getElementById('btn-mode-image');
+
+    if (wrapImage) wrapImage.style.display = isImageMode ? 'block' : 'none';
+    if (wrapInteractive) wrapInteractive.style.display = isImageMode ? 'none' : 'block';
+
+    if (btnInteractive && btnImage) {
+        if (isImageMode) {
+            btnInteractive.className = 'btn btn-secondary';
+            btnInteractive.style.flex = '1';
+            btnInteractive.style.fontSize = '11px';
+            btnImage.className = 'btn btn-primary';
+            btnImage.style.flex = '1';
+            btnImage.style.fontSize = '11px';
+        } else {
+            btnInteractive.className = 'btn btn-primary';
+            btnInteractive.style.flex = '1';
+            btnInteractive.style.fontSize = '11px';
+            btnImage.className = 'btn btn-secondary';
+            btnImage.style.flex = '1';
+            btnImage.style.fontSize = '11px';
+        }
+    }
+
+    updateMapImagePreviewInPanel();
+
+    document.getElementById('inp-map-zoom').value = card.map.zoom || 17;
+    document.getElementById('inp-line-color').value = card.map.lineColor || '#d32f2f';
+    document.getElementById('inp-line-width').value = card.map.lineWidth || 4.5;
+
+    document.getElementById('chk-cuzk-wms').checked = (card.map.showCuzkParcels !== false);
+    document.getElementById('sel-cuzk-numbers').value = (card.map.cuzkIncludeNumbers !== false) ? 'yes' : 'no';
+    document.getElementById('rng-cuzk-opacity').value = Math.round(((card.map.cuzkOpacity !== undefined) ? card.map.cuzkOpacity : 0.85) * 100);
+
+    document.getElementById('inp-footer-company').value = card.footerCompany || '';
+    document.getElementById('inp-footer-phone').value = card.footerPhone || '';
+
+    renderKvEditor('container-basic-fields', 'basicInfo');
+    renderKvEditor('container-sprava-fields', 'spravaInfo');
+    renderKvEditor('container-tech1-fields', 'techBlock1');
+    renderKvEditor('container-tech2-fields', 'techBlock2');
+    renderKvEditor('container-tech3-fields', 'techBlock3');
+
+    const obecItem = card.basicInfo.find(it => it.label.toLowerCase().includes('obec'));
+    if (obecItem) {
+        document.getElementById('mapObec').value = obecItem.value;
+    }
+}
+
+function updateIconPreviewInPanel() {
+    const card = cardsData[activeCardIdx];
+    const previewWrap = document.getElementById('icon-preview-container');
+    const previewImg = document.getElementById('icon-preview-img');
+    const previewDesc = document.getElementById('icon-preview-desc');
+
+    if (card.headerIconType === 'custom' && card.headerCustomIconSrc) {
+        previewWrap.style.display = 'flex';
+        previewImg.src = card.headerCustomIconSrc;
+        previewDesc.textContent = 'Aktivní vlastní ikona';
+    } else {
+        previewWrap.style.display = 'none';
+    }
+}
+
+function updateMapImagePreviewInPanel() {
+    const card = cardsData[activeCardIdx];
+    const previewBox = document.getElementById('map-image-preview-box');
+    const thumb = document.getElementById('map-image-thumb');
+    if (!previewBox || !thumb) return;
+
+    if (card && card.map && card.map.type === 'image' && card.map.imageSrc) {
+        previewBox.style.display = 'flex';
+        thumb.src = card.map.imageSrc;
+    } else {
+        previewBox.style.display = 'none';
+        thumb.src = '';
+    }
+}
+
+function setMapDisplayMode(mode) {
+    const card = cardsData[activeCardIdx];
+    if (!card) return;
+    card.map.type = mode;
+    saveCardsToStorage();
+    populateFormWithActiveCard();
+
+    if (mode === 'image') {
+        if (mapInstances[card.id]) {
+            try { mapInstances[card.id].remove(); } catch(e){}
+            delete mapInstances[card.id];
+        }
+        updateCardPreviewDOM(activeCardIdx);
+    } else {
+        const pageEl = document.getElementById(`page-card-${card.id}`);
+        if (pageEl) {
+            pageEl.innerHTML = buildCardHTML(card, activeCardIdx);
+            initCardMap(card, activeCardIdx);
+        }
+    }
+}
+
+function handleMapImageUpload(input) {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const card = cardsData[activeCardIdx];
+        if (!card) return;
+        card.map.imageSrc = e.target.result;
+        card.map.type = 'image';
+        saveCardsToStorage();
+        populateFormWithActiveCard();
+        updateCardPreviewDOM(activeCardIdx);
+    };
+    reader.readAsDataURL(file);
+    input.value = '';
+}
+
+function removeMapImage() {
+    const card = cardsData[activeCardIdx];
+    if (!card) return;
+    card.map.imageSrc = '';
+    saveCardsToStorage();
+    populateFormWithActiveCard();
+    updateCardPreviewDOM(activeCardIdx);
+}
+
+function renderKvEditor(containerId, dataPropName) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const card = cardsData[activeCardIdx];
+    const items = card[dataPropName] || [];
+
+    container.innerHTML = items.map((item, idx) => `
+        <div class="kv-edit-row">
+            <input type="text" value="${escapeHtml(item.label)}" placeholder="Popisek" oninput="updateKvItem('${dataPropName}', ${idx}, 'label', this.value)">
+            <input type="text" value="${escapeHtml(item.value)}" placeholder="Hodnota" oninput="updateKvItem('${dataPropName}', ${idx}, 'value', this.value)">
+            <button type="button" class="btn-del-item" onclick="removeKvItem('${dataPropName}', ${idx})" title="Smazat">✕</button>
+        </div>
+    `).join('');
+}
+
+function updateKvItem(dataPropName, idx, field, val) {
+    const card = cardsData[activeCardIdx];
+    if (card && card[dataPropName] && card[dataPropName][idx]) {
+        card[dataPropName][idx][field] = val;
+        saveCardsToStorage();
+        updateCardPreviewDOM(activeCardIdx);
+    }
+}
+
+function addKvItem(dataPropName) {
+    const card = cardsData[activeCardIdx];
+    if (!card) return;
+    if (!card[dataPropName]) card[dataPropName] = [];
+    card[dataPropName].push({ label: 'Nové pole:', value: '-' });
+    saveCardsToStorage();
+    renderKvEditor(
+        dataPropName === 'basicInfo' ? 'container-basic-fields' :
+        dataPropName === 'spravaInfo' ? 'container-sprava-fields' :
+        dataPropName === 'techBlock1' ? 'container-tech1-fields' :
+        dataPropName === 'techBlock2' ? 'container-tech2-fields' : 'container-tech3-fields',
+        dataPropName
+    );
+    updateCardPreviewDOM(activeCardIdx);
+}
+
+function removeKvItem(dataPropName, idx) {
+    const card = cardsData[activeCardIdx];
+    if (!card || !card[dataPropName]) return;
+    card[dataPropName].splice(idx, 1);
+    saveCardsToStorage();
+    renderKvEditor(
+        dataPropName === 'basicInfo' ? 'container-basic-fields' :
+        dataPropName === 'spravaInfo' ? 'container-sprava-fields' :
+        dataPropName === 'techBlock1' ? 'container-tech1-fields' :
+        dataPropName === 'techBlock2' ? 'container-tech2-fields' : 'container-tech3-fields',
+        dataPropName
+    );
+    updateCardPreviewDOM(activeCardIdx);
+}
+
+/* Nahrávání a správa ikony v záhlaví */
+function handleHeaderIconUpload(input) {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        cardsData[activeCardIdx].headerCustomIconSrc = e.target.result;
+        cardsData[activeCardIdx].headerIconType = 'custom';
+        saveCardsToStorage();
+        updateCardPreviewDOM(activeCardIdx);
+        updateIconPreviewInPanel();
+    };
+    reader.readAsDataURL(file);
+    input.value = '';
+}
+
+function resetHeaderIconToRoad() {
+    cardsData[activeCardIdx].headerIconType = 'road';
+    cardsData[activeCardIdx].headerCustomIconSrc = '';
+    saveCardsToStorage();
+    updateCardPreviewDOM(activeCardIdx);
+    updateIconPreviewInPanel();
+}
+
+function removeHeaderIcon() {
+    cardsData[activeCardIdx].headerIconType = 'none';
+    cardsData[activeCardIdx].headerCustomIconSrc = '';
+    saveCardsToStorage();
+    updateCardPreviewDOM(activeCardIdx);
+    updateIconPreviewInPanel();
+}
+
+function handleFooterLogoUpload(input) {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        cardsData[activeCardIdx].footerLogo = e.target.result;
+        saveCardsToStorage();
+        updateCardPreviewDOM(activeCardIdx);
+    };
+    reader.readAsDataURL(file);
+}
+
+function resetFooterLogo() {
+    cardsData[activeCardIdx].footerLogo = './img/logo3.png';
+    saveCardsToStorage();
+    updateCardPreviewDOM(activeCardIdx);
+}
+
+function updateCurrentCardData() {
+    const card = cardsData[activeCardIdx];
+    if (!card) return;
+
+    card.cardTitle = document.getElementById('inp-card-title').value;
+    card.headerIconSize = parseInt(document.getElementById('inp-icon-size').value, 10) || 38;
+    card.sec2Title = document.getElementById('inp-sec2-title').value;
+    card.sec3Title = document.getElementById('inp-sec3-title').value;
+    card.footerCompany = document.getElementById('inp-footer-company').value;
+    card.footerPhone = document.getElementById('inp-footer-phone').value;
+
+    saveCardsToStorage();
+    renderPageNavigation();
+    updateCardPreviewDOM(activeCardIdx);
+}
+
+/* ==========================================================================
+   VYKRESLOVÁNÍ KARET V NÁHLEDU (A4)
+   ========================================================================== */
+function renderAllCards() {
+    const preview = document.getElementById('preview-panel');
+    preview.innerHTML = '';
+
+    cardsData.forEach((card, idx) => {
+        const pageEl = document.createElement('div');
+        pageEl.className = 'page';
+        pageEl.id = `page-card-${card.id}`;
+        pageEl.onclick = () => {
+            if (activeCardIdx !== idx) switchCard(idx);
+        };
+
+        pageEl.innerHTML = buildCardHTML(card, idx);
+        preview.appendChild(pageEl);
+
+        initCardMap(card, idx);
+    });
+}
+
+function buildCardHTML(card, idx) {
+    const iconHtml = renderIconHtml(card);
+
+    // Základní údaje tabulka
+    const basicRows = (card.basicInfo || []).map(it => `
+        <tr>
+            <td class="label-col">${escapeHtml(it.label)}</td>
+            <td class="val-col">${escapeHtml(it.value)}</td>
+        </tr>
+    `).join('');
+
+    // Správa
+    const spravaRows = (card.spravaInfo || []).map(it => `
+        <div class="sprava-item">
+            <span class="kv-label">${escapeHtml(it.label)}</span>
+            <span class="kv-value">${escapeHtml(it.value)}</span>
+        </div>
+    `).join('');
+
+    // Technické údaje podbloky
+    const tech1Rows = (card.techBlock1 || []).map(it => `
+        <div class="tech-grid-row">
+            <span class="kv-label">${escapeHtml(it.label)}</span>
+            <span class="kv-value">${escapeHtml(it.value)}</span>
+        </div>
+    `).join('');
+
+    const tech2Rows = (card.techBlock2 || []).map(it => `
+        <div class="tech-grid-row">
+            <span class="kv-label">${escapeHtml(it.label)}</span>
+            <span class="kv-value">${escapeHtml(it.value)}</span>
+        </div>
+    `).join('');
+
+    const tech3Rows = (card.techBlock3 || []).map(it => `
+        <div class="tech-grid-row" style="grid-column: span 2;">
+            <span class="kv-label" style="min-width: 165px;">${escapeHtml(it.label)}</span>
+            <span class="kv-value">${escapeHtml(it.value)}</span>
+        </div>
+    `).join('');
+
+    return `
+        <!-- Záhlaví: Nadpis přesně uprostřed, ikona vlevo -->
+        <div class="card-header-row">
+            <div class="card-header-icon-box" style="height:${card.headerIconSize || 38}px; width:${(card.headerIconSize || 38) * 1.15}px;">
+                ${iconHtml}
+            </div>
+            <div class="card-header-title">${escapeHtml(card.cardTitle || '')}</div>
+        </div>
+        <div class="header-divider-line"></div>
+
+        <!-- Sekce 1: Základní údaje & Mapa s border-radius -->
+        <div class="sec-top-grid">
+            <table class="basic-info-table">
+                <tbody>${basicRows}</tbody>
+            </table>
+            <div class="card-map-wrapper">
+                ${renderMapSlotHTML(card)}
+            </div>
+        </div>
+        <div class="sec-divider-line"></div>
+
+        <!-- Sekce 2: SPRÁVA -->
+        <div class="sec-title">${escapeHtml(card.sec2Title || 'SPRÁVA')}</div>
+        <div class="sprava-grid">
+            ${spravaRows}
+        </div>
+        <div class="sec-divider-line"></div>
+
+        <!-- Sekce 3: TECHNICKÉ ÚDAJE -->
+        <div class="sec-title">${escapeHtml(card.sec3Title || 'TECHNICKÉ ÚDAJE')}</div>
+        <div class="tech-grid-2col">
+            ${tech1Rows}
+        </div>
+        <div class="sub-divider-line"></div>
+        <div class="tech-grid-2col">
+            ${tech2Rows}
+        </div>
+        <div class="sub-divider-line"></div>
+        <div class="tech-grid-2col">
+            ${tech3Rows}
+        </div>
+
+        <!-- Patička -->
+        <div class="card-footer">
+            <div class="footer-logo-box">
+                <img src="${card.footerLogo || './img/logo3.png'}" alt="Logo" onerror="this.onerror=null; this.src='./img/logo3.png';">
+            </div>
+            <div class="footer-company-text">
+                <div><strong>${escapeHtml(card.footerCompany || '')}</strong></div>
+                <div>${escapeHtml(card.footerPhone || '')}</div>
+            </div>
+        </div>
+    `;
+}
+
+function renderMapSlotHTML(card) {
+    if (card.map && card.map.type === 'image') {
+        if (card.map.imageSrc) {
+            return `<img src="${card.map.imageSrc}" alt="Obrázek mapy">`;
+        }
+        return `
+            <div style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#f4f5f7; color:#78909c; text-align:center; padding:12px; font-size:11px;">
+                <span style="font-weight:700; color:#546e7a; margin-bottom:4px;">Vlastní obrázek mapy</span>
+                <span style="font-size:10px;">Nahrajte soubor v levém panelu</span>
+            </div>
+        `;
+    }
+    return `<div id="map-container-${card.id}" style="width:100%; height:100%;"></div>`;
+}
+
+function renderIconHtml(card) {
+    const type = card.headerIconType || 'road';
+    if (type === 'none') return '';
+    if (type === 'custom' && card.headerCustomIconSrc) {
+        return `<img src="${card.headerCustomIconSrc}" alt="Ikona">`;
+    }
+    // Výchozí ikona silnice
+    return `<svg viewBox="0 0 64 64">
+        <path d="M10 50 C 14 36, 26 34, 32 30 C 38 26, 50 24, 54 10" stroke="#1a1a1a" stroke-width="13" stroke-linecap="round" fill="none"/>
+        <path d="M10 50 C 14 36, 26 34, 32 30 C 38 26, 50 24, 54 10" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="4 4" fill="none"/>
+    </svg>`;
+}
+
+function updateCardPreviewDOM(idx) {
+    const card = cardsData[idx];
+    if (!card) return;
+    const pageEl = document.getElementById(`page-card-${card.id}`);
+    if (!pageEl) {
+        renderAllCards();
+        return;
+    }
+
+    if (card.map && card.map.type === 'image') {
+        if (mapInstances[card.id]) {
+            try { mapInstances[card.id].remove(); } catch(e){}
+            delete mapInstances[card.id];
+        }
+        pageEl.innerHTML = buildCardHTML(card, idx);
+        return;
+    }
+
+    const mapWrap = pageEl.querySelector('.card-map-wrapper');
+    const existingMapDiv = document.getElementById(`map-container-${card.id}`);
+
+    if (existingMapDiv && mapWrap) {
+        const tempHolder = document.createElement('div');
+        tempHolder.appendChild(existingMapDiv);
+        pageEl.innerHTML = buildCardHTML(card, idx);
+        const newMapWrap = pageEl.querySelector('.card-map-wrapper');
+        if (newMapWrap) {
+            newMapWrap.innerHTML = '';
+            newMapWrap.appendChild(existingMapDiv);
+        }
+    } else {
+        pageEl.innerHTML = buildCardHTML(card, idx);
+        initCardMap(card, idx);
+    }
+}
+
+/* ==========================================================================
+   LEAFLET MAPA (OSM)
+   ========================================================================== */
+function initCardMap(card, idx) {
+    if (card.map && card.map.type === 'image') {
+        if (mapInstances[card.id]) {
+            try { mapInstances[card.id].remove(); } catch(e){}
+            delete mapInstances[card.id];
+        }
+        return;
+    }
+
+    const mapContainerId = `map-container-${card.id}`;
+    const el = document.getElementById(mapContainerId);
+    if (!el) return;
+
+    if (mapInstances[card.id]) {
+        try { mapInstances[card.id].remove(); } catch(e){}
+        delete mapInstances[card.id];
+    }
+
+    if (typeof L === 'undefined') return;
+
+    const map = L.map(mapContainerId, {
+        zoomControl: true,
+        attributionControl: true
+    }).setView([card.map.lat, card.map.lng], card.map.zoom);
+
+    L.control.scale({
+        position: 'topleft',
+        imperial: false,
+        metric: true
+    }).addTo(map);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(map);
+
+    // 2. ČÚZK WMS: Hranice parcel a parcelní čísla
+    map._cuzkWmsLayer = null;
+    if (card.map.showCuzkParcels !== false) {
+        const wmsLayers = (card.map.cuzkIncludeNumbers !== false) ? 'hranice_parcel,parcelni_cisla' : 'hranice_parcel';
+        map._cuzkWmsLayer = L.tileLayer.wms('https://services.cuzk.cz/wms/local-km-wms.asp', {
+            layers: wmsLayers,
+            format: 'image/png',
+            transparent: true,
+            version: '1.3.0',
+            crs: L.CRS.EPSG3857,
+            attribution: '&copy; ČÚZK',
+            minZoom: 13,
+            maxZoom: 20,
+            opacity: (card.map.cuzkOpacity !== undefined) ? card.map.cuzkOpacity : 0.85
+        }).addTo(map);
+    }
+
+    map._polylineLayer = null;
+    map._markerLayer = null;
+    map._vertexMarkers = [];
+
+    mapInstances[card.id] = map;
+
+    renderCardMapGeometry(card);
+
+    map.on('click', (e) => onMapClick(e, card, idx));
+    map.on('moveend', () => {
+        const center = map.getCenter();
+        card.map.lat = center.lat;
+        card.map.lng = center.lng;
+        card.map.zoom = map.getZoom();
+        saveCardsToStorage();
+        if (idx === activeCardIdx) {
+            document.getElementById('inp-map-zoom').value = card.map.zoom;
+        }
+    });
+
+    setTimeout(() => {
+        try { map.invalidateSize(); } catch(e){}
+    }, 150);
+}
+
+function renderCardMapGeometry(card) {
+    const map = mapInstances[card.id];
+    if (!map) return;
+
+    if (map._polylineLayer) { map.removeLayer(map._polylineLayer); map._polylineLayer = null; }
+    if (map._markerLayer) { map.removeLayer(map._markerLayer); map._markerLayer = null; }
+    if (map._vertexMarkers) {
+        map._vertexMarkers.forEach(m => map.removeLayer(m));
+        map._vertexMarkers = [];
+    }
+
+    if (card.map.polyline && card.map.polyline.length > 0) {
+        map._polylineLayer = L.polyline(card.map.polyline, {
+            color: card.map.lineColor || '#d32f2f',
+            weight: card.map.lineWidth || 4.5,
+            opacity: 0.95,
+            lineCap: 'round',
+            lineJoin: 'round'
+        }).addTo(map);
+
+        if (currentMapTool === 'line' && cardsData[activeCardIdx].id === card.id) {
+            card.map.polyline.forEach((pt) => {
+                const vm = L.circleMarker(pt, {
+                    radius: 5,
+                    color: '#fff',
+                    fillColor: '#d32f2f',
+                    fillOpacity: 1,
+                    weight: 2
+                }).addTo(map);
+                map._vertexMarkers.push(vm);
+            });
+        }
+    }
+
+    if (card.map.marker) {
+        map._markerLayer = L.marker([card.map.marker[0], card.map.marker[1]]).addTo(map);
+    }
+
+    // Geometrie má být vždy navrchu nad WMS parcelami
+    if (map._polylineLayer) map._polylineLayer.bringToFront();
+    if (map._markerLayer) map._markerLayer.bringToFront();
+}
+
+function onCuzkWmsChange() {
+    const card = cardsData[activeCardIdx];
+    if (!card) return;
+    card.map.showCuzkParcels = document.getElementById('chk-cuzk-wms').checked;
+    card.map.cuzkIncludeNumbers = (document.getElementById('sel-cuzk-numbers').value === 'yes');
+    card.map.cuzkOpacity = (parseInt(document.getElementById('rng-cuzk-opacity').value, 10) || 85) / 100;
+    saveCardsToStorage();
+    updateCuzkWmsLayer(card);
+}
+
+function updateCuzkWmsLayer(card) {
+    const map = mapInstances[card.id];
+    if (!map) return;
+
+    if (map._cuzkWmsLayer) {
+        map.removeLayer(map._cuzkWmsLayer);
+        map._cuzkWmsLayer = null;
+    }
+
+    if (card.map.showCuzkParcels !== false) {
+        const wmsLayers = (card.map.cuzkIncludeNumbers !== false) ? 'hranice_parcel,parcelni_cisla' : 'hranice_parcel';
+        map._cuzkWmsLayer = L.tileLayer.wms('https://services.cuzk.cz/wms/local-km-wms.asp', {
+            layers: wmsLayers,
+            format: 'image/png',
+            transparent: true,
+            version: '1.3.0',
+            crs: L.CRS.EPSG3857,
+            attribution: '&copy; ČÚZK',
+            minZoom: 13,
+            maxZoom: 20,
+            opacity: (card.map.cuzkOpacity !== undefined) ? card.map.cuzkOpacity : 0.85
+        }).addTo(map);
+
+        if (map._polylineLayer) map._polylineLayer.bringToFront();
+        if (map._markerLayer) map._markerLayer.bringToFront();
+    }
+}
+
+function onMapClick(e, card, idx) {
+    if (activeCardIdx !== idx) {
+        switchCard(idx);
+        return;
+    }
+
+    const latlng = [e.latlng.lat, e.latlng.lng];
+
+    if (currentMapTool === 'line') {
+        if (!card.map.polyline) card.map.polyline = [];
+        card.map.polyline.push(latlng);
+        saveCardsToStorage();
+        renderCardMapGeometry(card);
+    } else if (currentMapTool === 'point') {
+        card.map.marker = latlng;
+        saveCardsToStorage();
+        renderCardMapGeometry(card);
+    }
+}
+
+function setMapTool(tool) {
+    currentMapTool = tool;
+    document.querySelectorAll('.map-tool-btn').forEach(btn => btn.classList.remove('active'));
+    const btn = document.getElementById(`tool-${tool}`);
+    if (btn) btn.classList.add('active');
+
+    const card = cardsData[activeCardIdx];
+    const map = mapInstances[card.id];
+    if (map) {
+        const container = map.getContainer();
+        if (tool === 'line' || tool === 'point') {
+            container.style.cursor = 'crosshair';
+        } else {
+            container.style.cursor = '';
+        }
+        renderCardMapGeometry(card);
+    }
+}
+
+function undoLastMapPoint() {
+    const card = cardsData[activeCardIdx];
+    if (card && card.map.polyline && card.map.polyline.length > 0) {
+        card.map.polyline.pop();
+        saveCardsToStorage();
+        renderCardMapGeometry(card);
+    }
+}
+
+function clearMapGeometry() {
+    const card = cardsData[activeCardIdx];
+    if (!card) return;
+    if (confirm('Opravdu vymazat trasu a bod z této mapy?')) {
+        card.map.polyline = [];
+        card.map.marker = null;
+        saveCardsToStorage();
+        renderCardMapGeometry(card);
+    }
+}
+
+function updateMapStyle() {
+    const card = cardsData[activeCardIdx];
+    if (!card) return;
+    card.map.lineColor = document.getElementById('inp-line-color').value;
+    card.map.lineWidth = parseFloat(document.getElementById('inp-line-width').value) || 4.5;
+    saveCardsToStorage();
+    renderCardMapGeometry(card);
+}
+
+function onMapZoomInput() {
+    const card = cardsData[activeCardIdx];
+    const map = mapInstances[card.id];
+    const z = parseInt(document.getElementById('inp-map-zoom').value, 10);
+    if (map && z >= 10 && z <= 19) {
+        map.setZoom(z);
+    }
+}
+
+function fitMapToGeometry() {
+    const card = cardsData[activeCardIdx];
+    const map = mapInstances[card.id];
+    if (!map) return;
+
+    if (card.map.polyline && card.map.polyline.length > 0) {
+        const bounds = L.latLngBounds(card.map.polyline);
+        map.fitBounds(bounds, { padding: [20, 20], maxZoom: 18 });
+    } else if (card.map.marker) {
+        map.setView(card.map.marker, 17);
+    }
+}
+
+/* ==========================================================================
+   NAŠEPTÁVAČ OBCÍ (ČÚZK RÚIAN API)
+   ========================================================================== */
+let obecDebounce = null;
+let obecActiveIdx = -1;
+let selectedObecKod = null;
+
+function onObecInput() {
+    clearTimeout(obecDebounce);
+    const q = document.getElementById('mapObec').value.trim();
+    if (q.length < 2) { hideObecSuggestions(); return; }
+    obecDebounce = setTimeout(() => fetchObecSuggestions(q), 280);
+}
+
+async function fetchObecSuggestions(q) {
+    try {
+        const url = `https://ags.cuzk.cz/arcgis/rest/services/RUIAN/MapServer/12/query`
+            + `?where=${encodeURIComponent("UPPER(nazev) LIKE UPPER('" + q.replace(/'/g, "''") + "%')")}`
+            + `&outFields=nazev,kod`
+            + `&returnGeometry=false`
+            + `&resultRecordCount=8`
+            + `&orderByFields=nazev`
+            + `&f=json`;
+        const resp = await fetch(url);
+        const data = await resp.json();
+        const list = document.getElementById('obecSuggestions');
+        if (!data.features || data.features.length === 0) { hideObecSuggestions(); return; }
+        obecActiveIdx = -1;
+        list.innerHTML = data.features.map((f, i) =>
+            `<div class="autocomplete-item" onmousedown="selectObec('${f.attributes.nazev.replace(/'/g, "\\'")}',${f.attributes.kod})"
+                 data-index="${i}" data-kod="${f.attributes.kod}">${f.attributes.nazev}<small>${f.attributes.kod}</small></div>`
+        ).join('');
+        list.classList.add('visible');
+    } catch (e) {
+        hideObecSuggestions();
+    }
+}
+
+function selectObec(name, kod) {
+    document.getElementById('mapObec').value = name;
+    selectedObecKod = kod || null;
+    hideObecSuggestions();
+    locateCity();
+}
+
+function hideObecSuggestions() {
+    const list = document.getElementById('obecSuggestions');
+    list.classList.remove('visible');
+    list.innerHTML = '';
+    obecActiveIdx = -1;
+}
+
+function onObecKeydown(e) {
+    const list = document.getElementById('obecSuggestions');
+    const items = list.querySelectorAll('.autocomplete-item');
+    if (!list.classList.contains('visible') || items.length === 0) {
+        if (e.key === 'Enter') locateCity();
+        return;
+    }
+    if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        obecActiveIdx = Math.min(obecActiveIdx + 1, items.length - 1);
+        items.forEach((it, i) => it.classList.toggle('active', i === obecActiveIdx));
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        obecActiveIdx = Math.max(obecActiveIdx - 1, 0);
+        items.forEach((it, i) => it.classList.toggle('active', i === obecActiveIdx));
+    } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (obecActiveIdx >= 0 && items[obecActiveIdx]) {
+            items[obecActiveIdx].onmousedown();
+        } else {
+            locateCity();
+        }
+    } else if (e.key === 'Escape') {
+        hideObecSuggestions();
+    }
+}
+
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.autocomplete-wrap')) hideObecSuggestions();
+});
+
+async function locateCity() {
+    hideObecSuggestions();
+    let query = document.getElementById("mapObec").value.trim();
+    if (!query) return;
+
+    let useKod = selectedObecKod;
+    selectedObecKod = null;
+
+    const card = cardsData[activeCardIdx];
+    const map = mapInstances[card.id];
+
+    try {
+        let whereClause = useKod ? `kod=${useKod}` : `nazev='${query.replace(/'/g, "''")}'`;
+        let ruianUrl = `https://ags.cuzk.cz/arcgis/rest/services/RUIAN/MapServer/12/query`
+            + `?where=${encodeURIComponent(whereClause)}`
+            + `&outFields=nazev`
+            + `&outSR=4326`
+            + `&returnGeometry=true`
+            + `&f=json`;
+        let ruianResp = await fetch(ruianUrl);
+        let ruianData = await ruianResp.json();
+
+        if (ruianData.features && ruianData.features.length > 0) {
+            let nazev = ruianData.features[0].attributes.nazev;
+            let rings = ruianData.features[0].geometry.rings;
+            let latlngs = rings.map(ring => ring.map(pt => [pt[1], pt[0]]));
+
+            let poly = L.polygon(latlngs);
+            let center = poly.getBounds().getCenter();
+
+            if (map) {
+                map.setView(center, 15);
+            }
+            card.map.lat = center.lat;
+            card.map.lng = center.lng;
+            card.map.zoom = 15;
+
+            updateObecFieldValues(nazev);
+            saveCardsToStorage();
+            return;
+        }
+    } catch (e) {}
+
+    // Fallback: Nominatim
+    try {
+        let nomUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', Česká republika')}&limit=1`;
+        let nomResp = await fetch(nomUrl);
+        let nomData = await nomResp.json();
+        if (nomData && nomData.length > 0) {
+            let lat = parseFloat(nomData[0].lat);
+            let lon = parseFloat(nomData[0].lon);
+            if (map) {
+                map.setView([lat, lon], 15);
+            }
+            card.map.lat = lat;
+            card.map.lng = lon;
+            card.map.zoom = 15;
+            updateObecFieldValues(query);
+            saveCardsToStorage();
+        }
+    } catch(e) {
+        alert('Obec se nepodařilo v mapě nalézt.');
+    }
+}
+
+function updateObecFieldValues(nazev) {
+    const card = cardsData[activeCardIdx];
+    if (!card) return;
+
+    card.basicInfo.forEach(item => {
+        const lbl = item.label.toLowerCase();
+        if (lbl.includes('obec:') || lbl.includes('část obce:') || lbl.includes('katastrální území:')) {
+            item.value = nazev;
+        }
+    });
+
+    populateFormWithActiveCard();
+    updateCardPreviewDOM(activeCardIdx);
+}
+
+/* ==========================================================================
+   EXPORT & IMPORT DO JSON
+   ========================================================================= */
+function exportCardsToJson() {
+    const jsonStr = JSON.stringify(cardsData, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Technicke-karty-export-${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function importCardsFromJson(input) {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            if (Array.isArray(data) && data.length > 0) {
+                cardsData = data;
+                activeCardIdx = 0;
+                saveCardsToStorage();
+                renderPageNavigation();
+                renderAllCards();
+                populateFormWithActiveCard();
+                alert(`Úspěšně načteno ${data.length} karet.`);
+            } else {
+                alert('Neplatný formát souboru karet.');
+            }
+        } catch(err) {
+            alert('Chyba při čtení JSON souboru: ' + err.message);
+        }
+        input.value = '';
+    };
+    reader.readAsText(file);
+}
+
+function resetAllToDefault() {
+    if (!confirm('Opravdu chcete obnovit všechny karty na výchozí vzor Svésedlice? Rozpracované změny budou přepsány.')) return;
+    cardsData = [JSON.parse(JSON.stringify(DEFAULT_CARD))];
+    activeCardIdx = 0;
+    saveCardsToStorage();
+    renderPageNavigation();
+    renderAllCards();
+    populateFormWithActiveCard();
+}
+
+/* ==========================================================================
+   POMOCNÉ FUNKCE
+   ========================================================================== */
+function toggleSec(secId) {
+    const sec = document.getElementById(secId);
+    const arr = document.getElementById(`arr-${secId}`);
+    if (!sec) return;
+    if (sec.style.display === 'none') {
+        sec.style.display = 'block';
+        if (arr) arr.textContent = 'Sbalit';
+    } else {
+        sec.style.display = 'none';
+        if (arr) arr.textContent = 'Rozbalit';
+    }
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+</script>
+
+</body>
+</html>
