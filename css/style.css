@@ -111,7 +111,7 @@ h1 {
     color: #1a1a2e;
     margin-bottom: 10px;
     padding-bottom: 6px;
-    border-bottom: 2px solid #cfd8dc;
+    border-bottom: 2px solid #1a1a2e;
     letter-spacing: 0.04em;
     min-height: 32px;
     display: flex;
@@ -240,12 +240,12 @@ h1 {
 }
 
 .card.export {
-    border-top-color: #FCF55F;
+    border-top-color: #cdc201;
 }
 
 .card.export .card-title,
 .card.export .card-icon {
-    color: #8c8200;
+    color: #cdc201;
 }
 
 .card.export:hover {
@@ -267,12 +267,12 @@ h1 {
 
 /* Témata Pasportů */
 .card.kom {
-    border-top-color: #e78d36;
+    border-top-color: #ff7b00;
 }
 
 .card.kom .card-title,
 .card.kom .card-icon {
-    color: #e78d36;
+    color: #ff7b00;
 }
 
 .card.kom:hover {
@@ -293,12 +293,12 @@ h1 {
 }
 
 .card.ndz {
-    border-top-color: #8b0000;
+    border-top-color: #e00000;
 }
 
 .card.ndz .card-title,
 .card.ndz .card-icon {
-    color: #8b0000;
+    color: #e00000;
 }
 
 .card.ndz:hover {
@@ -306,12 +306,12 @@ h1 {
 }
 
 .card.kan {
-    border-top-color: #8b5638;
+    border-top-color: #774122;
 }
 
 .card.kan .card-title,
 .card.kan .card-icon {
-    color: #8b5638;
+    color: #774122;
 }
 
 .card.kan:hover {
@@ -345,12 +345,12 @@ h1 {
 }
 
 .card.or {
-    border-top-color: #ff4186;
+    border-top-color: #ff00c8;
 }
 
 .card.or .card-title,
 .card.or .card-icon {
-    color: #ff4186;
+    color: #ff00c8;
 }
 
 .card.or:hover {
@@ -384,12 +384,12 @@ h1 {
 }
 
 .card.akt {
-    border-top-color: #f9a825;
+    border-top-color: #9d9800;
 }
 
 .card.akt .card-title,
 .card.akt .card-icon {
-    color: #f9a825;
+    color: #9d9800;
 }
 
 .card.akt:hover {
