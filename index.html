@@ -15,9 +15,10 @@
         color: #1a1a1a;
         min-height: 100vh;
         display: flex;
+        flex-direction: column;
         align-items: center;
-        justify-content: center;
-        padding: 15px 20px 10px;
+        justify-content: flex-start;
+        padding: 14px 20px 16px;
     }
 
     .container {
@@ -29,8 +30,11 @@
     }
 
     .header-text {
-        text-align: center;
-        margin-bottom: 14px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        margin-bottom: 0;
     }
 
     h1 {
@@ -179,17 +183,260 @@
     .card.zel { border-top-color: #2e7d32; } .card.zel .card-title, .card.zel .card-icon { color: #2e7d32; } .card.zel:hover { background: #e8f5e9; }
     .card.akt { border-top-color: #f9a825; } .card.akt .card-title, .card.akt .card-icon { color: #f9a825; } .card.akt:hover { background: #fffde7; }
 
-    /* ---- Patička ---- */
-    .footer {
-        margin-top: 16px;
-        font-size: 10px;
-        color: #757575;
+    /* ---- Instrukce pod nadpisem ---- */
+    .header-notice {
+        margin: 35px auto 38px;
+        font-size: 10.5px;
+        color: #999999;
         font-weight: 500;
         text-transform: uppercase;
         letter-spacing: 0.05em;
         text-align: center;
         max-width: 900px;
-        line-height: 1.35;
+        line-height: 1.4;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+    }
+
+    .notice-icon {
+        width: 15px;
+        height: 15px;
+        flex-shrink: 0;
+        color: #ea521f;
+    }
+
+    .header-notice strong {
+        color: #1a1a2e;
+        font-weight: 700;
+    }
+
+    /* ---- Tooltip pro kontakt ---- */
+    .has-tooltip {
+        position: relative;
+        color: inherit;
+        text-decoration: underline dotted #ea521f;
+        text-underline-offset: 3px;
+        cursor: pointer;
+        transition: color 0.15s ease;
+    }
+
+    .has-tooltip:hover {
+        color: #ea521f;
+    }
+
+    .has-tooltip.tooltip-radek {
+        text-decoration-color: #4483fc;
+    }
+    .has-tooltip.tooltip-radek:hover {
+        color: #4483fc;
+    }
+
+    .has-tooltip.tooltip-bara {
+        text-decoration-color: #ff4186;
+    }
+    .has-tooltip.tooltip-bara:hover {
+        color: #ff4186;
+    }
+
+    .has-tooltip::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: calc(100% + 7px);
+        left: 50%;
+        transform: translateX(-50%) translateY(4px);
+        background: #1a1a2e;
+        color: #ffffff;
+        font-size: 10px;
+        font-weight: 500;
+        text-transform: none;
+        letter-spacing: 0.02em;
+        padding: 4px 8px;
+        border-radius: 4px;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+        z-index: 100;
+    }
+
+    .has-tooltip::before {
+        content: '';
+        position: absolute;
+        bottom: calc(100% + 2px);
+        left: 50%;
+        transform: translateX(-50%) translateY(4px);
+        border: 5px solid transparent;
+        border-top-color: #1a1a2e;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+        z-index: 100;
+    }
+
+    .has-tooltip:hover::after,
+    .has-tooltip:hover::before {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    /* ---- Hledání / Filtrace ---- */
+    .search-container {
+        width: 100%;
+        max-width: 440px;
+        margin: 0 0 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+    }
+
+    .search-box {
+        width: 100%;
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 12px;
+        width: 15px;
+        height: 15px;
+        color: #90a4ae;
+        pointer-events: none;
+        transition: color 0.2s ease;
+    }
+
+    .search-input {
+        width: 100%;
+        height: 34px;
+        padding: 0 32px 0 34px;
+        font-size: 12px;
+        font-family: inherit;
+        color: #1a1a2e;
+        background: #ffffff;
+        border: 1.5px solid #cfd8dc;
+        border-radius: 20px;
+        outline: none;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .search-input::placeholder {
+        color: #90a4ae;
+        font-size: 11.5px;
+    }
+
+    .search-input:focus {
+        border-color: #ea521f;
+        box-shadow: 0 0 0 3px rgba(234, 82, 31, 0.12), 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .search-box:focus-within .search-icon {
+        color: #ea521f;
+    }
+
+    .search-clear {
+        position: absolute;
+        right: 8px;
+        width: 18px;
+        height: 18px;
+        border: none;
+        background: #eceff1;
+        color: #546e7a;
+        border-radius: 50%;
+        font-size: 13px;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.2s, color 0.2s;
+        padding: 0;
+    }
+
+    .search-clear:hover {
+        background: #cfd8dc;
+        color: #263238;
+    }
+
+    .search-count {
+        font-size: 10px;
+        color: #78909c;
+        margin-top: 4px;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+    }
+
+    .card.search-hidden {
+        display: none !important;
+    }
+
+    .column.search-hidden {
+        display: none !important;
+    }
+
+    .no-results-msg {
+        text-align: center;
+        padding: 24px 20px;
+        color: #78909c;
+        font-size: 12.5px;
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        margin: 0 0 16px;
+        width: 100%;
+        max-width: 500px;
+        display: none;
+    }
+
+    /* ---- Nový spodní footer ---- */
+    .footer-bottom {
+        margin-top: 22px;
+        padding-top: 12px;
+        border-top: 1px solid #dcdfe3;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        font-size: 11px;
+        color: #78909c;
+    }
+
+    .footer-bottom a {
+        color: #455a64;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+
+    .footer-bottom a:hover {
+        color: #ea521f;
+        text-decoration: underline;
+    }
+
+    .footer-github-icon {
+        width: 14px;
+        height: 14px;
+        fill: currentColor;
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    .footer-separator {
+        color: #b0bec5;
+        user-select: none;
     }
 </style>
 </head>
@@ -249,6 +496,11 @@
     <path d="M18.5 14h-10l-3 2.5 3 2.5h10z"/>
     <path d="M9 21h6"/>
   </symbol>
+  <symbol id="icon-notice-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+    <line x1="12" y1="9" x2="12" y2="13"/>
+    <line x1="12" y1="17" x2="12.01" y2="17"/>
+  </symbol>
 </svg>
 
 <div class="container">
@@ -257,6 +509,26 @@
             <svg class="header-icon" aria-hidden="true"><use href="#icon-rozcestnik" xlink:href="#icon-rozcestnik"/></svg>
             <span>Rozcestník Generátorů</span>
         </h1>
+        <div class="header-notice">
+            <svg class="notice-icon" aria-hidden="true"><use href="#icon-notice-alert" xlink:href="#icon-notice-alert"/></svg>
+            <span>Dokumenty se generují do PDF. <strong>Všechny výsledné PDF předat pro kontrolu <a href="mailto:sutta@atomicon.cz" class="has-tooltip" data-tooltip="sutta@atomicon.cz">Kubovi</a> nebo <a href="mailto:vyroubal@atomicon.cz" class="has-tooltip tooltip-radek" data-tooltip="vyroubal@atomicon.cz">Radkovi</a>!</strong> Pokud je třeba <strong>elektronický podpis, předej PDF <a href="mailto:sutta@atomicon.cz" class="has-tooltip" data-tooltip="sutta@atomicon.cz">Kubovi</a> nebo <a href="mailto:kubickova@atomicon.cz" class="has-tooltip tooltip-bara" data-tooltip="kubickova@atomicon.cz">Báře</a></strong>.</span>
+        </div>
+    </div>
+    
+    <div class="search-container">
+        <div class="search-box">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="generator-search" class="search-input" placeholder="Hledat generátor, pasport nebo protokol..." autocomplete="off" spellcheck="false">
+            <button type="button" id="search-clear" class="search-clear" aria-label="Vymazat hledání" title="Vymazat hledání" style="display:none;">&times;</button>
+        </div>
+        <div id="search-count" class="search-count" style="display:none;"></div>
+    </div>
+
+    <div id="no-results-msg" class="no-results-msg">
+        Nenalezen žádný generátor odpovídající zadanému hledání.
     </div>
     
     <div class="columns-wrapper">
@@ -350,10 +622,113 @@
         </div>
     </div>
     
-    <div class="footer">
-        Dokumenty se generují do PDF. <strong>Všechny výsledné PDF předat pro kontrolu Kubovi nebo Radkovi!</strong>. Pokud je třeba <strong>elektronický podpis, předej PDF Kubovi nebo Báře</strong>.
-    </div>
+    <footer class="footer-bottom">
+        <span>&copy; 2026 Jakub Šutta</span>
+        <span class="footer-separator">•</span>
+        <a href="https://github.com/jakubsutta/DTM-protocol" target="_blank" rel="noopener noreferrer">
+            <svg class="footer-github-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+            </svg>
+            <span>GitHub: DTM-protocol</span>
+        </a>
+        <span class="footer-separator">•</span>
+        <span>Poslední aktualizace: 25. 9. 2026</span>
+    </footer>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('generator-search');
+    const clearBtn = document.getElementById('search-clear');
+    const searchCount = document.getElementById('search-count');
+    const noResultsMsg = document.getElementById('no-results-msg');
+    const columns = document.querySelectorAll('.column');
+    const cards = document.querySelectorAll('.card');
+
+    function removeDiacritics(str) {
+        return (str || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .trim();
+    }
+
+    const cardData = Array.from(cards).map(card => {
+        const title = card.querySelector('.card-title')?.textContent || '';
+        const desc = card.querySelector('.card-desc')?.textContent || '';
+        return {
+            element: card,
+            column: card.closest('.column'),
+            normalizedText: removeDiacritics(title + ' ' + desc)
+        };
+    });
+
+    function filterCards() {
+        const query = removeDiacritics(searchInput.value);
+        clearBtn.style.display = query.length > 0 ? 'flex' : 'none';
+
+        if (!query) {
+            cardData.forEach(item => item.element.classList.remove('search-hidden'));
+            columns.forEach(col => col.classList.remove('search-hidden'));
+            if (noResultsMsg) noResultsMsg.style.display = 'none';
+            if (searchCount) searchCount.style.display = 'none';
+            return;
+        }
+
+        let visibleCount = 0;
+        const colVisibleCounts = new Map();
+        columns.forEach(col => colVisibleCounts.set(col, 0));
+
+        cardData.forEach(item => {
+            const matches = item.normalizedText.includes(query);
+            if (matches) {
+                item.element.classList.remove('search-hidden');
+                visibleCount++;
+                colVisibleCounts.set(item.column, (colVisibleCounts.get(item.column) || 0) + 1);
+            } else {
+                item.element.classList.add('search-hidden');
+            }
+        });
+
+        columns.forEach(col => {
+            if (colVisibleCounts.get(col) === 0) {
+                col.classList.add('search-hidden');
+            } else {
+                col.classList.remove('search-hidden');
+            }
+        });
+
+        if (visibleCount === 0) {
+            if (noResultsMsg) noResultsMsg.style.display = 'block';
+            if (searchCount) {
+                searchCount.style.display = 'block';
+                searchCount.textContent = 'Nenalezen žádný výsledek';
+            }
+        } else {
+            if (noResultsMsg) noResultsMsg.style.display = 'none';
+            if (searchCount) {
+                searchCount.style.display = 'block';
+                searchCount.textContent = `Nalezeno: ${visibleCount} z ${cards.length}`;
+            }
+        }
+    }
+
+    searchInput.addEventListener('input', filterCards);
+
+    clearBtn.addEventListener('click', function () {
+        searchInput.value = '';
+        searchInput.focus();
+        filterCards();
+    });
+
+    searchInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            searchInput.value = '';
+            filterCards();
+        }
+    });
+});
+</script>
 
 </body>
 </html>
