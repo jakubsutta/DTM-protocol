@@ -265,6 +265,19 @@ h1 {
     background: #f8fafc;
 }
 
+.card.cors {
+    border-top-color: #00838f;
+}
+
+.card.cors .card-title,
+.card.cors .card-icon {
+    color: #00838f;
+}
+
+.card.cors:hover {
+    background: #e0f7fa;
+}
+
 /* Témata Pasportů */
 .card.kom {
     border-top-color: #ff7b00;
