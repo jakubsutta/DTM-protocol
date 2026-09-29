@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/proj4@2/dist/proj4.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/shpjs@4.0.4/dist/shp.min.js"></script>
 <style>
     * { box-sizing: border-box; }
@@ -20,8 +21,8 @@
     .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
     input[type=file] { font-size: 13px; }
     label.chk { font-size: 12.5px; color: #546e7a; display: flex; align-items: center; gap: 6px; cursor: pointer; }
-    button { background: #ea521f; color: #fff; border: none; padding: 9px 18px; border-radius: 5px; font-weight: 600; cursor: pointer; font-size: 12.5px; }
-    button:hover:not(:disabled) { background: #bd3203; }
+    button { background: #00838f; color: #fff; border: none; padding: 9px 18px; border-radius: 5px; font-weight: 600; cursor: pointer; font-size: 12.5px; }
+    button:hover:not(:disabled) { background: #006064; }
     button:disabled { background: #cfd8dc; cursor: not-allowed; }
     button.secondary { background: #2c2f4a; }
     button.secondary:hover:not(:disabled) { background: #3a3e63; }
@@ -32,24 +33,192 @@
     .status { font-size: 12px; color: #78909c; margin-top: 10px; min-height: 18px; }
     .status.err { color: #c62828; }
     .progress-bar { height: 6px; background: #eceff1; border-radius: 4px; overflow: hidden; margin-top: 8px; }
-    .progress-bar > div { height: 100%; background: #ea521f; width: 0%; transition: width 0.2s; }
+    .progress-bar > div { height: 100%; background: #00838f; width: 0%; transition: width 0.2s; }
     .pill { display: inline-block; background: #eceff1; color: #546e7a; font-size: 10px; padding: 2px 7px; border-radius: 10px; margin-left: 6px; }
-    .note { background: #fff3e0; border: 1px solid #ffcc80; border-radius: 6px; padding: 10px 14px; font-size: 11.5px; color: #e65100; margin-bottom: 16px; }
+    .note { background: #e0f7fa; border: 1px solid #80deea; border-radius: 6px; padding: 10px 14px; font-size: 11.5px; color: #006064; margin-bottom: 16px; }
     .hidden { display: none; }
+
+    /* Vzhled tabulky výsledků dle Table_Export.html */
+    .table-data {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11px;
+        margin-top: 14px;
+        background: #fff;
+        border: 1px solid #e0e0e0;
+    }
+    .table-data thead tr.tr-cols th {
+        background: #f5f7fa;
+        font-weight: 700;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        text-align: center;
+        padding: 8px 6px;
+        line-height: 1.3;
+        color: #546e7a;
+        border: 1px solid #e0e0e0;
+    }
+    .table-data tbody tr:nth-child(even) {
+        background-color: #f8fafc;
+    }
+    .table-data tbody tr:nth-child(odd) {
+        background-color: #ffffff;
+    }
+    .table-data tbody td {
+        padding: 6.5px 10px;
+        line-height: 1.35;
+        vertical-align: middle;
+        font-size: 10.5px;
+        border: 1px solid #e0e0e0;
+        color: #1a1a1a;
+    }
+    /* První sloupec: označení komunikace dle vzoru Table_Export */
+    .table-data tbody td:first-child {
+        color: #0277bd;
+        font-weight: 700;
+        background-color: #fafbfc;
+        text-align: center;
+        font-size: 11px;
+    }
+    .table-data tbody td:nth-child(2) {
+        color: #37474f;
+        font-weight: 500;
+    }
+    .table-data tbody td:nth-child(3) {
+        color: #1a1a1a;
+        word-break: break-word;
+    }
+
+    /* Fixní patička shodná s Table_Export.html */
+    .table-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 10px;
+        border-top: 1px solid #e0e0e0;
+        margin-top: 16px;
+    }
+    .footer-logo-box img {
+        height: 25px;
+        max-height: 28px;
+        object-fit: contain;
+    }
+    .footer-company-text {
+        text-align: right;
+        color: #ea521f;
+        font-size: 10.5px;
+        font-weight: 600;
+        line-height: 1.35;
+    }
+
+    .print-header { display: none; }
+
+    @media print {
+        * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        @page {
+            size: A4 portrait;
+            margin: 12mm 15mm 12mm 15mm;
+        }
+        html, body {
+            background: #fff !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            color: #000 !important;
+        }
+        .wrap {
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        .no-print {
+            display: none !important;
+        }
+        .panel {
+            box-shadow: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border: none !important;
+            background: transparent !important;
+        }
+        #resultsPanel {
+            display: block !important;
+        }
+        .print-header {
+            display: flex !important;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #ea521f;
+        }
+        .print-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+        .print-sub {
+            font-size: 10.5px;
+            color: #546e7a;
+            margin-top: 3px;
+        }
+        .table-data {
+            margin-top: 0 !important;
+            page-break-inside: auto;
+        }
+        .table-data thead {
+            display: table-header-group !important;
+        }
+        .table-data tr {
+            page-break-inside: avoid !important;
+        }
+        .table-data th {
+            background-color: #f5f7fa !important;
+            color: #546e7a !important;
+            border: 1px solid #e0e0e0 !important;
+        }
+        .table-data tbody tr:nth-child(even) {
+            background-color: #f8fafc !important;
+        }
+        .table-data tbody tr:nth-child(odd) {
+            background-color: #ffffff !important;
+        }
+        .table-data td {
+            border: 1px solid #e0e0e0 !important;
+        }
+        .table-data tbody td:first-child {
+            background-color: #fafbfc !important;
+            color: #0277bd !important;
+        }
+        .table-footer {
+            margin-top: 14px !important;
+            padding-top: 8px !important;
+            border-top: 1px solid #e0e0e0 !important;
+            page-break-inside: avoid !important;
+        }
+        .footer-company-text {
+            color: #ea521f !important;
+        }
+    }
 </style>
 </head>
 <body>
 <div class="wrap">
-    <h1>Dohledání parcel pod komunikacemi</h1>
-    <p class="lead">Nahraj SHP (zip) s atributy <code>number</code> a <code>city_code</code> v S-JTSK (EPSG:5514). Pro každou komunikaci vyhledá dotčené katastrální parcely přes WFS ČÚZK.</p>
+    <div class="no-print">
+        <h1>Dohledání parcel pod komunikacemi</h1>
+        <p class="lead">Nahraj SHP (zip) s atributy <code>number</code> a <code>city_code</code> v S-JTSK (EPSG:5514). Pro každou komunikaci vyhledá dotčené katastrální parcely přes WFS ČÚZK.</p>
 
-    <div class="note">Knihovny (Leaflet, proj4, shpjs) jsou teď z CDN kvůli rychlému testu. Než to nasadíš natrvalo na GitHub Pages, doporučuju je stejně jako u ostatních nástrojů stáhnout a nahrát staticky do repa.</div>
+        <div class="note">Knihovny (Leaflet, proj4, JSZip, shpjs) jsou teď z CDN kvůli rychlému testu. Než to nasadíš natrvalo na GitHub Pages, doporučuju je stejně jako u ostatních nástrojů stáhnout a nahrát staticky do repa.</div>
+    </div>
 
-    <div class="panel">
+    <div class="panel no-print">
         <h2>1. Nahrání dat</h2>
         <div class="row">
             <input type="file" id="shpFile" accept=".zip">
-            <label class="chk"><input type="checkbox" id="swapXY"> prohodit pořadí X/Y (pokud se linie na mapě zobrazí špatně)</label>
+            <label class="chk"><input type="checkbox" id="swapXY" onchange="if(document.getElementById('shpFile').files[0]) loadShp()"> prohodit pořadí X/Y (pokud se linie na mapě zobrazí špatně)</label>
         </div>
         <div class="row">
             <button onclick="loadShp()">Načíst a zobrazit náhled</button>
@@ -62,7 +231,7 @@
         </table>
     </div>
 
-    <div class="panel">
+    <div class="panel no-print">
         <h2>2. Dohledání parcel</h2>
         <div class="row">
             <button id="runBtn" onclick="processAll()" disabled>Spustit dohledání parcel</button>
@@ -73,14 +242,41 @@
     </div>
 
     <div class="panel" id="resultsPanel" style="display:none">
-        <h2>3. Výsledky <span class="pill" id="resultCount"></span></h2>
-        <div class="row">
-            <button onclick="exportCsv()">⬇ Export do CSV</button>
+        <div class="print-header">
+            <div>
+                <div class="print-title">Dohledání parcel pod komunikacemi</div>
+                <div class="print-sub" id="printSubInfo"></div>
+            </div>
+            <div class="footer-logo-box">
+                <img src="./img/logo3.png" alt="Logo" onerror="this.onerror=null; this.src='./img/logo3.png';">
+            </div>
         </div>
-        <table>
-            <thead><tr><th style="width:80px">number</th><th style="width:220px">obec</th><th>parcely</th></tr></thead>
+
+        <h2 class="no-print">3. Výsledky <span class="pill" id="resultCount"></span></h2>
+        <div class="row no-print">
+            <button onclick="exportCsv()">⬇ Export do CSV</button>
+            <button class="secondary" onclick="exportPdf()">📄 Export do PDF (Tisk)</button>
+        </div>
+        <table class="table-data">
+            <thead>
+                <tr class="tr-cols">
+                    <th style="width:110px">OZNAČENÍ</th>
+                    <th style="width:220px">OBEC</th>
+                    <th>PARCELY</th>
+                </tr>
+            </thead>
             <tbody id="resultsBody"></tbody>
         </table>
+
+        <div class="table-footer">
+            <div class="footer-logo-box">
+                <img src="./img/logo3.png" alt="Logo" onerror="this.onerror=null; this.src='./img/logo3.png';">
+            </div>
+            <div class="footer-company-text">
+                <div><strong>ATOMICON s. r. o. Stupkova 952/18, Olomouc 779 00</strong></div>
+                <div>tel. +420 778 481 700</div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -96,15 +292,50 @@ let stopRequested = false;
 
 function initMapOnce() {
     if (mapInstance) return;
-    mapInstance = L.map('map').setView([49.8, 15.47], 7);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(mapInstance);
+    mapInstance = L.map('map', { maxZoom: 20 }).setView([49.8, 15.47], 7);
+    L.tileLayer('https://ags.cuzk.cz/arcgis1/rest/services/ORTOFOTO_WM/MapServer/tile/{z}/{y}/{x}', {
+        attribution: '&copy; <a href="https://cuzk.gov.cz" target="_blank">ČÚZK</a>',
+        maxZoom: 20
+    }).addTo(mapInstance);
     mapLayerGroup = L.layerGroup().addTo(mapInstance);
 }
 
-function reproj(pt, swap) {
-    const x = swap ? pt[1] : pt[0];
-    const y = swap ? pt[0] : pt[1];
-    return proj4('EPSG:5514', 'EPSG:4326', [x, y]); // vrací [lon, lat]
+// Normalizace bodu: detekce, zda shpjs již provedl převod do WGS84,
+// a příprava jak pro Leaflet [lat, lng], tak pro ČÚZK WFS S-JTSK [-Y, -X].
+function parsePoint(pt, swap) {
+    let x = swap ? pt[1] : pt[0];
+    let y = swap ? pt[0] : pt[1];
+
+    // Je bod již ve WGS84 [lon, lat]?
+    // (V ČR je zeměpisná délka cca 12°–19° a šířka 48°–51°).
+    // shpjs při nalezení .prj souboru automaticky data sám přeprojektuje do WGS84.
+    const isWgs84 = Math.abs(x) <= 180 && Math.abs(y) <= 90;
+
+    let lon, lat, sjtskY, sjtskX;
+
+    if (isWgs84) {
+        // shpjs už data přeprojektoval do WGS84 [lon, lat] - nesmí se znovu volat 5514->4326!
+        lon = x;
+        lat = y;
+        // Přepočet do S-JTSK (EPSG:5514) pro WFS ČÚZK
+        const sjtsk = proj4('EPSG:4326', 'EPSG:5514', [lon, lat]);
+        sjtskY = sjtsk[0];
+        sjtskX = sjtsk[1];
+    } else {
+        // Soubor neměl .prj, souřadnice zůstaly v původním S-JTSK (v metrech).
+        // V ČR jsou souřadnice pro ČÚZK i proj4 záporné (-Y, -X).
+        sjtskY = x > 0 ? -x : x;
+        sjtskX = y > 0 ? -y : y;
+        // Přepočet do WGS84 pro Leaflet mapu
+        const wgs = proj4('EPSG:5514', 'EPSG:4326', [sjtskY, sjtskX]);
+        lon = wgs[0];
+        lat = wgs[1];
+    }
+
+    return {
+        latlng: [lat, lon],       // pro Leaflet [lat, lng]
+        sjtsk: [sjtskY, sjtskX]   // pro ČÚZK WFS [-Y, -X]
+    };
 }
 
 async function loadShp() {
@@ -118,8 +349,33 @@ async function loadShp() {
 
     try {
         const buffer = await file.arrayBuffer();
-        const geojson = await shp(buffer);
-        const collections = Array.isArray(geojson) ? geojson : [geojson];
+        let collections = [];
+
+        if (window.JSZip) {
+            const zip = await JSZip.loadAsync(buffer);
+            const shpFiles = Object.keys(zip.files).filter(k => k.toLowerCase().endsWith('.shp') && !k.includes('__MACOSX'));
+            for (const shpFile of shpFiles) {
+                const base = shpFile.slice(0, -4);
+                const shpBuf = await zip.files[shpFile].async('arraybuffer');
+                const dbfKey = Object.keys(zip.files).find(k => k.toLowerCase() === (base + '.dbf').toLowerCase());
+                const dbfBuf = dbfKey ? await zip.files[dbfKey].async('arraybuffer') : null;
+                const cpgKey = Object.keys(zip.files).find(k => k.toLowerCase() === (base + '.cpg').toLowerCase());
+                const cpg = cpgKey ? await zip.files[cpgKey].async('text') : undefined;
+
+                // parseShp voláme BEZ prj parametru: získáme původní přesná data v S-JTSK přímo ze souboru.
+                // Vyhneme se tak nepřesnému internímu převodu v shpjs (který v .prj postrádá 7prvkovou Helmertovu transformaci).
+                const geoms = shp.parseShp(shpBuf);
+                const props = dbfBuf ? shp.parseDbf(dbfBuf, cpg) : [];
+                const geojson = shp.combine([geoms, props]);
+                collections.push(geojson);
+            }
+        }
+
+        if (collections.length === 0) {
+            const geojson = await shp(buffer);
+            collections = Array.isArray(geojson) ? geojson : [geojson];
+        }
+
         const swap = document.getElementById('swapXY').checked;
 
         initMapOnce();
@@ -147,8 +403,11 @@ async function loadShp() {
 
                 if (!groups.has(number)) groups.set(number, { cityCode, lines: [] });
                 for (const line of lines) {
-                    groups.get(number).lines.push(line);
-                    const latlngs = line.map(pt => { const ll = reproj(pt, swap); return [ll[1], ll[0]]; });
+                    const parsedLine = line.map(pt => parsePoint(pt, swap));
+                    const latlngs = parsedLine.map(p => p.latlng);
+                    const sjtskCoords = parsedLine.map(p => p.sjtsk);
+
+                    groups.get(number).lines.push(sjtskCoords);
                     allLatLngs.push(...latlngs);
                     mapLayerGroup.addLayer(L.polyline(latlngs, { color: '#ea521f', weight: 3 }));
                 }
@@ -200,13 +459,11 @@ function chunkCoords(coords, maxPerChunk) {
     return chunks;
 }
 
-function buildPolygonGml(coordsChunk, swap) {
-    const posList = coordsChunk.map(pt => {
-        const x = swap ? pt[1] : pt[0];
-        const y = swap ? pt[0] : pt[1];
-        return x + ' ' + y;
-    }).join(' ');
-    return `<gml:Polygon gml:id="G${Date.now()}${Math.floor(Math.random()*10000)}" srsName="http://www.opengis.net/def/crs/EPSG/0/5514" xmlns:gml="http://www.opengis.net/gml/3.2"><gml:exterior><gml:LinearRing><gml:posList>${posList}</gml:posList></gml:LinearRing></gml:exterior></gml:Polygon>`;
+function buildPolygonParam(coordsChunk) {
+    // ČÚZK WFS GetFeatureByPolygon:
+    // Podporuje seznam souřadnic oddělený mezerami.
+    // U otevřené linie (neuzavřený polygon) provádí ČÚZK prostorový průnik s linií.
+    return coordsChunk.map(pt => `${pt[0].toFixed(2)} ${pt[1].toFixed(2)}`).join(' ');
 }
 
 function extractParcelLabels(xmlText) {
@@ -239,10 +496,10 @@ function extractParcelLabels(xmlText) {
     }
 }
 
-async function queryParcelsForChunk(coordsChunk, swap) {
-    const gml = buildPolygonGml(coordsChunk, swap);
+async function queryParcelsForChunk(coordsChunk) {
+    const polygon = buildPolygonParam(coordsChunk);
     const url = 'https://services.cuzk.cz/wfs/inspire-CP-wfs.asp?service=wfs&version=2.0.0&request=getFeature&storedQuery_id=GetFeatureByPolygon&POLYGON='
-        + encodeURIComponent(gml) + '&FEATURE_TYPE=CadastralParcel&srsName=' + encodeURIComponent('http://www.opengis.net/def/crs/EPSG/0/5514');
+        + encodeURIComponent(polygon) + '&FEATURE_TYPE=CadastralParcel&srsName=' + encodeURIComponent('http://www.opengis.net/def/crs/EPSG/0/5514');
     const resp = await fetch(url);
     const text = await resp.text();
     return extractParcelLabels(text);
@@ -253,7 +510,6 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 async function processAll() {
     stopRequested = false;
     results = [];
-    const swap = document.getElementById('swapXY').checked;
     const runStatus = document.getElementById('runStatus');
     const progressFill = document.getElementById('progressFill');
     document.getElementById('runBtn').disabled = true;
@@ -275,7 +531,7 @@ async function processAll() {
                 if (stopRequested) break;
                 runStatus.textContent = `Zpracovávám komunikaci "${number}" (${done + 1}/${numbers.length})…`;
                 try {
-                    const { labels, error } = await queryParcelsForChunk(chunk, swap);
+                    const { labels, error } = await queryParcelsForChunk(chunk);
                     labels.forEach(l => parcelSet.add(l));
                     if (error) errorMsg = error;
                 } catch (e) {
@@ -307,16 +563,34 @@ function renderResults() {
     body.innerHTML = '';
     for (const r of results) {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${r.number}</td><td>${r.obec}</td><td>${r.parcely}</td>`;
+        tr.innerHTML = `<td>${escapeHtml(r.number)}</td><td>${escapeHtml(r.obec)}</td><td>${escapeHtml(r.parcely)}</td>`;
         body.appendChild(tr);
     }
     document.getElementById('resultCount').textContent = results.length + ' řádků';
+    const printSub = document.getElementById('printSubInfo');
+    if (printSub) {
+        const today = new Date().toLocaleDateString('cs-CZ');
+        printSub.textContent = `Vygenerováno: ${today} | Celkem komunikací: ${results.length}`;
+    }
     document.getElementById('resultsPanel').style.display = 'block';
+}
+
+function exportPdf() {
+    window.print();
+}
+
+function escapeHtml(str) {
+    if (str == null) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
 }
 
 function exportCsv() {
     const delim = ';';
-    const rows = [['number', 'obec', 'parcely'], ...results.map(r => [r.number, r.obec, r.parcely])];
+    const rows = [['označení', 'obec', 'parcely'], ...results.map(r => [r.number, r.obec, r.parcely])];
     const csv = rows.map(row => row.map(cell => '"' + String(cell).replace(/"/g, '""') + '"').join(delim)).join('\r\n');
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
