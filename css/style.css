@@ -265,15 +265,19 @@ h1 {
     background: #f8fafc;
 }
 
+.card.parcel,
 .card.cors {
     border-top-color: #00838f;
 }
 
+.card.parcel .card-title,
+.card.parcel .card-icon,
 .card.cors .card-title,
 .card.cors .card-icon {
     color: #00838f;
 }
 
+.card.parcel:hover,
 .card.cors:hover {
     background: #e0f7fa;
 }

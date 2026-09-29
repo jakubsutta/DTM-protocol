@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dohledání parcel pod komunikacemi</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%2300838f%22 stroke-width=%221.6%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M3.5 9L9 4L19.5 6L19 19.5L13.5 20L5 19Z%22/><path d=%22M9 4L11 12.5%22/><path d=%22M19.5 6L11 12.5%22/><path d=%22M13.5 20L11 12.5%22/><path d=%22M3.5 9L11 12.5%22/><path d=%22M9 4V2%22/><path d=%22M19.5 6L22 5.5%22/><path d=%22M13.5 20L14 22%22/><path d=%22M3.5 9L1.5 9%22/><circle cx=%2211%22 cy=%2212.5%22 r=%221.5%22 fill=%22%2300838f%22/></svg>">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/proj4@2/dist/proj4.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/shpjs@4.0.4/dist/shp.min.js"></script>
+<style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; color: #1a1a1a; margin: 0; padding: 24px; }
+    .wrap { max-width: 1000px; margin: 0 auto; }
+    h1 { font-size: 20px; margin-bottom: 4px; }
+    .lead { color: #607d8b; font-size: 13px; margin-bottom: 20px; }
+    .panel { background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .panel h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: #78909c; margin-bottom: 14px; border-bottom: 1px solid #eceff1; padding-bottom: 8px; }
+    .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+    input[type=file] { font-size: 13px; }
+    label.chk { font-size: 12.5px; color: #546e7a; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+    button { background: #ea521f; color: #fff; border: none; padding: 9px 18px; border-radius: 5px; font-weight: 600; cursor: pointer; font-size: 12.5px; }
+    button:hover:not(:disabled) { background: #bd3203; }
+    button:disabled { background: #cfd8dc; cursor: not-allowed; }
+    button.secondary { background: #2c2f4a; }
+    button.secondary:hover:not(:disabled) { background: #3a3e63; }
+    #map { height: 320px; border-radius: 6px; margin-top: 12px; background: #e8eaed; }
+    table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 10px; }
+    th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid #eceff1; vertical-align: top; }
+    th { color: #78909c; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .status { font-size: 12px; color: #78909c; margin-top: 10px; min-height: 18px; }
+    .status.err { color: #c62828; }
+    .progress-bar { height: 6px; background: #eceff1; border-radius: 4px; overflow: hidden; margin-top: 8px; }
+    .progress-bar > div { height: 100%; background: #ea521f; width: 0%; transition: width 0.2s; }
+    .pill { display: inline-block; background: #eceff1; color: #546e7a; font-size: 10px; padding: 2px 7px; border-radius: 10px; margin-left: 6px; }
+    .note { background: #fff3e0; border: 1px solid #ffcc80; border-radius: 6px; padding: 10px 14px; font-size: 11.5px; color: #e65100; margin-bottom: 16px; }
+    .hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+    <h1>Dohledání parcel pod komunikacemi</h1>
+    <p class="lead">Nahraj SHP (zip) s atributy <code>number</code> a <code>city_code</code> v S-JTSK (EPSG:5514). Pro každou komunikaci vyhledá dotčené katastrální parcely přes WFS ČÚZK.</p>
+
+    <div class="note">Knihovny (Leaflet, proj4, shpjs) jsou teď z CDN kvůli rychlému testu. Než to nasadíš natrvalo na GitHub Pages, doporučuju je stejně jako u ostatních nástrojů stáhnout a nahrát staticky do repa.</div>
+
+    <div class="panel">
+        <h2>1. Nahrání dat</h2>
+        <div class="row">
+            <input type="file" id="shpFile" accept=".zip">
+            <label class="chk"><input type="checkbox" id="swapXY"> prohodit pořadí X/Y (pokud se linie na mapě zobrazí špatně)</label>
+        </div>
+        <div class="row">
+            <button onclick="loadShp()">Načíst a zobrazit náhled</button>
+        </div>
+        <div class="status" id="loadStatus"></div>
+        <div id="map"></div>
+        <table id="previewTable" style="display:none">
+            <thead><tr><th>number</th><th>city_code</th><th>typ geometrie</th></tr></thead>
+            <tbody id="previewBody"></tbody>
+        </table>
+    </div>
+
+    <div class="panel">
+        <h2>2. Dohledání parcel</h2>
+        <div class="row">
+            <button id="runBtn" onclick="processAll()" disabled>Spustit dohledání parcel</button>
+            <button id="stopBtn" class="secondary" onclick="stopRequested=true" disabled>Zastavit</button>
+        </div>
+        <div class="progress-bar"><div id="progressFill"></div></div>
+        <div class="status" id="runStatus"></div>
+    </div>
+
+    <div class="panel" id="resultsPanel" style="display:none">
+        <h2>3. Výsledky <span class="pill" id="resultCount"></span></h2>
+        <div class="row">
+            <button onclick="exportCsv()">⬇ Export do CSV</button>
+        </div>
+        <table>
+            <thead><tr><th style="width:80px">number</th><th style="width:220px">obec</th><th>parcely</th></tr></thead>
+            <tbody id="resultsBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+proj4.defs('EPSG:5514', '+proj=krovak +lat_0=49.5 +lon_0=24.83333333333333 +alpha=30.28813972222222 +k=0.9999 +x_0=0 +y_0=0 +ellps=bessel +towgs84=570.8,85.7,462.8,4.998,1.587,5.261,3.56 +units=m +no_defs');
+
+let mapInstance = null;
+let mapLayerGroup = null;
+let groups = new Map(); // number -> { city_code, lines: [ [ [x,y],... ], ... ] }
+let obecCache = new Map(); // city_code -> nazev
+let results = [];
+let stopRequested = false;
+
+function initMapOnce() {
+    if (mapInstance) return;
+    mapInstance = L.map('map').setView([49.8, 15.47], 7);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(mapInstance);
+    mapLayerGroup = L.layerGroup().addTo(mapInstance);
+}
+
+function reproj(pt, swap) {
+    const x = swap ? pt[1] : pt[0];
+    const y = swap ? pt[0] : pt[1];
+    return proj4('EPSG:5514', 'EPSG:4326', [x, y]); // vrací [lon, lat]
+}
+
+async function loadShp() {
+    const fileInput = document.getElementById('shpFile');
+    const statusEl = document.getElementById('loadStatus');
+    const file = fileInput.files[0];
+    if (!file) { statusEl.textContent = 'Vyber prosím soubor .zip.'; statusEl.className = 'status err'; return; }
+
+    statusEl.className = 'status'; statusEl.textContent = 'Načítám a parsuji SHP…';
+    groups = new Map();
+
+    try {
+        const buffer = await file.arrayBuffer();
+        const geojson = await shp(buffer);
+        const collections = Array.isArray(geojson) ? geojson : [geojson];
+        const swap = document.getElementById('swapXY').checked;
+
+        initMapOnce();
+        mapLayerGroup.clearLayers();
+        const previewBody = document.getElementById('previewBody');
+        previewBody.innerHTML = '';
+
+        const allLatLngs = [];
+        let featureCount = 0;
+
+        for (const col of collections) {
+            for (const feat of (col.features || [])) {
+                featureCount++;
+                const props = feat.properties || {};
+                const number = String(props.number ?? props.NUMBER ?? '(bez čísla)');
+                const cityCode = String(props.city_code ?? props.CITY_CODE ?? '');
+                const geom = feat.geometry;
+                if (!geom) continue;
+
+                let lines = [];
+                if (geom.type === 'LineString') lines = [geom.coordinates];
+                else if (geom.type === 'MultiLineString') lines = geom.coordinates;
+                else if (geom.type === 'Polygon') lines = geom.coordinates;
+                else if (geom.type === 'MultiPolygon') lines = geom.coordinates.flat();
+
+                if (!groups.has(number)) groups.set(number, { cityCode, lines: [] });
+                for (const line of lines) {
+                    groups.get(number).lines.push(line);
+                    const latlngs = line.map(pt => { const ll = reproj(pt, swap); return [ll[1], ll[0]]; });
+                    allLatLngs.push(...latlngs);
+                    mapLayerGroup.addLayer(L.polyline(latlngs, { color: '#ea521f', weight: 3 }));
+                }
+
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${number}</td><td>${cityCode}</td><td>${geom.type}</td>`;
+                previewBody.appendChild(row);
+            }
+        }
+
+        if (allLatLngs.length) {
+            const bounds = L.latLngBounds(allLatLngs);
+            mapInstance.fitBounds(bounds, { padding: [20, 20] });
+        }
+
+        document.getElementById('previewTable').style.display = 'table';
+        statusEl.textContent = `Načteno ${featureCount} prvků, ${groups.size} unikátních komunikací (number). Zkontroluj polohu na mapě.`;
+        document.getElementById('runBtn').disabled = groups.size === 0;
+    } catch (e) {
+        statusEl.className = 'status err';
+        statusEl.textContent = 'Chyba při načítání SHP: ' + e.message;
+    }
+}
+
+async function lookupObec(cityCode) {
+    if (!cityCode) return '—';
+    if (obecCache.has(cityCode)) return obecCache.get(cityCode);
+    try {
+        const url = 'https://ags.cuzk.cz/arcgis/rest/services/RUIAN/MapServer/12/query?where=' + encodeURIComponent('kod=' + cityCode) + '&outFields=nazev,kod&f=json';
+        const resp = await fetch(url);
+        const data = await resp.json();
+        const nazev = data.features && data.features[0] ? data.features[0].attributes.nazev : null;
+        const label = nazev ? `${nazev} (${cityCode})` : `neznámý kód (${cityCode})`;
+        obecCache.set(cityCode, label);
+        return label;
+    } catch (e) {
+        return `chyba RUIAN (${cityCode})`;
+    }
+}
+
+function chunkCoords(coords, maxPerChunk) {
+    const chunks = [];
+    for (let i = 0; i < coords.length - 1; i += (maxPerChunk - 1)) {
+        const chunk = coords.slice(i, i + maxPerChunk);
+        if (chunk.length >= 2) chunks.push(chunk);
+        if (i + maxPerChunk - 1 >= coords.length - 1) break;
+    }
+    if (chunks.length === 0 && coords.length >= 2) chunks.push(coords);
+    return chunks;
+}
+
+function buildPolygonGml(coordsChunk, swap) {
+    const posList = coordsChunk.map(pt => {
+        const x = swap ? pt[1] : pt[0];
+        const y = swap ? pt[0] : pt[1];
+        return x + ' ' + y;
+    }).join(' ');
+    return `<gml:Polygon gml:id="G${Date.now()}${Math.floor(Math.random()*10000)}" srsName="http://www.opengis.net/def/crs/EPSG/0/5514" xmlns:gml="http://www.opengis.net/gml/3.2"><gml:exterior><gml:LinearRing><gml:posList>${posList}</gml:posList></gml:LinearRing></gml:exterior></gml:Polygon>`;
+}
+
+function extractParcelLabels(xmlText) {
+    const labels = new Set();
+    try {
+        const doc = new DOMParser().parseFromString(xmlText, 'text/xml');
+        if (doc.getElementsByTagName('parsererror').length) return { labels: [], error: 'Neplatná XML odpověď.' };
+        const exception = doc.getElementsByTagNameNS('*', 'ExceptionReport');
+        if (exception.length) {
+            const msg = doc.getElementsByTagNameNS('*', 'ExceptionText')[0];
+            return { labels: [], error: 'WFS chyba: ' + (msg ? msg.textContent : 'neznámá') };
+        }
+        const parcels = doc.getElementsByTagNameNS('*', 'CadastralParcel');
+        for (const parcel of parcels) {
+            let label = null;
+            const tryTags = ['label', 'nationalCadastralReference'];
+            for (const tag of tryTags) {
+                const el = parcel.getElementsByTagNameNS('*', tag)[0];
+                if (el && el.textContent.trim()) { label = el.textContent.trim(); break; }
+            }
+            if (!label) {
+                const localId = parcel.getElementsByTagNameNS('*', 'localId')[0];
+                label = localId ? localId.textContent.trim() : (parcel.getAttribute('gml:id') || parcel.id || '(bez čísla)');
+            }
+            labels.add(label);
+        }
+        return { labels: Array.from(labels), error: null };
+    } catch (e) {
+        return { labels: [], error: 'Chyba parsování: ' + e.message };
+    }
+}
+
+async function queryParcelsForChunk(coordsChunk, swap) {
+    const gml = buildPolygonGml(coordsChunk, swap);
+    const url = 'https://services.cuzk.cz/wfs/inspire-CP-wfs.asp?service=wfs&version=2.0.0&request=getFeature&storedQuery_id=GetFeatureByPolygon&POLYGON='
+        + encodeURIComponent(gml) + '&FEATURE_TYPE=CadastralParcel&srsName=' + encodeURIComponent('http://www.opengis.net/def/crs/EPSG/0/5514');
+    const resp = await fetch(url);
+    const text = await resp.text();
+    return extractParcelLabels(text);
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function processAll() {
+    stopRequested = false;
+    results = [];
+    const swap = document.getElementById('swapXY').checked;
+    const runStatus = document.getElementById('runStatus');
+    const progressFill = document.getElementById('progressFill');
+    document.getElementById('runBtn').disabled = true;
+    document.getElementById('stopBtn').disabled = false;
+    document.getElementById('resultsPanel').style.display = 'none';
+
+    const numbers = Array.from(groups.keys());
+    let done = 0;
+
+    for (const number of numbers) {
+        if (stopRequested) { runStatus.textContent = 'Zastaveno uživatelem.'; break; }
+        const group = groups.get(number);
+        const parcelSet = new Set();
+        let errorMsg = null;
+
+        for (const line of group.lines) {
+            const chunks = chunkCoords(line, 35);
+            for (const chunk of chunks) {
+                if (stopRequested) break;
+                runStatus.textContent = `Zpracovávám komunikaci "${number}" (${done + 1}/${numbers.length})…`;
+                try {
+                    const { labels, error } = await queryParcelsForChunk(chunk, swap);
+                    labels.forEach(l => parcelSet.add(l));
+                    if (error) errorMsg = error;
+                } catch (e) {
+                    errorMsg = 'Síťová chyba: ' + e.message;
+                }
+                await sleep(200);
+            }
+        }
+
+        const obecLabel = await lookupObec(group.cityCode);
+        results.push({
+            number,
+            obec: obecLabel,
+            parcely: errorMsg ? `⚠️ ${errorMsg}` : (parcelSet.size ? Array.from(parcelSet).sort().join(', ') : '— žádné nenalezeny —')
+        });
+
+        done++;
+        progressFill.style.width = Math.round((done / numbers.length) * 100) + '%';
+    }
+
+    renderResults();
+    runStatus.textContent = stopRequested ? `Zastaveno — hotovo ${done}/${numbers.length}.` : `Hotovo — zpracováno ${done}/${numbers.length} komunikací.`;
+    document.getElementById('runBtn').disabled = false;
+    document.getElementById('stopBtn').disabled = true;
+}
+
+function renderResults() {
+    const body = document.getElementById('resultsBody');
+    body.innerHTML = '';
+    for (const r of results) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${r.number}</td><td>${r.obec}</td><td>${r.parcely}</td>`;
+        body.appendChild(tr);
+    }
+    document.getElementById('resultCount').textContent = results.length + ' řádků';
+    document.getElementById('resultsPanel').style.display = 'block';
+}
+
+function exportCsv() {
+    const delim = ';';
+    const rows = [['number', 'obec', 'parcely'], ...results.map(r => [r.number, r.obec, r.parcely])];
+    const csv = rows.map(row => row.map(cell => '"' + String(cell).replace(/"/g, '""') + '"').join(delim)).join('\r\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'parcely-komunikace.csv';
+    link.click();
+}
+
+initMapOnce();
+</script>
+</body>
+</html>

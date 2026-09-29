@@ -123,14 +123,24 @@
             <path d="M9 3v18" />
             <path d="M15 3v18" />
         </symbol>
-        <symbol id="icon-cors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+        <symbol id="icon-parcel" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
             stroke-linecap="round" stroke-linejoin="round">
-            <rect x="16" y="16" width="6" height="6" rx="1" />
-            <rect x="2" y="16" width="6" height="6" rx="1" />
-            <rect x="9" y="2" width="6" height="6" rx="1" />
-            <path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3" />
-            <path d="M12 12V8" />
+            <!-- Vnější obvod parcel -->
+            <path d="M3.5 9L9 4L19.5 6L19 19.5L13.5 20L5 19Z" />
+            <!-- Vnitřní hranice parcel -->
+            <path d="M9 4L11 12.5" />
+            <path d="M19.5 6L11 12.5" />
+            <path d="M13.5 20L11 12.5" />
+            <path d="M3.5 9L11 12.5" />
+            <!-- Navazující vnější katastrální linie -->
+            <path d="M9 4V2" />
+            <path d="M19.5 6L22 5.5" />
+            <path d="M13.5 20L14 22" />
+            <path d="M3.5 9L1.5 9" />
+            <!-- Hraniční znak / společný mezník -->
+            <circle cx="11" cy="12.5" r="1.5" fill="currentColor" />
         </symbol>
+
         <symbol id="icon-rozcestnik" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
             stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 3v3" />
@@ -230,12 +240,12 @@
                         <div class="card-title">Export tabulek</div>
                         <div class="card-desc">Generátor a export souhrnných pasportních tabulek.</div>
                     </a>
-                    <a href="./protocol/test-cors.html" class="card cors">
+                    <a href="./protocol/Find-parcel.html" class="card parcel">
                         <div class="card-icon"><svg>
-                                <use href="#icon-cors" xlink:href="#icon-cors" />
+                                <use href="#icon-parcel" xlink:href="#icon-parcel" />
                             </svg></div>
-                        <div class="card-title">Test CORS</div>
-                        <div class="card-desc">Test dostupnosti a CORS pro WFS služby ČÚZK.</div>
+                        <div class="card-title">Parcely pod komunikací</div>
+                        <div class="card-desc">Vyhledání a identifikace parcel pod komunikací přes WFS ČÚZK.</div>
                     </a>
                 </div>
             </div>
