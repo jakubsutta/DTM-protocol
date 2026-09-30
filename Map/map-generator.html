@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generátor map pasportů</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%230288D1%22 stroke-width=%221.6%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><polygon points=%223 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21%22/><line x1=%229%22 y1=%223%22 x2=%229%22 y2=%2218%22/><line x1=%2215%22 y1=%226%22 x2=%2215%22 y2=%2221%22/></svg>">
+
+    <!-- External Libraries -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/proj4@2/dist/proj4.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/shpjs@4.0.4/dist/shp.min.js"></script>
+
+    <!-- Map Generator Styles -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+    <!-- Boční ovládací panel -->
+    <aside class="panel">
+        <header class="panel-header">
+            <a href="../index.html" class="header-back-link" title="Zpět na rozcestník generátorů">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+            </a>
+            <div class="header-titles">
+                <h1>Generátor map pasportů</h1>
+                <div class="sub">Pokročilý kartografický výstup</div>
+            </div>
+        </header>
+
+        <!-- Navigace záložek (Segmented Control) -->
+        <nav class="tabs-nav-bar" aria-label="Nastavení mapy">
+            <div class="tabs-nav">
+                <button type="button" class="tab-btn active" data-tab="tab-mapa" title="Podkladové mapy, formát a tiráž">
+                    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon>
+                        <line x1="9" y1="3" x2="9" y2="18"></line>
+                        <line x1="15" y1="6" x2="15" y2="21"></line>
+                    </svg>
+                    <span>Mapa</span>
+                </button>
+                <button type="button" class="tab-btn" data-tab="tab-data" title="Import SHP dat, vrstvy a stylizace symbolů">
+                    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
+                    <span>Data</span>
+                </button>
+                <button type="button" class="tab-btn" data-tab="tab-popisky" title="Nastavení a úprava popisků">
+                    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="4 7 4 4 20 4 20 7"></polyline>
+                        <line x1="9" y1="20" x2="15" y2="20"></line>
+                        <line x1="12" y1="4" x2="12" y2="20"></line>
+                    </svg>
+                    <span>Popisky</span>
+                </button>
+                <button type="button" class="tab-btn" data-tab="tab-legenda" title="Nastavení a úprava legendy">
+                    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="8" y1="6" x2="21" y2="6"></line>
+                        <line x1="8" y1="12" x2="21" y2="12"></line>
+                        <line x1="8" y1="18" x2="21" y2="18"></line>
+                        <circle cx="4" cy="6" r="1.5" fill="currentColor"></circle>
+                        <circle cx="4" cy="12" r="1.5" fill="currentColor"></circle>
+                        <circle cx="4" cy="18" r="1.5" fill="currentColor"></circle>
+                    </svg>
+                    <span>Legenda</span>
+                </button>
+            </div>
+        </nav>
+
+        <div class="tabs-content">
+            <!-- ZÁLOŽKA 1: MAPA -->
+            <section id="tab-mapa" class="tab-pane active">
+                <div class="section-label">Podkladové mapy</div>
+                <div class="field">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="chkOrto" checked>
+                        <span>Ortofoto ČÚZK</span>
+                    </label>
+                </div>
+                <div class="field">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="chkKnInverse">
+                        <span>Katastrální mapa (Inverzní / Hranice parcel)</span>
+                    </label>
+                </div>
+
+                <div class="section-label">Stránka a vodítka</div>
+                <div class="field">
+                    <div class="grid2">
+                        <div>
+                            <label for="pageFormat">Formát</label>
+                            <select id="pageFormat">
+                                <option value="A4">A4</option>
+                                <option value="A3">A3</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="pageOrient">Orientace</label>
+                            <select id="pageOrient">
+                                <option value="portrait">Na výšku</option>
+                                <option value="landscape" selected>Na šířku</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Okraje / Vodítka (mm)</label>
+                    <div class="grid4">
+                        <div>
+                            <label for="mT">Horní</label>
+                            <input type="number" id="mT" value="15" min="0" max="100">
+                        </div>
+                        <div>
+                            <label for="mR">Pravý</label>
+                            <input type="number" id="mR" value="15" min="0" max="100">
+                        </div>
+                        <div>
+                            <label for="mB">Dolní</label>
+                            <input type="number" id="mB" value="15" min="0" max="100">
+                        </div>
+                        <div>
+                            <label for="mL">Levý</label>
+                            <input type="number" id="mL" value="15" min="0" max="100">
+                        </div>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="snapToGuides" checked>
+                        <span>Přichytávat rám k vodítkům</span>
+                    </label>
+                </div>
+                <button type="button" id="lockFrameBtn" class="lock-btn">Rám je volný (Kliknutím uzamknete)</button>
+
+                <div class="section-label">Měřítko a nadpisy</div>
+                <div class="field">
+                    <div class="grid2">
+                        <div>
+                            <label for="scaleInput">Ruční měřítko (1 : X)</label>
+                            <input type="number" id="scaleInput" value="2000" step="100" min="50">
+                        </div>
+                        <div>
+                            <label for="inpMapNum">Číslo výkresu</label>
+                            <input type="text" id="inpMapNum" value="A.1">
+                        </div>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="inpTitle">Nadpis</label>
+                    <input type="text" id="inpTitle" value="Pasport Místních Komunikací">
+                </div>
+                <div class="field">
+                    <label for="inpSubtitle">Podnadpis</label>
+                    <input type="text" id="inpSubtitle" value="Obec Račice-Pístovice">
+                </div>
+
+                <div class="section-label">Nastavení tiráže</div>
+                <div class="field">
+                    <label for="impAuthor">Pořizovatel / Zhotovitel</label>
+                    <input type="text" id="impAuthor" value="Správa majetku obcí s.r.o.">
+                </div>
+                <div class="field">
+                    <label for="impContributors">Přispěvatelé</label>
+                    <input type="text" id="impContributors" value="ČÚZK, ŘSD ČR">
+                </div>
+                <div class="field">
+                    <div class="grid2">
+                        <div>
+                            <label for="impDate">Datum</label>
+                            <input type="text" id="impDate" value="09/2026">
+                        </div>
+                        <div>
+                            <label for="impSource">Zdroj dat</label>
+                            <input type="text" id="impSource" value="IS DMVS / DTM, ČÚZK">
+                        </div>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="impNote">Poznámka</label>
+                    <input type="text" id="impNote" value="www.atomicon.cz">
+                </div>
+            </section>
+
+            <!-- ZÁLOŽKA 2: DATA A SYMBOLOGIE -->
+            <section id="tab-data" class="tab-pane">
+                <div class="section-label">Import SHP dat</div>
+                <div class="field">
+                    <label for="shpFile">Načíst SHP data (.zip archiv)</label>
+                    <input type="file" id="shpFile" accept=".zip">
+                    <button type="button" id="btnLoadShp" style="margin-top: 6px;">Načíst soubor</button>
+                    <div class="status" id="shpStatus"></div>
+                </div>
+
+                <div class="section-label">Kategorizace podle dat</div>
+                <div class="field">
+                    <label for="categoryField">Kategorizovat podle atributu</label>
+                    <select id="categoryField">
+                        <option value="">-- Jednotný symbol (Bez kategorií) --</option>
+                    </select>
+                </div>
+                <div id="secCategories" style="display: none; margin-bottom: 14px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span style="font-size: 11px; font-weight: 600; color: #37474f;">Kategorie a barvy</span>
+                        <button type="button" id="btnRandomizeColors" class="mini-btn" style="width: auto; padding: 2px 8px !important;" title="Přiřadit nové barvy">Nové barvy</button>
+                    </div>
+                    <div id="categoryListContainer" class="category-list"></div>
+                </div>
+
+                <div class="section-label">Nastavení symbolů</div>
+                <div class="field">
+                    <label for="pointType">Typ zobrazení bodů</label>
+                    <select id="pointType">
+                        <option value="vector">Vektorový tvar (Kruh / Čtverec)</option>
+                        <option value="iconUrl">Obrázek / Ikona z URL</option>
+                        <option value="svgCode">Vlastní SVG kód</option>
+                    </select>
+                </div>
+
+                <div id="secVectorSym">
+                    <div class="field">
+                        <div class="grid3">
+                            <div>
+                                <label for="symFillColor">Výplň</label>
+                                <input type="color" id="symFillColor" value="#ea521f">
+                            </div>
+                            <div>
+                                <label for="symStrokeColor">Obrys</label>
+                                <input type="color" id="symStrokeColor" value="#000000">
+                            </div>
+                            <div>
+                                <label for="symShape">Tvar bodu</label>
+                                <select id="symShape">
+                                    <option value="circle">Kruh</option>
+                                    <option value="square">Čtverec</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="grid2">
+                            <div>
+                                <label for="symSize">Velikost bodu (px)</label>
+                                <input type="number" id="symSize" value="6" step="1" min="1">
+                            </div>
+                            <div>
+                                <label for="symStrokeWidth">Tloušťka obrysu</label>
+                                <input type="number" id="symStrokeWidth" value="1.5" step="0.5" min="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-label">Nastavení linií</div>
+                <div class="field">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="lineOutlineEnable">
+                        <span>Zapnout obrys / pod-linii</span>
+                    </label>
+                </div>
+                <div class="field">
+                    <div class="grid2">
+                        <div>
+                            <label for="lineOutlineColor">Barva pod-linie</label>
+                            <input type="color" id="lineOutlineColor" value="#000000">
+                        </div>
+                        <div>
+                            <label for="lineOutlineWidth">Šířka pod-linie</label>
+                            <input type="number" id="lineOutlineWidth" value="5" step="0.5" min="1">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="secIconSym" style="display: none;">
+                    <div class="field" id="secIconUrl">
+                        <label for="iconUrl">URL adresa obrázku (PNG/SVG)</label>
+                        <input type="text" id="iconUrl" value="https://cdn-icons-png.flaticon.com/512/684/684908.png">
+                    </div>
+                    <div class="field" id="secSvgCode" style="display: none;">
+                        <label for="svgCodeText">Vložit SVG kód</label>
+                        <textarea id="svgCodeText" rows="3"><svg viewBox="0 0 24 24" fill="#ea521f"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></textarea>
+                    </div>
+                    <div class="field">
+                        <div class="grid2">
+                            <div>
+                                <label for="iconSize">Velikost ikony (px)</label>
+                                <input type="number" id="iconSize" value="24" step="2" min="8">
+                            </div>
+                            <div>
+                                <label for="iconAngle">Natočení (°)</label>
+                                <input type="number" id="iconAngle" value="0" step="5" min="0" max="360">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ZÁLOŽKA 3: POPISKY -->
+            <section id="tab-popisky" class="tab-pane">
+                <div class="section-label">Popisky prvků</div>
+                <div class="field">
+                    <label for="labelField">Atribut pro popisek</label>
+                    <select id="labelField">
+                        <option value="">-- Bez popisků --</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <div class="grid2">
+                        <div>
+                            <label for="labelFontSize">Velikost popisků (px)</label>
+                            <input type="number" id="labelFontSize" value="11" min="6" max="32" step="1">
+                        </div>
+                        <div>
+                            <label for="labelFontColor">Barva textu</label>
+                            <input type="color" id="labelFontColor" value="#000000" style="height: 30px;">
+                        </div>
+                    </div>
+                </div>
+                <div class="section-label">Interaktivní úprava v mapě</div>
+                <div class="field">
+                    <button type="button" id="btnToggleLabelEdit" class="outline">Zapnout režim posunu/otáčení popisků</button>
+                </div>
+                <p style="font-size: 11px; color: #64748b; line-height: 1.4; margin-top: 8px;">
+                    Po zapnutí režimu můžete jednotlivé popisky v mapě uchopit myší a přesunout. 
+                    Přidržením klávesy <strong>Shift</strong> můžete popisek otáčet.
+                </p>
+            </section>
+
+            <!-- ZÁLOŽKA 4: LEGENDA -->
+            <section id="tab-legenda" class="tab-pane">
+                <div class="section-label">Nastavení zobrazení</div>
+                <div class="field">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="showLegend" checked>
+                        <span>Zobrazit legendu v mapovém okně</span>
+                    </label>
+                </div>
+                <div class="field">
+                    <label for="inpLegendTitle">Nadpis legendy</label>
+                    <input type="text" id="inpLegendTitle" value="LEGENDA">
+                </div>
+
+                <div class="section-label">Zdroj položek legendy</div>
+                <div class="field">
+                    <select id="legendMode">
+                        <option value="auto">Automaticky dle dat / kategorií</option>
+                        <option value="manual">Ručně zadané položky (s geometrií)</option>
+                    </select>
+                </div>
+
+                <div id="secManualLegend" style="display: none;">
+                    <div class="section-label">Položky legendy</div>
+                    <div id="manualLegendItems"></div>
+                    <div style="display: flex; gap: 8px; margin-top: 8px;">
+                        <button type="button" id="btnAddManualLegend" class="outline" style="flex: 1;">+ Přidat položku</button>
+                        <button type="button" id="btnAddManualHeader" class="outline" style="flex: 1;">+ Přidat podnadpis</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Pevná patička s exportem -->
+        <footer class="panel-footer">
+            <button type="button" id="btnPrintPdf" class="secondary">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 9V2h12v7"></path>
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                    <rect x="6" y="14" width="12" height="8"></rect>
+                </svg>
+                <span>Exportovat do PDF (Ctrl+P)</span>
+            </button>
+        </footer>
+    </aside>
+
+    <!-- Plátno stránky (Tiskový náhled) -->
+    <main class="canvas-area" id="canvasArea">
+        <div class="canvas-zoom-controls" id="canvasZoomControls">
+            <button type="button" id="btnZoomOut" class="zoom-btn" title="Oddálit (−)">−</button>
+            <span id="zoomLevelLabel" class="zoom-level">100%</span>
+            <button type="button" id="btnZoomIn" class="zoom-btn" title="Přiblížit (+)">+</button>
+            <button type="button" id="btnZoomReset" class="zoom-btn zoom-btn-text" title="Resetovat přiblížení">Fit</button>
+        </div>
+        <div class="page-scaler" id="pageScaler">
+            <div class="page" id="page">
+                <div class="margin-guide" id="marginGuide"></div>
+
+            <div class="map-frame" id="mapFrame" style="left:15mm; top:15mm; width:267mm; height:180mm;">
+                <div id="map" class="map-container"></div>
+
+                <div id="mapTitleGroup" class="map-elem" style="left: 6mm; top: 6mm;">
+                    <div id="outTitle" class="map-title-main"></div>
+                    <div id="outSubtitle" class="map-title-sub"></div>
+                </div>
+
+                <div id="outMapNum" class="map-elem map-number" style="right: 6mm; top: 6mm;"></div>
+
+                <div id="mapScaleElem" class="map-elem map-scale" style="left: 6mm; bottom: 6mm;">
+                    <div id="outScaleText"></div>
+                    <div class="scale-bar-container">
+                        <div id="outScaleBar" class="scale-bar"></div>
+                        <span id="outScaleLengthText" style="font-size: 9px;"></span>
+                    </div>
+                </div>
+
+                <div id="outImprint" class="map-elem map-imprint" style="right: 6mm; bottom: 6mm;"></div>
+
+                <div id="mapLegend" class="map-elem map-legend" style="left: 6mm; top: 40mm;">
+                    <div id="outLegendTitle" class="map-legend-title">LEGENDA</div>
+                    <div id="outLegendContent"></div>
+                </div>
+
+                <div class="move-handle" id="moveHandle" title="Posun celého okna"></div>
+                <div class="resize-handle" id="resizeHandle" title="Změna velikosti okna"></div>
+            </div>
+        </div>
+        </div>
+    </main>
+</div>
+
+<!-- Map Generator Scripts -->
+<script src="js/config.js"></script>
+<script src="js/map.js"></script>
+<script src="js/labels.js"></script>
+<script src="js/legend.js"></script>
+<script src="js/data.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

@@ -282,6 +282,20 @@ h1 {
     background: #e0f7fa;
 }
 
+.card.mapa {
+    border-top-color: #0288d1;
+}
+
+.card.mapa .card-title,
+.card.mapa .card-icon {
+    color: #0288d1;
+}
+
+.card.mapa:hover {
+    background: #e1f5fe;
+}
+
+
 /* Témata Pasportů */
 .card.kom {
     border-top-color: #ff7b00;
