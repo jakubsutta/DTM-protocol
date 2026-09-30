@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generátor map pasportů</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/proj4@2/dist/proj4.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/shpjs@4.0.4/dist/shp.min.js"></script>
+<style>
+    * { box-sizing: border-box; }
+    html, body { height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; }
+    body, input, select, textarea, button { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background: #eef0f3; color: #1a1a1a; }
+    
+    .app { display: grid; grid-template-columns: 380px 1fr; height: 100%; width: 100%; overflow: hidden; }
+
+    .panel { background: #ffffff; display: flex; flex-direction: column; height: 100%; border-right: 1px solid #dcdfe4; z-index: 100; }
+    .panel-header { padding: 16px 18px 12px; border-bottom: 1px solid #eef0f3; flex-shrink: 0; }
+    .panel-header h1 { font-size: 15px; font-weight: 800; margin: 0 0 2px; color: #111827; letter-spacing: -0.01em; }
+    .panel-header .sub { font-size: 11px; color: #6b7280; margin: 0; }
+
+    .tabs-nav { display: flex; background: #f8fafc; border-bottom: 1px solid #e2e8f0; flex-shrink: 0; padding: 0 8px; }
+    .tab-btn { 
+        flex: 1; padding: 11px 6px; font-size: 11px; font-weight: 600; border: none; 
+        background: transparent; color: #64748b; cursor: pointer; text-align: center; 
+        transition: all 0.15s ease; border-bottom: 2px solid transparent; text-transform: uppercase; letter-spacing: 0.03em;
+    }
+    .tab-btn:hover { color: #0f172a; background: #f1f5f9; }
+    .tab-btn.active { color: #ea521f; border-bottom: 2px solid #ea521f; background: #ffffff; font-weight: 700; }
+
+    .tabs-content { padding: 16px 18px; overflow-y: auto; flex-grow: 1; }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    .section-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #ea521f; margin: 16px 0 8px; padding-bottom: 4px; border-bottom: 1px solid #fde8e0; }
+    .section-label:first-of-type { margin-top: 0; }
+    .field { margin-bottom: 10px; }
+    .field label { display: block; font-size: 11px; color: #37474f; margin-bottom: 3px; font-weight: 600; }
+    .field input, .field select, .field textarea { width: 100%; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 8px; font-size: 12px; background: #fff; }
+    .field input[type="color"] { padding: 2px 4px; height: 30px; cursor: pointer; }
+    .field input[type="checkbox"] { width: auto; margin-right: 6px; transform: translateY(1px); }
+    
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .grid4 label, .grid3 label { font-size: 9px; text-align: center; }
+
+    button { background: #ea521f; color: #fff; border: none; padding: 8px 12px; border-radius: 4px; font-weight: 600; cursor: pointer; font-size: 12px; width: 100%; margin-top: 6px; transition: background 0.15s; }
+    button:hover { background: #d03d0c; }
+    button.secondary { background: #1e293b; }
+    button.secondary:hover { background: #0f172a; }
+    button.outline { background: transparent; color: #334155; border: 1px solid #cbd5e1; }
+    button.outline:hover { background: #f8fafc; border-color: #94a3b8; }
+    button.lock-btn { background: #16a34a; }
+    button.lock-btn.locked { background: #dc2626; }
+    button.active-toggle { background: #0284c7; }
+    
+    .status { font-size: 11px; color: #64748b; margin-top: 8px; min-height: 16px; word-break: break-word; }
+    .status.err { color: #dc2626; }
+
+    .canvas-area { height: 100%; width: 100%; padding: 30px; overflow: auto; background: #dcdfe4; }
+    .page { background: #fff; position: relative; box-shadow: 0 4px 30px rgba(0,0,0,0.18); margin: 0 auto; }
+    .margin-guide { position: absolute; border: 1px dashed #ea521f; pointer-events: none; z-index: 2; }
+    
+    .map-frame { position: absolute; border: 2px solid #000; background: #f8f9fa; z-index: 10; }
+    .map-frame.locked { cursor: default !important; }
+    .map-container { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
+
+    .resize-handle { position: absolute; width: 12px; height: 12px; background: #ea521f; border: 2px solid #fff; border-radius: 50%; right: -6px; bottom: -6px; cursor: nwse-resize; z-index: 100; }
+    .move-handle { position: absolute; width: 12px; height: 12px; background: #0284c7; border: 2px solid #fff; border-radius: 50%; right: -6px; top: -6px; cursor: move; z-index: 100; }
+    .map-frame.locked .resize-handle, .map-frame.locked .move-handle { display: none; }
+
+    .map-elem { position: absolute; background: rgba(255, 255, 255, 0.95); padding: 8px 12px; border: none !important; border-radius: 8px; z-index: 50; color: #000; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12); cursor: move; user-select: none; pointer-events: auto; }
+    .map-title-main { font-weight: 800; font-size: 15px; text-transform: uppercase; line-height: 1.1; }
+    .map-title-sub { font-size: 11px; color: #37474f; margin-top: 2px; }
+    .map-number { font-size: 15px; font-weight: 800; color: #000; }
+    .map-scale { font-size: 10px; font-weight: 700; display: flex; flex-direction: column; gap: 4px; }
+    .scale-bar-container { display: flex; align-items: center; gap: 6px; }
+    .scale-bar { height: 4px; background: #000; border: 1px solid #fff; outline: 1px solid #000; }
+    
+    .map-imprint { text-align: right; line-height: 1.3; white-space: pre-line; }
+    .map-legend { min-width: 150px; }
+    .map-legend-title { font-size: 11px; font-weight: 800; margin-bottom: 6px; border-bottom: 1px solid #e2e8f0; padding-bottom: 3px; text-transform: uppercase; }
+    .legend-item { display: flex; align-items: center; gap: 8px; font-size: 11px; margin-top: 5px; }
+    .legend-sym-box { width: 24px; height: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+    .manual-item-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px; margin-bottom: 8px; }
+    .manual-item-row { display: flex; gap: 6px; align-items: center; margin-bottom: 4px; }
+
+    .map-label-container { background: transparent !important; border: none !important; }
+    .draggable-label { color: #000; font-weight: 700; font-size: 12px; white-space: nowrap; user-select: none; cursor: pointer; text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, -2px 0px 0 #fff, 2px 0px 0 #fff, 0px -2px 0 #fff, 0px 2px 0 #fff; transition: transform 0.05s ease-out; display: inline-block; }
+    .edit-mode-active .draggable-label { cursor: move; outline: 1px dashed #0284c7; background: rgba(2, 132, 199, 0.1); }
+
+    @media print {
+        html, body { height: auto; overflow: visible; }
+        .panel { display: none !important; }
+        .app { display: block; height: auto; overflow: visible; }
+        .canvas-area { padding: 0; background: none; height: auto; overflow: visible; }
+        .page { box-shadow: none; margin: 0; }
+        .margin-guide, .resize-handle, .move-handle, .leaflet-control-container { display: none !important; }
+        .map-elem { box-shadow: none !important; cursor: default; }
+        .draggable-label { outline: none !important; background: transparent !important; }
+        @page { margin: 0; }
+    }
+</style>
+</head>
+<body>
+<div class="app">
+    <div class="panel">
+        <div class="panel-header">
+            <h1>Generátor map pasportů</h1>
+            <div class="sub">Pokročilý kartografický výstup</div>
+        </div>
+
+        <div class="tabs-nav">
+            <button class="tab-btn active" onclick="switchTab('tab-mapa', this)">Mapa</button>
+            <button class="tab-btn" onclick="switchTab('tab-data', this)">Data & Symboly</button>
+            <button class="tab-btn" onclick="switchTab('tab-popisky', this)">Popisky</button>
+            <button class="tab-btn" onclick="switchTab('tab-legenda', this)">Legenda</button>
+        </div>
+
+        <div class="tabs-content">
+            <!-- ZÁLOŽKA 1: MAPA -->
+            <div id="tab-mapa" class="tab-pane active">
+                <div class="section-label">Podkladové mapy</div>
+                <div class="field">
+                    <label><input type="checkbox" id="chkOrto" checked onchange="toggleWmsLayers()"> Ortofoto ČÚZK</label>
+                </div>
+                <div class="field">
+                    <label><input type="checkbox" id="chkKnInverse" onchange="toggleWmsLayers()"> Katastrální mapa (Inverzní / Hranice parcel)</label>
+                </div>
+
+                <div class="section-label">Stránka a vodítka</div>
+                <div class="field">
+                    <div class="grid2">
+                        <div><label>Formát</label><select id="pageFormat" onchange="updatePageSize()"><option value="A4">A4</option><option value="A3">A3</option></select></div>
+                        <div><label>Orientace</label><select id="pageOrient" onchange="updatePageSize()"><option value="portrait">Na výšku</option><option value="landscape" selected>Na šířku</option></select></div>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Okraje / Vodítka (mm)</label>
+                    <div class="grid4">
+                        <div><label>Horní</label><input type="number" id="mT" value="15" onchange="updatePageSize()"></div>
+                        <div><label>Pravý</label><input type="number" id="mR" value="15" onchange="updatePageSize()"></div>
+                        <div><label>Dolní</label><input type="number" id="mB" value="15" onchange="updatePageSize()"></div>
+                        <div><label>Levý</label><input type="number" id="mL" value="15" onchange="updatePageSize()"></div>
+                    </div>
+                </div>
+                <div class="field">
+                    <label><input type="checkbox" id="snapToGuides" checked> Přichytávat rám k vodítkům</label>
+                </div>
+                <button id="lockFrameBtn" class="lock-btn" onclick="toggleLockFrame()">Rám je volný (Kliknutím uzamknete)</button>
+
+                <div class="section-label">Měřítko a nadpisy</div>
+                <div class="field">
+                    <div class="grid2">
+                        <div><label>Ruční měřítko (1 : X)</label><input type="number" id="scaleInput" value="2000" step="100" onchange="onManualScaleChange()"></div>
+                        <div><label>Číslo výkresu</label><input type="text" id="inpMapNum" value="A.1" oninput="updateDecorations()"></div>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Nadpis</label>
+                    <input type="text" id="inpTitle" value="Pasport Místních Komunikací" oninput="updateDecorations()">
+                </div>
+                <div class="field">
+                    <label>Podnadpis</label>
+                    <input type="text" id="inpSubtitle" value="Obec Račice-Pístovice" oninput="updateDecorations()">
+                </div>
+
+                <div class="section-label">Nastavení tiráže</div>
+                <div class="field">
+                    <label>Pořizovatel / Zhotovitel</label>
+                    <input type="text" id="impAuthor" value="Správa majetku obcí s.r.o." oninput="updateDecorations()">
+                </div>
+                <div class="field">
+                    <div class="grid2">
+                        <div><label>Datum</label><input type="text" id="impDate" value="09/2026" oninput="updateDecorations()"></div>
+                        <div><label>Souřadnicový systém</label><input type="text" id="impSrs" value="S-JTSK / Křovák" oninput="updateDecorations()"></div>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Poznámka / Schválil</label>
+                    <input type="text" id="impNote" value="Schválil: Ing. Jan Novák" oninput="updateDecorations()">
+                </div>
+            </div>
+
+            <!-- ZÁLOŽKA 2: DATA A SYMBOLOGIE -->
+            <div id="tab-data" class="tab-pane">
+                <div class="section-label">Import SHP dat</div>
+                <div class="field">
+                    <label>Načíst SHP data (.zip archiv)</label>
+                    <input type="file" id="shpFile" accept=".zip">
+                    <button onclick="loadShp()" style="margin-top: 6px;">Načíst soubor</button>
+                    <div class="status" id="shpStatus"></div>
+                </div>
+
+                <div class="section-label">Kategorizace podle dat</div>
+                <div class="field">
+                    <label>Kategorizovat podle atributu</label>
+                    <select id="categoryField" onchange="updateVectorStyle()">
+                        <option value="">-- Jednotný symbol (Bez kategorií) --</option>
+                    </select>
+                </div>
+
+                <div class="section-label">Nastavení symbolů</div>
+                <div class="field">
+                    <label>Typ zobrazení bodů</label>
+                    <select id="pointType" onchange="toggleSymbolMode(); updateVectorStyle();">
+                        <option value="vector">Vektorový tvar (Kruh / Čtverec)</option>
+                        <option value="iconUrl">Obrázek / Ikona z URL</option>
+                        <option value="svgCode">Vlastní SVG kód</option>
+                    </select>
+                </div>
+
+                <div id="secVectorSym">
+                    <div class="field">
+                        <div class="grid3">
+                            <div><label>Výplň</label><input type="color" id="symFillColor" value="#ea521f" onchange="updateVectorStyle()"></div>
+                            <div><label>Obrys</label><input type="color" id="symStrokeColor" value="#000000" onchange="updateVectorStyle()"></div>
+                            <div><label>Tvar bodu</label>
+                                <select id="symShape" onchange="updateVectorStyle()">
+                                    <option value="circle">Kruh</option>
+                                    <option value="square">Čtverec</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <div class="grid2">
+                            <div><label>Velikost bodu (px)</label><input type="number" id="symSize" value="6" step="1" min="1" onchange="updateVectorStyle()"></div>
+                            <div><label>Tloušťka obrysu</label><input type="number" id="symStrokeWidth" value="1.5" step="0.5" min="0" onchange="updateVectorStyle()"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-label">Nastavení linií</div>
+                <div class="field">
+                    <label><input type="checkbox" id="lineOutlineEnable" onchange="updateVectorStyle()"> Zapnout obrys / pod-linii</label>
+                </div>
+                <div class="field">
+                    <div class="grid2">
+                        <div><label>Barva pod-linie</label><input type="color" id="lineOutlineColor" value="#000000" onchange="updateVectorStyle()"></div>
+                        <div><label>Šířka pod-linie</label><input type="number" id="lineOutlineWidth" value="5" step="0.5" min="1" onchange="updateVectorStyle()"></div>
+                    </div>
+                </div>
+
+                <div id="secIconSym" style="display: none;">
+                    <div class="field" id="secIconUrl">
+                        <label>URL adresa obrázku (PNG/SVG)</label>
+                        <input type="text" id="iconUrl" value="https://cdn-icons-png.flaticon.com/512/684/684908.png" oninput="updateVectorStyle()">
+                    </div>
+                    <div class="field" id="secSvgCode" style="display: none;">
+                        <label>Vložit SVG kód</label>
+                        <textarea id="svgCodeText" rows="3" oninput="updateVectorStyle()"><svg viewBox="0 0 24 24" fill="#ea521f"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></textarea>
+                    </div>
+                    <div class="field">
+                        <div class="grid2">
+                            <div><label>Velikost ikony (px)</label><input type="number" id="iconSize" value="24" step="2" onchange="updateVectorStyle()"></div>
+                            <div><label>Natočení (°)</label><input type="number" id="iconAngle" value="0" step="5" onchange="updateVectorStyle()"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ZÁLOŽKA 3: POPISKY -->
+            <div id="tab-popisky" class="tab-pane">
+                <div class="section-label">Popisky prvků</div>
+                <div class="field">
+                    <label>Atribut pro popisek</label>
+                    <select id="labelField" onchange="updateVectorStyle()">
+                        <option value="">-- Bez popisků --</option>
+                    </select>
+                </div>
+                <div class="section-label">Interaktivní úprava v mapě</div>
+                <div class="field">
+                    <button id="btnToggleLabelEdit" class="outline" onclick="toggleLabelEditMode()">Zapnout režim posunu/otáčení popisků</button>
+                </div>
+            </div>
+
+            <!-- ZÁLOŽKA 4: LEGENDA -->
+            <div id="tab-legenda" class="tab-pane">
+                <div class="section-label">Nastavení zobrazení</div>
+                <div class="field">
+                    <label><input type="checkbox" id="showLegend" checked onchange="updateDecorations()"> Zobrazit legendu v mapovém okně</label>
+                </div>
+                <div class="field">
+                    <label>Nadpis legendy</label>
+                    <input type="text" id="inpLegendTitle" value="LEGENDA" oninput="updateDecorations()">
+                </div>
+
+                <div class="section-label">Zdroj položek legendy</div>
+                <div class="field">
+                    <select id="legendMode" onchange="toggleLegendMode(); updateDecorations();">
+                        <option value="auto">Automaticky dle dat / kategorií</option>
+                        <option value="manual">Ručně zadané položky (s geometrií)</option>
+                    </select>
+                </div>
+
+                <div id="secManualLegend" style="display: none;">
+                    <div class="section-label">Položky legendy</div>
+                    <div id="manualLegendItems"></div>
+                    <button class="outline" onclick="addManualLegendItem()">+ Přidat položku</button>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px; border-top: 1px solid #eef0f3; padding-top: 15px;">
+                <button class="secondary" onclick="window.print()">Exportovat do PDF (Ctrl+P)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PLÁTNO STRÁNKY -->
+    <div class="canvas-area">
+        <div class="page" id="page">
+            <div class="margin-guide" id="marginGuide"></div>
+            
+            <div class="map-frame" id="mapFrame" style="left:15mm; top:15mm; width:267mm; height:180mm;">
+                <div id="map" class="map-container"></div>
+                
+                <div id="mapTitleGroup" class="map-elem" style="left: 6mm; top: 6mm;">
+                    <div id="outTitle" class="map-title-main"></div>
+                    <div id="outSubtitle" class="map-title-sub"></div>
+                </div>
+
+                <div id="outMapNum" class="map-elem map-number" style="right: 6mm; top: 6mm;"></div>
+
+                <div id="mapScaleElem" class="map-elem map-scale" style="left: 6mm; bottom: 6mm;">
+                    <div id="outScaleText"></div>
+                    <div class="scale-bar-container">
+                        <div id="outScaleBar" class="scale-bar"></div>
+                        <span id="outScaleLengthText" style="font-size: 9px;"></span>
+                    </div>
+                </div>
+
+                <div id="outImprint" class="map-elem map-imprint" style="right: 6mm; bottom: 6mm;"></div>
+                
+                <div id="mapLegend" class="map-elem map-legend" style="left: 6mm; top: 40mm;">
+                    <div id="outLegendTitle" class="map-legend-title">LEGENDA</div>
+                    <div id="outLegendContent"></div>
+                </div>
+
+                <div class="move-handle" id="moveHandle" title="Posun celého okna"></div>
+                <div class="resize-handle" id="resizeHandle" title="Změna velikosti okna"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+proj4.defs('EPSG:5514', '+proj=krovak +lat_0=49.5 +lon_0=24.83333333333333 +alpha=30.28813972222222 +k=0.9999 +x_0=0 +y_0=0 +ellps=bessel +towgs84=570.8,85.7,462.8,4.998,1.587,5.261,3.56 +units=m +no_defs');
+
+const PAGE_SIZES = { A4: [210, 297], A3: [297, 420] };
+let map = null, ortoLayer = null, knInverseLayer = null, geojsonLayer = null, outlineLayer = null;
+let labelMarkersGroup = L.layerGroup();
+let isLocked = false, isLabelEditMode = false;
+
+let manualItems = [
+    { text: 'Hlavní komunikace', geom: 'line', color: '#ea521f', svg: '' },
+    { text: 'Bod zájmu', geom: 'point', color: '#0284c7', svg: '' },
+    { text: 'Plocha zeleně', geom: 'polygon', color: '#16a34a', svg: '' }
+];
+
+function switchTab(tabId, btn) {
+    document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    btn.classList.add('active');
+}
+
+function val(id) { return document.getElementById(id).value; }
+function num(id) { return parseFloat(val(id)) || 0; }
+
+function updatePageSize() {
+    const format = val('pageFormat'), orient = val('pageOrient');
+    let [w, h] = PAGE_SIZES[format];
+    if (orient === 'landscape') [w, h] = [h, w];
+
+    const page = document.getElementById('page');
+    page.style.width = w + 'mm'; page.style.height = h + 'mm';
+
+    const mt = num('mT'), mr = num('mR'), mb = num('mB'), ml = num('mL');
+    const guide = document.getElementById('marginGuide');
+    guide.style.top = mt + 'mm'; guide.style.left = ml + 'mm';
+    guide.style.width = (w - ml - mr) + 'mm'; guide.style.height = (h - mt - mb) + 'mm';
+
+    updateDecorations();
+    if(map) { setTimeout(() => map.invalidateSize(), 100); }
+}
+
+function initMap() {
+    map = L.map('map', { zoomControl: false, attributionControl: false }).setView([49.817, 15.473], 14);
+    ortoLayer = L.tileLayer.wms('https://ags.cuzk.cz/arcgis1/services/ORTOFOTO_WM/MapServer/WMSServer', { layers: '0', format: 'image/png', transparent: true }).addTo(map);
+    knInverseLayer = L.tileLayer.wms('https://ags.cuzk.cz/arcgis1/services/KN/MapServer/WMSServer', { layers: '0', format: 'image/png', transparent: true, styles: 'default' });
+    labelMarkersGroup.addTo(map);
+    map.on('zoomend moveend', syncScaleFromMap);
+    setTimeout(() => { map.invalidateSize(); syncScaleFromMap(); }, 300);
+}
+
+function toggleWmsLayers() {
+    if (document.getElementById('chkOrto').checked) { if (!map.hasLayer(ortoLayer)) map.addLayer(ortoLayer); } else { if (map.hasLayer(ortoLayer)) map.removeLayer(ortoLayer); }
+    if (document.getElementById('chkKnInverse').checked) { if (!map.hasLayer(knInverseLayer)) map.addLayer(knInverseLayer); } else { if (map.hasLayer(knInverseLayer)) map.removeLayer(knInverseLayer); }
+}
+
+function syncScaleFromMap() {
+    if (!map) return;
+    const center = map.getCenter();
+    const scale = Math.round(591657550.500000 / Math.pow(2, map.getZoom()) * Math.cos(center.lat * Math.PI / 180));
+    document.getElementById('scaleInput').value = scale;
+    updateScaleBar(scale);
+}
+
+function onManualScaleChange() {
+    const scale = num('scaleInput');
+    if (!map || scale <= 0) return;
+    const center = map.getCenter();
+    map.setZoom(Math.log2(591657550.500000 * Math.cos(center.lat * Math.PI / 180) / scale));
+    updateScaleBar(scale);
+}
+
+function toggleLockFrame() {
+    isLocked = !isLocked;
+    const frame = document.getElementById('mapFrame');
+    const btn = document.getElementById('lockFrameBtn');
+    if (isLocked) { frame.classList.add('locked'); btn.classList.add('locked'); btn.textContent = 'Rám je UZAMČEN (Kliknutím odemknete)'; } else { frame.classList.remove('locked'); btn.classList.remove('locked'); btn.textContent = 'Rám je volný (Kliknutím uzamknete)'; }
+}
+
+function toggleSymbolMode() {
+    const mode = val('pointType');
+    document.getElementById('secVectorSym').style.display = mode === 'vector' ? 'block' : 'none';
+    document.getElementById('secIconSym').style.display = mode !== 'vector' ? 'block' : 'none';
+    document.getElementById('secIconUrl').style.display = mode === 'iconUrl' ? 'block' : 'none';
+    document.getElementById('secSvgCode').style.display = mode === 'svgCode' ? 'block' : 'none';
+}
+
+function toggleLegendMode() { document.getElementById('secManualLegend').style.display = val('legendMode') === 'manual' ? 'block' : 'none'; }
+
+function toggleLabelEditMode() {
+    isLabelEditMode = !isLabelEditMode;
+    const btn = document.getElementById('btnToggleLabelEdit');
+    const mapEl = document.getElementById('map');
+    if (isLabelEditMode) { btn.classList.add('active-toggle'); btn.textContent = 'Vypnout režim posunu popisků'; mapEl.classList.add('edit-mode-active'); } else { btn.classList.remove('active-toggle'); btn.textContent = 'Zapnout režim posunu/otáčení popisků'; mapEl.classList.remove('edit-mode-active'); }
+}
+
+function initInteractions() {
+    const frame = document.getElementById('mapFrame');
+    let mode = null, targetEl = null, startX, startY, startLeft, startTop, startW, startH;
+    const getMpp = () => parseFloat(document.getElementById('page').style.width) / document.getElementById('page').getBoundingClientRect().width;
+
+    document.getElementById('moveHandle').addEventListener('mousedown', (e) => { if (isLocked) return; mode = 'frame_move'; targetEl = frame; startX = e.clientX; startY = e.clientY; startLeft = parseFloat(frame.style.left); startTop = parseFloat(frame.style.top); e.stopPropagation(); e.preventDefault(); });
+    document.getElementById('resizeHandle').addEventListener('mousedown', (e) => { if (isLocked) return; mode = 'frame_resize'; targetEl = frame; startX = e.clientX; startY = e.clientY; startW = parseFloat(frame.style.width); startH = parseFloat(frame.style.height); e.stopPropagation(); e.preventDefault(); });
+
+    document.querySelectorAll('.map-elem').forEach(el => {
+        el.addEventListener('mousedown', (e) => {
+            mode = 'elem_move'; targetEl = el; startX = e.clientX; startY = e.clientY;
+            startLeft = parseFloat(el.style.left) || el.offsetLeft; startTop = parseFloat(el.style.top) || el.offsetTop;
+            el.style.right = 'auto'; el.style.bottom = 'auto'; el.style.left = startLeft + 'px'; el.style.top = startTop + 'px';
+            e.stopPropagation(); e.preventDefault();
+        });
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!mode) return;
+        const mpp = getMpp(), dx = (e.clientX - startX) * mpp, dy = (e.clientY - startY) * mpp;
+        const snapEnabled = document.getElementById('snapToGuides').checked;
+        const mt = num('mT'), mr = num('mR'), mb = num('mB'), ml = num('mL');
+        const pageW = parseFloat(document.getElementById('page').style.width), pageH = parseFloat(document.getElementById('page').style.height);
+        
+        if (mode === 'frame_move') {
+            let newL = startLeft + dx, newT = startTop + dy;
+            if (snapEnabled) {
+                if (Math.abs(newL - ml) < 5) newL = ml; if (Math.abs(newT - mt) < 5) newT = mt;
+                if (Math.abs((newL + parseFloat(frame.style.width)) - (pageW - mr)) < 5) newL = pageW - mr - parseFloat(frame.style.width);
+                if (Math.abs((newT + parseFloat(frame.style.height)) - (pageH - mb)) < 5) newT = pageH - mb - parseFloat(frame.style.height);
+            }
+            frame.style.left = newL + 'mm'; frame.style.top = newT + 'mm';
+        } else if (mode === 'frame_resize') {
+            let newW = Math.max(50, startW + dx), newH = Math.max(50, startH + dy);
+            if (snapEnabled) {
+                if (Math.abs((parseFloat(frame.style.left) + newW) - (pageW - mr)) < 5) newW = pageW - mr - parseFloat(frame.style.left);
+                if (Math.abs((parseFloat(frame.style.top) + newH) - (pageH - mb)) < 5) newH = pageH - mb - parseFloat(frame.style.top);
+            }
+            frame.style.width = newW + 'mm'; frame.style.height = newH + 'mm'; if(map) map.invalidateSize();
+        } else if (mode === 'elem_move') {
+            targetEl.style.left = (startLeft + (e.clientX - startX)) + 'px'; targetEl.style.top = (startTop + (e.clientY - startY)) + 'px';
+        }
+    });
+    document.addEventListener('mouseup', () => { mode = null; });
+}
+
+function renderManualLegendInputs() {
+    const container = document.getElementById('manualLegendItems');
+    container.innerHTML = '';
+    manualItems.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = 'manual-item-card';
+
+        let html = '<div class="manual-item-row">' +
+                   '<input type="text" value="' + item.text + '" placeholder="Název položky" oninput="manualItems[' + index + '].text = this.value; updateDecorations();">' +
+                   '<button class="outline" style="width: 30px; padding: 4px;" onclick="removeManualLegendItem(' + index + ')">✕</button>' +
+                   '</div>' +
+                   '<div class="manual-item-row">' +
+                   '<select style="flex:1;" onchange="manualItems[' + index + '].geom = this.value; renderManualLegendInputs(); updateDecorations();">' +
+                   '<option value="point" ' + (item.geom === 'point' ? 'selected' : '') + '>Bod (Kruh)</option>' +
+                   '<option value="line" ' + (item.geom === 'line' ? 'selected' : '') + '>Linie</option>' +
+                   '<option value="polygon" ' + (item.geom === 'polygon' ? 'selected' : '') + '>Polygon</option>' +
+                   '<option value="svg" ' + (item.geom === 'svg' ? 'selected' : '') + '>Vlastní SVG</option>' +
+                   '</select>';
+
+        if (item.geom !== 'svg') {
+            html += '<input type="color" value="' + item.color + '" style="width: 40px;" onchange="manualItems[' + index + '].color = this.value; updateDecorations();">';
+        }
+        html += '</div>';
+
+        if (item.geom === 'svg') {
+            html += '<div class="manual-item-row">' +
+                    '<input type="text" value="' + (item.svg || '').replace(/"/g, '&quot;') + '" placeholder="<svg>...</svg>" oninput="manualItems[' + index + '].svg = this.value; updateDecorations();">' +
+                    '</div>';
+        }
+
+        card.innerHTML = html;
+        container.appendChild(card);
+    });
+}
+
+function addManualLegendItem() { manualItems.push({ text: 'Nová položka', geom: 'line', color: '#000000', svg: '' }); renderManualLegendInputs(); updateDecorations(); }
+function removeManualLegendItem(index) { manualItems.splice(index, 1); renderManualLegendInputs(); updateDecorations(); }
+
+function updateDecorations() {
+    document.getElementById('outTitle').textContent = val('inpTitle');
+    document.getElementById('outSubtitle').textContent = val('inpSubtitle');
+    document.getElementById('outMapNum').textContent = val('inpMapNum');
+    
+    document.getElementById('outImprint').innerHTML = '<strong>Pořizovatel:</strong> ' + val('impAuthor') + '<br><strong>Datum:</strong> ' + val('impDate') + ' | <strong>SRS:</strong> ' + val('impSrs') + (val('impNote') ? '<br>' + val('impNote') : '');
+
+    document.getElementById('mapLegend').style.display = document.getElementById('showLegend').checked ? 'block' : 'none';
+    document.getElementById('outLegendTitle').textContent = val('inpLegendTitle');
+    
+    const legendContent = document.getElementById('outLegendContent');
+    legendContent.innerHTML = '';
+    const legendMode = val('legendMode');
+    
+    if (legendMode === 'manual') {
+        manualItems.forEach(item => {
+            let symHtml = '';
+            if (item.geom === 'point') symHtml = '<svg width="20" height="14"><circle cx="10" cy="7" r="5" fill="' + item.color + '" stroke="#000" stroke-width="1"/></svg>';
+            else if (item.geom === 'line') symHtml = '<svg width="20" height="14"><line x1="1" y1="7" x2="19" y2="7" stroke="' + item.color + '" stroke-width="3"/></svg>';
+            else if (item.geom === 'polygon') symHtml = '<svg width="20" height="14"><rect x="2" y="2" width="16" height="10" fill="' + item.color + '" stroke="#000" stroke-width="1"/></svg>';
+            else if (item.geom === 'svg') symHtml = '<div style="width:20px; height:14px; display:flex; align-items:center; justify-content:center;">' + (item.svg || '') + '</div>';
+
+            const row = document.createElement('div'); row.className = 'legend-item';
+            row.innerHTML = '<div class="legend-sym-box">' + symHtml + '</div><span>' + item.text + '</span>';
+            legendContent.appendChild(row);
+        });
+    } else {
+        const categoryField = val('categoryField');
+        if (categoryField && Object.keys(categoryColors).length > 0) {
+            Object.keys(categoryColors).forEach(catVal => {
+                const row = document.createElement('div'); row.className = 'legend-item';
+                row.innerHTML = '<div class="legend-sym-box"><svg width="20" height="14"><rect x="1" y="1" width="18" height="12" fill="' + categoryColors[catVal] + '" stroke="#000" stroke-width="1"/></svg></div><span>' + catVal + '</span>';
+                legendContent.appendChild(row);
+            });
+        } else {
+            let symSvg = '<svg width="20" height="14"><rect x="1" y="1" width="18" height="12" fill="' + val('symFillColor') + '" stroke="' + val('symStrokeColor') + '" stroke-width="1"/></svg>';
+            if (val('pointType') === 'vector' && val('symShape') === 'circle') symSvg = '<svg width="18" height="18"><circle cx="9" cy="9" r="6" fill="' + val('symFillColor') + '" stroke="' + val('symStrokeColor') + '" stroke-width="1.5"/></svg>';
+            const row = document.createElement('div'); row.className = 'legend-item';
+            row.innerHTML = '<div class="legend-sym-box">' + symSvg + '</div><span>Objekty pasportu</span>';
+            legendContent.appendChild(row);
+        }
+    }
+    updateScaleBar(num('scaleInput'));
+}
+
+function updateScaleBar(scale) {
+    document.getElementById('outScaleText').textContent = '1 : ' + (scale || 0).toLocaleString('cs-CZ');
+    let targetMeters = scale <= 1000 ? 20 : (scale <= 5000 ? 100 : 500);
+    document.getElementById('outScaleBar').style.width = Math.max(10, (targetMeters * 1000) / (scale || 1)) + 'mm';
+    document.getElementById('outScaleLengthText').textContent = targetMeters + ' m';
+}
+
+let importedGeoJSON = null, categoryColors = {};
+const getRandomColor = () => '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+
+async function loadShp() {
+    const file = document.getElementById('shpFile').files[0];
+    const status = document.getElementById('shpStatus');
+    if (!file) { status.textContent = 'Vyberte ZIP soubor.'; status.className = 'status err'; return; }
+    status.className = 'status'; status.textContent = 'Načítám data...';
+
+    try {
+        const buffer = await file.arrayBuffer();
+        importedGeoJSON = await shp(buffer);
+
+        if (geojsonLayer) map.removeLayer(geojsonLayer);
+        if (outlineLayer) map.removeLayer(outlineLayer);
+
+        const labelSelect = document.getElementById('labelField');
+        const categorySelect = document.getElementById('categoryField');
+        labelSelect.innerHTML = '<option value="">-- Bez popisků --</option>';
+        categorySelect.innerHTML = '<option value="">-- Jednotný symbol (Bez kategorií) --</option>';
+
+        const firstFeat = (Array.isArray(importedGeoJSON) ? importedGeoJSON[0] : importedGeoJSON).features[0];
+        if (firstFeat && firstFeat.properties) {
+            Object.keys(firstFeat.properties).forEach(k => {
+                labelSelect.appendChild(new Option(k, k));
+                categorySelect.appendChild(new Option(k, k));
+            });
+        }
+        updateVectorStyle();
+        const bounds = geojsonLayer.getBounds(); if (bounds.isValid()) map.fitBounds(bounds);
+        status.textContent = 'Data byla úspěšně načtena a zobrazena v mapě.';
+    } catch (e) {
+        status.className = 'status err'; status.textContent = 'Chyba při načítání SHP: ' + e.message;
+    }
+}
+
+function updateVectorStyle() {
+    if (!importedGeoJSON || !map) return;
+    if (geojsonLayer) map.removeLayer(geojsonLayer);
+    if (outlineLayer) map.removeLayer(outlineLayer);
+    labelMarkersGroup.clearLayers();
+
+    categoryColors = {};
+    const categoryField = val('categoryField');
+    if (categoryField) {
+        (Array.isArray(importedGeoJSON) ? importedGeoJSON[0] : importedGeoJSON).features.forEach(f => {
+            const valKey = f.properties ? String(f.properties[categoryField]) : 'Neznámo';
+            if (!categoryColors[valKey]) categoryColors[valKey] = getRandomColor();
+        });
+    }
+
+    const getColor = (feature) => (categoryField && feature.properties && categoryColors[feature.properties[categoryField]]) ? categoryColors[feature.properties[categoryField]] : val('symFillColor');
+
+    if (document.getElementById('lineOutlineEnable').checked) {
+        outlineLayer = L.geoJSON(importedGeoJSON, { style: { color: val('lineOutlineColor'), weight: num('lineOutlineWidth'), opacity: 1 } }).addTo(map);
+    }
+
+    geojsonLayer = L.geoJSON(importedGeoJSON, {
+        style: (feature) => ({ color: val('symStrokeColor'), weight: num('symStrokeWidth'), fillColor: getColor(feature), fillOpacity: 0.7 }),
+        pointToLayer: (feature, latlng) => {
+            const pointType = val('pointType');
+            if (pointType === 'iconUrl') return L.marker(latlng, { icon: L.divIcon({ html: '<img src="' + val('iconUrl') + '" style="width:' + num('iconSize') + 'px; height:' + num('iconSize') + 'px; transform: rotate(' + num('iconAngle') + 'deg);">', className: '', iconSize: [num('iconSize'), num('iconSize')], iconAnchor: [num('iconSize')/2, num('iconSize')/2] }) });
+            if (pointType === 'svgCode') return L.marker(latlng, { icon: L.divIcon({ html: '<div style="width:' + num('iconSize') + 'px; height:' + num('iconSize') + 'px; transform: rotate(' + num('iconAngle') + 'deg);">' + val('svgCodeText') + '</div>', className: '', iconSize: [num('iconSize'), num('iconSize')], iconAnchor: [num('iconSize')/2, num('iconSize')/2] }) });
+            return L.circleMarker(latlng, { radius: num('symSize'), fillColor: getColor(feature), color: val('symStrokeColor'), weight: num('symStrokeWidth'), fillOpacity: 0.8 });
+        },
+        onEachFeature: (feature, layer) => {
+            const labelField = val('labelField');
+            if (labelField && feature.properties && feature.properties[labelField]) {
+                const labelIcon = L.divIcon({ className: 'map-label-container', html: '<div class="draggable-label" data-angle="0">' + String(feature.properties[labelField]) + '</div>', iconAnchor: [10, 10] });
+                const labelCenter = layer.getBounds ? layer.getBounds().getCenter() : (layer.getLatLng ? layer.getLatLng() : null);
+                if (labelCenter) {
+                    const labelMarker = L.marker(labelCenter, { icon: labelIcon, zIndexOffset: 1000 });
+                    labelMarkersGroup.addLayer(labelMarker);
+                    labelMarker.on('add', () => {
+                        const el = labelMarker.getElement();
+                        if (!el) return;
+                        el.addEventListener('mousedown', (e) => {
+                            if (!isLabelEditMode) return; e.stopPropagation(); e.preventDefault();
+                            let isDragging = !e.shiftKey, isRotating = e.shiftKey, startX = e.clientX, startY = e.clientY, startAngle = parseFloat(el.querySelector('.draggable-label').getAttribute('data-angle')) || 0;
+                            const onMouseMove = (moveEvent) => {
+                                if (isDragging) {
+                                    const currentPos = map.latLngToLayerPoint(labelMarker.getLatLng());
+                                    labelMarker.setLatLng(map.layerPointToLatLng(L.point(currentPos.x + (moveEvent.clientX - startX), currentPos.y + (moveEvent.clientY - startY))));
+                                    startX = moveEvent.clientX; startY = moveEvent.clientY;
+                                } else if (isRotating) {
+                                    const newAngle = startAngle + (moveEvent.clientX - startX);
+                                    el.querySelector('.draggable-label').style.transform = 'rotate(' + newAngle + 'deg)';
+                                    el.querySelector('.draggable-label').setAttribute('data-angle', newAngle);
+                                }
+                            };
+                            const onMouseUp = () => { isDragging = false; isRotating = false; window.removeEventListener('mousemove', onMouseMove); window.removeEventListener('mouseup', onMouseUp); };
+                            window.addEventListener('mousemove', onMouseMove); window.addEventListener('mouseup', onMouseUp);
+                        });
+                    });
+                }
+            }
+        }
+    }).addTo(map);
+    updateDecorations();
+}
+
+updatePageSize(); initMap(); initInteractions(); renderManualLegendInputs(); toggleSymbolMode(); toggleLegendMode();
+</script>
+</body>
+</html>
