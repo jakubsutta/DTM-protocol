@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Generátor kalendáře</title>
+<link rel="icon" href="calendar-favicon.svg" type="image/svg+xml">
 <style>
     * { box-sizing: border-box; }
     body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f3f0f8; color: #1a1a1a; margin: 0; }
@@ -30,7 +31,7 @@
     .event-item button.rm:hover { background: #fdecea; }
 
     /* ---- Stránka kalendáře ---- */
-    .canvas-area { padding: 30px; overflow: auto; display: flex; justify-content: center; align-items: flex-start; }
+    .canvas-area { padding: 30px; overflow: auto; display: flex; justify-content: center; align-items: flex-start; background-color: #ffffff; }
     .page { background: #fff; box-shadow: 0 4px 30px rgba(0,0,0,0.15); padding: 14mm 14mm 10mm; display: flex; flex-direction: column; flex-shrink: 0; }
 
     .cal-header { text-align: center; margin-bottom: 10mm; }
@@ -43,7 +44,7 @@
 
     .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); flex: 1; gap: 1.2mm; }
     .day-cell { border: 1px solid #e2e6e1; border-radius: 2mm; padding: 1.5mm 2mm; display: flex; flex-direction: column; background: #fff; min-height: 0; overflow: hidden; }
-    .day-cell.empty { background: #f3f5f2; border-color: #eceeec; }
+    .day-cell.empty { background: #f5f5f5; border-color: #f5f5f5; }
     .day-cell.weekend { background: #eaf1fe; border-color: #cddffb; }
     .day-cell.holiday { background: #fdece3; border-color: #f8c7ab; }
     .day-num { font-size: 4mm; font-weight: 700; color: #1a1a1a; }
@@ -59,6 +60,11 @@
         .app { display: block; }
         .canvas-area { padding: 0; }
         .page { box-shadow: none; margin: 0; }
+        .page, .cal-grid, .day-cell {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+        }
         @page { margin: 0; }
     }
 </style>
@@ -122,7 +128,7 @@ function updatePageSize() {
     const format = document.getElementById('pageFormat').value;
     const orient = document.getElementById('pageOrient').value;
     let [w, h] = PAGE_SIZES[format];
-    if (orient === 'portrait') { [w, h] = [h, w]; } // výchozí rozměry jsou na šířku (landscape)
+    if (orient === 'landscape') { [w, h] = [h, w]; } // výchozí rozměry jsou na výšku (portrait), pro landscape prohodíme
     const page = document.getElementById('page');
     page.style.width = w + 'mm';
     page.style.height = h + 'mm';
