@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generátor kalendáře</title>
+<style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f3f0f8; color: #1a1a1a; margin: 0; }
+    .app { display: grid; grid-template-columns: 300px 1fr; min-height: 100vh; }
+
+    /* ---- Panel (levandulová) ---- */
+    .panel { background: #efe9f7; border-right: 1px solid #ddd0ef; padding: 22px 18px 60px; overflow-y: auto; max-height: 100vh; position: sticky; top: 0; }
+    .panel h1 { font-size: 16px; font-weight: 800; color: #5b3a8e; margin-bottom: 4px; }
+    .panel .sub { font-size: 11px; color: #8873ad; margin-bottom: 18px; }
+    .section-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #7c4dcf; margin: 18px 0 8px; padding-bottom: 5px; border-bottom: 1px solid #ddd0ef; }
+    .section-label:first-of-type { margin-top: 0; }
+    .field { margin-bottom: 10px; }
+    .field label { display: block; font-size: 11px; color: #5b3a8e; margin-bottom: 3px; }
+    .field input, .field select { width: 100%; border: 1px solid #b39ddb; border-radius: 5px; padding: 7px 9px; font-size: 12.5px; font-family: inherit; background: #fff; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    button { background: #7c4dcf; color: #fff; border: none; padding: 9px 14px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 12.5px; width: 100%; margin-top: 6px; }
+    button:hover { background: #613bb0; }
+    button.secondary { background: #5b3a8e; }
+    .event-list { margin-top: 10px; }
+    .event-item { display: flex; justify-content: space-between; align-items: center; background: #fff; border: 1px solid #ddd0ef; border-radius: 5px; padding: 6px 9px; font-size: 11px; margin-bottom: 6px; }
+    .event-item .txt { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 6px; }
+    .event-item .date { color: #8873ad; font-size: 10px; display: block; }
+    .event-item button.rm { width: auto; background: none; color: #c62828; font-size: 14px; padding: 0 4px; margin: 0; }
+    .event-item button.rm:hover { background: #fdecea; }
+
+    /* ---- Stránka kalendáře ---- */
+    .canvas-area { padding: 30px; overflow: auto; display: flex; justify-content: center; align-items: flex-start; }
+    .page { background: #fff; box-shadow: 0 4px 30px rgba(0,0,0,0.15); padding: 14mm 14mm 10mm; display: flex; flex-direction: column; flex-shrink: 0; }
+
+    .cal-header { text-align: center; margin-bottom: 10mm; }
+    .cal-month { font-size: 9mm; font-weight: 800; color: #ea521f; text-transform: uppercase; letter-spacing: 0.04em; outline: none; }
+    .cal-month:focus { background: #fdece3; }
+
+    .cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); margin-bottom: 2mm; }
+    .cal-weekdays div { text-align: center; font-size: 3.4mm; font-weight: 700; color: #8a9389; text-transform: uppercase; letter-spacing: 0.03em; }
+    .cal-weekdays div.we { color: #4483fc; }
+
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); flex: 1; gap: 1.2mm; }
+    .day-cell { border: 1px solid #e2e6e1; border-radius: 2mm; padding: 1.5mm 2mm; display: flex; flex-direction: column; background: #fff; min-height: 0; overflow: hidden; }
+    .day-cell.empty { background: #f3f5f2; border-color: #eceeec; }
+    .day-cell.weekend { background: #eaf1fe; border-color: #cddffb; }
+    .day-cell.holiday { background: #fdece3; border-color: #f8c7ab; }
+    .day-num { font-size: 4mm; font-weight: 700; color: #1a1a1a; }
+    .day-cell.weekend .day-num { color: #4483fc; }
+    .day-cell.holiday .day-num { color: #ea521f; }
+    .day-label { font-size: 2.3mm; color: #ea521f; font-weight: 600; line-height: 1.25; margin-top: 0.5mm; }
+    .day-note { flex: 1; font-size: 2.4mm; color: #2f67d8; font-weight: 600; outline: none; margin-top: 0.8mm; line-height: 1.3; overflow: hidden; }
+    .day-note:focus { background: rgba(68,131,252,0.08); }
+    .day-note:empty:before { content: ''; }
+
+    @media print {
+        .panel { display: none !important; }
+        .app { display: block; }
+        .canvas-area { padding: 0; }
+        .page { box-shadow: none; margin: 0; }
+        @page { margin: 0; }
+    }
+</style>
+</head>
+<body>
+<div class="app">
+    <div class="panel">
+        <h1>Generátor kalendáře</h1>
+        <div class="sub">Nastav měsíc, formát a vlastní události</div>
+
+        <div class="section-label">Stránka</div>
+        <div class="field">
+            <div class="grid2">
+                <div><label>Formát</label><select id="pageFormat" onchange="updatePageSize()"><option value="A4">A4</option><option value="A3">A3</option></select></div>
+                <div><label>Orientace</label><select id="pageOrient" onchange="updatePageSize()"><option value="landscape" selected>Na šířku</option><option value="portrait">Na výšku</option></select></div>
+            </div>
+        </div>
+
+        <div class="section-label">Měsíc</div>
+        <div class="field">
+            <div class="grid2">
+                <div><label>Měsíc</label><select id="monthSelect" onchange="renderCalendar()">
+                    <option value="0">Leden</option><option value="1">Únor</option><option value="2">Březen</option>
+                    <option value="3">Duben</option><option value="4">Květen</option><option value="5">Červen</option>
+                    <option value="6">Červenec</option><option value="7">Srpen</option><option value="8">Září</option>
+                    <option value="9">Říjen</option><option value="10">Listopad</option><option value="11">Prosinec</option>
+                </select></div>
+                <div><label>Rok</label><input type="number" id="yearInput" value="2026" onchange="renderCalendar()"></div>
+            </div>
+        </div>
+
+        <div class="section-label">Vlastní událost</div>
+        <div class="field"><label>Den</label><input type="date" id="eventDate"></div>
+        <div class="field"><label>Text</label><input type="text" id="eventText" placeholder="např. Dovolená, Schůzka..."></div>
+        <button onclick="addEvent()">+ Přidat událost</button>
+        <div class="event-list" id="eventList"></div>
+
+        <div class="section-label">Export</div>
+        <button class="secondary" onclick="window.print()">⬇ Export do PDF (Ctrl+P)</button>
+    </div>
+
+    <div class="canvas-area">
+        <div class="page" id="page">
+            <div class="cal-header">
+                <span class="cal-month" id="calMonthTitle" contenteditable="true">LEDEN 2026</span>
+            </div>
+            <div class="cal-weekdays">
+                <div>Po</div><div>Út</div><div>St</div><div>Čt</div><div>Pá</div><div class="we">So</div><div class="we">Ne</div>
+            </div>
+            <div class="cal-grid" id="calGrid"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+const PAGE_SIZES = { A4: [210, 297], A3: [297, 420] };
+const MONTH_NAMES = ['LEDEN','ÚNOR','BŘEZEN','DUBEN','KVĚTEN','ČERVEN','ČERVENEC','SRPEN','ZÁŘÍ','ŘÍJEN','LISTOPAD','PROSINEC'];
+let customEvents = []; // { dateStr: 'YYYY-MM-DD', text: '...' }
+
+function updatePageSize() {
+    const format = document.getElementById('pageFormat').value;
+    const orient = document.getElementById('pageOrient').value;
+    let [w, h] = PAGE_SIZES[format];
+    if (orient === 'portrait') { [w, h] = [h, w]; } // výchozí rozměry jsou na šířku (landscape)
+    const page = document.getElementById('page');
+    page.style.width = w + 'mm';
+    page.style.height = h + 'mm';
+}
+
+function easterSunday(year) {
+    const a = year % 19, b = Math.floor(year / 100), c = year % 100;
+    const d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25);
+    const g = Math.floor((b - f + 1) / 3);
+    const h = (19 * a + b - d - g + 15) % 30;
+    const i = Math.floor(c / 4), k = c % 4;
+    const l = (32 + 2 * e + 2 * i - h - k) % 7;
+    const m = Math.floor((a + 11 * h + 22 * l) / 451);
+    const month = Math.floor((h + l - 7 * m + 114) / 31);
+    const day = ((h + l - 7 * m + 114) % 31) + 1;
+    return new Date(year, month - 1, day);
+}
+
+function getHolidays(year) {
+    const easter = easterSunday(year);
+    const addDays = (d, n) => { const r = new Date(d); r.setDate(r.getDate() + n); return r; };
+    const fmt = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const fixed = [
+        [`${year}-01-01`, 'Nový rok, Den obnovy samostatného českého státu'],
+        [`${year}-05-01`, 'Svátek práce'],
+        [`${year}-05-08`, 'Den vítězství'],
+        [`${year}-07-05`, 'Cyril a Metoděj'],
+        [`${year}-07-06`, 'Mistr Jan Hus'],
+        [`${year}-09-28`, 'Den české státnosti'],
+        [`${year}-10-28`, 'Vznik ČSR'],
+        [`${year}-11-17`, 'Den boje za svobodu a demokracii'],
+        [`${year}-12-24`, 'Štědrý den'],
+        [`${year}-12-25`, '1. svátek vánoční'],
+        [`${year}-12-26`, '2. svátek vánoční'],
+    ];
+    const movable = [
+        [fmt(addDays(easter, -2)), 'Velký pátek'],
+        [fmt(addDays(easter, 1)), 'Velikonoční pondělí'],
+    ];
+    const map = {};
+    [...fixed, ...movable].forEach(([d, label]) => { map[d] = label; });
+    return map;
+}
+
+function dateStr(y, m, d) { return `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`; }
+
+function renderCalendar() {
+    const year = parseInt(document.getElementById('yearInput').value);
+    const month = parseInt(document.getElementById('monthSelect').value);
+    document.getElementById('calMonthTitle').textContent = `${MONTH_NAMES[month]} ${year}`;
+
+    const holidays = getHolidays(year);
+    const grid = document.getElementById('calGrid');
+    grid.innerHTML = '';
+
+    const firstOfMonth = new Date(year, month, 1);
+    let startOffset = firstOfMonth.getDay() - 1; // Po=0 ... Ne=6
+    if (startOffset < 0) startOffset = 6;
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const totalCells = Math.ceil((startOffset + daysInMonth) / 7) * 7;
+
+    for (let i = 0; i < totalCells; i++) {
+        const dayNum = i - startOffset + 1;
+        const cell = document.createElement('div');
+        cell.className = 'day-cell';
+
+        if (dayNum < 1 || dayNum > daysInMonth) {
+            cell.classList.add('empty');
+            grid.appendChild(cell);
+            continue;
+        }
+
+        const dow = (startOffset + (dayNum - 1)) % 7; // 0=Po ... 6=Ne
+        const isWeekend = dow === 5 || dow === 6;
+        const ds = dateStr(year, month, dayNum);
+        const holidayName = holidays[ds];
+
+        if (isWeekend) cell.classList.add('weekend');
+        if (holidayName) cell.classList.add('holiday');
+
+        const numEl = document.createElement('div');
+        numEl.className = 'day-num';
+        numEl.textContent = dayNum;
+        cell.appendChild(numEl);
+
+        if (holidayName) {
+            const lbl = document.createElement('div');
+            lbl.className = 'day-label';
+            lbl.textContent = holidayName;
+            cell.appendChild(lbl);
+        }
+
+        const note = document.createElement('div');
+        note.className = 'day-note';
+        note.contentEditable = 'true';
+        note.dataset.date = ds;
+        const evts = customEvents.filter(e => e.dateStr === ds).map(e => e.text);
+        note.textContent = evts.join(', ');
+        cell.appendChild(note);
+
+        grid.appendChild(cell);
+    }
+}
+
+function renderEventList() {
+    const list = document.getElementById('eventList');
+    list.innerHTML = '';
+    customEvents.forEach((e, idx) => {
+        const row = document.createElement('div');
+        row.className = 'event-item';
+        row.innerHTML = `<div class="txt"><span class="date">${e.dateStr}</span>${e.text}</div><button class="rm" onclick="removeEvent(${idx})">×</button>`;
+        list.appendChild(row);
+    });
+}
+
+function addEvent() {
+    const d = document.getElementById('eventDate').value;
+    const t = document.getElementById('eventText').value.trim();
+    if (!d || !t) { alert('Vyber den a napiš text události.'); return; }
+    customEvents.push({ dateStr: d, text: t });
+    document.getElementById('eventText').value = '';
+    renderEventList();
+
+    const [y, m] = d.split('-').map(Number);
+    document.getElementById('yearInput').value = y;
+    document.getElementById('monthSelect').value = m - 1;
+    renderCalendar();
+}
+
+function removeEvent(idx) {
+    customEvents.splice(idx, 1);
+    renderEventList();
+    renderCalendar();
+}
+
+updatePageSize();
+renderCalendar();
+</script>
+</body>
+</html>
