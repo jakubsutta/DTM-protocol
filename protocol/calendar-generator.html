@@ -55,12 +55,41 @@
     .day-note:focus { background: rgba(68,131,252,0.08); }
     .day-note:empty:before { content: ''; }
 
+    /* ---- 3-month overview ---- */
+    .overview-page { display: none; }
+    .overview-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; width: 100%; height: 100%; }
+    .overview-month { background: #fff; border-radius: 2mm; box-shadow: 0 2px 12px rgba(0,0,0,0.08); overflow: hidden; display: flex; flex-direction: column; }
+    .overview-month-header { background: linear-gradient(135deg, #ea521f, #f4783a); color: #fff; text-align: center; font-size: 4mm; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; padding: 2.5mm 2mm; flex-shrink: 0; }
+    .overview-table { width: 100%; border-collapse: collapse; flex: 1; display: table; }
+    .overview-table tr { border-bottom: 1px solid #f0edf5; }
+    .overview-table tr:last-child { border-bottom: none; }
+    .overview-table td { padding: 0.8mm 2mm; vertical-align: middle; font-size: 3mm; line-height: 1.2; }
+    .overview-table td:first-child { width: 8mm; font-weight: 700; text-align: right; color: #1a1a1a; }
+    .overview-table td:nth-child(2) { width: 8mm; font-weight: 600; color: #8a9389; text-transform: uppercase; font-size: 2.8mm; }
+    .overview-table td:nth-child(3) { color: #555; font-size: 2.8mm; }
+    .overview-table tr.ov-weekend { background: #eaf1fe; }
+    .overview-table tr.ov-weekend td:first-child,
+    .overview-table tr.ov-weekend td:nth-child(2) { color: #4483fc; }
+    .overview-table tr.ov-holiday { background: #fdece3; }
+    .overview-table tr.ov-holiday td:first-child,
+    .overview-table tr.ov-holiday td:nth-child(2) { color: #ea521f; }
+    .overview-table .ov-holiday-label { color: #ea521f; font-weight: 600; }
+    .overview-table .ov-event-label { color: #2f67d8; font-weight: 600; }
+
+    button.toggle-active { background: #ea521f; }
+    button.toggle-active:hover { background: #c9431a; }
+
     @media print {
         .panel { display: none !important; }
         .app { display: block; }
         .canvas-area { padding: 0; }
-        .page { box-shadow: none; margin: 0; }
-        .page, .cal-grid, .day-cell {
+        .page { box-shadow: none; margin: 0; width: 100% !important; height: 100vh !important; }
+        .overview-page { padding: 8mm; }
+        .overview-month { box-shadow: none; border: 0.3mm solid #e2e6e1; }
+        .page, .cal-grid, .day-cell,
+        .overview-container, .overview-month, .overview-month-header,
+        .overview-table, .overview-table tr, .overview-table td,
+        .ov-weekend, .ov-holiday {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
             color-adjust: exact !important;
@@ -102,11 +131,14 @@
         <button onclick="addEvent()">+ Přidat událost</button>
         <div class="event-list" id="eventList"></div>
 
+        <div class="section-label">Zobrazení</div>
+        <button id="btnOverview" onclick="toggleOverview()">📅 Přehled 3 měsíců</button>
+
         <div class="section-label">Export</div>
         <button class="secondary" onclick="window.print()">⬇ Export do PDF (Ctrl+P)</button>
     </div>
 
-    <div class="canvas-area">
+    <div class="canvas-area" id="canvasArea">
         <div class="page" id="page">
             <div class="cal-header">
                 <span class="cal-month" id="calMonthTitle" contenteditable="true">LEDEN 2026</span>
@@ -116,22 +148,28 @@
             </div>
             <div class="cal-grid" id="calGrid"></div>
         </div>
+        <div class="page overview-page" id="overviewPage">
+            <div class="overview-container" id="overviewContainer"></div>
+        </div>
     </div>
 </div>
 
 <script>
 const PAGE_SIZES = { A4: [210, 297], A3: [297, 420] };
 const MONTH_NAMES = ['LEDEN','ÚNOR','BŘEZEN','DUBEN','KVĚTEN','ČERVEN','ČERVENEC','SRPEN','ZÁŘÍ','ŘÍJEN','LISTOPAD','PROSINEC'];
+const DAY_NAMES_SHORT = ['Ne','Po','Út','St','Čt','Pá','So'];
 let customEvents = []; // { dateStr: 'YYYY-MM-DD', text: '...' }
+let overviewActive = false;
 
 function updatePageSize() {
     const format = document.getElementById('pageFormat').value;
     const orient = document.getElementById('pageOrient').value;
     let [w, h] = PAGE_SIZES[format];
     if (orient === 'landscape') { [w, h] = [h, w]; } // výchozí rozměry jsou na výšku (portrait), pro landscape prohodíme
-    const page = document.getElementById('page');
-    page.style.width = w + 'mm';
-    page.style.height = h + 'mm';
+    document.querySelectorAll('.page').forEach(p => {
+        p.style.width = w + 'mm';
+        p.style.height = h + 'mm';
+    });
 }
 
 function easterSunday(year) {
@@ -262,6 +300,86 @@ function removeEvent(idx) {
     customEvents.splice(idx, 1);
     renderEventList();
     renderCalendar();
+}
+
+function toggleOverview() {
+    overviewActive = !overviewActive;
+    const btn = document.getElementById('btnOverview');
+    const calPage = document.getElementById('page');
+    const ovPage = document.getElementById('overviewPage');
+    if (overviewActive) {
+        btn.classList.add('toggle-active');
+        btn.textContent = '← Zpět na měsíc';
+        calPage.style.display = 'none';
+        ovPage.style.display = 'flex';
+        renderOverview();
+    } else {
+        btn.classList.remove('toggle-active');
+        btn.textContent = '📅 Přehled 3 měsíců';
+        calPage.style.display = '';
+        ovPage.style.display = 'none';
+    }
+}
+
+function renderOverview() {
+    const container = document.getElementById('overviewContainer');
+    container.innerHTML = '';
+    const year = parseInt(document.getElementById('yearInput').value);
+    const month = parseInt(document.getElementById('monthSelect').value);
+
+    for (let offset = 0; offset < 3; offset++) {
+        let m = month + offset;
+        let y = year;
+        if (m > 11) { m -= 12; y++; }
+
+        const holidays = getHolidays(y);
+        const daysInMonth = new Date(y, m + 1, 0).getDate();
+
+        const col = document.createElement('div');
+        col.className = 'overview-month';
+
+        const header = document.createElement('div');
+        header.className = 'overview-month-header';
+        header.textContent = `${MONTH_NAMES[m]} ${y}`;
+        col.appendChild(header);
+
+        const table = document.createElement('table');
+        table.className = 'overview-table';
+        const tbody = document.createElement('tbody');
+
+        for (let d = 1; d <= daysInMonth; d++) {
+            const dt = new Date(y, m, d);
+            const dow = dt.getDay(); // 0=Ne ... 6=So
+            const isWeekend = dow === 0 || dow === 6;
+            const ds = dateStr(y, m, d);
+            const holidayName = holidays[ds];
+            const evts = customEvents.filter(e => e.dateStr === ds).map(e => e.text);
+
+            const tr = document.createElement('tr');
+            if (holidayName) tr.classList.add('ov-holiday');
+            else if (isWeekend) tr.classList.add('ov-weekend');
+
+            const tdNum = document.createElement('td');
+            tdNum.textContent = d;
+            tr.appendChild(tdNum);
+
+            const tdDay = document.createElement('td');
+            tdDay.textContent = DAY_NAMES_SHORT[dow];
+            tr.appendChild(tdDay);
+
+            const tdInfo = document.createElement('td');
+            const parts = [];
+            if (holidayName) parts.push(`<span class="ov-holiday-label">${holidayName}</span>`);
+            if (evts.length) parts.push(`<span class="ov-event-label">${evts.join(', ')}</span>`);
+            tdInfo.innerHTML = parts.join(' · ');
+            tr.appendChild(tdInfo);
+
+            tbody.appendChild(tr);
+        }
+        table.appendChild(tbody);
+        col.appendChild(table);
+        container.appendChild(col);
+    }
 }
 
 updatePageSize();
