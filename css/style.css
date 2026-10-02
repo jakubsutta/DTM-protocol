@@ -55,7 +55,7 @@ body::after {
 }
 
 .container {
-    max-width: 1400px;
+    max-width: 1920px;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -91,13 +91,20 @@ h1 {
 /* ---- Sloupce ---- */
 .columns-wrapper {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 36px;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
     width: 100%;
     align-items: start;
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 1400px) {
+    .columns-wrapper {
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+}
+
+@media (max-width: 900px) {
     .columns-wrapper {
         grid-template-columns: 1fr;
         gap: 20px;
@@ -123,7 +130,7 @@ h1 {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-auto-rows: 86px;
-    gap: 10px;
+    gap: 8px;
 }
 
 @media (max-width: 800px) {
@@ -283,12 +290,12 @@ h1 {
 }
 
 .card.mapa {
-    border-top-color: #0288d1;
+    border-top-color: #8cd7ff;
 }
 
 .card.mapa .card-title,
 .card.mapa .card-icon {
-    color: #0288d1;
+    color: #8cd7ff;
 }
 
 .card.mapa:hover {
@@ -658,7 +665,7 @@ h1 {
 .footer-bottom {
     margin-top: 22px;
     padding-top: 12px;
-    border-top: 1px solid #dcdfe3;
+    border-top: 1px solid #292929;
     width: 100%;
     display: flex;
     align-items: center;
