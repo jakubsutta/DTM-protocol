@@ -14,11 +14,13 @@
         .app { display: block !important; }
         .form-panel { display: none !important; }
         .preview-panel { display: block !important; padding: 0 !important; box-shadow: none !important; margin: 0 !important; }
-        .page { box-shadow: none !important; margin: 0 !important; page-break-after: always; }
+        .page { box-shadow: none !important; margin: 0 !important; page-break-after: always; height: 297mm; max-height: 297mm; }
         .page:last-child { page-break-after: auto; }
         .leaflet-control-zoom { display: none !important; }
         .leaflet-control-attribution { display: block !important; font-size: 7px !important; background: rgba(255,255,255,0.7) !important; transform: scale(0.85); transform-origin: bottom right; }
         .map-box-big { border-radius: 0 !important; box-shadow: none !important; }
+        .toc-row:hover { background: transparent !important; }
+        .toc-dots { border-bottom: 1px dotted #888 !important; }
         @page { size: A4; margin: 0; }
     }
 
@@ -35,16 +37,16 @@
     .page-label:first-of-type { margin-top: 4px; }
     .section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #020000; margin: 14px 0 8px; padding-bottom: 5px; border-bottom: 1px solid #ea521f; }
     .field { margin-bottom: 10px; }
-    .field label { display: block; font-size: 11px; color: #000; margin-bottom: 4px; }
+    .field label { display: block; font-size: 11px; color: #000; margin-bottom: 4px; font-weight: 600; }
     .field input, .field select, .field textarea { width: 100%; background: #fff; border: 1px solid #2e7d32; border-radius: 4px; color: #1a1a1a; font-size: 12px; font-family: inherit; padding: 7px 10px; outline: none; transition: border-color 0.15s; }
     .field input:focus, .field select:focus, .field textarea:focus { border-color: #4fc3f7; }
-    .field textarea { resize: vertical; min-height: 90px; line-height: 1.4; }
-    .field textarea.short { min-height: 60px; }
-    .field-note { font-size: 10px; color: #90a4ae; margin-top: 3px; }
+    .field textarea { resize: vertical; min-height: 80px; line-height: 1.4; }
+    .field textarea.short { min-height: 55px; }
+    .field-note { font-size: 10px; color: #546e7a; margin-top: 3px; line-height: 1.4; }
     .result-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .result-row5 { display: grid; grid-template-columns: repeat(5,1fr); gap: 5px; }
 
-    .btn-row { display: flex; flex-direction: column; gap: 8px; margin: 20px 0; position: sticky; bottom: 0; background: #f1f8e9; padding-top: 8px; }
+    .btn-row { display: flex; flex-direction: column; gap: 8px; margin: 20px 0; position: sticky; bottom: 0; background: #f1f8e9; padding-top: 8px; z-index: 10; }
     .btn { display: flex; align-items: center; justify-content: center; gap: 7px; padding: 10px 16px; border-radius: 5px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; font-family: inherit; transition: background 0.15s; }
     .btn-primary { background: #2e7d32; color: #fff; } .btn-primary:hover { background: #1b5e20; }
     .btn-secondary { background: #c8e6c9; color: #1b5e20; } .btn-secondary:hover { background: #a5d6a7; color: #003300; }
@@ -57,20 +59,20 @@
 
     /* ---- Preview panel ---- */
     .preview-panel { padding: 30px 10px 60px; display: flex; flex-direction: column; align-items: center; gap: 26px; overflow-y: auto; }
-    .page { background: #fff; width: 210mm; min-height: 297mm; padding: 18mm 20mm 16mm; box-shadow: 0 4px 32px rgba(0,0,0,0.18); position: relative; color: #1a1a1a; display: flex; flex-direction: column; }
+    .page { background: #fff; width: 210mm; min-height: 297mm; padding: 16mm 20mm 14mm; box-shadow: 0 4px 32px rgba(0,0,0,0.18); position: relative; color: #1a1a1a; display: flex; flex-direction: column; }
 
-    .page-footer { margin-top: auto; padding-top: 10px; border-top: 1px solid #eceff1; display: flex; justify-content: space-between; font-size: 9px; color: #b0bec5; }
-    .sec-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #78909c; padding-bottom: 5px; border-bottom: 2px solid #ea521f; margin: 18px 0 10px; }
+    .page-footer { margin-top: auto; padding-top: 8px; border-top: 1px solid #eceff1; display: flex; justify-content: space-between; font-size: 9px; color: #b0bec5; }
+    .sec-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #78909c; padding-bottom: 4px; border-bottom: 2px solid #ea521f; margin: 12px 0 6px; scroll-margin-top: 20px; }
     .sec-title:first-child { margin-top: 0; }
-    .ptext { font-size: 12.5px; line-height: 1.6; color: #1a1a1a; }
-    .ptext p { margin-bottom: 8px; }
+    .ptext { font-size: 12px; line-height: 1.5; color: #1a1a1a; }
+    .ptext p { margin-bottom: 6px; }
     .ptext p:last-child { margin-bottom: 0; }
     .ptext p.ph { color: #b0bec5; font-style: italic; }
 
     /* ---- Titulní strana ---- */
     .p1 { align-items: center; text-align: center; justify-content: flex-start; }
     .p1-title { font-size: 24px; font-weight: 800; color: #1a1a2e; letter-spacing: 0.02em; line-height: 1.35; text-transform: uppercase; margin-top: 20px; max-width: 140mm; border-bottom: 2px solid #ea521f; padding-bottom: 8px; margin-bottom: 12px; }
-    .p1-obec { font-size: 17px; font-weight: 700; color: #2e7d32; text-transform: uppercase; margin-top: 14px; letter-spacing: 0.05em; }
+    .p1-obec { font-size: 17px; font-weight: 700; color: #1a1a2e; text-transform: uppercase; margin-top: 14px; letter-spacing: 0.05em; }
     .logo-obec-box { width: 60mm; height: 60mm; border: 2px dashed #cfd8dc; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 46px auto; overflow: hidden; background: #fafbfc; flex-shrink: 0; }
     .logo-obec-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
     .logo-placeholder { font-size: 11px; color: #b0bec5; }
@@ -97,11 +99,18 @@
     .autocomplete-item small { color: #90a4ae; font-size: 10px; margin-left: 6px; }
     .map-box-big { background: #eef2f5; border: 1px solid #cfd8dc; border-radius: 5px; overflow: hidden; width: 100%; height: 118mm; z-index: 1; margin-top: auto; }
 
+    /* ---- Obsah (TOC) ---- */
+    .toc-container { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+    .toc-row { display: flex; align-items: baseline; font-size: 12px; color: #1a1a1a; padding: 4px 6px; border-radius: 4px; transition: background 0.15s; }
+    .toc-row:hover { background: #e8f5e9; }
+    .toc-title { font-weight: 600; color: #2c3e50; white-space: nowrap; }
+    .toc-dots { flex: 1; border-bottom: 1.5px dotted #b0bec5; margin: 0 10px 3px 10px; min-width: 20px; }
+    .toc-page { font-weight: 700; color: #1a1a2e; font-variant-numeric: tabular-nums; font-size: 12.5px; min-width: 20px; text-align: right; }
+
     /* ---- Tabulky ---- */
-    .cost-caption { font-size: 10.5px; color: #78909c; font-style: italic; margin: 10px 0 6px; }
-    .cost-table { width: 100%; border-collapse: collapse; font-size: 11.5px; margin-bottom: 16px; margin-top: 10px; }
-    .cost-table th { background: #f5f7fa; padding: 6px 8px; text-align: center; font-size: 10px; font-weight: 700; color: #78909c; border: 1px solid #e0e0e0; }
-    .cost-table td { padding: 6px 8px; text-align: center; border: 1px solid #e0e0e0; }
+    .cost-table { width: 100%; border-collapse: collapse; font-size: 10.5px; margin-bottom: 10px; margin-top: 5px; }
+    .cost-table th { background: #f5f7fa; padding: 4px 6px; text-align: center; font-size: 10px; font-weight: 700; color: #78909c; border: 1px solid #e0e0e0; }
+    .cost-table td { padding: 4px 6px; text-align: center; border: 1px solid #e0e0e0; }
     .cost-table td:first-child { color: #78909c; font-weight: 600; text-align: left; background: #fafbfc; }
 
     /* ---- Podpis ---- */
@@ -163,7 +172,10 @@ tel. +420 778 481 700</textarea>
             <div class="field-note">Nalezená obec se propíše do názvu obce, objednatele a místa řešení.</div>
         </div>
 
-        <div class="page-label">Strana 3 — Textové části</div>
+        <div class="page-label">Strana 3 — Obsah</div>
+        <div class="field-note" style="margin-bottom: 8px;">Obsah dokumentu se generuje zcela automaticky podle nadpisů kapitol a jejich umístění na stránkách.</div>
+
+        <div class="page-label">Strana 4 — Úvod a přehled</div>
         <div class="field"><label>Pasport zeleně</label>
             <textarea id="pasportText">Pasport zeleně v katastru obce [Název obce] je zpracován jako digitální geodetický a popisný systém (GIS). Slouží k přesné evidenci, správě a hodnocení ploch a prvků zeleně v řešeném území.
 Je vyhotoven v souladu s platnými pravidly a metodikami pro tvorbu geografických informačních systémů. Obsahuje vektorové vrstvy v přenositelném datovém formátu ESRI Shapefile (*.shp) v souřadnicovém systému S-JTSK a WGS-84.</textarea>
@@ -171,41 +183,56 @@ Je vyhotoven v souladu s platnými pravidly a metodikami pro tvorbu geografický
         <div class="field"><label>Přehled území</label>
             <textarea id="prehledUzemi" class="short">Obec [Název obce] leží v okrese [Okres] v [Kraj]i. Celková katastrální výměra obce je [X] km². K [datum] zde žilo [počet] obyvatel (zdroj: veřejná databáze ČSÚ, SLDB [rok]).</textarea>
         </div>
-        <div class="field"><label>Způsob evidence</label>
-            <textarea id="zpusobEvidence">Evidence je vedena plošně (polygony) pro jednotlivé typy travnatých ploch, záhonů a keřových skupin a bodově pro solitérní stromy a význačné prvky.
-Data jsou uspořádána do databázových tabulek, které jsou přímo provázané s grafickými entitami, umožňujícími snadné vyhledávání a filtrování.</textarea>
-        </div>
-        <div class="field"><label>Zdravotní stav</label>
-            <textarea id="zdravotniStav">Hodnocení zdravotního stavu u dřevin je prováděno vizuální metodou zohledňující vitalitu, biomechanické vlastnosti, výskyt chorob, škůdců a případná mechanická poškození.
-Plochy zeleně jsou hodnoceny z hlediska míry zaplevelení, stupně opotřebení a kvality prováděné péče (sečení, zálivka, odplevelování).</textarea>
+        <div class="field"><label>Účel pořízení pasportu</label>
+            <textarea id="ucelPasportu" class="short">Hlavním účelem pořízení pasportu zeleně je získání uceleného a aktuálního přehledu o stavu a rozsahu ploch zeleně a dřevin na území obce [Název obce]. Pasport slouží jako základní koncepční podklad pro plánování efektivní a ekonomické údržby, stanovování rozpočtů na správu zeleně, návrhy revitalizací a nových výsadeb a pro zajištění provozní bezpečnosti vzrostlých dřevin ve veřejném prostoru.</textarea>
         </div>
 
-        <div class="page-label">Strana 4 — Plochy</div>
-        <div class="field"><label>Základní plochy (text)</label>
+        <div class="page-label">Strana 5 — Evidence a kategorizace prvků</div>
+        <div class="field"><label>Způsob evidence</label>
+            <textarea id="zpusobEvidence">Evidence je vedena plošně (polygony) pro jednotlivé typy travnatých ploch, záhonů a keřových skupin, bodově pro solitérní stromy a význačné prvky a liniově pro živé ploty a aleje.
+Data jsou uspořádána do databázových tabulek, které jsou přímo provázané s grafickými entitami, umožňujícími snadné vyhledávání, filtrování a prostorové analýzy.</textarea>
+        </div>
+        <div class="field"><label>Kategorizace prvků</label>
+            <textarea id="kategorizacePrvku">Jednotlivé prvky zeleně jsou kategorizovány podle svého prostorového a funkčního charakteru na prvky plošné (trávníky, záhony, parky, keřové skupiny), bodové (solitérní stromy, významné keře) a liniové (živé ploty, stromořadí, aleje, břehové porosty). Každému prvku je přiřazena kategorie významu, požadovaná intenzitní třída údržby a kvalitativní ukazatele určující technologický postup následné péče.</textarea>
+        </div>
+        <div class="field"><label>Definice číselníků a hodnot</label>
+            <textarea id="ciselnikyHodnoty">V databázové části pasportu jsou atributy prvků standardizovány pomocí předem definovaných číselníků. Tyto číselníky zahrnují taxony dřevin (český i vědecký název), kódování typů ploch, stupně vitality a zdravotního stavu (1–5), sadovnickou hodnotu dřevin (hodnoty 1–5 dle metodiky AOPK ČR) a kódy předepsané údržby či pěstebních zásahů. Standardizované hodnoty umožňují systematické filtrování a bezproblémový export do GIS a DTM samospráv.</textarea>
+        </div>
+
+        <div class="page-label">Strana 6 — Vymezení ploch a prvků zeleně</div>
+        <div class="field"><label>Vymezení základních ploch (text)</label>
             <textarea id="zakladniPlochyText" class="short">V řešeném území obce [Název obce] byly v rámci pasportizace mapovány následující základní plochy zeleně:</textarea>
         </div>
-        <div class="field"><label>Základní plochy (tabulka)</label>
+        <div class="field"><label>Vymezení základních ploch (tabulka)</label>
             <div class="table-editor" id="edit-zakladniPlochy"></div>
             <button type="button" class="btn btn-secondary" style="margin-top:5px; padding:5px; font-size:10px;" onclick="addRow('zakladniPlochy')">+ Přidat řádek</button>
         </div>
 
-        <div class="field"><label>Statistika ploch zeleně (text)</label>
-            <textarea id="statistikaPlochText" class="short">Podrobná statistika evidovaných ploch, rozdělených do jednotlivých kategorií a typů údržby:</textarea>
+        <div class="field"><label>Vymezení ploch zeleně (text)</label>
+            <textarea id="statistikaPlochText" class="short">Podrobná specifikace evidovaných ploch zeleně, rozdělených do jednotlivých kategorií a typů údržby:</textarea>
         </div>
-        <div class="field"><label>Statistika ploch zeleně (tabulka)</label>
+        <div class="field"><label>Vymezení ploch zeleně (tabulka)</label>
             <div class="table-editor" id="edit-statistikaPloch"></div>
             <button type="button" class="btn btn-secondary" style="margin-top:5px; padding:5px; font-size:10px;" onclick="addRow('statistikaPloch')">+ Přidat řádek</button>
         </div>
 
-        <div class="page-label">Strana 5 — Stromy a keře, Závěr, Přílohy</div>
-        <div class="field"><label>Statistika stromů a keřů (text)</label>
-            <textarea id="statistikaStromuText" class="short">Evidováno bylo celkem [počet] stromů a [počet] keřových skupin v následující struktuře:</textarea>
+        <div class="field"><label>Vymezení bodových prvků (text)</label>
+            <textarea id="statistikaStromuText" class="short">Evidováno bylo celkem [počet] stromů a [počet] keřových skupin v následující struktuře bodových prvků:</textarea>
         </div>
-        <div class="field"><label>Statistika stromů a keřů (tabulka)</label>
+        <div class="field"><label>Vymezení bodových prvků (tabulka)</label>
             <div class="table-editor" id="edit-statistikaStromu"></div>
             <button type="button" class="btn btn-secondary" style="margin-top:5px; padding:5px; font-size:10px;" onclick="addRow('statistikaStromu')">+ Přidat řádek</button>
         </div>
 
+        <div class="field"><label>Vymezení liniových prvků (text)</label>
+            <textarea id="vymezeniLiniiText" class="short">V řešeném území byly v rámci pasportizace zmapovány liniové prvky zeleně, zahrnující živé ploty, stromořadí a břehové porosty:</textarea>
+        </div>
+        <div class="field"><label>Vymezení liniových prvků (tabulka)</label>
+            <div class="table-editor" id="edit-vymezeniLinii"></div>
+            <button type="button" class="btn btn-secondary" style="margin-top:5px; padding:5px; font-size:10px;" onclick="addRow('vymezeniLinii')">+ Přidat řádek</button>
+        </div>
+
+        <div class="page-label">Strana 7 — Závěr, přílohy a podpis</div>
         <div class="field"><label>Závěr</label>
             <textarea id="zaver">Pasport zeleně popisuje aktuální stav ploch zeleně a dřevin v obci. Slouží jako výchozí podklad pro efektivní plánování údržby, revitalizace a rozvoje funkční zeleně. Všechna data jsou spravována v on-line mapovém systému, který umožňuje jejich plynulou aktualizaci.</textarea>
         </div>
@@ -230,7 +257,7 @@ Plochy zeleně jsou hodnoceny z hlediska míry zaplevelení, stupně opotřeben�
     <div class="preview-panel">
 
         <!-- STRANA 1 -->
-        <div class="page p1">
+        <div class="page p1" id="page-1">
             <div class="p1-title" id="p-nadpis">PASPORT ZELENĚ</div>
             <div class="p1-obec" id="p-nazevObec">OBEC —</div>
             <div class="logo-obec-box" id="p-logoObec"><span class="logo-placeholder">logo obce</span></div>
@@ -238,13 +265,13 @@ Plochy zeleně jsou hodnoceny z hlediska míry zaplevelení, stupně opotřeben�
                 <div class="lbl">Vypracoval</div>
                 <div class="logo-firma-box" id="p-logoFirma"><img src="./img/logo3.png" alt="logo firmy"></div>
                 <div class="p1-address" id="p-vypracoval">ATOMICON s. r. o., Stupkova 952/18, Olomouc 779 00<br>tel. +420 778 481 700</div>
-                <div class="p1-year" id="p-rok">2025</div>
+                <div class="p1-year" id="p-rok">2026</div>
             </div>
         </div>
 
         <!-- STRANA 2 -->
-        <div class="page">
-            <div class="sec-title">Základní údaje o obci</div>
+        <div class="page" id="page-2">
+            <div class="sec-title" id="sec-zakladniUdaje">Základní údaje o obci</div>
             <table class="info-table">
                 <tr><td>Objednatel:</td><td id="p-objednatel">—</td></tr>
                 <tr><td>Adresa:</td><td id="p-adresa">—</td></tr>
@@ -257,31 +284,52 @@ Plochy zeleně jsou hodnoceny z hlediska míry zaplevelení, stupně opotřeben�
                 <tr><td>Okres:</td><td id="p-okres">—</td></tr>
                 <tr><td>Kraj:</td><td id="p-kraj">—</td></tr>
             </table>
-            <div class="sec-title">Mapa zájmového území</div>
+            <div class="sec-title" id="sec-mapa">Mapa zájmového území</div>
             <div class="map-box-big" id="map-container"></div>
             <div class="page-footer"><div>Pasport zeleně</div><div>2</div></div>
         </div>
 
-        <!-- STRANA 3 -->
-        <div class="page">
-            <div class="sec-title" style="font-size:13px; text-transform:none; letter-spacing:0; color:#1a1a2e; border-bottom:2px solid #ea521f; padding-bottom:8px; margin-bottom:16px;">Pasport zeleně</div>
-            <div class="ptext" id="p-pasportText"></div>
-            
-            <div class="sec-title">Přehled území</div>
-            <div class="ptext" id="p-prehledUzemi"></div>
-            
-            <div class="sec-title">Způsob evidence</div>
-            <div class="ptext" id="p-zpusobEvidence"></div>
-            
-            <div class="sec-title">Zdravotní stav</div>
-            <div class="ptext" id="p-zdravotniStav"></div>
-
+        <!-- STRANA 3 — OBSAH -->
+        <div class="page" id="page-toc">
+            <div class="sec-title no-toc" style="font-size:13px; text-transform:none; letter-spacing:0; color:#1a1a2e; border-bottom:2px solid #ea521f; padding-bottom:8px; margin-bottom:12px;">Obsah dokumentu</div>
+            <div style="font-size:11px; color:#78909c; margin-bottom:16px; font-style:italic;">Přehled kapitol a jednotlivých částí pasportu zeleně.</div>
+            <div class="toc-container" id="p-toc">
+                <!-- Generováno automaticky skriptem -->
+            </div>
             <div class="page-footer"><div>Pasport zeleně</div><div>3</div></div>
         </div>
 
-        <!-- STRANA 4 -->
-        <div class="page">
-            <div class="sec-title">Základní plochy</div>
+        <!-- STRANA 4 — ÚVOD A PŘEHLED -->
+        <div class="page" id="page-4">
+            <div class="sec-title" id="sec-pasportText" style="font-size:13px; text-transform:none; letter-spacing:0; color:#1a1a2e; border-bottom:2px solid #ea521f; padding-bottom:8px; margin-bottom:12px;">Pasport zeleně</div>
+            <div class="ptext" id="p-pasportText"></div>
+            
+            <div class="sec-title" id="sec-prehledUzemi">Přehled území</div>
+            <div class="ptext" id="p-prehledUzemi"></div>
+
+            <div class="sec-title" id="sec-ucelPasportu">Účel pořízení pasportu</div>
+            <div class="ptext" id="p-ucelPasportu"></div>
+
+            <div class="page-footer"><div>Pasport zeleně</div><div>4</div></div>
+        </div>
+
+        <!-- STRANA 5 — EVIDENCE A KATEGORIZACE PRVKŮ -->
+        <div class="page" id="page-5">
+            <div class="sec-title" id="sec-zpusobEvidence" style="font-size:13px; text-transform:none; letter-spacing:0; color:#1a1a2e; border-bottom:2px solid #ea521f; padding-bottom:8px; margin-bottom:12px; margin-top:0;">Způsob evidence</div>
+            <div class="ptext" id="p-zpusobEvidence"></div>
+            
+            <div class="sec-title" id="sec-kategorizacePrvku">Kategorizace prvků</div>
+            <div class="ptext" id="p-kategorizacePrvku"></div>
+
+            <div class="sec-title" id="sec-ciselnikyHodnoty">Definice číselníků a hodnot</div>
+            <div class="ptext" id="p-ciselnikyHodnoty"></div>
+
+            <div class="page-footer"><div>Pasport zeleně</div><div>5</div></div>
+        </div>
+
+        <!-- STRANA 6 — VYMEZENÍ PLOCH A PRVKŮ ZELENĚ -->
+        <div class="page" id="page-6">
+            <div class="sec-title" id="sec-zakladniPlochy" style="margin-top:0;">Vymezení základních ploch</div>
             <div class="ptext" id="p-zakladniPlochyText"></div>
             <table class="cost-table" id="p-tab-zakladniPlochy">
                 <thead>
@@ -290,7 +338,7 @@ Plochy zeleně jsou hodnoceny z hlediska míry zaplevelení, stupně opotřeben�
                 <tbody></tbody>
             </table>
 
-            <div class="sec-title">Statistika ploch zeleně</div>
+            <div class="sec-title" id="sec-statistikaPloch">Vymezení ploch zeleně</div>
             <div class="ptext" id="p-statistikaPlochText"></div>
             <table class="cost-table" id="p-tab-statistikaPloch">
                 <thead>
@@ -299,12 +347,7 @@ Plochy zeleně jsou hodnoceny z hlediska míry zaplevelení, stupně opotřeben�
                 <tbody></tbody>
             </table>
 
-            <div class="page-footer"><div>Pasport zeleně</div><div>4</div></div>
-        </div>
-
-        <!-- STRANA 5 -->
-        <div class="page">
-            <div class="sec-title">Statistika stromů a keřů</div>
+            <div class="sec-title" id="sec-statistikaStromu">Vymezení bodových prvků</div>
             <div class="ptext" id="p-statistikaStromuText"></div>
             <table class="cost-table" id="p-tab-statistikaStromu">
                 <thead>
@@ -313,10 +356,24 @@ Plochy zeleně jsou hodnoceny z hlediska míry zaplevelení, stupně opotřeben�
                 <tbody></tbody>
             </table>
 
-            <div class="sec-title">Závěr</div>
+            <div class="sec-title" id="sec-vymezeniLinii">Vymezení liniových prvků</div>
+            <div class="ptext" id="p-vymezeniLiniiText"></div>
+            <table class="cost-table" id="p-tab-vymezeniLinii">
+                <thead>
+                    <tr><th>Kód</th><th>Kategorie</th><th>Skupina</th><th>Délka (m)</th><th>Tvar</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <div class="page-footer"><div>Pasport zeleně</div><div>6</div></div>
+        </div>
+
+        <!-- STRANA 7 — ZÁVĚR A PŘÍLOHY -->
+        <div class="page" id="page-7">
+            <div class="sec-title" id="sec-zaver" style="margin-top:0;">Závěr</div>
             <div class="ptext" id="p-zaver"></div>
 
-            <div class="sec-title">Přílohy</div>
+            <div class="sec-title" id="sec-prilohy">Přílohy</div>
             <div class="ptext" id="p-prilohy"></div>
 
             <div style="margin-top: auto; width: 100%;">
@@ -329,7 +386,7 @@ Plochy zeleně jsou hodnoceny z hlediska míry zaplevelení, stupně opotřeben�
                     </div>
                     <div class="sign-date">Datum:<br><span id="p-signDate">—</span></div>
                 </div>
-                <div class="page-footer" style="margin-top: 0;"><div>Pasport zeleně</div><div>5</div></div>
+                <div class="page-footer" style="margin-top: 0;"><div>Pasport zeleně</div><div>7</div></div>
             </div>
         </div>
 
@@ -560,7 +617,8 @@ function setHtml(id, text) { const el = document.getElementById(id); if (el) el.
 const tableConfig = {
     zakladniPlochy: { cols: ['Kód', 'Typ', 'Výměra'], data: [['', '', ''], ['', '', ''], ['', '', ''], ['', '', '']] },
     statistikaPloch: { cols: ['Kód', 'Typ', 'Počet', 'Základní plocha'], data: [['', '', '', ''], ['', '', '', ''], ['', '', '', ''], ['', '', '', '']] },
-    statistikaStromu: { cols: ['Kód', 'Kategorie', 'Kompozice', 'Druh', 'Skupina', 'Počet'], data: [['', '', '', '', '', ''], ['', '', '', '', '', ''], ['', '', '', '', '', '']] }
+    statistikaStromu: { cols: ['Kód', 'Kategorie', 'Kompozice', 'Druh', 'Skupina', 'Počet'], data: [['', '', '', '', '', ''], ['', '', '', '', '', ''], ['', '', '', '', '', '']] },
+    vymezeniLinii: { cols: ['Kód', 'Kategorie', 'Skupina', 'Délka (m)', 'Tvar'], data: [['', '', '', '', ''], ['', '', '', '', ''], ['', '', '', '', '']] }
 };
 
 window.renderTableEditors = function() {
@@ -574,7 +632,7 @@ window.renderTableEditors = function() {
         conf.data.forEach((row, rIdx) => {
             html += `<div style="display:grid; grid-template-columns: repeat(${conf.cols.length}, 1fr); gap:5px; margin-bottom:4px;">`;
             row.forEach((cell, cIdx) => {
-                html += `<input type="text" value="${escapeHtml(cell)}" oninput="updateTableData('${key}', ${rIdx}, ${cIdx}, this.value)">`;
+                html += `<input type="text" placeholder="${escapeHtml(conf.cols[cIdx])}" value="${escapeHtml(cell)}" oninput="updateTableData('${key}', ${rIdx}, ${cIdx}, this.value)">`;
             });
             html += `</div>`;
         });
@@ -614,6 +672,52 @@ function renderTablePreview(key) {
     tbody.innerHTML = html;
 }
 
+// ==== AUTOMATICKÉ GENEROVÁNÍ OBSAHU (TOC) ====
+function generateTOC() {
+    const container = document.getElementById('p-toc');
+    if (!container) return;
+    const pages = Array.from(document.querySelectorAll('.preview-panel .page'));
+    const items = [];
+    
+    pages.forEach((page, pIdx) => {
+        const pageNum = pIdx + 1;
+        // Vynechat titulní stranu (1) a samotnou stránku s obsahem
+        if (pageNum === 1 || page.id === 'page-toc') return;
+        
+        const headings = page.querySelectorAll('.sec-title:not(.no-toc)');
+        headings.forEach(h => {
+            const title = h.textContent.trim();
+            if (title) {
+                if (!h.id) {
+                    h.id = 'sec-auto-' + (items.length + 1);
+                }
+                items.push({
+                    title: title,
+                    page: pageNum,
+                    targetId: h.id
+                });
+            }
+        });
+    });
+
+    let html = '';
+    items.forEach((item) => {
+        html += `<div class="toc-row" onclick="scrollToSec('${item.targetId}')" title="Přejít na sekci" style="cursor: pointer;">
+            <span class="toc-title">${escapeHtml(item.title)}</span>
+            <span class="toc-dots"></span>
+            <span class="toc-page">${item.page}</span>
+        </div>`;
+    });
+    container.innerHTML = html;
+}
+
+function scrollToSec(id) {
+    const el = document.getElementById(id);
+    if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
 // ==== HLAVNÍ AKTUALIZACE NÁHLEDU ====
 function updatePreview() {
     setText('p-nadpis', val('nadpis') || 'PASPORT ZELENĚ');
@@ -636,18 +740,24 @@ function updatePreview() {
 
     setHtml('p-pasportText', val('pasportText'));
     setHtml('p-prehledUzemi', val('prehledUzemi'));
+    setHtml('p-ucelPasportu', val('ucelPasportu'));
     setHtml('p-zpusobEvidence', val('zpusobEvidence'));
-    setHtml('p-zdravotniStav', val('zdravotniStav'));
+    setHtml('p-kategorizacePrvku', val('kategorizacePrvku'));
+    setHtml('p-ciselnikyHodnoty', val('ciselnikyHodnoty'));
     
     setHtml('p-zakladniPlochyText', val('zakladniPlochyText'));
     setHtml('p-statistikaPlochText', val('statistikaPlochText'));
     setHtml('p-statistikaStromuText', val('statistikaStromuText'));
+    setHtml('p-vymezeniLiniiText', val('vymezeniLiniiText'));
     
     setHtml('p-zaver', val('zaver'));
     setHtml('p-prilohy', val('prilohy'));
 
     const d = val('signDate');
     setText('p-signDate', d ? new Date(d + 'T12:00:00').toLocaleDateString('cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' }) : '—');
+
+    // Aktualizace obsahu dle nadpisů
+    generateTOC();
 }
 
 function resetForm() {
