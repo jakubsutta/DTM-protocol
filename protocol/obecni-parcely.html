@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Výpis LV → GeoJSON parcel</title>
+<style>
+:root{color-scheme:light dark;--b:#8885;--a:#1a6fd4}
+body{font:15px system-ui,sans-serif;max-width:880px;margin:24px auto;padding:0 16px}
+h1{font-size:20px}textarea{width:100%;height:220px;box-sizing:border-box;font:13px monospace}
+label{margin-right:14px}input,select{font:inherit;padding:3px 6px}
+button{font:inherit;padding:7px 14px;border:0;border-radius:6px;background:var(--a);color:#fff;cursor:pointer}
+button:disabled{opacity:.4;cursor:default}.row{margin:10px 0;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+#sum{border:1px solid var(--b);border-radius:6px;padding:8px 12px;min-height:20px}
+#log{white-space:pre-wrap;font:13px monospace;margin-top:10px}.err{color:#d33}
+</style></head><body>
+<h1>Výpis LV → seznam parcel → GeoJSON</h1>
+<p>Vložte surový text z „Seznam nemovitostí na LV“ (klidně i více LV za sebou). K.ú. se přečte z řádku „Katastrální území: Název [kód]“.</p>
+<textarea id="in" placeholder="Sem vložte výpis…"></textarea>
+<div class="row">
+<label>K.ú. (kód nebo název, jen když ve výpisu chybí): <input id="ku" size="16" placeholder="např. 629669"></label>
+<label>Souřadnice: <select id="srs"><option value="5514">S-JTSK (5514)</option><option value="4326">WGS84 (4326)</option></select></label>
+<label>Soubor: <input id="fn" value="parcely.geojson" size="18"></label>
+</div>
+<div id="sum">Zatím nic nevloženo.</div>
+<div class="row"><button id="go" disabled>Stáhnout geometrii a uložit GeoJSON</button></div>
+<div id="log"></div>
+<script>
+const BASE="https://ags.cuzk.cz/arcgis/rest/services/RUIAN/MapServer";
+const $=id=>document.getElementById(id);
+// PARSE_START
+function parseLV(text,fallbackKu){
+  const lines=text.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+  const useSection=/^Pozemky\b/im.test(text);
+  let ku=fallbackKu||null,kuName=null,inP=!useSection;const items=new Map();
+  for(const l of lines){
+    let m=l.match(/Katastrální území:\s*(.+?)\s*\[(\d+)\]/i);
+    if(m){kuName=m[1];ku=m[2];inP=!useSection;continue}
+    if(/^Pozemky\b/i.test(l)){inP=true;continue}
+    if(/^(Stavby|Jednotky|Vlastníci|Seznam nemovitostí|Parcelní číslo)/i.test(l)){if(!/^Parcelní/i.test(l))inP=!useSection;continue}
+    if(!inP)continue;
+    m=l.match(/^(st\.\s*)?(\d+)(?:\s*\/\s*(\d+))?(?=\s*(?:;|\t|$))/i);
+    if(!m)continue;
+    const druh=m[1]?1:2,k=+m[2],p=m[3]?+m[3]:null;
+    const key=[ku,druh,k,p].join("|");
+    if(!items.has(key))items.set(key,{ku,kuName,druh,k,p,stavba:/součástí pozemku je stavba/i.test(l)});
+  }
+  return [...items.values()];
+}
+const label=i=>(i.druh==1?"st. ":"")+i.k+(i.p!=null?"/"+i.p:"");
+// PARSE_END
+let items=[];
+function refresh(){
+  items=parseLV($("in").value,/^\d+$/.test($("ku").value.trim())?$("ku").value.trim():null);
+  const g={};items.forEach(i=>(g[i.ku||"?"]??=[]).push(i));
+  $("sum").innerHTML=items.length?Object.entries(g).map(([k,a])=>`<b>k.ú. ${a[0].kuName||""} [${k}]</b>: ${a.length} parcel<br><small>${a.map(label).join(", ")}</small>`).join("<hr>"):"Žádné parcely nenalezeny.";
+  $("go").disabled=!items.length;
+}
+$("in").oninput=refresh;$("ku").oninput=refresh;
+async function q(layer,params){
+  const r=await fetch(`${BASE}/${layer}/query`,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams({...params,f:"geojson"})});
+  if(!r.ok)throw new Error("HTTP "+r.status);const j=await r.json();if(j.error)throw new Error(JSON.stringify(j.error));return j;
+}
+$("go").onclick=async()=>{
+  const log=s=>$("log").textContent+=s+"\n";$("log").textContent="";$("go").disabled=true;
+  try{
+    // doplnění k.ú. zadaného názvem
+    let fb=$("ku").value.trim();
+    for(const i of items)if(!i.ku){
+      if(!fb)throw new Error("Chybí k.ú. – vyplňte kód nebo název.");
+      if(!/^\d+$/.test(fb)){const r=await q(7,{where:`nazev='${fb.replace(/'/g,"''")}'`,outFields:"kod,nazev",returnGeometry:false});
+        if(r.features.length!=1)throw new Error(`K.ú. „${fb}“: nalezeno ${r.features.length}, zadejte kód.`);fb=String(r.features[0].properties.kod);log("k.ú. "+r.features[0].properties.nazev+" = "+fb)}
+      i.ku=fb;
+    }
+    const srs=$("srs").value,groups={};
+    items.forEach(i=>(groups[i.ku+"|"+i.druh]??=[]).push(i));
+    const feats=[],names={};items.forEach(i=>{if(i.kuName)names[i.ku]=i.kuName});
+    for(const [key,arr] of Object.entries(groups)){
+      const [ku,druh]=key.split("|");
+      for(let n=0;n<arr.length;n+=40){
+        const part=arr.slice(n,n+40);
+        const cond=part.map(i=>`(kmenovecislo=${i.k} AND poddelenicisla ${i.p==null?"IS NULL":"="+i.p})`).join(" OR ");
+        const r=await q(5,{where:`katastralniuzemi=${ku} AND druhcislovanikod=${druh} AND (${cond})`,
+          outFields:"kmenovecislo,poddelenicisla,druhcislovanikod,katastralniuzemi,vymeraparcely,zdroj",returnGeometry:true,outSR:srs});
+        feats.push(...r.features);
+      }
+    }
+    const st=new Map(items.map(i=>[`${i.ku}|${i.druh}|${i.k}|${i.p}`,i.stavba]));
+    feats.forEach(f=>{const p=f.properties,d=p.druhcislovanikod;
+      p.cislo=(d==1?"st. ":"")+p.kmenovecislo+(p.poddelenicisla!=null?"/"+p.poddelenicisla:"");
+      p.ku_nazev=names[p.katastralniuzemi]||null;p.stavba=st.get(`${p.katastralniuzemi}|${d}|${p.kmenovecislo}|${p.poddelenicisla??null}`)?"ano":"ne"});
+    const got=new Set(feats.map(f=>`${f.properties.katastralniuzemi}|${f.properties.druhcislovanikod}|${f.properties.kmenovecislo}|${f.properties.poddelenicisla??null}`));
+    const miss=items.filter(i=>!got.has(`${i.ku}|${i.druh}|${i.k}|${i.p}`)).map(label);
+    log(`Nalezeno ${feats.length} z ${items.length}.`+(miss.length?` Chybí (${miss.length}): ${miss.join(", ")}`:""));
+    const gj={type:"FeatureCollection",features:feats};
+    if(srs=="5514")gj.crs={type:"name",properties:{name:"urn:ogc:def:crs:EPSG::5514"}};
+    const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(gj)],{type:"application/geo+json"}));
+    a.download=$("fn").value||"parcely.geojson";a.click();log("Uloženo: "+a.download);
+  }catch(e){log("Chyba: "+e.message);$("log").classList.add("err")}
+  $("go").disabled=!items.length;
+};
+</script></body></html>
