@@ -328,6 +328,19 @@ h1 {
     background: #f3eefb;
 }
 
+.card.svazitost {
+    border-top-color: #00c853;
+}
+
+.card.svazitost .card-title,
+.card.svazitost .card-icon {
+    color: #00c853;
+}
+
+.card.svazitost:hover {
+    background: #eafbf0;
+}
+
 /* Témata Pasportů */
 .card.kom {
     border-top-color: #ff7b00;

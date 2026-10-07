@@ -2,37 +2,844 @@
 <html lang="cs"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Svažitost plochy (DMR 5G)</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%2300c853%22 stroke-width=%221.6%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M3 20h18%22/><path d=%22M19 6v14%22/><path d=%22M3 20L19 6%22/><path d=%22M7 20a4 4 0 0 0 -1.2 -2.8%22/><path d=%22M8.5 15.5h10.5%22/><path d=%22M13.5 11h5.5%22/><path d=%22M14.5 5.5L9.5 9.9%22/><path d=%22M9.5 7.9v2h2%22/></svg>">
+<link rel="icon" href="svazitost-favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
 <style>
-html,body{height:100%;margin:0;font:14px system-ui,sans-serif}
-body{display:flex}
-#map{flex:1;height:100%}
-#panel{width:330px;flex:none;height:100%;box-sizing:border-box;overflow-y:auto;background:#fff;box-shadow:2px 0 8px #0003;padding:14px;z-index:1000}
-#panel h3{margin:0 0 8px;font-size:17px}
-#panel h4{margin:14px 0 6px;font-size:13px;text-transform:uppercase;color:#555;border-bottom:1px solid #ddd;padding-bottom:3px}
-.lg{display:flex;align-items:center;gap:8px;margin:3px 0}
-.sw{width:16px;height:16px;border-radius:3px;flex:none}
-.lg span:last-child{margin-left:auto;color:#444}
-.small{font-size:12px;color:#555;line-height:1.4}
-details{margin-top:6px}summary{cursor:pointer;font-size:12px;color:#1565c0}
-button{padding:6px 10px;margin:0 4px 4px 0;border:1px solid #888;border-radius:5px;background:#f4f4f4;cursor:pointer}
-button.on{background:#2e7d32;color:#fff;border-color:#2e7d32}
-fieldset{margin:8px 0;border:1px solid #ccc;border-radius:5px;padding:6px 8px}
-legend{font-size:12px;color:#555}
-fieldset input{width:52px}
-#res{margin-top:8px}
-.big{font-size:22px;font-weight:600}
-.bar{display:flex;height:14px;border-radius:3px;overflow:hidden;margin:4px 0}
-.row{display:flex;justify-content:space-between;font-size:12px}
-.warn{color:#b26a00;font-size:12px;margin-top:4px}
-.err{color:#b00020}
+/* ---- Základ a písmo ---- */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  color: #1e293b;
+  background: #f8fafc;
+}
+
+body {
+  display: flex;
+}
+
+#map {
+  flex: 1;
+  height: 100%;
+}
+
+/* ---- Panel ---- */
+#panel {
+  width: 350px;
+  flex: none;
+  height: 100%;
+  overflow-y: auto;
+  background: #ffffff;
+  border-right: 1px solid #e1efe5;
+  box-shadow: 2px 0 16px rgba(0, 200, 83, 0.07), 1px 0 4px rgba(0, 0, 0, 0.04);
+  padding: 16px 16px 28px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+#panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+#panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#panel::-webkit-scrollbar-thumb {
+  background: #c8ebd3;
+  border-radius: 3px;
+}
+
+#panel::-webkit-scrollbar-thumb:hover {
+  background: #96ddab;
+}
+
+/* ---- Hlavička panelu ---- */
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 14px;
+  border-bottom: 1.5px solid #e8f5ec;
+}
+
+.header-back-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 7px;
+  color: #008f39;
+  background: #eafbf0;
+  border: 1px solid #c3f2d2;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.header-back-link:hover {
+  color: #ffffff;
+  background: #00c853;
+  border-color: #00b048;
+  transform: translateX(-2px);
+  box-shadow: 0 2px 8px rgba(0, 200, 83, 0.3);
+}
+
+.header-back-link svg {
+  width: 16px;
+  height: 16px;
+}
+
+.header-titles {
+  flex: 1;
+  min-width: 0;
+}
+
+.header-titles h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.header-titles .header-icon {
+  width: 19px;
+  height: 19px;
+  color: #00c853;
+  flex-shrink: 0;
+}
+
+.header-titles .sub {
+  font-size: 11px;
+  color: #008f39;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* ---- Tlačítka akcí ---- */
+.actions-group {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr 1fr;
+  gap: 6px;
+  margin: 14px 0 12px;
+}
+
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 8px;
+  margin: 0;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+  user-select: none;
+  white-space: nowrap;
+}
+
+button svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+/* Nakreslit plochu (Hlavní akce) */
+#bDraw {
+  background: #00c853;
+  color: #ffffff;
+  border-color: #00b048;
+  box-shadow: 0 2px 6px rgba(0, 200, 83, 0.25);
+}
+
+#bDraw:hover {
+  background: #00b348;
+  border-color: #00963d;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 200, 83, 0.35);
+}
+
+#bDraw:active {
+  transform: translateY(0);
+}
+
+#bDraw.on {
+  background: #008f39;
+  border-color: #00732e;
+  color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(0, 200, 83, 0.4);
+  animation: drawPulse 1.8s infinite ease-in-out;
+}
+
+@keyframes drawPulse {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(0, 200, 83, 0.45); }
+  50% { box-shadow: 0 0 0 6px rgba(0, 200, 83, 0.15); }
+}
+
+/* Dokončit */
+#bDone {
+  background: #eafbf0;
+  color: #008f39;
+  border: 1px solid #b9f0cb;
+}
+
+#bDone:hover:not(:disabled) {
+  background: #00c853;
+  color: #ffffff;
+  border-color: #00b048;
+  box-shadow: 0 2px 6px rgba(0, 200, 83, 0.25);
+  transform: translateY(-1px);
+}
+
+#bDone:disabled {
+  background: #f1f5f9;
+  color: #94a3b8;
+  border-color: #e2e8f0;
+  cursor: not-allowed;
+  opacity: 0.7;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Smazat */
+#bClear {
+  background: #ffffff;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+#bClear:hover {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+  transform: translateY(-1px);
+}
+
+/* ---- Sekce panelu ---- */
+#panel h4 {
+  margin: 16px 0 8px;
+  font-size: 10.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #008f39;
+  border-bottom: 1.5px solid #e1f5e8;
+  padding-bottom: 4px;
+}
+
+/* ---- Výsledek ---- */
+#res {
+  margin-top: 4px;
+  background: #f8fcf9;
+  border: 1px solid #d4eedb;
+  border-radius: 8px;
+  padding: 12px;
+  transition: all 0.2s ease;
+}
+
+.res-placeholder {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: #5a7362;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.res-placeholder-icon {
+  width: 16px;
+  height: 16px;
+  color: #00c853;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.big {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.bar {
+  display: flex;
+  height: 12px;
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 8px 0 6px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.12);
+  background: #e2e8f0;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11.5px;
+  color: #475569;
+  padding: 2px 0;
+}
+
+/* ---- Legenda ---- */
+#legend {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.lg {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  padding: 3px 6px;
+  border-radius: 5px;
+  background: #ffffff;
+  border: 1px solid #edf4ef;
+}
+
+.sw {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  flex: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.lg span:last-child {
+  margin-left: auto;
+  color: #64748b;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Detaily a formuláře ---- */
+.small {
+  font-size: 11.5px;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+details {
+  margin-top: 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 6px 10px;
+}
+
+summary {
+  cursor: pointer;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #008f39;
+  user-select: none;
+  outline: none;
+}
+
+summary:hover {
+  color: #00c853;
+}
+
+fieldset {
+  margin: 8px 0 2px;
+  border: 1px solid #d4eedb;
+  border-radius: 6px;
+  padding: 8px 10px;
+  background: #ffffff;
+}
+
+legend {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #008f39;
+  padding: 0 4px;
+}
+
+fieldset input {
+  width: 52px;
+  padding: 3px 6px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 12px;
+  text-align: center;
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+fieldset input:focus {
+  border-color: #00c853;
+  box-shadow: 0 0 0 3px rgba(0, 200, 83, 0.2);
+}
+
+/* ---- Výpočet a hlášení ---- */
+#calc {
+  margin-top: 8px;
+  background: #eafbf0;
+  border-left: 3px solid #00c853;
+  border-radius: 0 6px 6px 0;
+  padding: 8px 10px;
+  font-size: 11.5px;
+  color: #1e3a29;
+  line-height: 1.4;
+}
+
+#calc:empty {
+  display: none;
+}
+
+.warn {
+  color: #b45309;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 11.5px;
+  margin-top: 6px;
+}
+
+.err {
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 11.5px;
+  display: block;
+  margin-top: 6px;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ---- Styly pro Leaflet prvky kreslení ---- */
+.leaflet-tooltip {
+  font-family: 'Segoe UI', system-ui, sans-serif !important;
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  border-radius: 6px !important;
+  padding: 5px 9px !important;
+  border: 1px solid #d4eedb !important;
+  background: #ffffff !important;
+  color: #1e293b !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12) !important;
+}
+
+.leaflet-tooltip-top:before {
+  border-top-color: #ffffff !important;
+}
+
+/* ---- Mapa a vyhledávání obce (dle Pasportu) ---- */
+.autocomplete-wrap {
+  position: relative;
+  flex: 1;
+}
+
+.clear-search-btn {
+  position: absolute;
+  right: 7px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  height: auto;
+  z-index: 5;
+  transition: all 0.15s ease;
+}
+
+.clear-search-btn:hover {
+  color: #ef4444;
+  background: #fee2e2;
+}
+
+.autocomplete-wrap input {
+  width: 100%;
+  height: 34px;
+  padding: 0 24px 0 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 12px;
+  color: #1e293b;
+  outline: none;
+  background: #ffffff;
+  box-sizing: border-box;
+  transition: all 0.15s ease;
+}
+
+.autocomplete-wrap input:focus {
+  border-color: #00c853;
+  box-shadow: 0 0 0 3px rgba(0, 200, 83, 0.2);
+}
+
+.autocomplete-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #00c853;
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+  display: none;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.autocomplete-list.visible {
+  display: block;
+}
+
+.autocomplete-item {
+  padding: 7px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #f1f5f9;
+  color: #1e293b;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.12s ease;
+}
+
+.autocomplete-item:last-child {
+  border-bottom: none;
+}
+
+.autocomplete-item:hover, .autocomplete-item.active {
+  background: #eafbf0;
+  color: #008f39;
+}
+
+.autocomplete-item small {
+  color: #94a3b8;
+  font-size: 10px;
+  margin-left: 6px;
+}
+
+.btn-locate {
+  height: 34px;
+  padding: 0 12px;
+  background: #00c853;
+  color: #ffffff;
+  border: 1px solid #00b048;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-locate:hover {
+  background: #00b348;
+}
+
+/* ---- Úprava defaultních Leaflet prvků a tlačítek v mapě ---- */
+.leaflet-bar {
+  border: 1px solid #d4eedb !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 14px rgba(0, 200, 83, 0.08), 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+  overflow: hidden !important;
+  background: #ffffff !important;
+}
+
+.leaflet-bar a {
+  background-color: #ffffff !important;
+  border-bottom: 1px solid #e8f5ec !important;
+  color: #1e293b !important;
+  width: 34px !important;
+  height: 34px !important;
+  line-height: 34px !important;
+  font-family: 'Segoe UI', system-ui, sans-serif !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.15s ease !important;
+  text-decoration: none !important;
+}
+
+.leaflet-bar a:last-child {
+  border-bottom: none !important;
+}
+
+.leaflet-bar a:hover {
+  background-color: #eafbf0 !important;
+  color: #00c853 !important;
+}
+
+.leaflet-bar a:active {
+  background-color: #00c853 !important;
+  color: #ffffff !important;
+}
+
+.leaflet-bar a.leaflet-disabled {
+  background-color: #f8fafc !important;
+  color: #cbd5e1 !important;
+  cursor: not-allowed !important;
+}
+
+.leaflet-touch .leaflet-bar a {
+  width: 34px !important;
+  height: 34px !important;
+  line-height: 34px !important;
+}
+
+.leaflet-bar a svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* Měřítko mapy */
+.leaflet-control-scale-line {
+  border: 2px solid #00c853 !important;
+  border-top: none !important;
+  color: #1e293b !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(4px) !important;
+  font-family: 'Segoe UI', system-ui, sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 10px !important;
+  padding: 2px 6px !important;
+  border-radius: 0 0 4px 4px !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Špendlík vyhledané adresy */
+.ruian-pin-wrap {
+  background: transparent !important;
+  border: none !important;
+}
+
+.ruian-pin {
+  position: relative;
+  width: 32px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ruian-pin svg {
+  width: 32px;
+  height: 38px;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.28));
+  position: relative;
+  z-index: 2;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.ruian-pin:hover svg {
+  transform: scale(1.1) translateY(-2px);
+}
+
+.ruian-pin-pulse {
+  position: absolute;
+  left: 50%;
+  bottom: 0px;
+  transform: translate(-50%, 50%);
+  width: 16px;
+  height: 6px;
+  background: rgba(0, 200, 83, 0.5);
+  border-radius: 50%;
+  animation: pinPulse 2s infinite ease-out;
+  z-index: 1;
+}
+
+@keyframes pinPulse {
+  0% { transform: translate(-50%, 50%) scale(0.6); opacity: 0.9; }
+  100% { transform: translate(-50%, 50%) scale(2.8); opacity: 0; }
+}
+
+/* Přepínač vrstev (Ortofoto / OSM) */
+.leaflet-control-layers {
+  border: 1px solid #d4eedb !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 14px rgba(0, 200, 83, 0.08), 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+  background: #ffffff !important;
+  font-family: 'Segoe UI', system-ui, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #1e293b !important;
+  transition: all 0.2s ease !important;
+}
+
+.leaflet-control-layers-toggle {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 8px !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23008f39' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolygon points='12 2 2 7 12 12 22 7 12 2'/%3E%3Cpolyline points='2 17 12 22 22 17'/%3E%3Cpolyline points='2 12 12 17 22 12'/%3E%3C/svg%3E") !important;
+  background-size: 18px 18px !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+.leaflet-control-layers:hover {
+  border-color: #00c853 !important;
+}
+
+.leaflet-control-layers-expanded {
+  padding: 10px 14px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 8px 24px rgba(0, 200, 83, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+}
+
+.leaflet-control-layers label {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin: 4px 0 !important;
+  cursor: pointer !important;
+  color: #1e293b !important;
+}
+
+.leaflet-control-layers input[type="radio"],
+.leaflet-control-layers input[type="checkbox"] {
+  accent-color: #00c853 !important;
+  cursor: pointer !important;
+  width: 14px !important;
+  height: 14px !important;
+}
+
+.leaflet-control-layers-separator {
+  border-top-color: #e8f5ec !important;
+  margin: 6px 0 !important;
+}
+
+/* Tiráž v rohu mapy */
+.leaflet-control-attribution {
+  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(6px) !important;
+  border-top-left-radius: 6px !important;
+  padding: 2px 8px !important;
+  font-family: 'Segoe UI', system-ui, sans-serif !important;
+  font-size: 10.5px !important;
+  color: #64748b !important;
+}
+
+.leaflet-control-attribution a {
+  color: #008f39 !important;
+  text-decoration: none !important;
+}
+
+.leaflet-control-attribution a:hover {
+  text-decoration: underline !important;
+}
+
+/* Popup bublina v mapě */
+.leaflet-popup-content-wrapper {
+  border-radius: 8px !important;
+  border: 1px solid #d4eedb !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+  padding: 2px !important;
+  background: #ffffff !important;
+}
+
+.leaflet-popup-content {
+  margin: 10px 12px !important;
+  line-height: 1.4 !important;
+}
+
+.leaflet-popup-tip {
+  background: #ffffff !important;
+}
+
+.leaflet-popup-close-button {
+  color: #94a3b8 !important;
+  padding: 6px 6px 0 0 !important;
+}
+
+.leaflet-popup-close-button:hover {
+  color: #ef4444 !important;
+}
 </style></head><body>
 <div id="panel">
-  <h3>Svažitost plochy</h3>
-  <button id="bDraw">Nakreslit plochu</button><button id="bDone" disabled>Dokončit</button><button id="bClear">Smazat</button>
+  <div class="panel-header">
+    <a href="../index.html" class="header-back-link" title="Zpět na rozcestník generátorů">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+    </a>
+    <div class="header-titles">
+      <h3>
+        <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 20h18" />
+          <path d="M19 6v14" />
+          <path d="M3 20L19 6" />
+          <path d="M7 20a4 4 0 0 0 -1.2 -2.8" />
+          <path d="M8.5 15.5h10.5" />
+          <path d="M13.5 11h5.5" />
+          <path d="M14.5 5.5L9.5 9.9" />
+          <path d="M9.5 7.9v2h2" />
+        </svg>
+        <span>Svažitost plochy</span>
+      </h3>
+      <div class="sub">DMR 5G • ČÚZK (rastr 2 m)</div>
+    </div>
+  </div>
+
+  <!-- Vyhledávání obce a adresy RÚIAN (dle Pasportu) -->
+  <div style="display:flex; gap:6px; margin: 12px 0 10px;">
+    <div class="autocomplete-wrap">
+      <input type="text" id="mapObec" placeholder="Vyhledat obec nebo adresu (RÚIAN)..." oninput="onObecInput()" onkeydown="onObecKeydown(event)" autocomplete="off">
+      <button type="button" id="clearObec" class="clear-search-btn" title="Vymazat hledání" onclick="clearObecSearch()" style="display:none;">&times;</button>
+      <div class="autocomplete-list" id="obecSuggestions"></div>
+    </div>
+    <button type="button" class="btn-locate" onclick="locateCity()">Najít</button>
+  </div>
+
+  <div class="actions-group">
+    <button id="bDraw" title="Vyznačit vrcholy plochy na mapě">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      <span>Nakreslit</span>
+    </button>
+    <button id="bDone" disabled title="Dokončit kreslení a spustit analýzu svažitosti">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      <span>Dokončit</span>
+    </button>
+    <button id="bClear" title="Smazat plochu a výsledky">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      <span>Smazat</span>
+    </button>
+  </div>
 
   <h4>Výsledek</h4>
-  <div id="res">Klikáním vyznač vrcholy plochy, dokonči tlačítkem nebo dvojklikem.</div>
+  <div id="res"><div class="res-placeholder"><svg class="res-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><span>Klikáním vyznač vrcholy plochy, dokonči tlačítkem nebo dvojklikem.</span></div></div>
 
   <h4>Legenda – kategorie svažitosti</h4>
   <div id="legend"></div>
@@ -87,10 +894,64 @@ function stats(vals,t,cell){
 // CORE_END
 
 // ---------- MAPA ----------
-const map=L.map('map',{doubleClickZoom:false}).setView([49.59,17.25],14);
+const map=L.map('map',{doubleClickZoom:false,clickTolerance:8}).setView([49.59,17.25],14);
 const orto=L.tileLayer(ORTO_URL,{maxZoom:21,maxNativeZoom:19,attribution:'© ČÚZK'}).addTo(map);
 const osm=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:21,maxNativeZoom:19,attribution:'© OpenStreetMap'});
 L.control.layers({'Ortofoto ČÚZK':orto,'OSM':osm}).addTo(map);
+L.control.scale({imperial:false,metric:true}).addTo(map);
+
+// Tlačítka rychlých akcí v mapě (vyhledat RÚIAN, moje poloha)
+const MapActionsControl = L.Control.extend({
+  options: { position: 'topleft' },
+  onAdd: function() {
+    const bar = L.DomUtil.create('div', 'leaflet-bar');
+
+    const btnSearch = L.DomUtil.create('a', '', bar);
+    btnSearch.href = '#';
+    btnSearch.title = 'Hledat obec nebo adresu v RÚIAN';
+    btnSearch.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>';
+    L.DomEvent.disableClickPropagation(btnSearch);
+    L.DomEvent.on(btnSearch, 'click', e => {
+      L.DomEvent.preventDefault(e);
+      const inp = $('mapObec');
+      if (inp) {
+        inp.focus();
+        inp.select();
+        inp.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    });
+
+    const btnLoc = L.DomUtil.create('a', '', bar);
+    btnLoc.href = '#';
+    btnLoc.title = 'Přejít na moji aktuální polohu';
+    btnLoc.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="1" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="23"/><line x1="1" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="23" y2="12"/></svg>';
+    L.DomEvent.disableClickPropagation(btnLoc);
+    L.DomEvent.on(btnLoc, 'click', e => {
+      L.DomEvent.preventDefault(e);
+      map.locate({ setView: true, maxZoom: 16 });
+    });
+
+    return bar;
+  }
+});
+map.addControl(new MapActionsControl());
+
+map.on('locationfound', e => {
+  map.flyTo(e.latlng, 16);
+  const locM = L.circleMarker(e.latlng, {
+    radius: 7,
+    color: '#008f39',
+    weight: 2,
+    fillColor: '#00c853',
+    fillOpacity: 0.95
+  }).addTo(map);
+  locM.bindTooltip('Vaše poloha (± ' + Math.round(e.accuracy) + ' m)').openTooltip();
+  setTimeout(() => map.removeLayer(locM), 8000);
+});
+
+map.on('locationerror', e => {
+  alert('Nepodařilo se zjistit vaši polohu: ' + (e.message || 'přístup odepřen'));
+});
 
 const $=id=>document.getElementById(id);
 let T=DEFAULT_T.slice();
@@ -106,28 +967,249 @@ function renderLegend(){
   $('legend').innerHTML=CATS.map((c,j)=>`<div class="lg"><span class="sw" style="background:${c[1]}"></span><span>${c[0]}</span><span>${r[j]}</span></div>`).join('');
 }
 renderLegend();
-let drawing=false,pts=[],line=L.polyline([],{color:'#ffeb3b',weight:2}).addTo(map),poly=null,last=null;
-function setDraw(on){drawing=on;$('bDraw').classList.toggle('on',on);$('bDone').disabled=!on;map.getContainer().style.cursor=on?'crosshair':'';}
-function clearAll(){pts=[];line.setLatLngs([]);if(poly){map.removeLayer(poly);poly=null;}last=null;$('calc').textContent='';setDraw(false);$('res').textContent='Klikáním vyznač vrcholy plochy, dokonči tlačítkem nebo dvojklikem.';}
+
+const RES_EMPTY = '<div class="res-placeholder"><svg class="res-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><span>Klikáním vyznač vrcholy plochy, dokonči tlačítkem nebo dvojklikem.</span></div>';
+
+// ---- KRESLENÍ PLOCHY (UZLOVÉ BODY, VODICÍ LINIE, PŘESNÝ STYL) ----
+let drawing=false;
+let pts=[];
+let nodeMarkers=[];
+let poly=null;
+let last=null;
+let markerLayer=null;
+
+// Prvky pro vykreslování v mapě (interactive: false, aby neblokovaly klikání na mapu)
+const line=L.polyline([],{
+  color:'#00e676',
+  weight:3,
+  opacity:0.95,
+  lineCap:'round',
+  lineJoin:'round',
+  interactive:false
+}).addTo(map);
+
+const guideLine=L.polyline([],{
+  color:'#00e676',
+  weight:2,
+  dashArray:'5, 5',
+  opacity:0.85,
+  interactive:false
+}).addTo(map);
+
+const polyPreview=L.polygon([],{
+  color:'#00e676',
+  weight:1.5,
+  dashArray:'4, 4',
+  fillColor:'#00c853',
+  fillOpacity:0.15,
+  interactive:false
+}).addTo(map);
+
+function createNodeMarker(latlng, index){
+  const isFirst = index === 0;
+  const marker = L.circleMarker(latlng, {
+    radius: isFirst ? 7 : 5,
+    color: '#073b18',
+    weight: 2,
+    fillColor: isFirst ? '#00e676' : '#ffffff',
+    fillOpacity: 1,
+    interactive: isFirst
+  }).addTo(map);
+
+  if(isFirst){
+    marker.on('click', e => {
+      L.DomEvent.stopPropagation(e);
+      if(drawing && pts.length >= 3){
+        finish();
+      }
+    });
+    marker.on('mouseover', () => {
+      if(drawing && pts.length >= 3){
+        marker.setStyle({ radius: 9, fillColor: '#00ff66' });
+        marker.bindTooltip('Klikni pro dokončení', { permanent: false, direction: 'top', offset: [0, -8] }).openTooltip();
+      }
+    });
+    marker.on('mouseout', () => {
+      marker.setStyle({ radius: 7, fillColor: '#00e676' });
+      marker.unbindTooltip();
+    });
+  }
+  return marker;
+}
+
+function updateDrawingUI(){
+  if(!drawing) return;
+  const n = pts.length;
+  if(n === 0){
+    $('res').innerHTML = '<div class="res-placeholder"><svg class="res-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><span>Kreslení aktivní: Klikni do mapy pro umístění 1. vrcholu.</span></div>';
+    $('bDone').disabled = true;
+    $('bDone').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Dokončit</span>';
+  } else if(n === 1){
+    $('res').innerHTML = '<div class="res-placeholder"><svg class="res-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><span>Umístěn 1. vrchol. Kliknutím přidej 2. vrchol.</span></div>';
+    $('bDone').disabled = true;
+    $('bDone').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Dokončit (1)</span>';
+  } else if(n === 2){
+    $('res').innerHTML = '<div class="res-placeholder"><svg class="res-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><span>Umístěny 2 vrcholy. Pro plochu je nutný alespoň 3. vrchol.</span></div>';
+    $('bDone').disabled = true;
+    $('bDone').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Dokončit (2)</span>';
+  } else {
+    $('res').innerHTML = `<div class="res-placeholder"><svg class="res-placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><span>Umístěno <b>${n} vrcholů</b>. Dokonči tlačítkem, dvojklikem nebo kliknutím na počáteční bod.</span></div>`;
+    $('bDone').disabled = false;
+    $('bDone').innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Dokončit (${n})</span>`;
+  }
+}
+
+function setDraw(on){
+  drawing=on;
+  $('bDraw').classList.toggle('on',on);
+  $('bDone').disabled=!on || pts.length < 3;
+  map.getContainer().style.cursor=on?'crosshair':'';
+  if(on){
+    updateDrawingUI();
+  } else {
+    guideLine.setLatLngs([]);
+    polyPreview.setLatLngs([]);
+  }
+}
+
+function clearAll(){
+  pts=[];
+  line.setLatLngs([]);
+  guideLine.setLatLngs([]);
+  polyPreview.setLatLngs([]);
+  nodeMarkers.forEach(m=>map.removeLayer(m));
+  nodeMarkers=[];
+  if(poly){
+    map.removeLayer(poly);
+    poly=null;
+  }
+  if(markerLayer){
+    map.removeLayer(markerLayer);
+    markerLayer=null;
+  }
+  const inp = document.getElementById('mapObec');
+  if(inp) inp.value = '';
+  const clr = document.getElementById('clearObec');
+  if(clr) clr.style.display = 'none';
+  hideObecSuggestions();
+  last=null;
+  $('calc').textContent='';
+  setDraw(false);
+  $('res').innerHTML=RES_EMPTY;
+  $('bDone').disabled=true;
+  $('bDone').innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Dokončit</span>';
+}
+
+function removeLastPoint(){
+  if(!drawing || pts.length === 0) return;
+  pts.pop();
+  const m = nodeMarkers.pop();
+  if(m) map.removeLayer(m);
+  line.setLatLngs(pts);
+  if(pts.length < 2) polyPreview.setLatLngs([]);
+  if(pts.length === 0) guideLine.setLatLngs([]);
+  updateDrawingUI();
+}
+
 $('bDraw').onclick=()=>{clearAll();setDraw(true);};
 $('bClear').onclick=clearAll;
 $('bDone').onclick=finish;
-map.on('click',e=>{if(!drawing)return;
-  const l=pts[pts.length-1];
-  if(l&&map.latLngToLayerPoint(l).distanceTo(map.latLngToLayerPoint(e.latlng))<4)return;
-  pts.push(e.latlng);line.setLatLngs(pts);});
-map.on('dblclick',()=>{if(drawing)finish();});
+
+// Kliknutí na mapu pro přidání bodu
+map.on('click', e => {
+  if(!drawing || !e || !e.latlng) return;
+
+  // Kliknutí blízko prvního bodu uzavře plochu (při >= 3 bodech)
+  if(pts.length >= 3 && map.latLngToLayerPoint(pts[0]).distanceTo(map.latLngToLayerPoint(e.latlng)) < 12){
+    finish();
+    return;
+  }
+
+  // Ochrana proti nechtěnému mikrodvojkliku na stejné místo
+  const l = pts[pts.length - 1];
+  if(l && map.latLngToLayerPoint(l).distanceTo(map.latLngToLayerPoint(e.latlng)) < 4) return;
+
+  // Přidat vrchol
+  pts.push(e.latlng);
+  const marker = createNodeMarker(e.latlng, pts.length - 1);
+  nodeMarkers.push(marker);
+
+  line.setLatLngs(pts);
+  updateDrawingUI();
+});
+
+// Vodicí linie a náhled plochy při pohybu myši
+map.on('mousemove', e => {
+  if(!drawing || pts.length === 0 || !e || !e.latlng) return;
+  guideLine.setLatLngs([pts[pts.length - 1], e.latlng]);
+  if(pts.length >= 2){
+    polyPreview.setLatLngs([...pts, e.latlng]);
+  }
+});
+
+map.on('mouseout', () => {
+  if(!drawing) return;
+  guideLine.setLatLngs([]);
+  if(pts.length < 3) polyPreview.setLatLngs([]);
+});
+
+// Dokončení dvojklikem
+map.on('dblclick', e => {
+  if(drawing){
+    L.DomEvent.stopPropagation(e);
+    finish();
+  }
+});
+
+// Klávesové zkratky (Backspace/Delete vrátí bod, Escape zruší, Enter dokončí)
+document.addEventListener('keydown', e => {
+  if(!drawing) return;
+  if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if(e.key === 'Escape'){
+    clearAll();
+  } else if(e.key === 'Backspace' || e.key === 'Delete'){
+    removeLastPoint();
+  } else if(e.key === 'Enter'){
+    if(pts.length >= 3) finish();
+  }
+});
 
 function finish(){
-  if(pts.length<3){$('res').innerHTML='<span class="err">Potřebuji alespoň 3 vrcholy.</span>';return;}
-  setDraw(false);line.setLatLngs([]);
-  poly=L.polygon(pts,{color:'#ffeb3b',weight:2,fillOpacity:.15}).addTo(map);
+  if(pts.length < 3){
+    $('res').innerHTML='<span class="err">Potřebuji alespoň 3 vrcholy pro vytvoření plochy.</span>';
+    return;
+  }
+  setDraw(false);
+  guideLine.setLatLngs([]);
+  polyPreview.setLatLngs([]);
+  line.setLatLngs([]);
+
+  // Přestylizovat uzlové body do finálního čistého vzhledu
+  nodeMarkers.forEach(m => {
+    m.setStyle({
+      radius: 4.5,
+      color: '#008f39',
+      weight: 2,
+      fillColor: '#ffffff',
+      fillOpacity: 1
+    });
+    m.unbindTooltip();
+  });
+
+  poly=L.polygon(pts,{
+    color:'#00c853',
+    weight:3,
+    fillColor:'#00c853',
+    fillOpacity:0.22,
+    lineJoin:'round'
+  }).addTo(map);
+
   analyze(pts.slice());
 }
 
 // ---------- ANALÝZA ----------
 async function analyze(ll){
-  $('res').textContent='Stahuji výškový model…';$('calc').textContent='';
+  $('res').innerHTML='<div class="res-placeholder"><svg class="res-placeholder-icon" style="animation:spin 1s linear infinite" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg><span>Stahuji výškový model DMR 5G…</span></div>';$('calc').textContent='';
   try{
     const M=L.Projection.SphericalMercator;
     const ring=ll.map(p=>{const q=M.project(p);return [q.x,q.y];});
@@ -163,12 +1245,204 @@ function show(L_){
   const s=L_.st,i=catIdx(s.mean,T),[nm,col]=CATS[i];
   const deg=p=>(Math.atan(p/100)*180/Math.PI).toFixed(1);
   $('res').innerHTML=
-   `<div class="big" style="color:${col}">${s.mean.toFixed(1)} % <span style="font-size:14px">(${deg(s.mean)}°)</span></div>
-    <div><b>${nm}</b> <span style="color:#666">(dle průměru)</span></div>
-    <div class="row"><span>medián ${s.med.toFixed(1)} %</span><span>max ${s.max.toFixed(1)} %</span><span>${Math.round(s.area)} m²</span></div>
+   `<div class="big" style="color:${col}">${s.mean.toFixed(1)} % <span style="font-size:14px;color:#64748b">(${deg(s.mean)}°)</span></div>
+    <div style="font-size:13.5px;margin:2px 0 6px"><b>${nm}</b> <span style="color:#64748b;font-size:11.5px">(dle průměru)</span></div>
+    <div class="row"><span>medián <b>${s.med.toFixed(1)} %</b></span><span>max <b>${s.max.toFixed(1)} %</b></span><span><b>${Math.round(s.area).toLocaleString('cs-CZ')} m²</b></span></div>
     <div class="bar">${s.share.map((v,j)=>`<div style="width:${v*100}%;background:${CATS[j][1]}" title="${CATS[j][0]}"></div>`).join('')}</div>
     ${s.share.map((v,j)=>`<div class="row"><span style="color:${CATS[j][1]}">■ ${CATS[j][0]}</span><span>${(v*100).toFixed(0)} % plochy</span></div>`).join('')}
     ${L_.few?'<div class="warn">Malá plocha – výsledek je orientační.</div>':''}`;
   $('calc').innerHTML=`<b>Poslední výpočet:</b> buňka ${L_.cell.toFixed(1)} m, ${s.n} buněk v ploše.${L_.coarse?' <span class="warn">Plocha je velká – použito hrubší rozlišení.</span>':''}`;
+
+  if(poly){
+    const tooltipContent = `
+      <div style="font-family:'Segoe UI',sans-serif;font-size:12px;line-height:1.4">
+        <div style="font-weight:700;font-size:13px;color:${col}">${s.mean.toFixed(1)} % – ${nm}</div>
+        <div style="color:#64748b;margin-top:2px">Plocha: <b>${Math.round(s.area).toLocaleString('cs-CZ')} m²</b></div>
+        <div style="color:#64748b">Medián: <b>${s.med.toFixed(1)} %</b> · Max: <b>${s.max.toFixed(1)} %</b></div>
+      </div>
+    `;
+    poly.bindTooltip(tooltipContent, { permanent: false, direction: 'center', opacity: 0.95 });
+  }
+}
+
+// ---------- VYHLEDÁVÁNÍ OBCE A ADRESY Z RÚIAN (DLE TEXT PASPORT) ----------
+let obecDebounce = null;
+let obecActiveIdx = -1;
+let selectedObecKod = null;
+
+function clearObecSearch() {
+  const inp = document.getElementById('mapObec');
+  if (inp) inp.value = '';
+  const btn = document.getElementById('clearObec');
+  if (btn) btn.style.display = 'none';
+  hideObecSuggestions();
+  if (markerLayer) {
+    map.removeLayer(markerLayer);
+    markerLayer = null;
+  }
+}
+
+function onObecInput() {
+  clearTimeout(obecDebounce);
+  const q = document.getElementById('mapObec').value.trim();
+  const btn = document.getElementById('clearObec');
+  if (btn) btn.style.display = q.length > 0 ? 'block' : 'none';
+  if (q.length < 2) { hideObecSuggestions(); return; }
+  obecDebounce = setTimeout(() => fetchObecSuggestions(q), 300);
+}
+
+async function fetchObecSuggestions(q) {
+  try {
+    const url = `https://ags.cuzk.cz/arcgis/rest/services/RUIAN/MapServer/12/query`
+      + `?where=${encodeURIComponent("UPPER(nazev) LIKE UPPER('" + q.replace(/'/g, "''") + "%')")}`
+      + `&outFields=nazev,kod`
+      + `&returnGeometry=false`
+      + `&resultRecordCount=8`
+      + `&orderByFields=nazev`
+      + `&f=json`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+    const list = document.getElementById('obecSuggestions');
+
+    if (!data.features || data.features.length === 0) {
+      // Hledání adresy z vrstvy 1 (Adresní místa), pokud obec nebyla nalezena
+      const urlAddr = `https://ags.cuzk.cz/arcgis/rest/services/RUIAN/MapServer/1/query`
+        + `?where=${encodeURIComponent("UPPER(adresa) LIKE UPPER('%" + q.replace(/'/g, "''") + "%')")}`
+        + `&outFields=adresa,kod`
+        + `&returnGeometry=true`
+        + `&outSR=4326`
+        + `&resultRecordCount=8`
+        + `&f=json`;
+      const respAddr = await fetch(urlAddr);
+      const dataAddr = await respAddr.json();
+      if (!dataAddr.features || dataAddr.features.length === 0) {
+        hideObecSuggestions();
+        return;
+      }
+      obecActiveIdx = -1;
+      list.innerHTML = dataAddr.features.map((f, i) =>
+        `<div class="autocomplete-item" onmousedown="selectAdresa('${f.attributes.adresa.replace(/'/g, "\\'")}',${f.geometry.x},${f.geometry.y})"
+             data-index="${i}">${f.attributes.adresa}<small>${f.attributes.kod}</small></div>`
+      ).join('');
+      list.classList.add('visible');
+      return;
+    }
+
+    obecActiveIdx = -1;
+    list.innerHTML = data.features.map((f, i) =>
+      `<div class="autocomplete-item" onmousedown="selectObec('${f.attributes.nazev.replace(/'/g, "\\'")}',${f.attributes.kod})"
+           data-index="${i}" data-kod="${f.attributes.kod}">${f.attributes.nazev}<small>${f.attributes.kod}</small></div>`
+    ).join('');
+    list.classList.add('visible');
+  } catch (e) { hideObecSuggestions(); }
+}
+
+function selectObec(name, kod) {
+  document.getElementById('mapObec').value = name;
+  const btn = document.getElementById('clearObec');
+  if (btn) btn.style.display = 'block';
+  selectedObecKod = kod || null;
+  hideObecSuggestions();
+  locateCity();
+}
+
+function selectAdresa(adresa, x, y) {
+  document.getElementById('mapObec').value = adresa;
+  const btn = document.getElementById('clearObec');
+  if (btn) btn.style.display = 'block';
+  hideObecSuggestions();
+  if (markerLayer) { map.removeLayer(markerLayer); markerLayer = null; }
+  markerLayer = L.circleMarker([y, x], {
+    radius: 7,
+    color: '#008f39',
+    weight: 2,
+    fillColor: '#00c853',
+    fillOpacity: 0.95
+  }).addTo(map);
+  map.flyTo([y, x], 18, { duration: 1.2 });
+  markerLayer.bindPopup(`
+    <div style="font-family:'Segoe UI',system-ui,sans-serif;font-size:12px;line-height:1.4">
+      <div style="font-weight:600;margin-bottom:6px">${adresa}</div>
+      <button onclick="clearObecSearch()" style="width:100%;height:26px;background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;">
+        Odstranit značku
+      </button>
+    </div>
+  `).openPopup();
+}
+
+function hideObecSuggestions() {
+  const list = document.getElementById('obecSuggestions');
+  list.classList.remove('visible');
+  list.innerHTML = '';
+  obecActiveIdx = -1;
+}
+
+function onObecKeydown(e) {
+  const list = document.getElementById('obecSuggestions');
+  const items = list.querySelectorAll('.autocomplete-item');
+  if (!list.classList.contains('visible') || items.length === 0) {
+    if (e.key === 'Enter') locateCity();
+    return;
+  }
+  if (e.key === 'ArrowDown') { e.preventDefault(); obecActiveIdx = Math.min(obecActiveIdx + 1, items.length - 1); updateObecActive(items); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); obecActiveIdx = Math.max(obecActiveIdx - 1, 0); updateObecActive(items); }
+  else if (e.key === 'Enter') { e.preventDefault(); if (obecActiveIdx >= 0 && items[obecActiveIdx]) items[obecActiveIdx].onmousedown(); else locateCity(); }
+  else if (e.key === 'Escape') { hideObecSuggestions(); }
+}
+
+function updateObecActive(items) {
+  items.forEach((it, i) => it.classList.toggle('active', i === obecActiveIdx));
+}
+
+document.addEventListener('click', (e) => { if (!e.target.closest('.autocomplete-wrap')) hideObecSuggestions(); });
+
+async function locateCity() {
+  hideObecSuggestions();
+  let query = document.getElementById("mapObec").value.trim();
+  if (!query) return;
+
+  let useKod = selectedObecKod;
+  selectedObecKod = null;
+
+  if (markerLayer) { map.removeLayer(markerLayer); markerLayer = null; }
+
+  try {
+    let whereClause = useKod
+      ? `kod=${useKod}`
+      : `nazev='${query.replace(/'/g, "''")}'`;
+    let ruianUrl = `https://ags.cuzk.cz/arcgis/rest/services/RUIAN/MapServer/12/query`
+      + `?where=${encodeURIComponent(whereClause)}`
+      + `&outFields=nazev`
+      + `&outSR=4326`
+      + `&returnGeometry=true`
+      + `&f=json`;
+    let ruianResp = await fetch(ruianUrl);
+    let ruianData = await ruianResp.json();
+
+    if (ruianData.features && ruianData.features.length > 0) {
+      let rings = ruianData.features[0].geometry.rings;
+      let latlngs = rings.map(ring => ring.map(pt => [pt[1], pt[0]]));
+      // Vyhledaná obec pouze přiblíží mapu – NEPŘIDÁVÁ plochu do mapy
+      const flat = latlngs.flat();
+      if (flat.length > 0) {
+        map.fitBounds(L.latLngBounds(flat));
+      }
+    } else {
+      // Zkusit jako adresu
+      let urlAddr = `https://ags.cuzk.cz/arcgis/rest/services/RUIAN/MapServer/1/query`
+        + `?where=${encodeURIComponent("UPPER(adresa) LIKE UPPER('%" + query.replace(/'/g, "''") + "%')")}`
+        + `&outFields=adresa,kod`
+        + `&returnGeometry=true`
+        + `&outSR=4326`
+        + `&resultRecordCount=1`
+        + `&f=json`;
+      let respAddr = await fetch(urlAddr);
+      let dataAddr = await respAddr.json();
+      if (dataAddr.features && dataAddr.features.length > 0) {
+        let f = dataAddr.features[0];
+        selectAdresa(f.attributes.adresa, f.geometry.x, f.geometry.y);
+      }
+    }
+  } catch (e) { console.error(e); }
 }
 </script></body></html>
