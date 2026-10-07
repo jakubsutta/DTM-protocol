@@ -289,6 +289,19 @@ h1 {
     background: #e0f7fa;
 }
 
+.card.obecni {
+    border-top-color: #111111;
+}
+
+.card.obecni .card-title,
+.card.obecni .card-icon {
+    color: #111111;
+}
+
+.card.obecni:hover {
+    background: #f0f0f0;
+}
+
 .card.mapa {
     border-top-color: #8cd7ff;
 }

@@ -141,6 +141,18 @@
             <circle cx="11" cy="12.5" r="1.5" fill="currentColor" />
         </symbol>
 
+        <symbol id="icon-obecni-parcely" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+            stroke-linecap="round" stroke-linejoin="round">
+            <!-- Katastrální pozemek v perspektivě -->
+            <path d="M8 12L2.5 15.1a1 1 0 0 0 0 1.74l8.5 4.86a2 2 0 0 0 2 0l8.5-4.86a1 1 0 0 0 0-1.74L16 12" />
+            <!-- Vnitřní hranice parcel -->
+            <path d="M6.5 12.85l11 6.3" />
+            <path d="M17.5 12.85l-11 6.3" />
+            <!-- Vlajka označující obecní parcelu / vlastnictví -->
+            <path d="M12 2v10" />
+            <path d="M12 3l6 3-6 3" />
+        </symbol>
+
         <symbol id="icon-mapa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
             stroke-linecap="round" stroke-linejoin="round">
             <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21" />
@@ -274,6 +286,13 @@
                         <div class="card-title">Parcely pod komunikací</div>
                         <div class="card-desc">vyhledání dotčených z SHP</div>
                     </a>
+                    <a href="./protocol/obecni-parcely.html" class="card obecni">
+                        <div class="card-icon"><svg>
+                                <use href="#icon-obecni-parcely" xlink:href="#icon-obecni-parcely" />
+                            </svg></div>
+                        <div class="card-title">Obecní parcely</div>
+                        <div class="card-desc">výpis LV → GeoJSON parcel</div>
+                    </a>
                     <a href="./Map/map-generator.html" class="card mapa">
                         <div class="card-icon"><svg>
                                 <use href="#icon-mapa" xlink:href="#icon-mapa" />
@@ -380,7 +399,7 @@
                 <span>GitHub: DTM-protocol</span>
             </a>
             <span class="footer-separator">•</span>
-            <span>Poslední aktualizace: 02. 10. 2026</span>
+            <span>Poslední aktualizace: 07. 10. 2026</span>
         </footer>
     </div>
 
