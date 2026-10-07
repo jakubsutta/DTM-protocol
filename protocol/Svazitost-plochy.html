@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="cs"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Svažitost plochy (DMR 5G)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+<style>
+html,body{height:100%;margin:0;font:14px system-ui,sans-serif}
+body{display:flex}
+#map{flex:1;height:100%}
+#panel{width:330px;flex:none;height:100%;box-sizing:border-box;overflow-y:auto;background:#fff;box-shadow:2px 0 8px #0003;padding:14px;z-index:1000}
+#panel h3{margin:0 0 8px;font-size:17px}
+#panel h4{margin:14px 0 6px;font-size:13px;text-transform:uppercase;color:#555;border-bottom:1px solid #ddd;padding-bottom:3px}
+.lg{display:flex;align-items:center;gap:8px;margin:3px 0}
+.sw{width:16px;height:16px;border-radius:3px;flex:none}
+.lg span:last-child{margin-left:auto;color:#444}
+.small{font-size:12px;color:#555;line-height:1.4}
+details{margin-top:6px}summary{cursor:pointer;font-size:12px;color:#1565c0}
+button{padding:6px 10px;margin:0 4px 4px 0;border:1px solid #888;border-radius:5px;background:#f4f4f4;cursor:pointer}
+button.on{background:#2e7d32;color:#fff;border-color:#2e7d32}
+fieldset{margin:8px 0;border:1px solid #ccc;border-radius:5px;padding:6px 8px}
+legend{font-size:12px;color:#555}
+fieldset input{width:52px}
+#res{margin-top:8px}
+.big{font-size:22px;font-weight:600}
+.bar{display:flex;height:14px;border-radius:3px;overflow:hidden;margin:4px 0}
+.row{display:flex;justify-content:space-between;font-size:12px}
+.warn{color:#b26a00;font-size:12px;margin-top:4px}
+.err{color:#b00020}
+</style></head><body>
+<div id="panel">
+  <h3>Svažitost plochy</h3>
+  <button id="bDraw">Nakreslit plochu</button><button id="bDone" disabled>Dokončit</button><button id="bClear">Smazat</button>
+
+  <h4>Výsledek</h4>
+  <div id="res">Klikáním vyznač vrcholy plochy, dokonči tlačítkem nebo dvojklikem.</div>
+
+  <h4>Legenda – kategorie svažitosti</h4>
+  <div id="legend"></div>
+  <div class="small">Sklon v % = převýšení / vodorovná vzdálenost × 100 (100 % = 45°). Kategorie plochy se určuje podle průměrného sklonu.</div>
+  <details><summary>Upravit hranice kategorií</summary>
+    <fieldset><legend>Horní hranice (sklon v %)</legend>
+      rovina &lt; <input id="t1" type="number" step="0.5" min="0"> ·
+      zvl. rovina &lt; <input id="t2" type="number" step="0.5" min="0"><br>
+      mírný svah &lt; <input id="t3" type="number" step="0.5" min="0"> · jinak prudký svah
+    </fieldset>
+  </details>
+
+  <h4>Výpočet</h4>
+  <div class="small">
+    Zdroj výšek: DMR 5G (ČÚZK), rastr 2 m.<br>
+    Sklon každé buňky: Hornova metoda, okno 3×3 sousedních buněk.<br>
+    Do výsledku vstupují jen buňky, jejichž střed leží uvnitř plochy.<br>
+    Zobrazeno: průměr, medián, maximum a podíl plochy v kategoriích.
+  </div>
+  <div id="calc" class="small" style="margin-top:6px"></div>
+</div>
+<div id="map"></div>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/geotiff@2.1.3/dist-browser/geotiff.js"></script>
+<script>
+// ---------- KONFIGURACE ----------
+const DMR_URL='https://ags.cuzk.gov.cz/arcgis2/rest/services/dmr5g/ImageServer/exportImage';
+const ORTO_URL='https://ags.cuzk.gov.cz/arcgis1/rest/services/ORTOFOTO_WM/MapServer/WMTS/tile/1.0.0/ORTOFOTO_WM/default/default028mm/{z}/{y}/{x}';
+const CATS=[['rovina','#43a047'],['zvlněná rovina','#c0ca33'],['mírný svah','#fb8c00'],['prudký svah','#d32f2f']];
+const DEFAULT_T=[2,5,12]; // PLACEHOLDER – nahraď hodnotami ze svého systému
+
+// CORE_START
+function slopeGrid(z,w,h,cell){
+  const s=new Float32Array(w*h).fill(NaN);
+  for(let y=1;y<h-1;y++)for(let x=1;x<w-1;x++){
+    const i=y*w+x;
+    const a=z[i-w-1],b=z[i-w],c=z[i-w+1],d=z[i-1],f=z[i+1],g=z[i+w-1],hh=z[i+w],k=z[i+w+1];
+    const dx=((c+2*f+k)-(a+2*d+g))/(8*cell), dy=((g+2*hh+k)-(a+2*b+c))/(8*cell);
+    s[i]=Math.hypot(dx,dy)*100; // NaN u sousedů => NaN
+  }
+  return s;
+}
+function pip(x,y,r){let in_=false;for(let i=0,j=r.length-1;i<r.length;j=i++){
+  if((r[i][1]>y)!==(r[j][1]>y)&&x<(r[j][0]-r[i][0])*(y-r[i][1])/(r[j][1]-r[i][1])+r[i][0])in_=!in_;}return in_;}
+function catIdx(p,t){return p<t[0]?0:p<t[1]?1:p<t[2]?2:3;}
+function stats(vals,t,cell){
+  const v=Float64Array.from(vals).sort(),n=v.length;
+  const mean=v.reduce((a,b)=>a+b,0)/n, med=n%2?v[(n-1)/2]:(v[n/2-1]+v[n/2])/2;
+  const share=[0,0,0,0];vals.forEach(p=>share[catIdx(p,t)]++);
+  return {n,mean,med,max:v[n-1],share:share.map(c=>c/n),area:n*cell*cell};
+}
+// CORE_END
+
+// ---------- MAPA ----------
+const map=L.map('map',{doubleClickZoom:false}).setView([49.59,17.25],14);
+const orto=L.tileLayer(ORTO_URL,{maxZoom:21,maxNativeZoom:19,attribution:'© ČÚZK'}).addTo(map);
+const osm=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:21,maxNativeZoom:19,attribution:'© OpenStreetMap'});
+L.control.layers({'Ortofoto ČÚZK':orto,'OSM':osm}).addTo(map);
+
+const $=id=>document.getElementById(id);
+let T=DEFAULT_T.slice();
+try{const s=JSON.parse(localStorage.getItem('slopeT'));if(Array.isArray(s)&&s.length===3)T=s;}catch(e){}
+['t1','t2','t3'].forEach((id,i)=>{$(id).value=T[i];$(id).onchange=()=>{
+  T=['t1','t2','t3'].map(k=>parseFloat($(k).value));
+  try{localStorage.setItem('slopeT',JSON.stringify(T));}catch(e){}
+  renderLegend();if(last)show(last);};});
+
+function renderLegend(){
+  const f=v=>String(+v);
+  const r=[`do ${f(T[0])} %`,`${f(T[0])} – ${f(T[1])} %`,`${f(T[1])} – ${f(T[2])} %`,`nad ${f(T[2])} %`];
+  $('legend').innerHTML=CATS.map((c,j)=>`<div class="lg"><span class="sw" style="background:${c[1]}"></span><span>${c[0]}</span><span>${r[j]}</span></div>`).join('');
+}
+renderLegend();
+let drawing=false,pts=[],line=L.polyline([],{color:'#ffeb3b',weight:2}).addTo(map),poly=null,last=null;
+function setDraw(on){drawing=on;$('bDraw').classList.toggle('on',on);$('bDone').disabled=!on;map.getContainer().style.cursor=on?'crosshair':'';}
+function clearAll(){pts=[];line.setLatLngs([]);if(poly){map.removeLayer(poly);poly=null;}last=null;$('calc').textContent='';setDraw(false);$('res').textContent='Klikáním vyznač vrcholy plochy, dokonči tlačítkem nebo dvojklikem.';}
+$('bDraw').onclick=()=>{clearAll();setDraw(true);};
+$('bClear').onclick=clearAll;
+$('bDone').onclick=finish;
+map.on('click',e=>{if(!drawing)return;
+  const l=pts[pts.length-1];
+  if(l&&map.latLngToLayerPoint(l).distanceTo(map.latLngToLayerPoint(e.latlng))<4)return;
+  pts.push(e.latlng);line.setLatLngs(pts);});
+map.on('dblclick',()=>{if(drawing)finish();});
+
+function finish(){
+  if(pts.length<3){$('res').innerHTML='<span class="err">Potřebuji alespoň 3 vrcholy.</span>';return;}
+  setDraw(false);line.setLatLngs([]);
+  poly=L.polygon(pts,{color:'#ffeb3b',weight:2,fillOpacity:.15}).addTo(map);
+  analyze(pts.slice());
+}
+
+// ---------- ANALÝZA ----------
+async function analyze(ll){
+  $('res').textContent='Stahuji výškový model…';$('calc').textContent='';
+  try{
+    const M=L.Projection.SphericalMercator;
+    const ring=ll.map(p=>{const q=M.project(p);return [q.x,q.y];});
+    const lat0=ll.reduce((a,p)=>a+p.lat,0)/ll.length, k=Math.cos(lat0*Math.PI/180);
+    const xs=ring.map(r=>r[0]),ys=ring.map(r=>r[1]);
+    const xmin=Math.min(...xs),xmax=Math.max(...xs),ymin=Math.min(...ys),ymax=Math.max(...ys);
+    let cell=2; // metry na zemi; DMR 5G má 2 m
+    const spanGround=Math.max(xmax-xmin,ymax-ymin)*k;
+    let coarse=false;
+    if(spanGround/cell>900){cell=spanGround/900;coarse=true;}
+    const cm=cell/k; // velikost buňky v mercatorových metrech
+    const w=Math.ceil((xmax-xmin)/cm)+4,h=Math.ceil((ymax-ymin)/cm)+4;
+    const x0=xmin-2*cm,y1=ymax+2*cm,bbox=[x0,y1-h*cm,x0+w*cm,y1];
+    const q=new URLSearchParams({f:'image',format:'tiff',pixelType:'F32',bbox:bbox.join(','),bboxSR:102100,imageSR:102100,size:w+','+h,interpolation:'RSP_BilinearInterpolation'});
+    const res=await fetch(DMR_URL+'?'+q);
+    if(!res.ok)throw new Error('Server DMR vrátil HTTP '+res.status);
+    const tiff=await GeoTIFF.fromArrayBuffer(await res.arrayBuffer());
+    const img=await tiff.getImage();
+    const W=img.getWidth(),H=img.getHeight();
+    const z=Float32Array.from((await img.readRasters())[0],v=>(isFinite(v)&&v>-100&&v<4000)?v:NaN);
+    const sl=slopeGrid(z,W,H,cell);
+    const sx=(x0+0)/1,vals=[];
+    const cx=(x1,c)=>x0+(c+.5)*(bbox[2]-x0)/W, cy=(r)=>y1-(r+.5)*(y1-bbox[1])/H;
+    for(let r=1;r<H-1;r++)for(let c=1;c<W-1;c++){const v=sl[r*W+c];
+      if(!isNaN(v)&&pip(cx(0,c),cy(r),ring))vals.push(v);}
+    if(vals.length<3)throw new Error('Plocha je příliš malá (méně než 3 platné buňky '+cell.toFixed(1)+' m). Nakresli větší.');
+    last={st:stats(vals,T,cell),cell,coarse,few:vals.length<12};
+    show(last);
+  }catch(e){$('res').innerHTML='<span class="err">Chyba: '+e.message+'</span><div class="warn">Pokud jde o CORS/síť, ověř dostupnost služby DMR 5G ČÚZK.</div>';console.error(e);}
+}
+
+function show(L_){
+  const s=L_.st,i=catIdx(s.mean,T),[nm,col]=CATS[i];
+  const deg=p=>(Math.atan(p/100)*180/Math.PI).toFixed(1);
+  $('res').innerHTML=
+   `<div class="big" style="color:${col}">${s.mean.toFixed(1)} % <span style="font-size:14px">(${deg(s.mean)}°)</span></div>
+    <div><b>${nm}</b> <span style="color:#666">(dle průměru)</span></div>
+    <div class="row"><span>medián ${s.med.toFixed(1)} %</span><span>max ${s.max.toFixed(1)} %</span><span>${Math.round(s.area)} m²</span></div>
+    <div class="bar">${s.share.map((v,j)=>`<div style="width:${v*100}%;background:${CATS[j][1]}" title="${CATS[j][0]}"></div>`).join('')}</div>
+    ${s.share.map((v,j)=>`<div class="row"><span style="color:${CATS[j][1]}">■ ${CATS[j][0]}</span><span>${(v*100).toFixed(0)} % plochy</span></div>`).join('')}
+    ${L_.few?'<div class="warn">Malá plocha – výsledek je orientační.</div>':''}`;
+  $('calc').innerHTML=`<b>Poslední výpočet:</b> buňka ${L_.cell.toFixed(1)} m, ${s.n} buněk v ploše.${L_.coarse?' <span class="warn">Plocha je velká – použito hrubší rozlišení.</span>':''}`;
+}
+</script></body></html>
