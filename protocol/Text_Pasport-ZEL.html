@@ -41,7 +41,11 @@
     .section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #020000; margin: 14px 0 8px; padding-bottom: 5px; border-bottom: 1px solid #ea521f; }
     .field { margin-bottom: 10px; }
     .field label { display: block; font-size: 11px; color: #000; margin-bottom: 4px; font-weight: 600; }
-    .field input, .field select, .field textarea { width: 100%; background: #fff; border: 1px solid #2e7d32; border-radius: 4px; color: #1a1a1a; font-size: 12px; font-family: inherit; padding: 7px 10px; outline: none; transition: border-color 0.15s; }
+    .field .label-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+    .field .label-row label { margin-bottom: 0; }
+    .align-select { width: auto; padding: 2px 6px; font-size: 10px; border: 1px solid #ccc; border-radius: 3px; background: #fff; color: #555; cursor: pointer; }
+    .align-select:focus { border-color: #2e7d32; }
+    .field input, .field select:not(.align-select), .field textarea { width: 100%; background: #fff; border: 1px solid #2e7d32; border-radius: 4px; color: #1a1a1a; font-size: 12px; font-family: inherit; padding: 7px 10px; outline: none; transition: border-color 0.15s; }
     .field input:focus, .field select:focus, .field textarea:focus { border-color: #4fc3f7; }
     .field textarea { resize: vertical; min-height: 80px; line-height: 1.4; }
     .field textarea.short { min-height: 55px; }
@@ -179,31 +183,31 @@ tel. +420 778 481 700</textarea>
         <div class="field-note" style="margin-bottom: 8px;">Obsah dokumentu se generuje zcela automaticky podle nadpisů kapitol a jejich umístění na stránkách.</div>
 
         <div class="page-label">Strana 4 — Úvod a přehled</div>
-        <div class="field"><label>Pasport zeleně</label>
+        <div class="field"><div class="label-row"><label>Pasport zeleně</label><select class="align-select" id="align-pasportText" onchange="updatePreview()" title="Zarovnání odstavce"><option value="left">↤ Vlevo</option><option value="center">↔ Na střed</option><option value="right">↦ Vpravo</option><option value="justify" selected>☰ Do bloku</option></select></div>
             <textarea id="pasportText">Pasport zeleně v katastru obce [Název obce] je zpracován jako digitální geodetický a popisný systém (GIS). Slouží k přesné evidenci, správě a hodnocení ploch a prvků zeleně v řešeném území.
 Je vyhotoven v souladu s platnými pravidly a metodikami pro tvorbu geografických informačních systémů. Obsahuje vektorové vrstvy v přenositelném datovém formátu ESRI Shapefile (*.shp) v souřadnicovém systému S-JTSK a WGS-84.</textarea>
         </div>
-        <div class="field"><label>Přehled území</label>
+        <div class="field"><div class="label-row"><label>Přehled území</label><select class="align-select" id="align-prehledUzemi" onchange="updatePreview()" title="Zarovnání odstavce"><option value="left">↤ Vlevo</option><option value="center">↔ Na střed</option><option value="right">↦ Vpravo</option><option value="justify" selected>☰ Do bloku</option></select></div>
             <textarea id="prehledUzemi" class="short">Obec [Název obce] leží v okrese [Okres] v [Kraj]i. Celková katastrální výměra obce je [X] km². K [datum] zde žilo [počet] obyvatel (zdroj: veřejná databáze ČSÚ, SLDB [rok]).</textarea>
         </div>
-        <div class="field"><label>Účel pořízení pasportu</label>
+        <div class="field"><div class="label-row"><label>Účel pořízení pasportu</label><select class="align-select" id="align-ucelPasportu" onchange="updatePreview()" title="Zarovnání odstavce"><option value="left">↤ Vlevo</option><option value="center">↔ Na střed</option><option value="right">↦ Vpravo</option><option value="justify" selected>☰ Do bloku</option></select></div>
             <textarea id="ucelPasportu" class="short">Hlavním účelem pořízení pasportu zeleně je získání uceleného a aktuálního přehledu o stavu a rozsahu ploch zeleně a dřevin na území obce [Název obce]. Pasport slouží jako základní koncepční podklad pro plánování efektivní a ekonomické údržby, stanovování rozpočtů na správu zeleně, návrhy revitalizací a nových výsadeb a pro zajištění provozní bezpečnosti vzrostlých dřevin ve veřejném prostoru.</textarea>
         </div>
 
         <div class="page-label">Strana 5 — Evidence a kategorizace prvků</div>
-        <div class="field"><label>Způsob evidence</label>
+        <div class="field"><div class="label-row"><label>Způsob evidence</label><select class="align-select" id="align-zpusobEvidence" onchange="updatePreview()" title="Zarovnání odstavce"><option value="left">↤ Vlevo</option><option value="center">↔ Na střed</option><option value="right">↦ Vpravo</option><option value="justify" selected>☰ Do bloku</option></select></div>
             <textarea id="zpusobEvidence">Evidence je vedena plošně (polygony) pro jednotlivé typy travnatých ploch, záhonů a keřových skupin, bodově pro solitérní stromy a význačné prvky a liniově pro živé ploty a aleje.
 Data jsou uspořádána do databázových tabulek, které jsou přímo provázané s grafickými entitami, umožňujícími snadné vyhledávání, filtrování a prostorové analýzy.</textarea>
         </div>
-        <div class="field"><label>Kategorizace prvků</label>
+        <div class="field"><div class="label-row"><label>Kategorizace prvků</label><select class="align-select" id="align-kategorizacePrvku" onchange="updatePreview()" title="Zarovnání odstavce"><option value="left">↤ Vlevo</option><option value="center">↔ Na střed</option><option value="right">↦ Vpravo</option><option value="justify" selected>☰ Do bloku</option></select></div>
             <textarea id="kategorizacePrvku">Jednotlivé prvky zeleně jsou kategorizovány podle svého prostorového a funkčního charakteru na prvky plošné (trávníky, záhony, parky, keřové skupiny), bodové (solitérní stromy, významné keře) a liniové (živé ploty, stromořadí, aleje, břehové porosty). Každému prvku je přiřazena kategorie významu, požadovaná intenzitní třída údržby a kvalitativní ukazatele určující technologický postup následné péče.</textarea>
         </div>
-        <div class="field"><label>Definice číselníků a hodnot</label>
+        <div class="field"><div class="label-row"><label>Definice číselníků a hodnot</label><select class="align-select" id="align-ciselnikyHodnoty" onchange="updatePreview()" title="Zarovnání odstavce"><option value="left">↤ Vlevo</option><option value="center">↔ Na střed</option><option value="right">↦ Vpravo</option><option value="justify" selected>☰ Do bloku</option></select></div>
             <textarea id="ciselnikyHodnoty">V databázové části pasportu jsou atributy prvků standardizovány pomocí předem definovaných číselníků. Tyto číselníky zahrnují taxony dřevin (český i vědecký název), kódování typů ploch, stupně vitality a zdravotního stavu (1–5), sadovnickou hodnotu dřevin (hodnoty 1–5 dle metodiky AOPK ČR) a kódy předepsané údržby či pěstebních zásahů. Standardizované hodnoty umožňují systematické filtrování a bezproblémový export do GIS a DTM samospráv.</textarea>
         </div>
 
         <div class="page-label">Strana 6 — Vymezení ploch a prvků zeleně</div>
-        <div class="field"><label>Vymezení základních ploch (text)</label>
+        <div class="field"><div class="label-row"><label>Vymezení základních ploch (text)</label><select class="align-select" id="align-zakladniPlochyText" onchange="updatePreview()" title="Zarovnání odstavce"><option value="left">↤ Vlevo</option><option value="center">↔ Na střed</option><option value="right">↦ Vpravo</option><option value="justify" selected>☰ Do bloku</option></select></div>
             <textarea id="zakladniPlochyText" class="short">V řešeném území obce [Název obce] byly v rámci pasportizace mapovány následující základní plochy zeleně:</textarea>
         </div>
         <div class="field"><label>Vymezení základních ploch (tabulka)</label>
@@ -211,7 +215,7 @@ Data jsou uspořádána do databázových tabulek, které jsou přímo provázan
             <button type="button" class="btn btn-secondary" style="margin-top:5px; padding:5px; font-size:10px;" onclick="addRow('zakladniPlochy')">+ Přidat řádek</button>
         </div>
 
-        <div class="field"><label>Vymezení ploch zeleně (text)</label>
+        <div class="field"><div class="label-row"><label>Vymezení ploch zeleně (text)</label><select class="align-select" id="align-statistikaPlochText" onchange="updatePreview()" title="Zarovnání odstavce"><option value="left">↤ Vlevo</option><option value="center">↔ Na střed</option><option value="right">↦ Vpravo</option><option value="justify" selected>☰ Do bloku</option></select></div>
             <textarea id="statistikaPlochText" class="short">Podrobná specifikace evidovaných ploch zeleně, rozdělených do jednotlivých kategorií a typů údržby:</textarea>
         </div>
         <div class="field"><label>Vymezení ploch zeleně (tabulka)</label>
@@ -219,7 +223,7 @@ Data jsou uspořádána do databázových tabulek, které jsou přímo provázan
             <button type="button" class="btn btn-secondary" style="margin-top:5px; padding:5px; font-size:10px;" onclick="addRow('statistikaPloch')">+ Přidat řádek</button>
         </div>
 
-        <div class="field"><label>Vymezení bodových prvků (text)</label>
+        <div class="field"><div class="label-row"><label>Vymezení bodových prvků (text)</label><select class="align-select" id="align-statistikaStromuText" onchange="updatePreview()" title="Zarovnání odstavce"><option value="left">↤ Vlevo</option><option value="center">↔ Na střed</option><option value="right">↦ Vpravo</option><option value="justify" selected>☰ Do bloku</option></select></div>
             <textarea id="statistikaStromuText" class="short">Evidováno bylo celkem [počet] stromů a [počet] keřových skupin v následující struktuře bodových prvků:</textarea>
         </div>
         <div class="field"><label>Vymezení bodových prvků (tabulka)</label>
@@ -227,7 +231,7 @@ Data jsou uspořádána do databázových tabulek, které jsou přímo provázan
             <button type="button" class="btn btn-secondary" style="margin-top:5px; padding:5px; font-size:10px;" onclick="addRow('statistikaStromu')">+ Přidat řádek</button>
         </div>
 
-        <div class="field"><label>Vymezení liniových prvků (text)</label>
+        <div class="field"><div class="label-row"><label>Vymezení liniových prvků (text)</label><select class="align-select" id="align-vymezeniLiniiText" onchange="updatePreview()" title="Zarovnání odstavce"><option value="left">↤ Vlevo</option><option value="center">↔ Na střed</option><option value="right">↦ Vpravo</option><option value="justify" selected>☰ Do bloku</option></select></div>
             <textarea id="vymezeniLiniiText" class="short">V řešeném území byly v rámci pasportizace zmapovány liniové prvky zeleně, zahrnující živé ploty, stromořadí a břehové porosty:</textarea>
         </div>
         <div class="field"><label>Vymezení liniových prvků (tabulka)</label>
@@ -236,10 +240,10 @@ Data jsou uspořádána do databázových tabulek, které jsou přímo provázan
         </div>
 
         <div class="page-label">Strana 7 — Závěr, přílohy a podpis</div>
-        <div class="field"><label>Závěr</label>
+        <div class="field"><div class="label-row"><label>Závěr</label><select class="align-select" id="align-zaver" onchange="updatePreview()" title="Zarovnání odstavce"><option value="left">↤ Vlevo</option><option value="center">↔ Na střed</option><option value="right">↦ Vpravo</option><option value="justify" selected>☰ Do bloku</option></select></div>
             <textarea id="zaver">Pasport zeleně popisuje aktuální stav ploch zeleně a dřevin v obci. Slouží jako výchozí podklad pro efektivní plánování údržby, revitalizace a rozvoje funkční zeleně. Všechna data jsou spravována v on-line mapovém systému, který umožňuje jejich plynulou aktualizaci.</textarea>
         </div>
-        <div class="field"><label>Přílohy</label>
+        <div class="field"><div class="label-row"><label>Přílohy</label><select class="align-select" id="align-prilohy" onchange="updatePreview()" title="Zarovnání odstavce"><option value="left">↤ Vlevo</option><option value="center">↔ Na střed</option><option value="right">↦ Vpravo</option><option value="justify" selected>☰ Do bloku</option></select></div>
             <textarea id="prilohy" class="short">1. Mapová část – Pasport zeleně (vektorová data)
 2. Databázová část (souhrnné tabulky)
 3. Fotodokumentace vybraných prvků</textarea>
@@ -614,7 +618,8 @@ function textToHtml(text) {
 }
 function val(id) { return (document.getElementById(id)?.value || '').trim(); }
 function setText(id, text) { const el = document.getElementById(id); if (el) el.textContent = text || '—'; }
-function setHtml(id, text) { const el = document.getElementById(id); if (el) el.innerHTML = textToHtml(text) || '<p class="ph">— nevyplněno —</p>'; }
+function getAlign(textareaId) { const sel = document.getElementById('align-' + textareaId); return sel ? sel.value : 'justify'; }
+function setHtml(id, text, align) { const el = document.getElementById(id); if (el) { el.innerHTML = textToHtml(text) || '<p class="ph">— nevyplněno —</p>'; el.style.textAlign = align || 'justify'; } }
 
 // ==== TABULKY DATA ====
 const tableConfig = {
@@ -741,20 +746,20 @@ function updatePreview() {
     setText('p-okres', val('okres'));
     setText('p-kraj', val('kraj'));
 
-    setHtml('p-pasportText', val('pasportText'));
-    setHtml('p-prehledUzemi', val('prehledUzemi'));
-    setHtml('p-ucelPasportu', val('ucelPasportu'));
-    setHtml('p-zpusobEvidence', val('zpusobEvidence'));
-    setHtml('p-kategorizacePrvku', val('kategorizacePrvku'));
-    setHtml('p-ciselnikyHodnoty', val('ciselnikyHodnoty'));
+    setHtml('p-pasportText', val('pasportText'), getAlign('pasportText'));
+    setHtml('p-prehledUzemi', val('prehledUzemi'), getAlign('prehledUzemi'));
+    setHtml('p-ucelPasportu', val('ucelPasportu'), getAlign('ucelPasportu'));
+    setHtml('p-zpusobEvidence', val('zpusobEvidence'), getAlign('zpusobEvidence'));
+    setHtml('p-kategorizacePrvku', val('kategorizacePrvku'), getAlign('kategorizacePrvku'));
+    setHtml('p-ciselnikyHodnoty', val('ciselnikyHodnoty'), getAlign('ciselnikyHodnoty'));
     
-    setHtml('p-zakladniPlochyText', val('zakladniPlochyText'));
-    setHtml('p-statistikaPlochText', val('statistikaPlochText'));
-    setHtml('p-statistikaStromuText', val('statistikaStromuText'));
-    setHtml('p-vymezeniLiniiText', val('vymezeniLiniiText'));
+    setHtml('p-zakladniPlochyText', val('zakladniPlochyText'), getAlign('zakladniPlochyText'));
+    setHtml('p-statistikaPlochText', val('statistikaPlochText'), getAlign('statistikaPlochText'));
+    setHtml('p-statistikaStromuText', val('statistikaStromuText'), getAlign('statistikaStromuText'));
+    setHtml('p-vymezeniLiniiText', val('vymezeniLiniiText'), getAlign('vymezeniLiniiText'));
     
-    setHtml('p-zaver', val('zaver'));
-    setHtml('p-prilohy', val('prilohy'));
+    setHtml('p-zaver', val('zaver'), getAlign('zaver'));
+    setHtml('p-prilohy', val('prilohy'), getAlign('prilohy'));
 
     const d = val('signDate');
     setText('p-signDate', d ? new Date(d + 'T12:00:00').toLocaleDateString('cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' }) : '—');

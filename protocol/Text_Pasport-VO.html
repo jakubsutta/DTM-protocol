@@ -80,6 +80,10 @@
     .ptext p { margin-bottom: 8px; }
     .ptext p:last-child { margin-bottom: 0; }
     .ptext p.ph { color: #b0bec5; font-style: italic; }
+    .ptext .ql-align-center, .ql-align-center { text-align: center; }
+    .ptext .ql-align-right, .ql-align-right { text-align: right; }
+    .ptext .ql-align-justify, .ql-align-justify { text-align: justify; }
+    .ptext .ql-align-left, .ql-align-left { text-align: left; }
 
     /* ---- Titulní strana ---- */
     .p1 { align-items: center; text-align: center; justify-content: flex-start; }
@@ -719,7 +723,7 @@ window.onload = function() {
             
             const quill = new Quill(container, {
                 theme: 'snow',
-                modules: { toolbar: [ ['bold', 'italic', 'underline'], [{ 'list': 'bullet' }] ] }
+                modules: { toolbar: [ ['bold', 'italic', 'underline'], [{ 'list': 'bullet' }], [{ 'align': [] }] ] }
             });
             // Konvertujeme počáteční text na HTML, vložíme do Quillu a syncneme zpět
             quill.clipboard.dangerouslyPasteHTML(textToHtml(textarea.value));

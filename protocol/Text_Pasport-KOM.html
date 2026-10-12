@@ -7,6 +7,8 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link href="./vendor/quill/quill.snow.css" rel="stylesheet">
+<script src="./vendor/quill/quill.min.js"></script>
 <style>
     /* ---- Tisk / PDF ---- */
     @media print {
@@ -67,6 +69,20 @@
     .ptext p { margin-bottom: 8px; }
     .ptext p:last-child { margin-bottom: 0; }
     .ptext p.ph { color: #b0bec5; font-style: italic; }
+    
+    /* Quill JS styling */
+    .ql-toolbar.ql-snow { border: 1px solid rgba(0,0,0,0.15); border-bottom: none; background: #fafbfc; border-radius: 4px 4px 0 0; padding: 4px 8px; font-family: inherit; }
+    .ql-container.ql-snow { border: 1px solid rgba(0,0,0,0.15); border-radius: 0 0 4px 4px; background: #fff; height: auto !important; }
+    .ql-editor { font-family: inherit; font-size: 13px; color: #1a1a2e; line-height: 1.5; min-height: 120px; height: auto !important; padding: 10px; overflow-y: auto; }
+    .ql-editor p { margin-bottom: 8px; }
+    .ql-editor p:last-child { margin-bottom: 0; }
+    .ql-snow .ql-toolbar button:hover .ql-stroke, .ql-snow .ql-toolbar button.ql-active .ql-stroke { stroke: #ea521f; }
+    .ql-snow .ql-toolbar button:hover .ql-fill, .ql-snow .ql-toolbar button.ql-active .ql-fill { fill: #ea521f; }
+
+    .ptext .ql-align-center, .ql-align-center { text-align: center; }
+    .ptext .ql-align-right, .ql-align-right { text-align: right; }
+    .ptext .ql-align-justify, .ql-align-justify { text-align: justify; }
+    .ptext .ql-align-left, .ql-align-left { text-align: left; }
 
     /* ---- Titulní strana ---- */
     .p1 { align-items: center; text-align: center; justify-content: flex-start; }
@@ -575,6 +591,16 @@ function fillObecName(nazev) {
     if (objEl) objEl.value = 'Obec ' + nazev;
     const mistoEl = document.getElementById('mistoReseni');
     if (mistoEl) mistoEl.value = 'obec ' + nazev;
+    
+    Object.keys(quillEditors).forEach(id => {
+        const q = quillEditors[id];
+        if (q && q.root.innerHTML.includes('[Název obce]')) {
+            q.root.innerHTML = q.root.innerHTML.replaceAll('[Název obce]', nazev);
+            const ta = document.getElementById(id);
+            if (ta) ta.value = q.root.innerHTML;
+        }
+    });
+
     updatePreview();
 }
 
@@ -586,7 +612,16 @@ function textToHtml(text) {
 }
 function val(id) { return (document.getElementById(id)?.value || '').trim(); }
 function setText(id, text) { const el = document.getElementById(id); if (el) el.textContent = text || '—'; }
-function setHtml(id, text) { const el = document.getElementById(id); if (el) el.innerHTML = textToHtml(text) || '<p class="ph">— nevyplněno —</p>'; }
+function setHtml(id, text) { 
+    const el = document.getElementById(id); 
+    if (el) {
+        if (!text || text === '<p><br></p>') {
+            el.innerHTML = '<p class="ph">— nevyplněno —</p>';
+        } else {
+            el.innerHTML = text;
+        }
+    }
+}
 
 // ==== HLAVNÍ AKTUALIZACE NÁHLEDU ====
 function updatePreview() {
@@ -640,12 +675,54 @@ function resetForm() {
 }
 
 // ==== INIT ====
+let quillEditors = {};
+
 window.onload = function() {
     initMap();
     document.getElementById('signDate').value = new Date().toISOString().slice(0, 10);
-    document.querySelectorAll('.form-panel input[type=text], .form-panel input[type=date], .form-panel textarea').forEach(el => {
-        el.addEventListener('input', updatePreview);
-        el.addEventListener('change', updatePreview);
+    document.getElementById('rok').value = new Date().getFullYear();
+    
+    // Inicializace Quill editorů pro hlavní textová pole
+    const richTextIds = [
+        'pasportText', 'zaverecnyOdstavec',
+        'prehledUzemi', 'krajskeKomunikace', 'mistniKomunikace',
+        'ucelKomunikace', 'mosty', 'pridruzenePlochy',
+        'shrnuti', 'nakladyText', 'zimniText'
+    ];
+    richTextIds.forEach(id => {
+        const textarea = document.getElementById(id);
+        if (textarea) {
+            const container = document.createElement('div');
+            textarea.parentNode.insertBefore(container, textarea);
+            textarea.style.display = 'none';
+            
+            try {
+                const quill = new Quill(container, {
+                    theme: 'snow',
+                    modules: { toolbar: [ ['bold', 'italic', 'underline'], [{ 'list': 'bullet' }], [{ 'align': [] }] ] }
+                });
+                // Konvertujeme počáteční text na HTML, vložíme do Quillu a syncneme zpět
+                quill.clipboard.dangerouslyPasteHTML(textToHtml(textarea.value));
+                textarea.value = quill.root.innerHTML;
+                
+                quill.on('text-change', function() {
+                    textarea.value = quill.root.innerHTML;
+                    updatePreview();
+                });
+                quillEditors[id] = quill;
+            } catch (qe) {
+                console.error("Chyba Quill:", qe);
+                textarea.style.display = "block";
+                container.style.display = "none";
+            }
+        }
+    });
+
+    document.querySelectorAll('.form-panel input, .form-panel textarea, .form-panel select').forEach(el => {
+        if (el.style.display !== 'none') {
+            el.addEventListener('input', updatePreview);
+            el.addEventListener('change', updatePreview);
+        }
     });
     updatePreview();
 };
