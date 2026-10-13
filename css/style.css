@@ -341,6 +341,19 @@ h1 {
     background: #eafbf0;
 }
 
+.card.propagace {
+    border-top-color: #ff7899;
+}
+
+.card.propagace .card-title,
+.card.propagace .card-icon {
+    color: #ff7899;
+}
+
+.card.propagace:hover {
+    background: #ffe6ee;
+}
+
 /* Témata Pasportů */
 .card.kom {
     border-top-color: #ff7b00;
