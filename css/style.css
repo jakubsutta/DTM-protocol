@@ -354,6 +354,23 @@ h1 {
     background: #ffe6ee;
 }
 
+.card.obalka,
+.card.post-label {
+    border-top-color: #b94a0c;
+}
+
+.card.obalka .card-title,
+.card.obalka .card-icon,
+.card.post-label .card-title,
+.card.post-label .card-icon {
+    color: #b94a0c;
+}
+
+.card.obalka:hover,
+.card.post-label:hover {
+    background: #fbf2ec;
+}
+
 /* Témata Pasportů */
 .card.kom {
     border-top-color: #ff7b00;
