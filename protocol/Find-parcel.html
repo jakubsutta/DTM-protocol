@@ -59,6 +59,49 @@
         color: #546e7a;
         border: 1px solid #e0e0e0;
     }
+    .table-data thead tr.tr-cols th.sortable {
+        cursor: pointer;
+        user-select: none;
+        transition: background-color 0.15s ease, color 0.15s ease;
+    }
+    .table-data thead tr.tr-cols th.sortable:hover {
+        background-color: #e8ecf1;
+        color: #0277bd;
+    }
+    .table-data thead tr.tr-cols th.sort-active {
+        color: #0277bd !important;
+        background-color: #edf4f8 !important;
+    }
+    .sort-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        vertical-align: middle;
+        margin-left: 5px;
+        color: #b0bec5;
+    }
+    .sort-icon svg {
+        display: block;
+    }
+    .sort-icon .arrow-up, .sort-icon .arrow-down {
+        transition: stroke 0.15s ease, stroke-width 0.15s ease, opacity 0.15s ease;
+    }
+    th.sort-active.sort-asc .arrow-up {
+        stroke: #0277bd !important;
+        stroke-width: 2.4 !important;
+    }
+    th.sort-active.sort-asc .arrow-down {
+        stroke: #cfd8dc !important;
+        opacity: 0.35;
+    }
+    th.sort-active.sort-desc .arrow-down {
+        stroke: #0277bd !important;
+        stroke-width: 2.4 !important;
+    }
+    th.sort-active.sort-desc .arrow-up {
+        stroke: #cfd8dc !important;
+        opacity: 0.35;
+    }
     .table-data tbody tr:nth-child(even) {
         background-color: #f8fafc;
     }
@@ -180,6 +223,16 @@
             color: #546e7a !important;
             border: 1px solid #e0e0e0 !important;
         }
+        .table-data thead tr.tr-cols th.sortable {
+            cursor: default !important;
+        }
+        .table-data thead tr.tr-cols th.sort-active {
+            background-color: #f5f7fa !important;
+            color: #546e7a !important;
+        }
+        .sort-icon {
+            display: none !important;
+        }
         .table-data tbody tr:nth-child(even) {
             background-color: #f8fafc !important;
         }
@@ -253,16 +306,54 @@
         </div>
 
         <h2 class="no-print">3. Výsledky <span class="pill" id="resultCount"></span></h2>
-        <div class="row no-print">
-            <button onclick="exportCsv()">⬇ Export do CSV</button>
-            <button class="secondary" onclick="exportPdf()">📄 Export do PDF (Tisk)</button>
+        <div class="row no-print" style="justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px;">
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <button onclick="exportCsv()">⬇ Export do CSV</button>
+                <button class="secondary" onclick="exportPdf()">📄 Export do PDF (Tisk)</button>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center; margin-left: auto; flex-wrap: wrap;">
+                <label for="sortSelect" style="font-size: 11.5px; color: #546e7a; font-weight: 600;">Seřadit dle:</label>
+                <select id="sortSelect" onchange="onSortSelectChange(this.value)" style="font-size: 11.5px; padding: 6px 10px; border-radius: 5px; border: 1px solid #cfd8dc; background: #fff; color: #37474f; outline: none; cursor: pointer;">
+                    <option value="number-asc">Označení (vzestupně A-Z / 1-9)</option>
+                    <option value="number-desc">Označení (sestupně Z-A / 9-1)</option>
+                    <option value="obec-asc">Obec (A-Z)</option>
+                    <option value="obec-desc">Obec (Z-A)</option>
+                    <option value="parcely-asc">Parcely (A-Z)</option>
+                    <option value="parcely-desc">Parcely (Z-A)</option>
+                    <option value="original-asc">Původní pořadí ze SHP</option>
+                </select>
+            </div>
         </div>
-        <table class="table-data">
+        <table class="table-data" id="resultsTable">
             <thead>
                 <tr class="tr-cols">
-                    <th style="width:110px">OZNAČENÍ</th>
-                    <th style="width:220px">OBEC</th>
-                    <th>PARCELY</th>
+                    <th id="th-number" class="sortable" style="width:120px" onclick="handleSort('number')" title="Kliknutím seřadíte dle označení">
+                        OZNAČENÍ
+                        <span class="sort-icon" id="sort-icon-number">
+                            <svg viewBox="0 0 10 14" width="8" height="11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path class="arrow-up" d="M2 5L5 2L8 5"/>
+                                <path class="arrow-down" d="M2 9L5 12L8 9"/>
+                            </svg>
+                        </span>
+                    </th>
+                    <th id="th-obec" class="sortable" style="width:220px" onclick="handleSort('obec')" title="Kliknutím seřadíte dle obce">
+                        OBEC
+                        <span class="sort-icon" id="sort-icon-obec">
+                            <svg viewBox="0 0 10 14" width="8" height="11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path class="arrow-up" d="M2 5L5 2L8 5"/>
+                                <path class="arrow-down" d="M2 9L5 12L8 9"/>
+                            </svg>
+                        </span>
+                    </th>
+                    <th id="th-parcely" class="sortable" onclick="handleSort('parcely')" title="Kliknutím seřadíte dle parcel">
+                        PARCELY
+                        <span class="sort-icon" id="sort-icon-parcely">
+                            <svg viewBox="0 0 10 14" width="8" height="11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path class="arrow-up" d="M2 5L5 2L8 5"/>
+                                <path class="arrow-down" d="M2 9L5 12L8 9"/>
+                            </svg>
+                        </span>
+                    </th>
                 </tr>
             </thead>
             <tbody id="resultsBody"></tbody>
@@ -289,6 +380,8 @@ let groups = new Map(); // number -> { city_code, lines: [ [ [x,y],... ], ... ] 
 let obecCache = new Map(); // city_code -> nazev
 let results = [];
 let stopRequested = false;
+let currentSort = { col: 'number', dir: 'asc' };
+const collator = new Intl.Collator('cs', { numeric: true, sensitivity: 'base' });
 
 function initMapOnce() {
     if (mapInstance) return;
@@ -401,7 +494,7 @@ async function loadShp() {
                 else if (geom.type === 'Polygon') lines = geom.coordinates;
                 else if (geom.type === 'MultiPolygon') lines = geom.coordinates.flat();
 
-                if (!groups.has(number)) groups.set(number, { cityCode, lines: [] });
+                if (!groups.has(number)) groups.set(number, { cityCode, lines: [], originalIndex: groups.size });
                 for (const line of lines) {
                     const parsedLine = line.map(pt => parsePoint(pt, swap));
                     const latlngs = parsedLine.map(p => p.latlng);
@@ -516,7 +609,7 @@ async function processAll() {
     document.getElementById('stopBtn').disabled = false;
     document.getElementById('resultsPanel').style.display = 'none';
 
-    const numbers = Array.from(groups.keys());
+    const numbers = Array.from(groups.keys()).sort((a, b) => collator.compare(a, b));
     let done = 0;
 
     for (const number of numbers) {
@@ -543,9 +636,10 @@ async function processAll() {
 
         const obecLabel = await lookupObec(group.cityCode);
         results.push({
+            _originalIndex: group.originalIndex,
             number,
             obec: obecLabel,
-            parcely: errorMsg ? `⚠️ ${errorMsg}` : (parcelSet.size ? Array.from(parcelSet).sort().join(', ') : '— žádné nenalezeny —')
+            parcely: errorMsg ? `⚠️ ${errorMsg}` : (parcelSet.size ? Array.from(parcelSet).sort((a, b) => collator.compare(a, b)).join(', ') : '— žádné nenalezeny —')
         });
 
         done++;
@@ -558,10 +652,79 @@ async function processAll() {
     document.getElementById('stopBtn').disabled = true;
 }
 
+function handleSort(col) {
+    if (currentSort.col === col) {
+        currentSort.dir = currentSort.dir === 'asc' ? 'desc' : 'asc';
+    } else {
+        currentSort.col = col;
+        currentSort.dir = 'asc';
+    }
+    updateSortUi();
+    renderResults();
+}
+
+function onSortSelectChange(val) {
+    const [col, dir] = val.split('-');
+    currentSort.col = col;
+    currentSort.dir = dir || 'asc';
+    updateSortUi();
+    renderResults();
+}
+
+function updateSortUi() {
+    const select = document.getElementById('sortSelect');
+    if (select) {
+        select.value = `${currentSort.col}-${currentSort.dir}`;
+    }
+
+    ['number', 'obec', 'parcely'].forEach(col => {
+        const th = document.getElementById(`th-${col}`);
+        if (!th) return;
+        if (currentSort.col === col) {
+            th.classList.add('sort-active');
+            th.classList.toggle('sort-asc', currentSort.dir === 'asc');
+            th.classList.toggle('sort-desc', currentSort.dir === 'desc');
+            th.setAttribute('aria-sort', currentSort.dir === 'asc' ? 'ascending' : 'descending');
+        } else {
+            th.classList.remove('sort-active', 'sort-asc', 'sort-desc');
+            th.removeAttribute('aria-sort');
+        }
+    });
+}
+
+function compareResults(a, b, col, dir) {
+    if (col === 'original') {
+        const diff = (a._originalIndex ?? 0) - (b._originalIndex ?? 0);
+        return dir === 'desc' ? -diff : diff;
+    }
+
+    const valA = a[col] != null ? String(a[col]).trim() : '';
+    const valB = b[col] != null ? String(b[col]).trim() : '';
+
+    if (!valA && !valB) return 0;
+    if (!valA) return 1;
+    if (!valB) return -1;
+
+    if (valA === valB) {
+        if (col !== 'number') {
+            return collator.compare(String(a.number ?? ''), String(b.number ?? ''));
+        }
+        return (a._originalIndex ?? 0) - (b._originalIndex ?? 0);
+    }
+
+    const cmp = collator.compare(valA, valB);
+    return dir === 'desc' ? -cmp : cmp;
+}
+
+function getSortedResults() {
+    return [...results].sort((a, b) => compareResults(a, b, currentSort.col, currentSort.dir));
+}
+
 function renderResults() {
     const body = document.getElementById('resultsBody');
     body.innerHTML = '';
-    for (const r of results) {
+    const sorted = getSortedResults();
+    for (const r of sorted) {
         const tr = document.createElement('tr');
         tr.innerHTML = `<td>${escapeHtml(r.number)}</td><td>${escapeHtml(r.obec)}</td><td>${escapeHtml(r.parcely)}</td>`;
         body.appendChild(tr);
@@ -572,6 +735,7 @@ function renderResults() {
         const today = new Date().toLocaleDateString('cs-CZ');
         printSub.textContent = `Vygenerováno: ${today} | Celkem komunikací: ${results.length}`;
     }
+    updateSortUi();
     document.getElementById('resultsPanel').style.display = 'block';
 }
 
@@ -590,7 +754,8 @@ function escapeHtml(str) {
 
 function exportCsv() {
     const delim = ';';
-    const rows = [['označení', 'obec', 'parcely'], ...results.map(r => [r.number, r.obec, r.parcely])];
+    const sorted = getSortedResults();
+    const rows = [['označení', 'obec', 'parcely'], ...sorted.map(r => [r.number, r.obec, r.parcely])];
     const csv = rows.map(row => row.map(cell => '"' + String(cell).replace(/"/g, '""') + '"').join(delim)).join('\r\n');
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
