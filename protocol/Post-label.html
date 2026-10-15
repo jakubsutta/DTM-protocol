@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generátor adresy na obálku</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23b94a0c'/%3E%3Crect x='10' y='16' width='44' height='32' rx='4' fill='%23fff'/%3E%3Cpath d='M12 20l20 15 20-15' fill='none' stroke='%23b94a0c' stroke-width='3.5' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; background: #f0f2f5; color: #1a1a1a; }
+.app { display: grid; grid-template-columns: 400px 1fr; min-height: 100vh; }
+
+/* ---- Formulářový panel ---- */
+.form-panel { background:#d5b7a6; color: #fff; padding: 24px 22px 20px; overflow-y: auto; max-height: 100vh; position: sticky; top: 0; }
+.form-panel h2 { font-size: 13px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #432b14; margin-bottom: 8px; }
+.page-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #fff; background: #5c2306; padding: 6px 10px; border-radius: 4px; margin: 20px 0 12px; }
+.field { margin-bottom: 10px; }
+.field label { display: block; font-size: 11px; font-weight: 600; margin-bottom: 4px; color: #5c2306; }
+.field input[type=text], .field select { width: 100%; background: #fff; color: #1a1a1a; border: 1px solid #ffb27a; border-radius: 4px; font-size: 12px; font-family: inherit; padding: 7px 10px; outline: none; }
+.field input:focus, .field select:focus { border-color: #ffd9b3; box-shadow: 0 0 0 2px rgba(255,217,179,.5); }
+.field input[type=range] { width: 100%; accent-color: #fff; }
+.row2 { display: grid; grid-template-columns: 2fr 1fr; gap: 8px; }
+.file-field { border: 1px dashed #ffd9b3; border-radius: 4px; padding: 8px 10px; font-size: 11px; color: #fff; cursor: pointer; text-align: center; background: rgba(255,255,255,.12); }
+.file-field:hover { background: rgba(255,255,255,.22); border-color: #fff; }
+.link { font-size: 11px; color: #ffe0b2; cursor: pointer; background: none; border: none; text-decoration: underline; margin-top: 4px; font-family: inherit; }
+.btn-row { display: flex; flex-direction: column; gap: 8px; margin: 20px 0 0; position: sticky; bottom: 0; background:#d5b7a6; padding: 8px 0; }
+.btn { padding: 10px 16px; border-radius: 5px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; font-family: inherit; }
+.btn-primary { background: #432b14; color:#d5b7a6; } .btn-primary:hover { background: #ffe9d6; }
+.btn-secondary { background: transparent; color: #fff; border: 1px solid #ffd9b3; } .btn-secondary:hover { background: rgba(255,255,255,.15); }
+
+/* ---- Náhled A4 ---- */
+.preview-panel { padding: 30px 10px 60px; display: flex; justify-content: center; overflow: auto; }
+.page { background: #fff; width: 210mm; height: 297mm; flex: none; position: relative; box-shadow: 0 4px 32px rgba(0,0,0,.18); overflow: hidden;
+        font-family: 'Segoe UI', system-ui, sans-serif; color: #000; padding: 15mm; display: flex; flex-direction: column; align-items: flex-start; gap: 8mm; }
+.block { width: 90mm; padding: 3mm; }
+body.frame .block { outline: .3mm dashed #999; }
+.block h3 { font-size: 8.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 2.5mm; }
+.block .row { display: flex; align-items: center; gap: 4mm; }
+.block .logo { flex: none; }
+.block .logo img { display: block; max-width: 100%; height: auto; }
+.block .addr { flex: 1; min-width: 0; font-size: 11pt; line-height: 1.3; text-transform: uppercase; }
+.block .addr .name { font-weight: 700; }
+.block .addr div { min-height: 1.3em; }
+
+@media print {
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  body { background: #fff !important; }
+  .app { display: block !important; }
+  .form-panel { display: none !important; }
+  .preview-panel { display: block !important; padding: 0 !important; }
+  .page { box-shadow: none !important; margin: 0 !important; }
+  @page { size: A4; margin: 0; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="form-panel">
+    <h2>Adresa na obálku</h2>
+
+    <div class="page-label">Odesílatel</div>
+    <div class="field"><label>Logo odesílatele</label>
+      <select id="sLogoSel">
+        <option value="default">Atomicon – kruhové logo (výchozí)</option>
+        <option value="gisadmin">Atomicon – logo z GISAdmin (logo3.png)</option>
+        <option value="none">Bez loga</option>
+        <option value="custom">Vlastní soubor…</option>
+      </select>
+      <div class="file-field" style="margin-top:6px" onclick="document.getElementById('sLogoFile').click()">+ Nahrát vlastní logo</div>
+      <input type="file" id="sLogoFile" accept="image/*" style="display:none">
+    </div>
+    <div class="field"><label>Velikost loga: <span id="sLogoVal"></span> mm</label><input type="range" id="sLogoSize" min="10" max="40" step="1" value="22"></div>
+    <div class="field"><label>Název</label><input type="text" id="sName" spellcheck="false"></div>
+    <div class="field"><label>Ulice a č. p.</label><input type="text" id="sStreet" spellcheck="false"></div>
+    <div class="row2">
+      <div class="field"><label>Obec</label><input type="text" id="sCity" spellcheck="false"></div>
+      <div class="field"><label>PSČ</label><input type="text" id="sZip" spellcheck="false"></div>
+    </div>
+
+    <div class="page-label">Adresát</div>
+    <div class="field"><label>Logo obce</label>
+      <div class="file-field" onclick="document.getElementById('rLogoFile').click()" id="rLogoBtn">+ Vybrat obrázek loga obce</div>
+      <input type="file" id="rLogoFile" accept="image/*" style="display:none">
+      <button type="button" class="link" id="rLogoClear" style="display:none">Odebrat logo</button>
+    </div>
+    <div class="field"><label>Velikost loga: <span id="rLogoVal"></span> mm</label><input type="range" id="rLogoSize" min="10" max="40" step="1" value="22"></div>
+    <div class="field"><label>Název (např. Obec Olší)</label><input type="text" id="rName" spellcheck="false"></div>
+    <div class="field"><label>Doplňující řádek (např. k rukám starosty)</label><input type="text" id="rExtra" spellcheck="false"></div>
+    <div class="field"><label>Ulice a č. p.</label><input type="text" id="rStreet" spellcheck="false"></div>
+    <div class="row2">
+      <div class="field"><label>Obec</label><input type="text" id="rCity" spellcheck="false"></div>
+      <div class="field"><label>PSČ</label><input type="text" id="rZip" spellcheck="false"></div>
+    </div>
+
+    <div class="field" style="margin-top:14px"><label style="display:flex;gap:6px;align-items:center;font-size:12px"><input type="checkbox" id="frame"> Rámeček kolem bloků (pomůcka pro vystřižení)</label></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="window.print()">⬇ Tisk / uložit jako PDF (Ctrl+P)</button>
+      <button class="btn btn-secondary" id="bReset">Vymazat adresáta</button>
+    </div>
+  </div>
+
+  <div class="preview-panel">
+    <div class="page" id="page">
+      <div class="block" id="sender">
+        <h3>Odesílatel:</h3>
+        <div class="row"><div class="logo" id="pSLogo"></div><div class="addr" id="pS"></div></div>
+      </div>
+      <div class="block" id="recipient">
+        <h3>Adresát:</h3>
+        <div class="row"><div class="logo" id="pRLogo"></div><div class="addr" id="pR"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const LOGO_DEFAULT = 'data:image/png;base64,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';
+const LOGO_GISADMIN = 'https://gisadmin.atomicon.cz/static/images/logo3.png';
+const SENDER_DEFAULT = {sName:'Atomicon s.r.o.', sStreet:'Stupkova 952/18', sCity:'Olomouc', sZip:'77900'};
+const $ = id => document.getElementById(id);
+let customSLogo = null, rLogo = null;
+
+function fmtZip(z){ const d = (z||'').replace(/\s+/g,''); return /^\d{5}$/.test(d) ? d.slice(0,3)+' '+d.slice(3) : (z||'').trim(); }
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function addrHtml(name, extra, street, city, zip){
+  const lines = [];
+  if (name.trim())   lines.push('<div class="name">'+esc(name.trim())+'</div>');
+  if (extra.trim())  lines.push('<div>'+esc(extra.trim())+'</div>');
+  if (street.trim()) lines.push('<div>'+esc(street.trim())+'</div>');
+  const cz = [fmtZip(zip), city.trim()].filter(Boolean).join(' ');
+  if (cz)            lines.push('<div>'+esc(cz)+'</div>');
+  return lines.join('');
+}
+function logoHtml(src, mm){ return src ? '<img src="'+src+'" alt="" style="width:'+mm+'mm">' : ''; }
+
+function render(){
+  $('pS').innerHTML = addrHtml($('sName').value, '', $('sStreet').value, $('sCity').value, $('sZip').value);
+  $('pR').innerHTML = addrHtml($('rName').value, $('rExtra').value, $('rStreet').value, $('rCity').value, $('rZip').value);
+  const sel = $('sLogoSel').value;
+  const sSrc = sel==='default' ? LOGO_DEFAULT : sel==='gisadmin' ? LOGO_GISADMIN : sel==='custom' ? customSLogo : null;
+  $('sLogoVal').textContent = $('sLogoSize').value; $('rLogoVal').textContent = $('rLogoSize').value;
+  $('pSLogo').innerHTML = logoHtml(sSrc, $('sLogoSize').value);
+  $('pRLogo').innerHTML = logoHtml(rLogo, $('rLogoSize').value);
+  $('rLogoClear').style.display = rLogo ? 'inline' : 'none';
+  $('rLogoBtn').textContent = rLogo ? '✓ Logo obce nahráno – nahrát jiné' : '+ Vybrat obrázek loga obce';
+  saveSender();
+}
+function readImg(file, cb){ if(!file) return; const r = new FileReader(); r.onload = e => cb(e.target.result); r.readAsDataURL(file); }
+
+function saveSender(){ try { localStorage.setItem('obalkaSender', JSON.stringify({
+  sName:$('sName').value, sStreet:$('sStreet').value, sCity:$('sCity').value, sZip:$('sZip').value,
+  sLogoSel:$('sLogoSel').value==='custom' ? 'default' : $('sLogoSel').value, sLogoSize:$('sLogoSize').value, rLogoSize:$('rLogoSize').value })); } catch(e){} }
+function loadSender(){
+  let s = {}; try { s = JSON.parse(localStorage.getItem('obalkaSender')) || {}; } catch(e){}
+  const v = Object.assign({}, SENDER_DEFAULT, s);
+  ['sName','sStreet','sCity','sZip'].forEach(k => $(k).value = v[k]);
+  if (v.sLogoSel) $('sLogoSel').value = v.sLogoSel;
+  if (v.sLogoSize) $('sLogoSize').value = v.sLogoSize;
+  if (v.rLogoSize) $('rLogoSize').value = v.rLogoSize;
+}
+
+['sName','sStreet','sCity','sZip','rName','rExtra','rStreet','rCity','rZip','sLogoSel','sLogoSize','rLogoSize']
+  .forEach(id => $(id).addEventListener('input', render));
+$('sLogoFile').onchange = e => readImg(e.target.files[0], d => { customSLogo = d; $('sLogoSel').value = 'custom'; render(); });
+$('rLogoFile').onchange = e => readImg(e.target.files[0], d => { rLogo = d; render(); });
+$('rLogoClear').onclick = () => { rLogo = null; $('rLogoFile').value = ''; render(); };
+$('bReset').onclick = () => { ['rName','rExtra','rStreet','rCity','rZip'].forEach(k => $(k).value=''); rLogo = null; $('rLogoFile').value=''; render(); };
+
+$('frame').onchange = e => document.body.classList.toggle('frame', e.target.checked);
+loadSender(); render();
+</script>
+</body>
+</html>
