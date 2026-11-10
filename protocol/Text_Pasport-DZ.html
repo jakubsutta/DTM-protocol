@@ -127,6 +127,16 @@
     .cost-table td { padding: 3px 6px; text-align: center; border: 1px solid #e0e0e0; vertical-align: middle; }
     .cost-table td:first-child { color: #78909c; font-weight: 600; text-align: center; background: #fafbfc; }
 
+    /* ---- Tabulka seznam značení – přetečení + nová stránka ---- */
+    .seznam-znaceni-wrap { width: 100%; }
+    .seznam-znaceni-wrap.new-page { page-break-before: always; break-before: page; }
+    @media print {
+        .seznam-znaceni-wrap.new-page { page-break-before: always; break-before: page; }
+        .cost-table { page-break-inside: auto; break-inside: auto; }
+        .cost-table thead { display: table-header-group; }
+        .cost-table tr { page-break-inside: avoid; break-inside: avoid; }
+    }
+
     /* ---- Podpis ---- */
     .sign-row { display: flex; gap: 40px; margin-top: 10px; align-items: flex-end; }
     .stamp-box { width: 48mm; height: 22mm; border: 1.5px dashed #cfd8dc; border-radius: 6px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #fafbfc; margin-bottom: 4px; }
@@ -219,6 +229,10 @@ tel. +420 778 481 700</textarea>
 
         <div class="section-label">Seznam značení (tabulka)</div>
         <div class="field">
+            <label style="display:flex; align-items:center; gap:7px; cursor:pointer; font-weight:600; font-size:11px; margin-bottom:8px;">
+                <input type="checkbox" id="seznamNewPage" style="width:auto; accent-color:#d32f2f;" onchange="toggleSeznamNewPage()">
+                Začít na nové stránce
+            </label>
             <div class="table-editor" id="edit-seznamZnaceni"></div>
             <button type="button" class="btn btn-secondary" style="margin-top:6px; padding:6px; font-size:11px;" onclick="addRow('seznamZnaceni')">+ Přidat značku</button>
             <div class="field-note">Symbol se automaticky vygeneruje podle kódu DZ (např. P 4, B 20a, IP 6, IZ 4a apod.). Při zadání kódu se automaticky předvyplní oficiální název.</div>
@@ -272,7 +286,7 @@ tel. +420 778 481 700</textarea>
         </div>
 
         <!-- STRANA 3 -->
-        <div class="page">
+        <div class="page" id="page-3">
             <div class="sec-title" style="font-size:13px; text-transform:none; letter-spacing:0; color:#1a1a2e; border-bottom:2px solid #ea521f; padding-bottom:6px; margin-bottom:10px;">Pasport dopravního značení</div>
             <div class="ptext" id="p-dzUvod"></div>
             <div class="ptext" id="p-dzMetodika"></div>
@@ -282,6 +296,7 @@ tel. +420 778 481 700</textarea>
             <div class="ptext" id="p-dzZaver"></div>
             <div class="ptext" id="p-dzShrnuti"></div>
             
+            <div class="seznam-znaceni-wrap" id="seznam-znaceni-wrap">
             <div class="sec-title" style="font-size:10.5px; text-transform:uppercase; letter-spacing:0.08em; color:#78909c; border-bottom:2px solid #d32f2f; padding-bottom:4px; margin: 10px 0 6px;">Seznam značení</div>
             <table class="cost-table" id="p-tab-seznamZnaceni">
                 <thead>
@@ -295,8 +310,9 @@ tel. +420 778 481 700</textarea>
                 </thead>
                 <tbody></tbody>
             </table>
+            </div>
             
-            <div style="margin-top: auto; width: 100%;">
+            <div id="sign-section" style="margin-top: auto; width: 100%;">
                 <div class="sign-row" style="margin-top: 6px; margin-bottom: 12px;">
                     <div class="sign-block">
                         <div class="stamp-box" id="p-stamp"><span class="logo-placeholder">podpis / razítko</span></div>
@@ -863,6 +879,36 @@ function renderTablePreview(key) {
     }
     tbody.innerHTML = html;
 }
+
+// ==== SEZNAM ZNAČENÍ – nová stránka ====
+window.toggleSeznamNewPage = function() {
+    const cb = document.getElementById('seznamNewPage');
+    const wrap = document.getElementById('seznam-znaceni-wrap');
+    const signSection = document.getElementById('sign-section');
+    const page3 = document.getElementById('page-3');
+    if (!wrap || !signSection || !page3) return;
+
+    if (cb && cb.checked) {
+        // Vytvoř novou stránku za stranou 3
+        let newPage = document.getElementById('page-seznam');
+        if (!newPage) {
+            newPage = document.createElement('div');
+            newPage.className = 'page';
+            newPage.id = 'page-seznam';
+            page3.parentNode.insertBefore(newPage, page3.nextSibling);
+        }
+        // Přesuň tabulku a podpis do nové stránky
+        newPage.appendChild(wrap);
+        newPage.appendChild(signSection);
+    } else {
+        // Přesuň zpět do strany 3
+        page3.appendChild(wrap);
+        page3.appendChild(signSection);
+        // Odstraň prázdnou stránku
+        const newPage = document.getElementById('page-seznam');
+        if (newPage) newPage.remove();
+    }
+};
 
 // ==== HLAVNÍ AKTUALIZACE NÁHLEDU ====
 function updatePreview() {
