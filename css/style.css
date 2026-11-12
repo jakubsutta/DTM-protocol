@@ -286,6 +286,19 @@ h1 {
     background: #e8f5e9;
 }
 
+.card.jvf-validator {
+    border-bottom-color: #8b0000;
+}
+
+.card.jvf-validator .card-title,
+.card.jvf-validator .card-icon {
+    color: #8b0000;
+}
+
+.card.jvf-validator:hover {
+    background: #fdeaea;
+}
+
 .card.export {
     border-bottom-color: #cdc201;
 }

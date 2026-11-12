@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>JVF DTM Validátor</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%238b0000%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z%22/><path d=%22M14 2v6h6%22/><circle cx=%2211%22 cy=%2214.2%22 r=%223.6%22/><path d=%22M9.6 14.3l1.1 1.1 2.1-2.2%22/><path d=%22M13.6 16.8l2.6 2.5%22/></svg>">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
@@ -12,14 +13,15 @@
 <script src="jvf_syntax.js"></script>
 <script src="jvf_checks.js"></script>
 <style>
-:root{--bg:#f5f7fa;--card:#fff;--line:#e4e7eb;--tx:#1f2933;--mut:#7b8794;--acc:#2563eb;--err:#d32f2f;--warn:#f59e0b;--info:#2563eb;--ok:#2e9e5b}
+:root{--bg:#f8f5f5;--card:#fff;--line:#eadede;--tx:#1f2933;--mut:#7b8794;--acc:#8b0000;--err:#d32f2f;--warn:#f59e0b;--info:#2563eb;--ok:#2e9e5b}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font:14px/1.4 'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);height:100vh;display:flex;flex-direction:column;overflow:hidden}
-header{height:54px;flex:none;display:flex;align-items:center;gap:12px;padding:0 16px;background:var(--card);border-bottom:1px solid var(--line)}
-h1{font-size:15px;font-weight:600;margin-right:6px}h1 span{color:var(--acc)}
+header{height:54px;flex:none;display:flex;align-items:center;gap:12px;padding:0 16px;background:var(--card);border-bottom:2px solid var(--acc)}
+h1{font-size:15px;font-weight:600;margin-right:6px;display:inline-flex;align-items:center;gap:8px}h1 span{color:var(--acc)}h1 svg{width:20px;height:20px;color:var(--acc);flex:none}
 button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--tx);border-radius:6px;padding:6px 12px}
-button:hover{background:#f0f3f7}button:disabled{opacity:.4;cursor:default}
-button.pri{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}button.pri:hover{background:#1d4ed8}
+button:hover{background:#fdf3f3}button:disabled{opacity:.4;cursor:default}
+button.pri{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}button.pri:hover{background:#660000;border-color:#660000}
+input[type=checkbox]{accent-color:var(--acc)}
 #fn{color:var(--mut);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .badge{padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600;display:none}.badge.ok{background:#e3f6ea;color:#1e7a45;display:inline-block}.badge.bad{background:#fde8e8;color:var(--err);display:inline-block}
 .sp{flex:1}
@@ -27,16 +29,16 @@ main{flex:1;display:flex;min-height:0}
 #map{flex:1;min-width:0}
 aside{width:400px;flex:none;background:var(--card);border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
 #empty{margin:auto;padding:28px;text-align:center;color:var(--mut);border:2px dashed var(--line);border-radius:12px;width:calc(100% - 40px);cursor:pointer}
-#empty b{display:block;color:var(--tx);font-size:15px;margin-bottom:6px}#empty:hover,body.drop #empty{border-color:var(--acc);background:#f4f8ff}
+#empty b{display:block;color:var(--tx);font-size:15px;margin-bottom:6px}#empty:hover,body.drop #empty{border-color:var(--acc);background:#fdeaea}
 #res{display:none;flex-direction:column;min-height:0;flex:1}
 #sum{display:flex;gap:8px;padding:12px 14px 6px;flex-wrap:wrap}
 .chip{flex:1;min-width:80px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;cursor:pointer;background:var(--card)}
-.chip b{display:block;font-size:20px;line-height:1.1}.chip small{color:var(--mut)}.chip.on{border-color:var(--acc);background:#f4f8ff}
+.chip b{display:block;font-size:20px;line-height:1.1}.chip small{color:var(--mut)}.chip.on{border-color:var(--acc);background:#fdeaea}
 .chip.ERR b{color:var(--err)}.chip.WARN b{color:var(--warn)}.chip.INFO b{color:var(--info)}
 #meta{padding:0 14px 8px;color:var(--mut);font-size:12px}
-.flt{display:flex;gap:8px;padding:0 14px 10px}.flt input,.flt select,#set input,#set select{font:inherit;border:1px solid var(--line);border-radius:6px;padding:5px 8px;background:#fff;color:var(--tx)}.flt input{flex:1;min-width:0}
+.flt{display:flex;gap:8px;padding:0 14px 10px}.flt input,.flt select,#set input,#set select{font:inherit;border:1px solid var(--line);border-radius:6px;padding:5px 8px;background:#fff;color:var(--tx)}.flt input:focus,.flt select:focus,#set input:focus,#set select:focus{outline:none;border-color:var(--acc)}.flt input{flex:1;min-width:0}
 #list{flex:1;overflow:auto;border-top:1px solid var(--line)}
-.it{display:flex;gap:10px;padding:9px 14px;border-bottom:1px solid #f0f2f5;cursor:pointer}.it:hover{background:#f7f9fc}.it.sel{background:#eaf1ff}
+.it{display:flex;gap:10px;padding:9px 14px;border-bottom:1px solid #f5eded;cursor:pointer}.it:hover{background:#fdf6f6}.it.sel{background:#fdeaea}
 .dot{flex:none;width:10px;height:10px;border-radius:50%;margin-top:5px}.dot.ERR{background:var(--err)}.dot.WARN{background:var(--warn)}.dot.INFO{background:var(--info)}
 .it small{display:block;color:var(--mut);font-size:12px}.it b{font-size:12px;color:var(--mut);margin-right:4px}
 .more{padding:10px 14px;color:var(--mut);font-size:12px}
@@ -49,7 +51,7 @@ aside{width:400px;flex:none;background:var(--card);border-left:1px solid var(--l
 </head>
 <body>
 <header>
-  <h1>JVF <span>Validátor</span></h1>
+  <h1><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><circle cx="11" cy="14.2" r="3.6"/><path d="M9.6 14.3l1.1 1.1 2.1-2.2"/><path d="M13.6 16.8l2.6 2.5"/></svg>JVF <span>Validátor</span></h1>
   <button class="pri" id="bLoad">Nahrát soubor</button><input type="file" id="file" accept=".xml" hidden>
   <span id="fn"></span><span class="badge" id="badge"></span>
   <span class="sp"></span>

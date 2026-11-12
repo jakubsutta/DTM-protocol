@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <title>Generátory/Šablony - Atomicon</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=20261112">
 </head>
 
 <body>
@@ -25,6 +25,14 @@
             stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 3l6.5 2.6v4.9c0 4.4-2.7 7.9-6.5 9.6-3.8-1.7-6.5-5.2-6.5-9.6V5.6L12 3z" />
             <path d="M8.7 12.1l2.3 2.3 4.5-4.6" />
+        </symbol>
+        <symbol id="icon-jvf-validator" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <path d="M14 2v6h6" />
+            <circle cx="11" cy="14.2" r="3.6" />
+            <path d="M9.6 14.3l1.1 1.1 2.1-2.2" />
+            <path d="M13.6 16.8l2.6 2.5" />
         </symbol>
         <symbol id="icon-handover" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
             stroke-linecap="round" stroke-linejoin="round">
@@ -274,7 +282,7 @@
         <div class="columns-wrapper">
             <!-- SLOUPEC 1: PROTOKOLY -->
             <div class="column">
-                <div class="column-title">1) Protokoly</div>
+                <div class="column-title">1) Protokoly, validace</div>
                 <div class="cards">
                     <a href="./protocol/Protokol_DTM-vlozeni.html" class="card vlozeni">
                         <div class="card-icon"><svg>
@@ -303,12 +311,21 @@
                             <div class="card-desc">předávací protokol - Atomicon</div>
                         </div>
                     </a>
+                    <a href="./JVF_Validator/jvf_validator.html" class="card jvf-validator">
+                        <div class="card-icon"><svg>
+                                <use href="#icon-jvf-validator" xlink:href="#icon-jvf-validator" />
+                            </svg></div>
+                        <div class="card-body">
+                            <div class="card-title">JVF Validátor</div>
+                            <div class="card-desc">kontrola XML souborů JVF DTM</div>
+                        </div>
+                    </a>
                 </div>
             </div>
 
             <!-- SLOUPEC 2: TABULKY, KARTY, MAPY, KALENDÁŘ -->
             <div class="column">
-                <div class="column-title">2) Tabulky, Karty, Mapy, Kalendář</div>
+                <div class="column-title">2) Tabulky/Karty, Mapy, Kalendář, Propagace</div>
                 <div class="cards">
                     <a href="./protocol/Card_Export.html" class="card export">
                         <div class="card-icon"><svg>
@@ -503,7 +520,7 @@
                 <span>GitHub: DTM-protocol</span>
             </a>
             <span class="footer-separator">•</span>
-            <span>Poslední aktualizace: 29. 10. 2026</span>
+            <span>Poslední aktualizace: 12. 11. 2026</span>
         </footer>
     </div>
 
