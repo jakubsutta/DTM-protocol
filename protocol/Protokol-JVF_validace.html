@@ -141,10 +141,18 @@
                 <option value="error">Validace selhala</option>
             </select>
         </div>
-        <div class="field"><label>Verze JVF DTM</label><input type="text" id="verzeJvf" value="1.4.3"></div>
+        <div class="field"><label>Verze JVF DTM</label>
+            <select id="verzeJvf">
+                <option value="1.4.3">1.4.3</option>
+                <option value="1.5.0.2">1.5.0.2</option>
+            </select>
+        </div>
+        <div class="field" id="validaceJsonField" style="display:none"><label>Validace (z JSON)</label><textarea id="validaceJson"></textarea></div>
         <div class="field"><label>Poznámka</label><textarea id="poznamka"></textarea></div>
 
         <div class="section-label">Soubory</div>
+        <button class="btn btn-primary" style="margin-bottom:8px; font-size:11px; padding:8px 12px;" onclick="document.getElementById('jsonImportInput').click()">📂 Import JSON validace</button>
+        <input type="file" id="jsonImportInput" accept=".json,application/json" style="display:none" onchange="importJsonValidace(this)">
         <div id="files-container"></div>
         <button class="add-file-btn" onclick="addFile()">+ Přidat soubor</button>
 
@@ -194,6 +202,8 @@
                     <tbody id="p-files"><tr><td colspan="4" style="color:#b0bec5;font-size:11px;padding:10px;">Přidejte soubory...</td></tr></tbody>
                 </table>
             </div>
+
+            <div class="prot-note" id="p-validace-wrap" style="display:none"><strong>Validace:</strong> <span id="p-validace"></span></div>
 
             <div class="prot-note" id="p-poznamka-wrap" style="display:none"><strong>Poznámka:</strong> <span id="p-poznamka"></span></div>
 
@@ -370,11 +380,142 @@ function addFile() {
 }
 function removeFile(id) { document.getElementById('file-' + id)?.remove(); updatePreview(); }
 
+// ==== IMPORT JSON VALIDACE ====
+function importJsonValidace(input) {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const json = JSON.parse(e.target.result);
+            applyJsonValidace(json);
+        } catch (err) {
+            alert('Nepodařilo se načíst JSON soubor: ' + err.message);
+        }
+    };
+    reader.readAsText(file, 'utf-8');
+    // Reset file input, aby šlo importovat stejný soubor znovu
+    input.value = '';
+}
+
+function applyJsonValidace(json) {
+    // Verze JVF
+    if (json.soubor && json.soubor.jvfVerze) {
+        const verzeSel = document.getElementById('verzeJvf');
+        const ver = String(json.soubor.jvfVerze);
+        if (!Array.from(verzeSel.options).some(opt => opt.value === ver)) {
+            const opt = document.createElement('option');
+            opt.value = ver;
+            opt.textContent = ver;
+            verzeSel.appendChild(opt);
+        }
+        verzeSel.value = ver;
+    }
+
+    // Datum validace z JSON (vytvoreno)
+    if (json.vytvoreno) {
+        const d = new Date(json.vytvoreno);
+        if (!isNaN(d.getTime())) {
+            document.getElementById('datumValidace').value = d.toISOString().slice(0, 10);
+        }
+    }
+
+    // Celkový výsledek validace
+    if (json.celkem) {
+        const sel = document.getElementById('vysledekValidace');
+        if (json.celkem.chyb > 0) {
+            sel.value = 'error';
+        } else if (json.celkem.varovani > 0) {
+            sel.value = 'warning';
+        } else {
+            sel.value = 'success';
+        }
+    }
+
+    // Validace – info do sekce Validace (ne do Poznámky)
+    const validaceParts = [];
+    if (json.nastroj) {
+        validaceParts.push('Nástroj: ' + (json.nastroj.nazev || '—') + ' v' + (json.nastroj.verze || '?'));
+    }
+    if (json.nastaveni && json.nastaveni.verzeKontroly) {
+        validaceParts.push('Verze kontroly: ' + json.nastaveni.verzeKontroly);
+    }
+    if (json.soubor) {
+        if (json.soubor.nazev) validaceParts.push('Soubor: ' + json.soubor.nazev);
+        if (json.soubor.zaznamu !== undefined) validaceParts.push('Záznamů: ' + json.soubor.zaznamu);
+        if (json.soubor.bloku !== undefined) validaceParts.push('Bloků: ' + json.soubor.bloku);
+    }
+    if (json.vysledky) {
+        const parts = [];
+        for (const [key, res] of Object.entries(json.vysledky)) {
+            parts.push(key + ': ' + res.stav + (res.chyb ? ' (' + res.chyb + ' chyb)' : '') + (res.varovani ? ' (' + res.varovani + ' varování)' : ''));
+        }
+        if (parts.length) validaceParts.push('Výsledky — ' + parts.join(', '));
+    }
+    if (json.poznamky && json.poznamky.length > 0) {
+        validaceParts.push(json.poznamky.join(' '));
+    }
+    // Propsat validační text do editovatelného pole formuláře a zobrazit ho
+    const valTextarea = document.getElementById('validaceJson');
+    const valField = document.getElementById('validaceJsonField');
+    if (valTextarea) valTextarea.value = validaceParts.length ? validaceParts.join('. ') + '.' : '';
+    if (valField) valField.style.display = 'block';
+
+    // Vyčistit stávající soubory
+    document.getElementById('files-container').innerHTML = '';
+    fileCount = 0;
+
+    // Naplnit soubory z bloků
+    if (json.bloky && json.bloky.length > 0) {
+        const nazevSouboru = (json.soubor && json.soubor.nazev) || '';
+        json.bloky.forEach(blok => {
+            fileCount++;
+            const id = fileCount;
+            const div = document.createElement('div');
+            div.className = 'file-entry';
+            div.id = 'file-' + id;
+
+            // Určit výsledek bloku
+            let blokVysledek = 'success';
+            if (blok.chyb > 0) blokVysledek = 'error';
+            else if (blok.varovani > 0) blokVysledek = 'warning';
+
+            // Obsahová část (TI/DI/ZPS)
+            const cast = blok.cast || 'TI';
+
+            div.innerHTML = `<div class="file-fields">
+                <input type="text" placeholder="Název souboru" oninput="updatePreview()" id="fname-${id}" value="${escHtml(nazevSouboru)}">
+                <input type="text" placeholder="Typ objektu" oninput="updatePreview()" id="ftyp-${id}" value="${escHtml(blok.nazev || blok.element || '')}">
+                <select onchange="updatePreview()" id="fcast-${id}">
+                    <option value="TI"${cast==='TI'?' selected':''}>TI</option>
+                    <option value="DI"${cast==='DI'?' selected':''}>DI</option>
+                    <option value="ZPS"${cast==='ZPS'?' selected':''}>ZPS</option>
+                </select>
+                <select onchange="updatePreview()" id="fvys-${id}">
+                    <option value="success"${blokVysledek==='success'?' selected':''}>OK</option>
+                    <option value="warning"${blokVysledek==='warning'?' selected':''}>Upozornění</option>
+                    <option value="error"${blokVysledek==='error'?' selected':''}>Chyba</option>
+                </select>
+            </div><button class="file-remove" onclick="removeFile(${id})">×</button>`;
+
+            document.getElementById('files-container').appendChild(div);
+        });
+    }
+
+    updatePreview();
+}
+
+function escHtml(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 function resetForm() {
     if (!confirm('Vymazat formulář?')) return;
-    ['zpracovatel','ico','nazevZakazky','cisloZakazky','lokalita','mapObec','cisloValidace','verzeJvf','poznamka'].forEach(id => {
+    ['zpracovatel','ico','nazevZakazky','cisloZakazky','lokalita','mapObec','cisloValidace','verzeJvf','validaceJson','poznamka'].forEach(id => {
         const el = document.getElementById(id); if (el) el.value = id === 'zpracovatel' ? 'Atomicon, s.r.o.' : id === 'verzeJvf' ? '1.4.3' : '';
     });
+    const valField = document.getElementById('validaceJsonField');
+    if (valField) valField.style.display = 'none';
     document.getElementById('datumValidace').value = ''; document.getElementById('vysledekValidace').value = 'success';
     document.getElementById('files-container').innerHTML = ''; fileCount = 0;
     if (markerLayer) mapInstance.removeLayer(markerLayer); mapInstance.setView([49.8023, 15.4730], 7);
@@ -403,6 +544,15 @@ function updatePreview() {
     const pozWrap = document.getElementById('p-poznamka-wrap');
     if (val('poznamka')) { pozWrap.style.display = 'block'; document.getElementById('p-poznamka').textContent = val('poznamka'); } else { pozWrap.style.display = 'none'; }
 
+    // Sekce Validace – zobrazí se jen pokud je vyplněno (po importu JSON nebo úpravě)
+    const valWrap = document.getElementById('p-validace-wrap');
+    if (val('validaceJson')) {
+        valWrap.style.display = 'block';
+        document.getElementById('p-validace').textContent = val('validaceJson');
+    } else {
+        valWrap.style.display = 'none';
+    }
+
     const tbody = document.getElementById('p-files'); const entries = document.querySelectorAll('.file-entry');
     if (entries.length === 0) { tbody.innerHTML = '<tr><td colspan="4" style="color:#b0bec5;font-size:11px;padding:10px;">Přidejte soubory...</td></tr>'; } else {
         let rows = '';
@@ -415,7 +565,7 @@ function updatePreview() {
 }
 
 document.getElementById('datumValidace').value = new Date().toISOString().slice(0, 10);
-['zpracovatel','ico','nazevZakazky','cisloZakazky','lokalita','cisloValidace','datumValidace','verzeJvf','poznamka','vysledekValidace']
+['zpracovatel','ico','nazevZakazky','cisloZakazky','lokalita','cisloValidace','datumValidace','verzeJvf','validaceJson','poznamka','vysledekValidace']
     .forEach(id => { const el = document.getElementById(id); if (el) { el.addEventListener('input', updatePreview); el.addEventListener('change', updatePreview); }});
 updatePreview();
 </script>
