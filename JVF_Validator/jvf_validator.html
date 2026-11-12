@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JVF DTM Validátor</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsts@2.11.2/dist/jsts.min.js"></script>
+<script src="jvf_model_143.js"></script>
+<script src="jvf_syntax.js"></script>
+<script src="jvf_checks.js"></script>
+<style>
+:root{--bg:#f5f7fa;--card:#fff;--line:#e4e7eb;--tx:#1f2933;--mut:#7b8794;--acc:#2563eb;--err:#d32f2f;--warn:#f59e0b;--info:#2563eb;--ok:#2e9e5b}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:14px/1.4 'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+header{height:54px;flex:none;display:flex;align-items:center;gap:12px;padding:0 16px;background:var(--card);border-bottom:1px solid var(--line)}
+h1{font-size:15px;font-weight:600;margin-right:6px}h1 span{color:var(--acc)}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--tx);border-radius:6px;padding:6px 12px}
+button:hover{background:#f0f3f7}button:disabled{opacity:.4;cursor:default}
+button.pri{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}button.pri:hover{background:#1d4ed8}
+#fn{color:var(--mut);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.badge{padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600;display:none}.badge.ok{background:#e3f6ea;color:#1e7a45;display:inline-block}.badge.bad{background:#fde8e8;color:var(--err);display:inline-block}
+.sp{flex:1}
+main{flex:1;display:flex;min-height:0}
+#map{flex:1;min-width:0}
+aside{width:400px;flex:none;background:var(--card);border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+#empty{margin:auto;padding:28px;text-align:center;color:var(--mut);border:2px dashed var(--line);border-radius:12px;width:calc(100% - 40px);cursor:pointer}
+#empty b{display:block;color:var(--tx);font-size:15px;margin-bottom:6px}#empty:hover,body.drop #empty{border-color:var(--acc);background:#f4f8ff}
+#res{display:none;flex-direction:column;min-height:0;flex:1}
+#sum{display:flex;gap:8px;padding:12px 14px 6px;flex-wrap:wrap}
+.chip{flex:1;min-width:80px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;cursor:pointer;background:var(--card)}
+.chip b{display:block;font-size:20px;line-height:1.1}.chip small{color:var(--mut)}.chip.on{border-color:var(--acc);background:#f4f8ff}
+.chip.ERR b{color:var(--err)}.chip.WARN b{color:var(--warn)}.chip.INFO b{color:var(--info)}
+#meta{padding:0 14px 8px;color:var(--mut);font-size:12px}
+.flt{display:flex;gap:8px;padding:0 14px 10px}.flt input,.flt select,#set input,#set select{font:inherit;border:1px solid var(--line);border-radius:6px;padding:5px 8px;background:#fff;color:var(--tx)}.flt input{flex:1;min-width:0}
+#list{flex:1;overflow:auto;border-top:1px solid var(--line)}
+.it{display:flex;gap:10px;padding:9px 14px;border-bottom:1px solid #f0f2f5;cursor:pointer}.it:hover{background:#f7f9fc}.it.sel{background:#eaf1ff}
+.dot{flex:none;width:10px;height:10px;border-radius:50%;margin-top:5px}.dot.ERR{background:var(--err)}.dot.WARN{background:var(--warn)}.dot.INFO{background:var(--info)}
+.it small{display:block;color:var(--mut);font-size:12px}.it b{font-size:12px;color:var(--mut);margin-right:4px}
+.more{padding:10px 14px;color:var(--mut);font-size:12px}
+#set{display:none;position:absolute;top:60px;right:416px;z-index:1000;width:340px;max-height:calc(100vh - 80px);overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.15);padding:14px}
+#set.open{display:block}#set h3{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--mut);margin:12px 0 6px}#set h3:first-child{margin-top:0}
+#set label{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:5px 0;font-size:13px}#set label.c{justify-content:flex-start}#set input[type=number]{width:80px}#set input[type=text]{width:100%}
+#set p{color:var(--mut);font-size:12px;margin-top:10px}
+.leg{background:#fff;padding:8px 10px;border-radius:8px;box-shadow:0 1px 6px rgba(0,0,0,.2);font-size:12px;line-height:1.7}.leg i{display:inline-block;width:11px;height:11px;border-radius:50%;border:1px solid #000;margin-right:6px;vertical-align:-1px}
+</style>
+</head>
+<body>
+<header>
+  <h1>JVF <span>Validátor</span></h1>
+  <button class="pri" id="bLoad">Nahrát soubor</button><input type="file" id="file" accept=".xml" hidden>
+  <span id="fn"></span><span class="badge" id="badge"></span>
+  <span class="sp"></span>
+  <button id="bSet">Nastavení</button><button id="bPro" disabled title="JSON k importu do protokolu o validaci">Pro protokol</button><button id="bCsv" disabled>CSV</button><button id="bGeo" disabled>GeoJSON</button>
+</header>
+<div id="set">
+  <h3>Verze formátu</h3>
+  <label>Validovat jako<select id="ver"><option value="auto">dle souboru</option><option>1.4.3</option><option>1.5.0.2</option></select></label>
+  <h3>Rozsah editace</h3>
+  <label class="c"><input type="checkbox" id="cTI" checked>&nbsp;TI&nbsp;&nbsp;<input type="checkbox" id="cDI" checked>&nbsp;DI&nbsp;&nbsp;<input type="checkbox" id="cZPS" checked>&nbsp;ZPS</label>
+  <h3>Kontroly</h3>
+  <label class="c"><input type="checkbox" id="gS" checked>&nbsp;Syntaxe a atributy (dle modelu verze)</label>
+  <label class="c"><input type="checkbox" id="gT" checked>&nbsp;Samokřížení, neplatné geometrie</label>
+  <label class="c"><input type="checkbox" id="gZ" checked>&nbsp;Výšky (Z)</label>
+  <label class="c"><input type="checkbox" id="gD" checked>&nbsp;Duplicity a překryvy</label>
+  <label class="c"><input type="checkbox" id="gN" checked>&nbsp;Návaznost sítí</label>
+  <h3>Tolerance</h3>
+  <label>Napojení linií (m)<input type="number" id="tolConnect" value="0.05" step="0.01" min="0"></label>
+  <label>Max. mezera (m)<input type="number" id="gapMax" value="0.5" step="0.1" min="0"></label>
+  <label>Min. segment (m)<input type="number" id="minSeg" value="0.02" step="0.01" min="0"></label>
+  <label>Min. překryv plochy (m²)<input type="number" id="minOverlapArea" value="0.05" step="0.05" min="0"></label>
+  <label>Min. překryv linií (m)<input type="number" id="minOverlapLen" value="0.1" step="0.05" min="0"></label>
+  <label>Max. skok Z (m)<input type="number" id="maxZJump" value="5" step="0.5" min="0"></label>
+  <label>Z min / max (m n. m.)<span><input type="number" id="zMin" value="100" style="width:64px"> <input type="number" id="zMax" value="1650" style="width:64px"></span></label>
+  <label>Samokřížení linie<select id="lineSelfSev"><option>WARN</option><option>ERR</option><option>INFO</option></select></label>
+  <h3>Návaznost – bloky</h3>
+  <input type="text" id="netBlocks" placeholder="TrasaStokoveSite, TrasaVodovodniSite">
+  <p>Prázdné = všechny bloky začínající „Trasa“. Hlavička, DoprovodneInformace, cmn a gml se kontrolují jen na úrovni namespace a pořadí.</p>
+  <button class="pri" id="bApply" style="width:100%;margin-top:12px" disabled>Použít a zkontrolovat znovu</button>
+</div>
+<main>
+  <div id="map"></div>
+  <aside>
+    <div id="empty"><b>Přetáhněte sem soubor *.jvf.xml</b>nebo klikněte pro výběr. Data se zobrazí v mapě a nalezené chyby červeně.</div>
+    <div id="res">
+      <div id="sum"></div><div id="meta"></div>
+      <div class="flt"><input type="text" id="fTxt" placeholder="Hledat v nálezech…"><select id="fCode"></select></div>
+      <div id="list"></div>
+    </div>
+  </aside>
+</main>
+<script>
+proj4.defs('EPSG:5514','+proj=krovak +lat_0=49.5 +lon_0=24.8333333333333 +alpha=30.2881397527778 +k=0.9999 +x_0=0 +y_0=0 +ellps=bessel +towgs84=570.8,85.7,462.8,4.998,1.587,5.261,3.56 +units=m +no_defs');
+const TF=proj4('EPSG:5514','EPSG:4326'), $=id=>document.getElementById(id), esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ll=(x,y)=>{const p=TF.forward([x,y]);return[p[1],p[0]]}, inCR=p=>p[0]>48&&p[0]<52&&p[1]>11&&p[1]<20;
+const SEV={ERR:'#d32f2f',WARN:'#f59e0b',INFO:'#2563eb'}, GREEN='#2e9e5b', RED='#d32f2f';
+let raw='',fname='',res=null,shown=[],markers=[],fs='',recIss=new Map(),LASTO=null,fhash='',fsize=0;
+
+/* ---------- mapa ---------- */
+const map=L.map('map',{center:[49.8,15.5],zoom:7,maxZoom:22}), cv=L.canvas({padding:.5});
+const orto=L.tileLayer.wms('https://ags.cuzk.gov.cz/arcgis1/services/ORTOFOTO/MapServer/WMSServer',{layers:'0',format:'image/jpeg',version:'1.3.0',maxZoom:22,attribution:'© ČÚZK Ortofoto'}).addTo(map);
+const ortoT=L.tileLayer('https://ags.cuzk.gov.cz/arcgis1/rest/services/ORTOFOTO_WM/MapServer/tile/{z}/{y}/{x}',{maxZoom:22,maxNativeZoom:18,attribution:'© ČÚZK Ortofoto'});
+const osm=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:22,maxNativeZoom:19,attribution:'© OpenStreetMap'});
+const blank=L.tileLayer('data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==',{maxZoom:22});
+const dataG=L.layerGroup().addTo(map), errG=L.layerGroup().addTo(map), hlG=L.layerGroup().addTo(map);
+L.control.layers({'Ortofoto ČÚZK':orto,'Ortofoto ČÚZK (dlaždice)':ortoT,'OpenStreetMap':osm,'Bez podkladu':blank},{'Data JVF':dataG,'Místa chyb':errG},{collapsed:true}).addTo(map);
+const leg=L.control({position:'bottomleft'}); leg.onAdd=()=>{const d=L.DomUtil.create('div','leg');d.innerHTML=`<i style="background:${GREEN}"></i>objekt v pořádku<br><i style="background:${RED}"></i>objekt s chybou<br><i style="background:${SEV.WARN}"></i>varování`;return d}; leg.addTo(map);
+window.addEventListener('resize',()=>map.invalidateSize()); setTimeout(()=>map.invalidateSize(),50);
+
+/* ---------- kontrola ---------- */
+function opts(){const n=id=>parseFloat($(id).value),o={groups:{S:+$('gS').checked,G:1,T:+$('gT').checked,Z:+$('gZ').checked,D:+$('gD').checked,N:+$('gN').checked}};
+  ['tolConnect','gapMax','minSeg','minOverlapArea','minOverlapLen','maxZJump','zMin','zMax'].forEach(k=>o[k]=n(k));
+  o.version=$('ver').value;o.casts={TI:$('cTI').checked,DI:$('cDI').checked,ZPS:$('cZPS').checked};o.tolDupPoint=o.tolConnect;o.lineSelfSev=$('lineSelfSev').value;
+  const nb=$('netBlocks').value.split(',').map(s=>s.trim()).filter(Boolean);o.networkBlocks=nb.length?nb:null;return o}
+function run(){ if(!raw)return; $('fn').textContent=fname+' – kontroluji…'; setTimeout(()=>{ try{
+  const doc=new DOMParser().parseFromString(raw,'application/xml'), pe=doc.getElementsByTagName('parsererror')[0];
+  res=pe?{issues:[{sev:'ERR',code:'F01',msg:'Soubor není well-formed XML: '+pe.textContent.slice(0,200),block:'',rec:0,line:0,ref:'',x:null,y:null,r:null}],model:{blocks:[],version:''}}:JVFCheck.validate(doc,raw,(LASTO=opts()));
+  if(!pe)res.opts=LASTO;
+  fs=''; $('fn').textContent=fname; render(); draw(); $('set').classList.remove('open');
+  ['bCsv','bGeo','bApply','bPro'].forEach(i=>$(i).disabled=false);
+ }catch(ex){ $('fn').textContent='Chyba kontroly: '+ex.message; console.error(ex); } },30); }
+
+/* ---------- vykreslení dat ---------- */
+function draw(){ dataG.clearLayers(); recIss=new Map(); res.issues.forEach(i=>{ if(i.r){(recIss.get(i.r)||recIss.set(i.r,[]).get(i.r)).push(i)} });
+  const P=[],Ln=[],Pt=[]; let nv=0;
+  res.model.blocks.forEach(b=>b.recs.forEach(r=>{ const g=r.geom; if(!g||r.bad||!g.rings.length)return; nv+=g.rings[0].pts.length;
+    const iss=recIss.get(r)||[], er=iss.some(i=>i.sev==='ERR'), col=er?RED:GREEN, pop=()=>`<b>${esc(b.nazev)}</b><br>řádek ${r.line}${r.popis?' · '+esc(r.popis):''}`+iss.slice(0,5).map(i=>`<br><span style="color:${SEV[i.sev]}">${i.code}</span> ${esc(i.msg)}`).join('');
+    if(nv>600000)return; const rg=g.rings.map(x=>x.pts.map(p=>ll(p[0],p[1])));
+    if(g.kind==='plocha')P.push(L.polygon(rg,{renderer:cv,color:'#000',weight:1,fillColor:col,fillOpacity:.35}).bindPopup(pop));
+    else if(g.kind==='linie')Ln.push(L.polyline(rg[0],{renderer:cv,color:col,weight:er?3:2.5,opacity:.95}).bindPopup(pop));
+    else Pt.push(L.circleMarker(rg[0][0],{renderer:cv,radius:4,color:'#000',weight:1,fillColor:col,fillOpacity:1}).bindPopup(pop)); }));
+  [...P,...Ln,...Pt].forEach(l=>l.addTo(dataG));
+  const bb=L.featureGroup([...P,...Ln,...Pt]).getBounds(); if(bb.isValid())map.fitBounds(bb,{padding:[40,40],maxZoom:19}); markersDraw(); }
+
+/* ---------- panel nálezů ---------- */
+function render(){ const is=res.issues, c=s=>is.filter(i=>i.sev===s).length, nrec=res.model.blocks.reduce((a,b)=>a+b.recs.length,0), e=c('ERR');
+  $('empty').style.display='none'; $('res').style.display='flex';
+  $('badge').className='badge '+(e?'bad':'ok'); $('badge').textContent=e?e+' chyb':'Bez chyb';
+  $('sum').innerHTML=['ERR','WARN','INFO'].map(s=>`<div class="chip ${s}" data-s="${s}"><b>${c(s)}</b><small>${{ERR:'chyby',WARN:'varování',INFO:'info'}[s]}</small></div>`).join('');
+  $('meta').textContent=nrec+' záznamů · '+res.model.blocks.length+' bloků · verze '+(res.model.version||'?');
+  const codes=[...new Set(is.map(i=>i.code))].sort(); $('fCode').innerHTML='<option value="">Všechny kontroly</option>'+codes.map(k=>`<option>${k}</option>`).join(''); list(); }
+function list(){ const cd=$('fCode').value,tx=$('fTxt').value.toLowerCase(),ord={ERR:0,WARN:1,INFO:2};
+  document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x.dataset.s===fs));
+  shown=res.issues.filter(i=>(!fs||i.sev===fs)&&(!cd||i.code===cd)&&(!tx||(i.msg+i.block+i.line+i.ref+i.code).toLowerCase().includes(tx))).sort((a,b)=>ord[a.sev]-ord[b.sev]||a.code.localeCompare(b.code)||a.line-b.line);
+  $('list').innerHTML=shown.slice(0,1500).map((i,k)=>`<div class="it" data-k="${k}"><i class="dot ${i.sev}"></i><div><b>${i.code}</b>${esc(i.msg)}<small>${esc(i.block)}${i.line?' · řádek '+i.line:''}</small></div></div>`).join('')
+   +(shown.length>1500?`<div class="more">Zobrazeno prvních 1500 z ${shown.length}. Zúžte filtr, export obsahuje vše.</div>`:'')+(shown.length?'':'<div class="more">Žádné nálezy.</div>'); markersDraw(); }
+function markersDraw(){ errG.clearLayers(); markers=[]; if(!res)return;
+  shown.slice(0,3000).forEach((i,k)=>{ if(i.x==null)return; const p=ll(i.x,i.y); if(!inCR(p))return;
+    const m=L.circleMarker(p,{renderer:cv,radius:i.sev==='ERR'?7:5,color:'#fff',weight:2,fillColor:SEV[i.sev],fillOpacity:1}).addTo(errG); m.on('click',()=>pick(k,false)); markers[k]=m; }); }
+function pick(k,zoom){ const i=shown[k]; if(!i)return; document.querySelectorAll('.it.sel').forEach(t=>t.classList.remove('sel'));
+  const it=document.querySelector(`.it[data-k="${k}"]`); if(it){it.classList.add('sel'); if(!zoom)it.scrollIntoView({block:'nearest'});}
+  hlG.clearLayers(); const g=i.r&&i.r.geom&&!i.r.bad&&i.r.geom;
+  if(g){ const rg=g.rings.map(x=>x.pts.map(p=>ll(p[0],p[1]))), draw=(o)=>{ if(g.kind==='bod')L.circleMarker(rg[0][0],{radius:10,fill:false,...o}).addTo(hlG); else if(g.kind==='linie')L.polyline(rg[0],o).addTo(hlG); else L.polygon(rg,{fill:false,...o}).addTo(hlG); };
+    draw({color:'#fff',weight:8}); draw({color:SEV[i.sev],weight:4}); }
+  if(i.x!=null){ const p=ll(i.x,i.y); if(inCR(p)&&zoom)map.setView(p,Math.max(map.getZoom(),19)); if(markers[k]&&zoom)L.popup().setLatLng(p).setContent(`<b>${i.code}</b> ${esc(i.msg)}`).openOn(map); } }
+$('list').addEventListener('click',e=>{const it=e.target.closest('.it'); if(it)pick(+it.dataset.k,true)});
+$('sum').addEventListener('click',e=>{const c=e.target.closest('.chip'); if(c){fs=fs===c.dataset.s?'':c.dataset.s; list();}});
+$('fCode').addEventListener('change',list); $('fTxt').addEventListener('input',list);
+
+/* ---------- export ---------- */
+function dl(name,mime,txt){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:mime}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
+$('bCsv').onclick=()=>{const q=s=>'"'+String(s).replace(/"/g,'""')+'"';
+  dl(fname.replace(/\.xml$/i,'')+'_kontrola.csv','text/csv;charset=utf-8','\ufeff'+['Závažnost;Kód;Blok;Řádek;Reference;X;Y;Popis'].concat(res.issues.map(i=>[i.sev,i.code,q(i.block),i.line,q(i.ref),i.x??'',i.y??'',q(i.msg)].join(';'))).join('\r\n'))};
+$('bGeo').onclick=()=>dl(fname.replace(/\.xml$/i,'')+'_chyby.geojson','application/geo+json',JSON.stringify({type:'FeatureCollection',crs:{type:'name',properties:{name:'urn:ogc:def:crs:EPSG::5514'}},
+  features:res.issues.filter(i=>i.x!=null).map(i=>({type:'Feature',geometry:{type:'Point',coordinates:[i.x,i.y]},properties:{sev:i.sev,kod:i.code,blok:i.block,radek:i.line,ref:i.ref,popis:i.msg}}))}));
+
+/* ---------- export pro protokol ---------- */
+function protocolData(){ const o=res.opts||{groups:{}}, is=res.issues, M=res.model, g=o.groups||{};
+  const cnt=re=>{const a=is.filter(i=>re.test(i.code));return{chyb:a.filter(i=>i.sev==='ERR').length,varovani:a.filter(i=>i.sev==='WARN').length}};
+  const st=(c,on)=>!on?'neprovedeno':c.chyb?'nevyhovuje':c.varovani?'vyhovuje_s_upozornenim':'vyhovuje';
+  const ver=(o.version&&o.version!=='auto')?o.version:M.version, skip=is.some(i=>i.code==='S00'), off=[['T','samokřížení a platnost geometrie'],['D','duplicity a překryvy'],['N','návaznost sítí']].filter(x=>!g[x[0]]).map(x=>x[1]);
+  const syn=cnt(/^S(?!00)/), geo=cnt(/^[FG]|^Z/), top=cnt(/^[TDN]/);
+  const r=(c,on,note)=>Object.assign({stav:st(c,on)},c,{poznamka:note||''});
+  return {format:'jvf-validace',verzeFormatu:1,vytvoreno:new Date().toISOString(),nastroj:{nazev:'JVF Validátor',verze:'1.0'},
+    soubor:{nazev:fname,velikostB:fsize,sha256:fhash,jvfVerze:M.version||'',zaznamu:M.blocks.reduce((a,b)=>a+b.recs.length,0),bloku:M.blocks.length},
+    nastaveni:{verzeKontroly:ver,rozsahEditace:o.casts||null,kontroly:g,tolerance:{tolConnect:o.tolConnect,gapMax:o.gapMax,minSeg:o.minSeg,maxZJump:o.maxZJump}},
+    vysledky:{syntaxe:r(syn,!!g.S&&!skip&&!!M.blocks,skip||!g.S?'Model verze '+ver+' nebyl použit':'Dle datového modelu JVF DTM '+ver+' (odvozen z XSD)'),
+      geometrie:r(geo,true,g.Z?'':'Nezahrnuto: výšky (Z)'),
+      topologie:r(top,!!(g.T||g.D||g.N),off.length&&off.length<3?'Nezahrnuto: '+off.join(', '):'')},
+    celkem:{chyb:is.filter(i=>i.sev==='ERR').length,varovani:is.filter(i=>i.sev==='WARN').length,info:is.filter(i=>i.sev==='INFO').length},
+    bloky:M.blocks.map(b=>({element:b.root,nazev:b.nazev,cast:b.cast,geometrie:(b.recs.find(x=>x.geom)||{geom:{}}).geom.kind||'',zaznamu:b.recs.length,
+      chyb:is.filter(i=>i.root===b.root&&i.sev==='ERR').length,varovani:is.filter(i=>i.root===b.root&&i.sev==='WARN').length})),
+    poznamky:['Kontrola struktury a atributů vychází z datového modelu odvozeného z XSD schémat ČÚZK. Hlavička, DoprovodneInformace, cmn a gml se kontrolují jen na úrovni namespace a pořadí.'],
+    nalezy:is.slice(0,100).map(i=>({zavaznost:i.sev,kod:i.code,blok:i.block,radek:i.line,popis:i.msg}))}; }
+$('bPro').onclick=()=>dl(fname.replace(/\.xml$/i,'').replace(/\.jvf$/i,'')+'_validace.json','application/json',JSON.stringify(protocolData(),null,1));
+
+/* ---------- vstup ---------- */
+function load(f){ if(!f)return; fname=f.name; fsize=f.size; const r=new FileReader();
+  r.onload=async e=>{ const buf=e.target.result; raw=new TextDecoder('utf-8').decode(buf); fhash='';
+    try{ if(window.crypto&&crypto.subtle)fhash=[...new Uint8Array(await crypto.subtle.digest('SHA-256',buf))].map(b=>b.toString(16).padStart(2,'0')).join(''); }catch(x){}
+    run(); }; r.readAsArrayBuffer(f); }
+const pickFile=()=>$('file').click(); $('bLoad').onclick=pickFile; $('empty').onclick=pickFile; $('file').onchange=e=>{load(e.target.files[0]);e.target.value=''};
+$('bSet').onclick=()=>$('set').classList.toggle('open'); $('bApply').onclick=run;
+document.body.addEventListener('dragover',e=>{e.preventDefault();document.body.classList.add('drop')});
+document.body.addEventListener('dragleave',()=>document.body.classList.remove('drop'));
+document.body.addEventListener('drop',e=>{e.preventDefault();document.body.classList.remove('drop');load(e.dataTransfer.files[0])});
+</script>
+</body>
+</html>
