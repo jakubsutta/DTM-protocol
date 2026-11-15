@@ -1,0 +1,1936 @@
+<!doctype html>
+<html lang="cs" data-x="1">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Safari mockup – export PNG</title>
+<style>
+:root {
+  --bg: #f4f4f6;
+  --pn: #ffffff;
+  --tx: #1d1d1f;
+  --mu: #6e6e73;
+  --bd: #d9d9de;
+  --ac: #0a6cff;
+  --sf: #ececf0;
+  --tag-bg: #e5e5ea;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #161618;
+    --pn: #222226;
+    --tx: #f2f2f4;
+    --mu: #9a9aa2;
+    --bd: #3a3a40;
+    --ac: #4c9aff;
+    --sf: #2e2e34;
+    --tag-bg: #323238;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #161618;
+  --pn: #222226;
+  --tx: #f2f2f4;
+  --mu: #9a9aa2;
+  --bd: #3a3a40;
+  --ac: #4c9aff;
+  --sf: #2e2e34;
+  --tag-bg: #323238;
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--tx);
+  font: 14px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+.app {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 350px;
+  gap: 18px;
+  padding: 18px;
+  max-width: 1540px;
+  margin: 0 auto;
+}
+@media (max-width: 980px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+}
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.tabs {
+  display: inline-flex;
+  background: var(--sf);
+  border-radius: 10px;
+  padding: 3px;
+  gap: 2px;
+}
+.tabs button {
+  border: 0;
+  background: none;
+  color: var(--tx);
+  padding: 7px 16px;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+.tabs button.on {
+  background: var(--pn);
+  box-shadow: 0 1px 4px rgba(0,0,0,.15);
+  font-weight: 600;
+}
+.badge-res {
+  background: var(--sf);
+  color: var(--mu);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  border: 1px solid var(--bd);
+}
+.stage {
+  background: var(--pn);
+  border: 1px solid var(--bd);
+  border-radius: 14px;
+  padding: 20px;
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 520px;
+  overflow: hidden;
+  /* Šachovnice pro vizualizaci průhlednosti */
+  background-image: 
+    linear-gradient(45deg, rgba(0,0,0,0.04) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(0,0,0,0.04) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(0,0,0,0.04) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(0,0,0,0.04) 75%);
+  background-size: 18px 18px;
+  background-position: 0 0, 0 9px, 9px -9px, -9px 0px;
+}
+canvas {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.12);
+  display: block;
+}
+aside {
+  background: var(--pn);
+  border: 1px solid var(--bd);
+  border-radius: 16px;
+  padding: 14px;
+  align-self: start;
+  max-height: calc(100vh - 36px);
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+}
+.sec-card {
+  background: var(--bg);
+  border: 1px solid var(--bd);
+  border-radius: 12px;
+  padding: 13px 14px 11px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  transition: border-color .15s ease;
+}
+.sec-card:last-of-type {
+  margin-bottom: 0;
+}
+.sec-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px 0;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--tx);
+  letter-spacing: .02em;
+  text-transform: uppercase;
+}
+.sec-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: rgba(10, 108, 255, 0.08);
+  color: var(--ac);
+  flex-shrink: 0;
+}
+.sec-icon svg {
+  display: block;
+}
+.r {
+  display: grid;
+  grid-template-columns: 105px 1fr 38px;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+  font-size: 12px;
+}
+.r > span {
+  color: var(--tx);
+  font-weight: 500;
+}
+.r > input:not([type=range]),
+.r > select {
+  grid-column: 2 / 4;
+}
+.r output {
+  text-align: right;
+  color: var(--mu);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+select,
+input[type=text] {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 9px;
+  border: 1px solid var(--bd);
+  border-radius: 7px;
+  background: var(--sf);
+  color: var(--tx);
+  font: inherit;
+  font-size: 12px;
+  transition: all .15s ease;
+}
+select:focus,
+input[type=text]:focus {
+  outline: none;
+  border-color: var(--ac);
+  box-shadow: 0 0 0 2.5px rgba(10, 108, 255, 0.18);
+  background: var(--bg);
+}
+input[type=color] {
+  width: 100%;
+  height: 28px;
+  padding: 2px 3px;
+  border: 1px solid var(--bd);
+  border-radius: 6px;
+  background: var(--sf);
+  cursor: pointer;
+}
+input[type=checkbox] {
+  justify-self: end;
+  width: 17px;
+  height: 17px;
+  cursor: pointer;
+  accent-color: var(--ac);
+}
+input[type=range] {
+  accent-color: var(--ac);
+  cursor: pointer;
+}
+.scale-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 4px;
+  background: var(--sf);
+  padding: 3px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  border: 1px solid var(--bd);
+}
+.scale-selector button {
+  border: 0;
+  background: none;
+  color: var(--tx);
+  padding: 6px 4px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  cursor: pointer;
+  text-align: center;
+  transition: all .15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+.scale-selector button.on {
+  background: var(--pn);
+  box-shadow: 0 1px 3px rgba(0,0,0,.12);
+  font-weight: 600;
+  color: var(--ac);
+}
+.presets-collapse {
+  margin: 4px 0 10px;
+  border: 1px solid var(--bd);
+  border-radius: 9px;
+  background: var(--sf);
+  overflow: hidden;
+  transition: border-color .15s ease;
+}
+.presets-collapse:hover {
+  border-color: rgba(99, 102, 241, 0.35);
+}
+.presets-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--tx);
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  transition: background .15s ease;
+}
+.presets-summary::-webkit-details-marker {
+  display: none;
+}
+.presets-summary:hover {
+  background: rgba(128, 128, 128, 0.05);
+}
+.presets-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.presets-badge {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--mu);
+  background: var(--pn);
+  padding: 2px 7px;
+  border-radius: 10px;
+  border: 1px solid var(--bd);
+  transition: all .15s ease;
+}
+.presets-collapse[open] .presets-summary {
+  border-bottom: 1px solid var(--bd);
+  background: rgba(99, 102, 241, 0.04);
+}
+.presets-collapse[open] .presets-badge {
+  color: var(--ac);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+.presets {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  padding: 8px;
+  margin: 0;
+  max-height: 210px;
+  overflow-y: auto;
+}
+.preset-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border-radius: 7px;
+  border: 1px solid var(--bd);
+  background: var(--pn);
+  color: var(--tx);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all .15s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.preset-btn:hover {
+  border-color: var(--ac);
+  transform: translateY(-1px);
+}
+.preset-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,0,0,.15);
+  flex-shrink: 0;
+}
+.drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px dashed var(--bd);
+  border-radius: 10px;
+  padding: 12px 10px;
+  text-align: center;
+  color: var(--mu);
+  cursor: pointer;
+  transition: all .15s ease;
+  background: var(--sf);
+}
+.drop:hover, .drop.over {
+  border-color: var(--ac);
+  color: var(--ac);
+  background: rgba(10, 108, 255, 0.05);
+}
+.drop-icon {
+  margin-bottom: 4px;
+  color: var(--ac);
+}
+.drop input { display: none; }
+.btn-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin: 6px 0;
+}
+.btn {
+  width: 100%;
+  margin-top: 6px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--bd);
+  background: var(--sf);
+  color: var(--tx);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.btn:hover {
+  background: var(--bd);
+}
+.btn.p {
+  background: var(--ac);
+  border-color: var(--ac);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(10, 108, 255, 0.25);
+}
+.btn.p:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 4px 10px rgba(10, 108, 255, 0.35);
+}
+#msg {
+  min-height: 18px;
+  margin-top: 8px;
+  color: var(--mu);
+  font-size: 12px;
+  text-align: center;
+}
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="app">
+  <main>
+    <div class="toolbar">
+      <div class="tabs" id="tabs">
+        <button data-k="cover" class="on">Cover (1280×720)</button>
+        <button data-k="thumb">Thumbnail (600×600)</button>
+      </div>
+      <div class="badge-res" id="cap"></div>
+    </div>
+    <div class="stage" id="stage"><canvas id="cv"></canvas></div>
+  </main>
+  <aside>
+    <!-- 1. Prohlížeč -->
+    <div class="sec-card">
+      <div class="sec-header">
+        <span class="sec-icon">
+          <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><line x1="3" y1="9" x2="21" y2="9"/><circle cx="6.5" cy="6.5" r=".7" fill="currentColor"/><circle cx="9.5" cy="6.5" r=".7" fill="currentColor"/></svg>
+        </span>
+        Prohlížeč
+      </div>
+      <div class="scale-selector" id="browserSelector" style="grid-template-columns: 1fr 1fr 1fr; margin-bottom: 8px;">
+        <button type="button" data-browser="safari" class="on">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.38c.62-.75 1.04-1.8 0.93-2.85-.9.04-1.99.6-2.63 1.35-.56.65-1.05 1.72-.92 2.74 1 .08 2.02-.49 2.62-1.24z"/></svg>
+          Safari
+        </button>
+        <button type="button" data-browser="chrome">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M3 5.45L10.5 4.4v6.95H3V5.45zm0 13.1l7.5 1.05v-6.95H3v5.9zm8.6 1.2l9.4 1.3V11.35h-9.4v8.4zm0-15.55v8.1h9.4V2.9l-9.4 1.3z"/></svg>
+          Chrome
+        </button>
+        <button type="button" data-browser="tablet">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M17.52 15.34c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1m-11.05 0c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1m11.4-6.02l2-3.46a.42.42 0 00-.15-.57.42.42 0 00-.57.15l-2.02 3.5C15.58 8.43 13.85 8 12 8c-1.85 0-3.58.43-5.14.94L4.84 5.44a.42.42 0 00-.57-.15.42.42 0 00-.15.57l2 3.46C2.69 11.19.34 14.66 0 18.76h24c-.34-4.1-2.69-7.57-6.12-9.44"/></svg>
+          Tablet
+        </button>
+      </div>
+      <div class="r hidden" id="rowTabTitle"><span>Text záložky</span><input type="text" data-g="tabTitle"></div>
+      <div class="r"><span>Adresa URL</span><input type="text" data-g="url"></div>
+      <div class="r"><span>Zobrazit adresu</span><input type="checkbox" data-g="showUrl"></div>
+      <div class="r"><span>Tmavý režim</span><input type="checkbox" data-g="dark"></div>
+      <div class="r"><span>Zaoblení</span><input type="range" data-g="rad" min="0" max="40"><output></output></div>
+      <div class="r"><span>Stín</span><input type="range" data-g="sh" min="0" max="100"><output></output></div>
+    </div>
+
+    <!-- 2. Snímek obrazovky -->
+    <div class="sec-card">
+      <div class="sec-header">
+        <span class="sec-icon">
+          <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </span>
+        Snímek obrazovky
+      </div>
+      <label class="drop" id="drop">
+        <span class="drop-icon">
+          <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </span>
+        <span id="dropText">Vložit vlastní screenshot</span>
+        <small style="margin-top: 2px;">přetažení, klik nebo Ctrl+V</small>
+        <input type="file" id="file" accept="image/*">
+      </label>
+      <div class="btn-group">
+        <button class="btn" id="btnUseMockup" type="button">
+          <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          Přednastavený
+        </button>
+        <button class="btn" id="clr" type="button">
+          <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          Odebrat
+        </button>
+      </div>
+      <div class="r" style="margin-top: 8px;"><span>Posun obrázku</span><input type="range" data-t="sc" min="0" max="100"><output></output></div>
+    </div>
+
+    <!-- 3. Rozměry a pozice -->
+    <div class="sec-card">
+      <div class="sec-header">
+        <span class="sec-icon">
+          <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="3" y1="9" x2="9" y2="9"/></svg>
+        </span>
+        Rozměry a pozice
+      </div>
+      <div class="r"><span>Šířka %</span><input type="range" data-t="w" min="30" max="130"><output></output></div>
+      <div class="r"><span>Výška %</span><input type="range" data-t="h" min="30" max="130"><output></output></div>
+      <div class="r"><span>Posun X %</span><input type="range" data-t="x" min="-40" max="40"><output></output></div>
+      <div class="r"><span>Posun Y %</span><input type="range" data-t="y" min="-40" max="40"><output></output></div>
+      <div class="r"><span id="lblCh">Prvky lišty %</span><input type="range" data-t="ch" min="50" max="220"><output></output></div>
+    </div>
+
+    <!-- 4. Pozadí scény -->
+    <div class="sec-card">
+      <div class="sec-header">
+        <span class="sec-icon">
+          <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".7" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".7" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".7" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".7" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.8-.7 1.8-1.7 0-.5-.2-.9-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1 .8-1.7 1.8-1.7H16c3.3 0 6-2.7 6-6 0-5.5-4.5-10-10-10z"/></svg>
+        </span>
+        Pozadí scény
+      </div>
+      <details class="presets-collapse">
+        <summary class="presets-summary">
+          <span class="presets-title">
+            <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Předvolby pozadí
+          </span>
+          <span class="presets-badge">16 stylů ▾</span>
+        </summary>
+        <div class="presets" id="presets"></div>
+      </details>
+      <div class="r">
+        <span>Typ pozadí</span>
+        <select data-g="bgType" id="bgType">
+          <option value="contour">Vrstevnice (Topografie)</option>
+          <option value="ascii">ASCII kód / Matrix</option>
+          <option value="pixel">Pixel / 8-bit mozaika</option>
+          <option value="crosses">Křížky / Swiss design</option>
+          <option value="isometric">Izometrická 3D mřížka</option>
+          <option value="dots">Moderní tečky (Dots)</option>
+          <option value="grid">Technická mřížka (Grid)</option>
+          <option value="mesh">Mesh / Aurora přechod</option>
+          <option value="linear">Lineární přechod</option>
+          <option value="radial">Radiální záře (Spotlight)</option>
+          <option value="solid">Jednobarevné</option>
+          <option value="transparent">Průhledné (Transparent PNG)</option>
+        </select>
+      </div>
+      <div class="r" id="rowC1"><span>Barva 1</span><input type="color" data-g="c1"></div>
+      <div class="r" id="rowC2"><span>Barva 2</span><input type="color" data-g="c2"></div>
+      <div class="r" id="rowC3"><span>Barva 3</span><input type="color" data-g="c3"></div>
+      <div class="r" id="rowC4"><span>Barva 4</span><input type="color" data-g="c4"></div>
+      <div class="r" id="rowAng"><span>Úhel</span><input type="range" data-g="ang" min="0" max="360"><output></output></div>
+      <div class="r" id="rowNoise"><span>Šum / Textura</span><input type="range" data-g="noise" min="0" max="35"><output></output></div>
+      <div class="r" id="rowGrid"><span>Hustota mřížky</span><input type="range" data-g="gridSpacing" min="16" max="64"><output></output></div>
+    </div>
+
+    <!-- 5. Přidat text -->
+    <div class="sec-card">
+      <div class="sec-header">
+        <span class="sec-icon">
+          <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+        </span>
+        Přidat text
+      </div>
+      <div class="r"><span>Zobrazit text</span><input type="checkbox" data-g="showText"></div>
+      <div class="r"><span>Text</span><input type="text" data-g="text" placeholder="Zadejte text..."></div>
+      <div class="r"><span>Velikost</span><input type="range" data-g="textSize" min="14" max="110"><output></output></div>
+      <div class="r">
+        <span>Tučnost</span>
+        <select data-g="textWeight">
+          <option value="400">400 - Normální</option>
+          <option value="600">600 - Polotučné</option>
+          <option value="700">700 - Tučné</option>
+          <option value="800">800 - Extra tučné</option>
+        </select>
+      </div>
+      <div class="r"><span>Barva textu</span><input type="color" data-g="textColor"></div>
+      <div class="r"><span>Stín textu</span><input type="checkbox" data-g="textShadow"></div>
+      <div class="r">
+        <span>Zarovnání</span>
+        <select data-g="textAlign">
+          <option value="center">Na střed</option>
+          <option value="left">Vlevo</option>
+          <option value="right">Vpravo</option>
+        </select>
+      </div>
+      <div class="r"><span>Posun X %</span><input type="range" data-g="textX" min="0" max="100"><output></output></div>
+      <div class="r"><span>Posun Y %</span><input type="range" data-g="textY" min="0" max="100"><output></output></div>
+    </div>
+
+    <!-- 6. Export -->
+    <div class="sec-card">
+      <div class="sec-header">
+        <span class="sec-icon">
+          <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </span>
+        Kvalita a export
+      </div>
+      <div class="scale-selector" id="scaleSelector">
+        <button type="button" data-scale="1">1× Standard</button>
+        <button type="button" data-scale="2" class="on">2× Retina</button>
+        <button type="button" data-scale="3">3× 4K Ultra</button>
+      </div>
+      <div class="r" style="margin-top: 8px;"><span>Název souboru</span><input type="text" id="fn" value="sablona"></div>
+      <button class="btn p" id="e1" type="button">
+        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Exportovat aktuální PNG
+      </button>
+      <button class="btn" id="e2" type="button">
+        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="14" height="14" rx="2"/><rect x="8" y="9" width="14" height="14" rx="2"/></svg>
+        Exportovat Cover + Thumb
+      </button>
+      <div id="msg"></div>
+    </div>
+  </aside>
+</div>
+
+<script>
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const SZ = { cover: [1280, 720], thumb: [600, 600] };
+const NM = { cover: 'cover', thumb: 'thumbnail' };
+
+const PRESETS = [
+  { name: 'Aurora', type: 'linear', c1: '#4f46e5', c2: '#ec4899', c3: '#f59e0b', c4: '#06b6d4', ang: 135, noise: 8, dark: false },
+  { name: 'Topo Neon', type: 'contour', c1: '#090d16', c2: '#1e1b4b', c3: '#38bdf8', ang: 45, noise: 7, gridSpacing: 28, dark: true },
+  { name: 'Topo Sahara', type: 'contour', c1: '#fffbeb', c2: '#fed7aa', c3: '#f97316', ang: 45, noise: 6, gridSpacing: 30, dark: false },
+  { name: 'Matrix Code', type: 'ascii', c1: '#020617', c2: '#052e16', c3: '#22c55e', ang: 135, noise: 5, gridSpacing: 22, dark: true },
+  { name: 'Cyber Pixel', type: 'pixel', c1: '#18181b', c2: '#3b0764', c3: '#a855f7', c4: '#06b6d4', noise: 6, gridSpacing: 24, dark: true },
+  { name: 'Isometric 3D', type: 'isometric', c1: '#0a0e1a', c2: '#1e293b', c3: '#60a5fa', noise: 8, gridSpacing: 34, dark: true },
+  { name: 'Swiss Cross', type: 'crosses', c1: '#f8fafc', c2: '#f1f5f9', ang: 135, noise: 4, gridSpacing: 30, dark: false },
+  { name: 'Mesh Magic', type: 'mesh', c1: '#312e81', c2: '#9333ea', c3: '#ec4899', c4: '#06b6d4', ang: 135, noise: 10, dark: true },
+  { name: 'Sunset Glow', type: 'linear', c1: '#f97316', c2: '#ec4899', c3: '#6366f1', c4: '#3b82f6', ang: 120, noise: 10, dark: false },
+  { name: 'Ocean Deep', type: 'linear', c1: '#0284c7', c2: '#0369a1', c3: '#075985', c4: '#0c4a6e', ang: 150, noise: 7, dark: true },
+  { name: 'Emerald Mist', type: 'linear', c1: '#059669', c2: '#065f46', c3: '#047857', c4: '#064e3b', ang: 140, noise: 8, dark: true },
+  { name: 'Dark Studio Grid', type: 'grid', c1: '#111827', c2: '#030712', c3: '#1f2937', c4: '#374151', ang: 180, noise: 12, gridSpacing: 32, dark: true },
+  { name: 'Minimal Dot', type: 'dots', c1: '#f8fafc', c2: '#e2e8f0', c3: '#cbd5e1', c4: '#94a3b8', ang: 135, noise: 5, gridSpacing: 26, dark: false },
+  { name: 'Spotlight Glow', type: 'radial', c1: '#3b82f6', c2: '#0f172a', c3: '#1e3a8a', c4: '#0284c7', ang: 0, noise: 10, dark: true },
+  { name: 'Soft Pastel', type: 'linear', c1: '#fbcfe8', c2: '#bae6fd', c3: '#e9d5ff', c4: '#fef08a', ang: 110, noise: 5, dark: false },
+  { name: 'Průhledné', type: 'transparent', c1: '#ffffff', c2: '#ffffff', c3: '#ffffff', c4: '#ffffff', ang: 0, noise: 0, dark: false }
+];
+
+const S = {
+  browser: 'safari', // 'safari' | 'chrome' | 'tablet'
+  tabTitle: 'Moje šablona',
+  exportScale: 2, // 2x Retina jako standard pro vysokou ostrost
+  bgType: 'linear',
+  c1: '#4f46e5',
+  c2: '#ec4899',
+  c3: '#f59e0b',
+  c4: '#06b6d4',
+  ang: 135,
+  noise: 8,
+  gridSpacing: 32,
+  rad: 14,
+  sh: 55,
+  url: 'moje-sablona.cz',
+  showUrl: true,
+  dark: false,
+  showText: false,
+  text: 'Moje nová šablona',
+  textSize: 36,
+  textWeight: '700',
+  textColor: '#ffffff',
+  textShadow: true,
+  textAlign: 'center',
+  textX: 50,
+  textY: 10,
+  cover: { w: 80, h: 88, x: 0, y: 6, sc: 0, ch: 100 },
+  thumb: { w: 92, h: 92, x: 0, y: 6, sc: 0, ch: 140 }
+};
+
+let cur = 'cover', img = null;
+let noiseTile = null;
+
+// Tvorba jemné textury šumu (odstraňuje color banding a dodává prémiový vzhled)
+function getNoiseTile() {
+  if (noiseTile) return noiseTile;
+  const ncv = document.createElement('canvas');
+  ncv.width = 160;
+  ncv.height = 160;
+  const nctx = ncv.getContext('2d');
+  const imgData = nctx.createImageData(160, 160);
+  const d = imgData.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const val = Math.random() * 255;
+    d[i] = val;
+    d[i + 1] = val;
+    d[i + 2] = val;
+    d[i + 3] = 255;
+  }
+  nctx.putImageData(imgData, 0, 0);
+  noiseTile = ncv;
+  return noiseTile;
+}
+
+// Vykreslení prémiového přednastaveného mockupu stránky (SaaS dashboard)
+function ph(c, w, h, tb) {
+  const D = S.dark;
+  const ch = h - tb;
+  const su = Math.max(0.48, w / 920);
+
+  // Pozadí stránky
+  c.fillStyle = D ? '#0d1117' : '#f8fafc';
+  c.fillRect(0, tb, w, ch);
+
+  // Horní navigační lišta stránky
+  const navH = Math.min(48 * su, ch * 0.13);
+  c.fillStyle = D ? '#161b22' : '#ffffff';
+  c.fillRect(0, tb, w, navH);
+  c.fillStyle = D ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+  c.fillRect(0, tb + navH - 1, w, 1);
+
+  // Logo aplikace s barevným přechodem
+  const pad = 24 * su;
+  const logoS = 22 * su;
+  const logoY = tb + (navH - logoS) / 2;
+  const lGrad = c.createLinearGradient(pad, logoY, pad + logoS, logoY + logoS);
+  lGrad.addColorStop(0, '#6366f1');
+  lGrad.addColorStop(1, '#a855f7');
+  c.fillStyle = lGrad;
+  c.beginPath();
+  c.roundRect(pad, logoY, logoS, logoS, 5.5 * su);
+  c.fill();
+
+  // Bílý symbol v logu
+  c.fillStyle = '#ffffff';
+  c.beginPath();
+  c.arc(pad + logoS / 2, logoY + logoS / 2, 4 * su, 0, Math.PI * 2);
+  c.fill();
+
+  // Název aplikace
+  c.fillStyle = D ? '#f0f6fc' : '#0f172a';
+  c.font = `700 ${13.5 * su}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+  c.textAlign = 'left';
+  c.textBaseline = 'middle';
+  c.fillText('Nova Cloud', pad + logoS + 9 * su, tb + navH / 2);
+
+  // Navigační položky
+  if (w > 500) {
+    const navItems = ['Přehled', 'Analytika', 'Zákazníci', 'Reporty'];
+    let nx = pad + logoS + 115 * su;
+    c.font = `500 ${11.5 * su}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    navItems.forEach((item, idx) => {
+      c.fillStyle = idx === 0 ? (D ? '#60a5fa' : '#2563eb') : (D ? '#8b949e' : '#64748b');
+      c.fillText(item, nx, tb + navH / 2);
+      nx += c.measureText(item).width + 20 * su;
+    });
+  }
+
+  // Tlačítko vpravo
+  const btnW = 88 * su, btnH = 26 * su;
+  const btnX = w - pad - btnW, btnY = tb + (navH - btnH) / 2;
+  c.fillStyle = D ? '#238636' : '#2563eb';
+  c.beginPath();
+  c.roundRect(btnX, btnY, btnW, btnH, 6 * su);
+  c.fill();
+  c.fillStyle = '#ffffff';
+  c.font = `600 ${10.5 * su}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+  c.textAlign = 'center';
+  c.fillText('+ Nový projekt', btnX + btnW / 2, btnY + btnH / 2);
+
+  // Hlavní obsah
+  const bodyY = tb + navH + 16 * su;
+  const bodyW = w - pad * 2;
+
+  // Hero karta
+  const heroH = Math.min(106 * su, ch * 0.28);
+  const heroGrad = c.createLinearGradient(pad, bodyY, pad + bodyW, bodyY + heroH);
+  heroGrad.addColorStop(0, D ? '#161b22' : '#ffffff');
+  heroGrad.addColorStop(1, D ? '#1c2128' : '#f1f5f9');
+  c.fillStyle = heroGrad;
+  c.beginPath();
+  c.roundRect(pad, bodyY, bodyW, heroH, 10 * su);
+  c.fill();
+  c.strokeStyle = D ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+  c.lineWidth = 1;
+  c.stroke();
+
+  // Štítek v hero sekci
+  const badgeH = 19 * su, badgeW = 146 * su;
+  c.fillStyle = D ? 'rgba(99,102,241,0.22)' : 'rgba(99,102,241,0.12)';
+  c.beginPath();
+  c.roundRect(pad + 16 * su, bodyY + 12 * su, badgeW, badgeH, 9.5 * su);
+  c.fill();
+  c.fillStyle = D ? '#a5b4fc' : '#4f46e5';
+  c.font = `600 ${9.5 * su}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+  c.textAlign = 'center';
+  c.fillText('✨ Q4 Výkonnostní report', pad + 16 * su + badgeW / 2, bodyY + 12 * su + badgeH / 2);
+
+  // Nadpis hero sekce
+  c.textAlign = 'left';
+  c.fillStyle = D ? '#f0f6fc' : '#0f172a';
+  c.font = `700 ${Math.max(13, 16.5 * su)}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+  c.fillText('Analytika prodejů a růstu v reálném čase', pad + 16 * su, bodyY + 47 * su);
+  c.fillStyle = D ? '#8b949e' : '#64748b';
+  c.font = `400 ${Math.max(10, 11 * su)}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+  c.fillText('Přehled klíčových ukazatelů, konverzí a návštěvnosti za posledních 30 dní.', pad + 16 * su, bodyY + 66 * su);
+
+  // Řada 3 metrik
+  const cardsY = bodyY + heroH + 12 * su;
+  const numCards = w > 480 ? 3 : 2;
+  const cardGap = 10 * su;
+  const cardW = (bodyW - cardGap * (numCards - 1)) / numCards;
+  const cardH = Math.min(76 * su, ch * 0.22);
+
+  const metrics = [
+    { label: 'Celkové tržby', val: '$148,250', chg: '+24.6%' },
+    { label: 'Aktivní uživatelé', val: '28,490', chg: '+14.2%' },
+    { label: 'Konverzní poměr', val: '4.82%', chg: '+2.1%' }
+  ];
+
+  for (let i = 0; i < numCards; i++) {
+    const cx = pad + i * (cardW + cardGap);
+    c.fillStyle = D ? '#161b22' : '#ffffff';
+    c.beginPath();
+    c.roundRect(cx, cardsY, cardW, cardH, 9 * su);
+    c.fill();
+    c.strokeStyle = D ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+    c.stroke();
+
+    c.fillStyle = D ? '#8b949e' : '#64748b';
+    c.font = `500 ${10 * su}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    c.fillText(metrics[i].label, cx + 12 * su, cardsY + 18 * su);
+
+    c.fillStyle = D ? '#f0f6fc' : '#0f172a';
+    c.font = `700 ${15 * su}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    c.fillText(metrics[i].val, cx + 12 * su, cardsY + 39 * su);
+
+    // Zelený badge
+    c.fillStyle = D ? 'rgba(34,197,94,0.18)' : 'rgba(34,197,94,0.12)';
+    const trW = 48 * su, trH = 16 * su;
+    c.beginPath();
+    c.roundRect(cx + 12 * su, cardsY + 50 * su, trW, trH, 8 * su);
+    c.fill();
+    c.fillStyle = D ? '#4ade80' : '#16a34a';
+    c.font = `600 ${8.5 * su}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    c.textAlign = 'center';
+    c.fillText(`▲ ${metrics[i].chg}`, cx + 12 * su + trW / 2, cardsY + 50 * su + trH / 2);
+    c.textAlign = 'left';
+  }
+
+  // Graf
+  const chartY = cardsY + cardH + 12 * su;
+  const chartH = tb + ch - chartY - 14 * su;
+  if (chartH > 52 * su) {
+    c.fillStyle = D ? '#161b22' : '#ffffff';
+    c.beginPath();
+    c.roundRect(pad, chartY, bodyW, chartH, 10 * su);
+    c.fill();
+    c.strokeStyle = D ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+    c.stroke();
+
+    c.fillStyle = D ? '#f0f6fc' : '#0f172a';
+    c.font = `600 ${11.5 * su}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    c.fillText('Vývoj návštěvnosti a objednávek', pad + 14 * su, chartY + 18 * su);
+
+    const plotY = chartY + 32 * su;
+    const plotH = chartH - 44 * su;
+    if (plotH > 18) {
+      // Vodicí linky
+      c.strokeStyle = D ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)';
+      c.lineWidth = 1;
+      for (let l = 0; l <= 2; l++) {
+        const ly = plotY + plotH * (l / 2);
+        c.beginPath();
+        c.moveTo(pad + 14 * su, ly);
+        c.lineTo(pad + bodyW - 14 * su, ly);
+        c.stroke();
+      }
+
+      const points = [
+        [0, 0.75], [0.15, 0.62], [0.3, 0.45], [0.45, 0.52],
+        [0.6, 0.28], [0.75, 0.35], [0.9, 0.14], [1.0, 0.20]
+      ];
+      const startX = pad + 14 * su;
+      const plotW = bodyW - 28 * su;
+
+      const cGrad = c.createLinearGradient(0, plotY, 0, plotY + plotH);
+      cGrad.addColorStop(0, D ? 'rgba(99,102,241,0.38)' : 'rgba(79,70,229,0.22)');
+      cGrad.addColorStop(1, 'rgba(99,102,241,0)');
+
+      c.beginPath();
+      points.forEach(([px, py], idx) => {
+        const x = startX + px * plotW;
+        const y = plotY + py * plotH;
+        if (idx === 0) c.moveTo(x, y);
+        else {
+          const prev = points[idx - 1];
+          const px0 = startX + prev[0] * plotW;
+          const py0 = plotY + prev[1] * plotH;
+          const mx = (px0 + x) / 2;
+          c.bezierCurveTo(mx, py0, mx, y, x, y);
+        }
+      });
+      c.lineTo(startX + plotW, plotY + plotH);
+      c.lineTo(startX, plotY + plotH);
+      c.closePath();
+      c.fillStyle = cGrad;
+      c.fill();
+
+      // Křivka grafu
+      c.beginPath();
+      points.forEach(([px, py], idx) => {
+        const x = startX + px * plotW;
+        const y = plotY + py * plotH;
+        if (idx === 0) c.moveTo(x, y);
+        else {
+          const prev = points[idx - 1];
+          const px0 = startX + prev[0] * plotW;
+          const py0 = plotY + prev[1] * plotH;
+          const mx = (px0 + x) / 2;
+          c.bezierCurveTo(mx, py0, mx, y, x, y);
+        }
+      });
+      c.strokeStyle = D ? '#818cf8' : '#4f46e5';
+      c.lineWidth = 2.4 * su;
+      c.stroke();
+
+      // Vrcholový bod grafu
+      const peakX = startX + 0.9 * plotW;
+      const peakY = plotY + 0.14 * plotH;
+      c.fillStyle = '#ffffff';
+      c.beginPath();
+      c.arc(peakX, peakY, 4 * su, 0, Math.PI * 2);
+      c.fill();
+      c.strokeStyle = '#4f46e5';
+      c.lineWidth = 2 * su;
+      c.stroke();
+    }
+  }
+}
+
+// Vykreslení pozadí dle zvoleného typu
+function drawBackground(c, W, H) {
+  const type = S.bgType;
+  if (type === 'transparent') {
+    c.clearRect(0, 0, W, H);
+    return;
+  }
+
+  if (type === 'solid') {
+    c.fillStyle = S.c1;
+    c.fillRect(0, 0, W, H);
+  } else if (type === 'linear') {
+    const r = S.ang * Math.PI / 180, dx = Math.cos(r), dy = Math.sin(r);
+    const L = (Math.abs(W * dx) + Math.abs(H * dy)) / 2;
+    const g = c.createLinearGradient(W/2 - dx*L, H/2 - dy*L, W/2 + dx*L, H/2 + dy*L);
+    g.addColorStop(0, S.c1);
+    g.addColorStop(0.5, S.c3);
+    g.addColorStop(1, S.c2);
+    c.fillStyle = g;
+    c.fillRect(0, 0, W, H);
+  } else if (type === 'radial') {
+    const cx = W / 2, cy = H / 2;
+    const maxR = Math.max(W, H) * 0.75;
+    const g = c.createRadialGradient(cx, cy, 0, cx, cy, maxR);
+    g.addColorStop(0, S.c1);
+    g.addColorStop(0.65, S.c3);
+    g.addColorStop(1, S.c2);
+    c.fillStyle = g;
+    c.fillRect(0, 0, W, H);
+  } else if (type === 'mesh') {
+    c.fillStyle = S.c1;
+    c.fillRect(0, 0, W, H);
+
+    // Bod 1 - vlevo nahoře
+    const g1 = c.createRadialGradient(W * 0.2, H * 0.2, 0, W * 0.2, H * 0.2, W * 0.7);
+    g1.addColorStop(0, S.c2);
+    g1.addColorStop(1, 'transparent');
+    c.fillStyle = g1;
+    c.fillRect(0, 0, W, H);
+
+    // Bod 2 - vpravo dole
+    const g2 = c.createRadialGradient(W * 0.85, H * 0.85, 0, W * 0.85, H * 0.85, W * 0.7);
+    g2.addColorStop(0, S.c3);
+    g2.addColorStop(1, 'transparent');
+    c.fillStyle = g2;
+    c.fillRect(0, 0, W, H);
+
+    // Bod 3 - vpravo nahoře
+    const g3 = c.createRadialGradient(W * 0.85, H * 0.15, 0, W * 0.85, H * 0.15, W * 0.55);
+    g3.addColorStop(0, S.c4);
+    g3.addColorStop(1, 'transparent');
+    c.fillStyle = g3;
+    c.fillRect(0, 0, W, H);
+  } else if (type === 'dots') {
+    const r = S.ang * Math.PI / 180, dx = Math.cos(r), dy = Math.sin(r);
+    const L = (Math.abs(W * dx) + Math.abs(H * dy)) / 2;
+    const g = c.createLinearGradient(W/2 - dx*L, H/2 - dy*L, W/2 + dx*L, H/2 + dy*L);
+    g.addColorStop(0, S.c1);
+    g.addColorStop(1, S.c2);
+    c.fillStyle = g;
+    c.fillRect(0, 0, W, H);
+
+    const sp = S.gridSpacing || 28;
+    c.fillStyle = S.dark ? 'rgba(255,255,255,0.22)' : 'rgba(15,23,42,0.18)';
+    for (let x = sp / 2; x < W; x += sp) {
+      for (let y = sp / 2; y < H; y += sp) {
+        c.beginPath();
+        c.arc(x, y, 1.8, 0, Math.PI * 2);
+        c.fill();
+      }
+    }
+  } else if (type === 'grid') {
+    const r = S.ang * Math.PI / 180, dx = Math.cos(r), dy = Math.sin(r);
+    const L = (Math.abs(W * dx) + Math.abs(H * dy)) / 2;
+    const g = c.createLinearGradient(W/2 - dx*L, H/2 - dy*L, W/2 + dx*L, H/2 + dy*L);
+    g.addColorStop(0, S.c1);
+    g.addColorStop(1, S.c2);
+    c.fillStyle = g;
+    c.fillRect(0, 0, W, H);
+
+    const sp = S.gridSpacing || 32;
+    c.strokeStyle = S.dark ? 'rgba(255,255,255,0.14)' : 'rgba(15,23,42,0.12)';
+    c.lineWidth = 1;
+    c.beginPath();
+    for (let x = 0; x <= W; x += sp) {
+      c.moveTo(x + 0.5, 0);
+      c.lineTo(x + 0.5, H);
+    }
+    for (let y = 0; y <= H; y += sp) {
+      c.moveTo(0, y + 0.5);
+      c.lineTo(W, y + 0.5);
+    }
+    c.stroke();
+  } else if (type === 'contour') {
+    const sp = S.gridSpacing || 28;
+    const r = S.ang * Math.PI / 180, dx = Math.cos(r), dy = Math.sin(r);
+    const L = (Math.abs(W * dx) + Math.abs(H * dy)) / 2;
+    const g = c.createLinearGradient(W/2 - dx*L, H/2 - dy*L, W/2 + dx*L, H/2 + dy*L);
+    g.addColorStop(0, S.c1);
+    g.addColorStop(1, S.c2);
+    c.fillStyle = g;
+    c.fillRect(0, 0, W, H);
+
+    c.save();
+    let idx = 0;
+    for (let y0 = -H * 0.35; y0 <= H * 1.35; y0 += sp) {
+      idx++;
+      const isMajor = (idx % 5 === 0);
+      c.beginPath();
+      c.lineWidth = isMajor ? 1.2 : 0.75;
+      if (isMajor && S.c3) {
+        c.strokeStyle = S.c3;
+        c.globalAlpha = S.dark ? 0.22 : 0.18;
+      } else {
+        c.strokeStyle = S.dark ? '#ffffff' : '#0f172a';
+        c.globalAlpha = S.dark ? 0.07 : 0.05;
+      }
+      for (let x = 0; x <= W; x += 10) {
+        const nx = x / W;
+        const ny = y0 / H;
+        const wave = Math.sin(nx * 4.2 + y0 * 0.007) * 36
+                   + Math.cos(nx * 8.0 - y0 * 0.005) * 20
+                   + Math.sin(nx * 2.2 + ny * 3.2) * 42;
+        const y = y0 + wave;
+        if (x === 0) c.moveTo(x, y);
+        else c.lineTo(x, y);
+      }
+      c.stroke();
+    }
+    c.restore();
+  } else if (type === 'ascii') {
+    const sp = S.gridSpacing || 22;
+    const r = S.ang * Math.PI / 180, dx = Math.cos(r), dy = Math.sin(r);
+    const L = (Math.abs(W * dx) + Math.abs(H * dy)) / 2;
+    const g = c.createLinearGradient(W/2 - dx*L, H/2 - dy*L, W/2 + dx*L, H/2 + dy*L);
+    g.addColorStop(0, S.c1);
+    g.addColorStop(1, S.c2);
+    c.fillStyle = g;
+    c.fillRect(0, 0, W, H);
+
+    const chars = ['0', '1', '+', '*', '#', '/', '>', '<', '{', '}', '~', '$', '%', '&', '@', ':', ';', 'A', 'X', 'Z', '9', '7'];
+    c.save();
+    c.font = `600 ${sp * 0.55}px "SF Mono", Menlo, Consolas, Monaco, monospace`;
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+
+    for (let x = sp / 2; x < W; x += sp) {
+      for (let y = sp / 2; y < H; y += sp) {
+        const hash = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
+        const charIdx = Math.floor(Math.abs(hash) % chars.length);
+        const char = chars[charIdx];
+        const isGlow = (Math.abs(hash) - Math.floor(Math.abs(hash))) > 0.82;
+
+        if (isGlow && S.c3) {
+          c.fillStyle = S.c3;
+          c.globalAlpha = S.dark ? 0.22 : 0.18;
+        } else {
+          const wave = Math.sin(x * 0.006 + y * 0.004 + (S.ang || 0) * 0.05);
+          c.fillStyle = S.dark ? '#ffffff' : '#0f172a';
+          c.globalAlpha = Math.max(0.02, Math.min(0.08, 0.04 + wave * 0.025));
+        }
+        c.fillText(char, x, y);
+      }
+    }
+    c.restore();
+  } else if (type === 'pixel') {
+    const sp = S.gridSpacing || 24;
+    const g = c.createLinearGradient(0, 0, W, H);
+    g.addColorStop(0, S.c1);
+    g.addColorStop(1, S.c2);
+    c.fillStyle = g;
+    c.fillRect(0, 0, W, H);
+
+    c.save();
+    const palette = [S.c1, S.c2, S.c3 || S.c1, S.c4 || S.c2];
+    for (let x = 0; x < W; x += sp) {
+      for (let y = 0; y < H; y += sp) {
+        const nx = x / W, ny = y / H;
+        const n = (Math.sin(nx * 6.2 + ny * 4.1) + Math.cos(nx * 3.4 - ny * 7.2) + 2) / 4;
+        const hash = Math.abs((Math.sin(x * 37.1 + y * 53.7) * 43758.5) % 1);
+        const dither = Math.max(0, Math.min(0.99, n + (hash - 0.5) * 0.3));
+        const pIdx = Math.floor(dither * palette.length);
+        c.fillStyle = palette[pIdx];
+        c.globalAlpha = 0.05 + hash * 0.09;
+        c.fillRect(x + 1, y + 1, sp - 2, sp - 2);
+      }
+    }
+    c.restore();
+  } else if (type === 'crosses') {
+    const sp = S.gridSpacing || 32;
+    const r = S.ang * Math.PI / 180, dx = Math.cos(r), dy = Math.sin(r);
+    const L = (Math.abs(W * dx) + Math.abs(H * dy)) / 2;
+    const g = c.createLinearGradient(W/2 - dx*L, H/2 - dy*L, W/2 + dx*L, H/2 + dy*L);
+    g.addColorStop(0, S.c1);
+    g.addColorStop(1, S.c2);
+    c.fillStyle = g;
+    c.fillRect(0, 0, W, H);
+
+    c.save();
+    c.strokeStyle = S.dark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.07)';
+    c.lineWidth = 0.9;
+    const arm = Math.max(2.5, sp * 0.11);
+    c.beginPath();
+    for (let x = sp / 2; x < W; x += sp) {
+      for (let y = sp / 2; y < H; y += sp) {
+        c.moveTo(x - arm, y);
+        c.lineTo(x + arm, y);
+        c.moveTo(x, y - arm);
+        c.lineTo(x, y + arm);
+      }
+    }
+    c.stroke();
+    c.restore();
+  } else if (type === 'isometric') {
+    const sp = S.gridSpacing || 34;
+    const g = c.createLinearGradient(0, 0, W, H);
+    g.addColorStop(0, S.c1);
+    g.addColorStop(1, S.c2);
+    c.fillStyle = g;
+    c.fillRect(0, 0, W, H);
+
+    c.save();
+    c.strokeStyle = S.dark ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.05)';
+    c.lineWidth = 0.8;
+
+    c.beginPath();
+    for (let x = 0; x <= W + sp; x += sp) {
+      c.moveTo(x + 0.5, 0);
+      c.lineTo(x + 0.5, H);
+    }
+    const tan30 = Math.tan(Math.PI / 6);
+    const rowStep = sp * Math.sqrt(3);
+    for (let y = -W * tan30; y <= H + W * tan30; y += rowStep) {
+      c.moveTo(0, y);
+      c.lineTo(W, y + W * tan30);
+      c.moveTo(0, y);
+      c.lineTo(W, y - W * tan30);
+    }
+    c.stroke();
+
+    if (S.c3) {
+      c.fillStyle = S.c3;
+      c.globalAlpha = S.dark ? 0.22 : 0.18;
+      for (let x = 0; x <= W; x += sp) {
+        for (let y = 0; y <= H; y += rowStep) {
+          c.beginPath();
+          c.arc(x, y, 1.2, 0, Math.PI * 2);
+          c.fill();
+        }
+      }
+    }
+    c.restore();
+  }
+
+  // Jemný šumový filtr (Film grain)
+  if (S.noise > 0) {
+    c.save();
+    c.globalAlpha = S.noise / 100;
+    c.globalCompositeOperation = 'overlay';
+    const tile = getNoiseTile();
+    const ptrn = c.createPattern(tile, 'repeat');
+    c.fillStyle = ptrn;
+    c.fillRect(0, 0, W, H);
+    c.restore();
+  }
+}
+
+// Hlavní vykreslovací funkce podporující škálování rozlišení (Retina / 4K)
+function draw(cv, key, scale = 1) {
+  const [baseW, baseH] = SZ[key], t = S[key], D = S.dark;
+  const W = Math.round(baseW * scale);
+  const H = Math.round(baseH * scale);
+  cv.width = W;
+  cv.height = H;
+  const c = cv.getContext('2d');
+  c.imageSmoothingEnabled = true;
+  c.imageSmoothingQuality = 'high';
+
+  c.save();
+  c.scale(scale, scale);
+
+  // 1. Pozadí
+  drawBackground(c, baseW, baseH);
+
+  // 2. Rozměry a pozice okna
+  const w = baseW * t.w / 100, h = baseH * t.h / 100;
+  const x = (baseW - w) / 2 + baseW * t.x / 100, y = (baseH - h) / 2 + baseH * t.y / 100;
+  const u = w / 1000 * t.ch / 100;
+  const isChrome = S.browser === 'chrome';
+  const isTablet = S.browser === 'tablet';
+  const R = S.rad * u, tb = (isChrome ? 66 : isTablet ? 62 : 56) * u, cy = tb / 2;
+
+  c.save();
+  c.translate(x, y);
+
+  // 3. Stíny okna (realistický vícevrstvý stín pro hloubku)
+  if (S.sh > 0) {
+    // Ambientní jemný rozptýlený stín
+    c.shadowColor = `rgba(0, 0, 0, ${(S.sh / 100) * 0.22})`;
+    c.shadowBlur = S.sh * 1.8 * u;
+    c.shadowOffsetY = S.sh * 0.7 * u;
+    c.fillStyle = D ? '#1a1b1e' : '#ffffff';
+    c.beginPath();
+    c.roundRect(0, 0, w, h, R);
+    c.fill();
+
+    // Přímý kontaktní stín
+    c.shadowColor = `rgba(0, 0, 0, ${(S.sh / 100) * 0.35})`;
+    c.shadowBlur = S.sh * 0.6 * u;
+    c.shadowOffsetY = S.sh * 0.25 * u;
+    c.fill();
+  } else {
+    c.fillStyle = D ? '#1a1b1e' : '#ffffff';
+    c.beginPath();
+    c.roundRect(0, 0, w, h, R);
+    c.fill();
+  }
+
+  c.shadowColor = 'transparent';
+  c.shadowBlur = 0;
+  c.shadowOffsetY = 0;
+  c.clip();
+
+  // 4. Obsah okna
+  c.save();
+  c.beginPath();
+  c.rect(0, tb, w, h - tb);
+  c.clip();
+
+  if (img) {
+    const k = w / img.width, ih = img.height * k, o = Math.max(0, ih - (h - tb)) * t.sc / 100;
+    c.drawImage(img, 0, tb - o, w, ih);
+  } else {
+    ph(c, w, h, tb);
+  }
+  c.restore();
+
+  // 5. Lišta prohlížeče (macOS Safari, Windows Chrome nebo Tablet Android)
+  if (isChrome) {
+    drawChromeHeader(c, w, tb, u, D);
+  } else if (isTablet) {
+    drawAndroidTabletHeader(c, w, tb, u, D);
+  } else {
+    drawSafariHeader(c, w, tb, u, cy, D);
+  }
+
+  // 6. U tabletu: spodní Android navigační gestová lišta (pill bar)
+  if (isTablet) {
+    const gw = Math.min(110 * u, w * 0.28), gh = 3.6 * u, gy = h - 9 * u;
+    c.fillStyle = D ? 'rgba(255,255,255,0.42)' : 'rgba(0,0,0,0.28)';
+    c.beginPath();
+    c.roundRect((w - gw) / 2, gy, gw, gh, 2 * u);
+    c.fill();
+  }
+
+  // Vnější jemný obvodový rámeček okna pro dokonalou ostrost
+  c.strokeStyle = D ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)';
+  c.lineWidth = Math.max(1, 1 * u);
+  c.beginPath();
+  c.roundRect(0, 0, w, h, R);
+  c.stroke();
+
+  c.restore();
+
+  // 7. Vlastní text (kdekoliv po celém obrázku, i mimo prohlížeč nebo přes něj)
+  if (S.showText && S.text && S.text.trim()) {
+    c.save();
+    const tx = baseW * (S.textX / 100);
+    const ty = baseH * (S.textY / 100);
+    const fontSize = (S.textSize || 36) * (baseW / 1280);
+    const weight = S.textWeight || '700';
+
+    c.font = `${weight} ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif`;
+    c.textAlign = S.textAlign || 'center';
+    c.textBaseline = 'middle';
+
+    if (S.textShadow) {
+      c.shadowColor = 'rgba(0, 0, 0, 0.55)';
+      c.shadowBlur = 8 * (baseW / 1280);
+      c.shadowOffsetX = 0;
+      c.shadowOffsetY = 2 * (baseW / 1280);
+    } else {
+      c.shadowColor = 'transparent';
+      c.shadowBlur = 0;
+      c.shadowOffsetY = 0;
+    }
+
+    c.fillStyle = S.textColor || '#ffffff';
+    const lines = S.text.split('\n');
+    const lh = fontSize * 1.25;
+    const startY = ty - ((lines.length - 1) * lh) / 2;
+    lines.forEach((line, i) => {
+      c.fillText(line, tx, startY + i * lh);
+    });
+    c.restore();
+  }
+
+  c.restore();
+}
+
+// Vykreslení lišty macOS Safari
+function drawSafariHeader(c, w, tb, u, cy, D) {
+  // Safari lišta (Toolbar)
+  c.fillStyle = D ? '#2a2a2e' : '#f2f2f4';
+  c.fillRect(0, 0, w, tb);
+
+  // Dělící spodní linka lišty
+  c.fillStyle = D ? 'rgba(0,0,0,0.45)' : 'rgba(0,0,0,0.12)';
+  c.fillRect(0, tb - Math.max(1, 0.8 * u), w, Math.max(1, 0.8 * u));
+
+  // Tlačítka semaforu (macOS okno)
+  const dots = [
+    { fill: '#ff5f57', stroke: '#e0443e' },
+    { fill: '#febc2e', stroke: '#dea123' },
+    { fill: '#28c840', stroke: '#1aab29' }
+  ];
+  dots.forEach((d, i) => {
+    const dx = (22 + i * 20) * u;
+    c.fillStyle = d.fill;
+    c.beginPath();
+    c.arc(dx, cy, 6 * u, 0, Math.PI * 2);
+    c.fill();
+    c.strokeStyle = d.stroke;
+    c.lineWidth = 0.6 * u;
+    c.stroke();
+  });
+
+  // Šipky zpět a vpřed
+  c.strokeStyle = D ? '#9a9aa2' : '#6b6b70';
+  c.lineWidth = 1.8 * u;
+  c.lineCap = c.lineJoin = 'round';
+  c.beginPath();
+  c.moveTo(96 * u, cy - 6 * u);
+  c.lineTo(90 * u, cy);
+  c.lineTo(96 * u, cy + 6 * u);
+  c.moveTo(112 * u, cy - 6 * u);
+  c.lineTo(118 * u, cy);
+  c.lineTo(112 * u, cy + 6 * u);
+  c.stroke();
+
+  // URL řádek (pouze lišta s vlastním textem adresy)
+  if (S.showUrl) {
+    const pw = Math.min(w * 0.55, Math.max(200 * u, w - 240 * u)), ph_ = 32 * u;
+    const px = (w - pw) / 2, py = cy - ph_ / 2;
+
+    c.fillStyle = D ? '#38383c' : '#e3e3e8';
+    c.beginPath();
+    c.roundRect(px, py, pw, ph_, 8 * u);
+    c.fill();
+
+    // Pouze text adresy
+    c.fillStyle = D ? '#f0f0f4' : '#1d1d1f';
+    c.font = `500 ${13.5 * u}px -apple-system, "SF Pro Text", "Segoe UI", Roboto, sans-serif`;
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+    c.fillText(S.url, w / 2, cy + 0.5 * u, pw - 24 * u);
+  }
+
+  // Ikona vpravo: pouze karty (přehled panelů)
+  const sx = w - 30 * u;
+  c.strokeStyle = D ? '#9a9aa2' : '#6b6b70';
+  c.lineWidth = 1.8 * u;
+  c.lineCap = c.lineJoin = 'round';
+  c.beginPath();
+  c.roundRect(sx - 7 * u, cy - 3 * u, 11 * u, 10 * u, 2 * u);
+  c.moveTo(sx - 3 * u, cy - 3 * u);
+  c.lineTo(sx - 3 * u, cy - 7 * u);
+  c.lineTo(sx + 7 * u, cy - 7 * u);
+  c.lineTo(sx + 7 * u, cy + 3 * u);
+  c.lineTo(sx + 4 * u, cy + 3 * u);
+  c.stroke();
+}
+
+// Vykreslení lišty Windows Chrome (čistý minimalistický styl se stejným počtem prvků jako Safari)
+function drawChromeHeader(c, w, tb, u, D) {
+  const tabH = 28 * u;
+  const cy2 = tabH + (tb - tabH) / 2;
+
+  // 1. Řádek záložek (Tab strip)
+  c.fillStyle = D ? '#1f1f23' : '#dfe1e5';
+  c.fillRect(0, 0, w, tabH);
+
+  // 2. Ovládací tlačítka okna Windows vpravo nahoře (—, □, ✕)
+  const btnW = Math.min(38 * u, w * 0.08);
+  const btnH = tabH;
+  const ctrlX = w - 3 * btnW;
+
+  c.strokeStyle = D ? '#c7c7c7' : '#3c4043';
+  c.lineWidth = Math.max(1, 1.15 * u);
+  c.lineCap = 'butt';
+
+  // Minimalizovat (—)
+  c.beginPath();
+  c.moveTo(ctrlX + btnW * 0.5 - 4.5 * u, btnH / 2);
+  c.lineTo(ctrlX + btnW * 0.5 + 4.5 * u, btnH / 2);
+  c.stroke();
+
+  // Maximalizovat / Obnovit (□)
+  c.strokeRect(ctrlX + btnW * 1.5 - 4.2 * u, btnH / 2 - 4.2 * u, 8.4 * u, 8.4 * u);
+
+  // Zavřít (✕)
+  const cxC = ctrlX + btnW * 2.5, cyC = btnH / 2, cs = 4.2 * u;
+  c.beginPath();
+  c.moveTo(cxC - cs, cyC - cs);
+  c.lineTo(cxC + cs, cyC + cs);
+  c.moveTo(cxC + cs, cyC - cs);
+  c.lineTo(cxC - cs, cyC + cs);
+  c.stroke();
+
+  // 3. Jediná čistá aktivní záložka (pouze název bez loga)
+  const maxTabW = Math.max(70 * u, ctrlX - 16 * u);
+  const tabW = Math.min(180 * u, Math.max(80 * u, maxTabW * 0.38));
+  const tabX = 8 * u;
+
+  // Záložka napojená na tělo lišty
+  c.fillStyle = D ? '#28292a' : '#ffffff';
+  c.beginPath();
+  c.roundRect(tabX, 4 * u, tabW, 24 * u + 1, [7 * u, 7 * u, 0, 0]);
+  c.fill();
+
+  // Titulek záložky (čistý text bez loga, zadaný uživatelem pro Chrome)
+  const tabText = (S.tabTitle !== undefined && S.tabTitle !== '') ? S.tabTitle : (S.url || 'Nová záložka');
+  c.fillStyle = D ? '#f1f3f4' : '#1f1f1f';
+  c.font = `500 ${11 * u}px -apple-system, "Segoe UI", Roboto, sans-serif`;
+  c.textAlign = 'left';
+  c.textBaseline = 'middle';
+  c.fillText(tabText, tabX + 12 * u, 16 * u, Math.max(10 * u, tabW - 24 * u));
+
+  // 4. Hlavní lišta nástrojů (Toolbar)
+  c.fillStyle = D ? '#28292a' : '#ffffff';
+  c.fillRect(0, tabH, w, tb - tabH);
+  c.fillStyle = D ? 'rgba(0,0,0,0.45)' : 'rgba(0,0,0,0.08)';
+  c.fillRect(0, tb - Math.max(1, 0.8 * u), w, Math.max(1, 0.8 * u));
+
+  // Pouze šipky zpět a vpřed (žádné tlačítko obnovení, stejně jako v Safari)
+  c.lineWidth = Math.max(1, 1.6 * u);
+  c.lineCap = c.lineJoin = 'round';
+
+  // Šipka zpět
+  c.strokeStyle = D ? '#e3e3e3' : '#444746';
+  c.beginPath();
+  c.moveTo(22 * u, cy2);
+  c.lineTo(13 * u, cy2);
+  c.lineTo(17 * u, cy2 - 4 * u);
+  c.moveTo(13 * u, cy2);
+  c.lineTo(17 * u, cy2 + 4 * u);
+  c.stroke();
+
+  // Šipka vpřed
+  c.strokeStyle = D ? '#5f6368' : '#c4c7c5';
+  c.beginPath();
+  c.moveTo(31 * u, cy2);
+  c.lineTo(40 * u, cy2);
+  c.lineTo(36 * u, cy2 - 4 * u);
+  c.moveTo(40 * u, cy2);
+  c.lineTo(36 * u, cy2 + 4 * u);
+  c.stroke();
+
+  // Pouze jediné tlačítko vpravo: menu se třemi tečkami ⋮ (stejně jako jediná ikona vpravo u Safari)
+  const menuX = w - 18 * u;
+  c.fillStyle = D ? '#e3e3e3' : '#444746';
+  for (let d = -1; d <= 1; d++) {
+    c.beginPath();
+    c.arc(menuX, cy2 + d * 4.5 * u, 1.2 * u, 0, Math.PI * 2);
+    c.fill();
+  }
+
+  // 5. Adresní řádek Omnibox (užší vycentrovaná lišta)
+  if (S.showUrl) {
+    const ow = Math.min(w * 0.55, Math.max(180 * u, w - 240 * u));
+    const ox = (w - ow) / 2;
+    const oh = 28 * u, oy = cy2 - oh / 2;
+
+    c.fillStyle = D ? '#1f1f1f' : '#f1f3f4';
+    c.beginPath();
+    c.roundRect(ox, oy, ow, oh, 14 * u);
+    c.fill();
+    if (D) {
+      c.strokeStyle = 'rgba(255,255,255,0.07)';
+      c.lineWidth = 1;
+      c.stroke();
+    }
+
+    // Text adresy (vycentrovaný)
+    c.fillStyle = D ? '#e8eaed' : '#1f1f1f';
+    c.font = `400 ${12 * u}px -apple-system, "Segoe UI", Roboto, sans-serif`;
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+    c.fillText(S.url, w / 2, cy2 + 0.5 * u, ow - 24 * u);
+  }
+}
+
+// Vykreslení lišty Android tabletu (v prohlížeči)
+function drawAndroidTabletHeader(c, w, tb, u, D) {
+  const statH = 18 * u;
+  const barH = tb - statH;
+  const cy2 = statH + barH / 2;
+
+  // 1. Android stavová lišta (Status Bar)
+  c.fillStyle = D ? '#151618' : '#e9ecf0';
+  c.fillRect(0, 0, w, statH);
+
+  // Hodiny vlevo (09:41)
+  c.fillStyle = D ? '#c7c9ce' : '#3f4246';
+  c.font = `600 ${9.5 * u}px -apple-system, Roboto, "Segoe UI", sans-serif`;
+  c.textAlign = 'left';
+  c.textBaseline = 'middle';
+  c.fillText('09:41', 14 * u, statH / 2 + 0.5 * u);
+
+  // Čelní kamerka (punch hole uprostřed)
+  c.beginPath();
+  c.arc(w / 2, statH / 2, 2.4 * u, 0, Math.PI * 2);
+  c.fillStyle = D ? '#090a0c' : '#222326';
+  c.fill();
+  c.strokeStyle = D ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.18)';
+  c.lineWidth = 0.8 * u;
+  c.stroke();
+
+  // Ikony stavu vpravo (WiFi a Baterie)
+  const bx = w - 28 * u, by = statH / 2 - 4.2 * u, bw = 14 * u, bh = 8.4 * u;
+  // Baterie
+  c.strokeStyle = D ? '#c7c9ce' : '#3f4246';
+  c.lineWidth = Math.max(1, 1.1 * u);
+  c.strokeRect(bx, by, bw, bh);
+  // Kolíček baterie
+  c.fillStyle = D ? '#c7c9ce' : '#3f4246';
+  c.fillRect(bx + bw + 0.6 * u, by + 2.2 * u, 1.4 * u, 4 * u);
+  // Úroveň nabití baterie (~80%)
+  c.fillRect(bx + 1.8 * u, by + 1.8 * u, (bw - 3.6 * u) * 0.8, bh - 3.6 * u);
+
+  // WiFi / signál (4 čárky)
+  const sx = bx - 16 * u;
+  for (let i = 0; i < 4; i++) {
+    const sH = (2.8 + i * 2) * u;
+    c.fillRect(sx + i * 3 * u, statH / 2 + 4.2 * u - sH, 1.8 * u, sH);
+  }
+
+  // 2. Lišta prohlížeče (Chrome / Android Browser Toolbar)
+  c.fillStyle = D ? '#212226' : '#ffffff';
+  c.fillRect(0, statH, w, barH);
+  // Dělící spodní linka lišty
+  c.fillStyle = D ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.08)';
+  c.fillRect(0, tb - Math.max(1, 0.8 * u), w, Math.max(1, 0.8 * u));
+
+  // Šipky zpět a vpřed vlevo
+  c.lineWidth = Math.max(1, 1.6 * u);
+  c.lineCap = c.lineJoin = 'round';
+
+  // Šipka zpět
+  c.strokeStyle = D ? '#e3e3e3' : '#444746';
+  c.beginPath();
+  c.moveTo(25 * u, cy2);
+  c.lineTo(15 * u, cy2);
+  c.lineTo(19 * u, cy2 - 4 * u);
+  c.moveTo(15 * u, cy2);
+  c.lineTo(19 * u, cy2 + 4 * u);
+  c.stroke();
+
+  // Šipka vpřed
+  c.strokeStyle = D ? '#666870' : '#bbbec4';
+  c.beginPath();
+  c.moveTo(35 * u, cy2);
+  c.lineTo(45 * u, cy2);
+  c.lineTo(41 * u, cy2 - 4 * u);
+  c.moveTo(45 * u, cy2);
+  c.lineTo(41 * u, cy2 + 4 * u);
+  c.stroke();
+
+  // Ovládací prvky vpravo: Kebab menu ⋮ a čítač záložek [ 1 ]
+  // Menu se třemi tečkami ⋮
+  const menuX = w - 16 * u;
+  c.fillStyle = D ? '#e3e3e3' : '#444746';
+  for (let d = -1; d <= 1; d++) {
+    c.beginPath();
+    c.arc(menuX, cy2 + d * 4.5 * u, 1.3 * u, 0, Math.PI * 2);
+    c.fill();
+  }
+
+  // Ikonický Android čítač záložek [ 1 ]
+  const tbx = w - 46 * u, tby = cy2 - 7.5 * u, tbs = 15 * u;
+  c.strokeStyle = D ? '#e3e3e3' : '#444746';
+  c.lineWidth = Math.max(1, 1.4 * u);
+  c.beginPath();
+  c.roundRect(tbx, tby, tbs, tbs, 3.5 * u);
+  c.stroke();
+  c.fillStyle = D ? '#e3e3e3' : '#444746';
+  c.font = `700 ${9.5 * u}px -apple-system, Roboto, sans-serif`;
+  c.textAlign = 'center';
+  c.textBaseline = 'middle';
+  c.fillText('1', tbx + tbs / 2, cy2 + 0.5 * u);
+
+  // 3. Adresní řádek Omnibox (Material You vycentrovaná pilulka se zámkem)
+  if (S.showUrl) {
+    const ow = Math.min(w * 0.58, Math.max(160 * u, w - 150 * u));
+    const ox = (w - ow) / 2;
+    const oh = 28 * u, oy = cy2 - oh / 2;
+
+    c.fillStyle = D ? '#1a1b1f' : '#f0f3f8';
+    c.beginPath();
+    c.roundRect(ox, oy, ow, oh, 14 * u);
+    c.fill();
+    if (D) {
+      c.strokeStyle = 'rgba(255,255,255,0.08)';
+      c.lineWidth = 1;
+      c.stroke();
+    }
+
+    // Ikona zámku v řádku
+    const lx = ox + 14 * u, ly = cy2;
+    c.strokeStyle = D ? '#9aa0a6' : '#5f6368';
+    c.fillStyle = D ? '#9aa0a6' : '#5f6368';
+    c.lineWidth = 1.1 * u;
+    c.beginPath();
+    c.arc(lx, ly - 2.5 * u, 2.3 * u, Math.PI, 0);
+    c.stroke();
+    c.fillRect(lx - 3.2 * u, ly - 1.2 * u, 6.4 * u, 5.2 * u);
+
+    // Text adresy URL
+    c.fillStyle = D ? '#e8eaed' : '#1f1f1f';
+    c.font = `400 ${11.5 * u}px -apple-system, Roboto, "Segoe UI", sans-serif`;
+    c.textAlign = 'left';
+    c.textBaseline = 'middle';
+    c.fillText(S.url, ox + 24 * u, cy2 + 0.5 * u, ow - 36 * u);
+  }
+}
+
+function show() {
+  const dpr = Math.max(2, window.devicePixelRatio || 1);
+  draw($('#cv'), cur, dpr);
+  const [bw, bh] = SZ[cur];
+  const scale = S.exportScale || 2;
+  $('#cap').textContent = `${bw} × ${bh} px (Export: ${bw * scale} × ${bh * scale} px @ ${scale}×)`;
+}
+
+function o(e) {
+  const n = e.parentElement.querySelector('output');
+  if (n) n.textContent = e.value;
+}
+
+function updateBgVisibility() {
+  const t = S.bgType;
+  const isPattern = ['dots', 'grid', 'contour', 'ascii', 'pixel', 'isometric', 'crosses'].includes(t);
+  $('#rowC1').classList.toggle('hidden', t === 'transparent');
+  $('#rowC2').classList.toggle('hidden', t === 'solid' || t === 'transparent');
+  $('#rowC3').classList.toggle('hidden', t === 'solid' || t === 'transparent' || t === 'dots' || t === 'grid' || t === 'crosses');
+  $('#rowC4').classList.toggle('hidden', t !== 'mesh' && t !== 'pixel');
+  $('#rowAng').classList.toggle('hidden', t === 'solid' || t === 'radial' || t === 'mesh' || t === 'transparent' || t === 'isometric');
+  $('#rowNoise').classList.toggle('hidden', t === 'transparent');
+  $('#rowGrid').classList.toggle('hidden', !isPattern);
+}
+
+function sync() {
+  $$('[data-g]').forEach(e => {
+    const v = S[e.dataset.g];
+    if (e.type === 'checkbox') e.checked = v;
+    else e.value = v;
+    o(e);
+  });
+  $$('[data-t]').forEach(e => {
+    e.value = S[cur][e.dataset.t];
+    o(e);
+  });
+  $$('#scaleSelector button').forEach(b => {
+    b.classList.toggle('on', +b.dataset.scale === S.exportScale);
+  });
+  $$('#browserSelector button').forEach(b => {
+    b.classList.toggle('on', b.dataset.browser === S.browser);
+  });
+  const lblCh = $('#lblCh');
+  if (lblCh) {
+    if (S.browser === 'chrome') lblCh.textContent = 'Prvky Chrome %';
+    else if (S.browser === 'tablet') lblCh.textContent = 'Prvky Tabletu %';
+    else lblCh.textContent = 'Prvky Safari %';
+  }
+  const rowTabTitle = $('#rowTabTitle');
+  if (rowTabTitle) {
+    rowTabTitle.classList.toggle('hidden', S.browser !== 'chrome');
+  }
+  updateBgVisibility();
+}
+
+// Inicializace tlačítek předvoleb
+function initPresets() {
+  const cont = $('#presets');
+  cont.innerHTML = '';
+  PRESETS.forEach(p => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'preset-btn';
+    btn.innerHTML = `<span class="preset-dot" style="background:${p.type==='transparent'?'#ffffff':`linear-gradient(135deg, ${p.c1}, ${p.c2})`}"></span>${p.name}`;
+    btn.addEventListener('click', () => {
+      S.bgType = p.type;
+      S.c1 = p.c1;
+      S.c2 = p.c2;
+      if (p.c3) S.c3 = p.c3;
+      if (p.c4) S.c4 = p.c4;
+      if (p.ang !== undefined) S.ang = p.ang;
+      if (p.noise !== undefined) S.noise = p.noise;
+      if (p.gridSpacing !== undefined) S.gridSpacing = p.gridSpacing;
+      if (p.dark !== undefined) S.dark = p.dark;
+      sync();
+      show();
+    });
+    cont.appendChild(btn);
+  });
+}
+
+// Přepínání prohlížeče (Safari vs Chrome Windows)
+$('#browserSelector').addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  S.browser = b.dataset.browser;
+  sync();
+  show();
+});
+
+// Přepínání škálování (1x, 2x Retina, 3x 4K)
+$('#scaleSelector').addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  S.exportScale = +b.dataset.scale;
+  sync();
+  show();
+});
+
+$('aside').addEventListener('input', e => {
+  const t = e.target, g = t.dataset.g, k = t.dataset.t;
+  if (g) {
+    S[g] = t.type === 'checkbox' ? t.checked : t.type === 'range' ? +t.value : t.value;
+    if (g === 'bgType') updateBgVisibility();
+  } else if (k) {
+    S[cur][k] = +t.value;
+  } else {
+    return;
+  }
+  o(t);
+  show();
+});
+
+$('#tabs').addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  cur = b.dataset.k;
+  $$('#tabs button').forEach(x => x.classList.toggle('on', x === b));
+  sync();
+  show();
+});
+
+function load(f) {
+  if (!f || !f.type.startsWith('image/')) return;
+  const fr = new FileReader();
+  fr.onload = () => {
+    const i = new Image();
+    i.onload = () => {
+      img = i;
+      $('#dropText').textContent = f.name.length > 20 ? f.name.slice(0, 18) + '…' : f.name;
+      show();
+    };
+    i.src = fr.result;
+  };
+  fr.readAsDataURL(f);
+}
+
+$('#file').addEventListener('change', e => load(e.target.files[0]));
+$('#clr').addEventListener('click', () => {
+  img = null;
+  $('#file').value = '';
+  $('#dropText').textContent = 'Vložit vlastní screenshot';
+  show();
+});
+$('#btnUseMockup').addEventListener('click', () => {
+  img = null;
+  $('#file').value = '';
+  $('#dropText').textContent = 'Přednastavený mockup aktivní';
+  show();
+});
+
+['dragenter', 'dragover'].forEach(n => document.addEventListener(n, e => {
+  e.preventDefault();
+  $('#drop').classList.add('over');
+}));
+['dragleave', 'drop'].forEach(n => document.addEventListener(n, e => {
+  e.preventDefault();
+  $('#drop').classList.remove('over');
+}));
+document.addEventListener('drop', e => load(e.dataTransfer.files[0]));
+document.addEventListener('paste', e => load([...(e.clipboardData?.files || [])][0]));
+
+async function save(key) {
+  const scale = S.exportScale || 2;
+  const cv = document.createElement('canvas');
+  draw(cv, key, scale);
+  const b = await new Promise(r => cv.toBlob(r, 'image/png'));
+  const actualW = SZ[key][0] * scale;
+  const actualH = SZ[key][1] * scale;
+  const name = ($('#fn').value.trim() || 'sablona') + '-' + NM[key] + '-' + actualW + 'x' + actualH + '.png';
+  let d = null;
+  try { d = await window.claude?.use('downloads'); } catch (_) {}
+  if (d) {
+    await d.save({ filename: name, data: b });
+  } else {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(b);
+    a.download = name;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  }
+}
+
+async function exp(keys) {
+  const m = $('#msg');
+  m.textContent = 'Generuji PNG ve vysoké kvalitě…';
+  try {
+    for (const k of keys) await save(k);
+    m.textContent = 'Hotovo. Export byl úspěšně stažen.';
+    setTimeout(() => { m.textContent = ''; }, 4500);
+  } catch (e) {
+    m.textContent = e && e.code === 'declined' ? 'Export byl zrušen.' : 'Export se nepodařil.';
+  }
+}
+
+$('#e1').addEventListener('click', () => exp([cur]));
+$('#e2').addEventListener('click', () => exp(['cover', 'thumb']));
+
+// Interaktivní posun textu tažením myší přímo na plátně
+let isDraggingText = false;
+
+function getTextHitBox(baseW, baseH) {
+  if (!S.showText || !S.text || !S.text.trim()) return null;
+  const tx = baseW * (S.textX / 100);
+  const ty = baseH * (S.textY / 100);
+  const fontSize = (S.textSize || 36) * (baseW / 1280);
+  const lines = S.text.split('\n');
+  const lh = fontSize * 1.25;
+  const totalH = lines.length * lh;
+  const maxLineLen = Math.max(...lines.map(l => l.length), 1);
+  const approxW = Math.max(40, maxLineLen * fontSize * 0.6);
+  let left = tx - approxW / 2;
+  if (S.textAlign === 'left') left = tx;
+  else if (S.textAlign === 'right') left = tx - approxW;
+  return {
+    x: left - 15,
+    y: ty - totalH / 2 - 15,
+    w: approxW + 30,
+    h: totalH + 30
+  };
+}
+
+const cvEl = $('#cv');
+cvEl.addEventListener('mousedown', e => {
+  if (!S.showText || !S.text || !S.text.trim()) return;
+  const [baseW, baseH] = SZ[cur];
+  const rect = cvEl.getBoundingClientRect();
+  const mx = (e.clientX - rect.left) * (baseW / rect.width);
+  const my = (e.clientY - rect.top) * (baseH / rect.height);
+  const b = getTextHitBox(baseW, baseH);
+  if (b && mx >= b.x && mx <= b.x + b.w && my >= b.y && my <= b.y + b.h) {
+    isDraggingText = true;
+    cvEl.style.cursor = 'grabbing';
+    e.preventDefault();
+  }
+});
+
+window.addEventListener('mousemove', e => {
+  if (!isDraggingText) {
+    if (S.showText && S.text && S.text.trim()) {
+      const [baseW, baseH] = SZ[cur];
+      const rect = cvEl.getBoundingClientRect();
+      const mx = (e.clientX - rect.left) * (baseW / rect.width);
+      const my = (e.clientY - rect.top) * (baseH / rect.height);
+      const b = getTextHitBox(baseW, baseH);
+      if (b && mx >= b.x && mx <= b.x + b.w && my >= b.y && my <= b.y + b.h) {
+        cvEl.style.cursor = 'grab';
+        return;
+      }
+    }
+    cvEl.style.cursor = 'default';
+    return;
+  }
+  const [baseW, baseH] = SZ[cur];
+  const rect = cvEl.getBoundingClientRect();
+  const mx = (e.clientX - rect.left) * (baseW / rect.width);
+  const my = (e.clientY - rect.top) * (baseH / rect.height);
+  S.textX = Math.round(Math.max(0, Math.min(100, (mx / baseW) * 100)));
+  S.textY = Math.round(Math.max(0, Math.min(100, (my / baseH) * 100)));
+  sync();
+  show();
+});
+
+window.addEventListener('mouseup', () => {
+  if (isDraggingText) {
+    isDraggingText = false;
+    cvEl.style.cursor = 'default';
+  }
+});
+
+initPresets();
+sync();
+show();
+</script>
+</body>
+</html>
