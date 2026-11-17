@@ -287,8 +287,10 @@
             <div class="header-actions">
                 <!-- Vyhledávací pole vysouvající se doleva přímo z tlačítka -->
                 <div class="search-drawer" id="search-drawer">
-                    <button type="button" id="search-open-btn" class="header-action-btn search-trigger-btn" aria-label="Hledat nástroj (⌘F)" title="Hledat nástroj (⌘F)">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <button type="button" id="search-open-btn" class="header-action-btn search-trigger-btn"
+                        aria-label="Hledat nástroj (⌘F)" title="Hledat nástroj (⌘F)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="11" cy="11" r="8"></circle>
                             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                         </svg>
@@ -297,15 +299,20 @@
                     </button>
 
                     <div class="search-expand-bar" id="search-expand-bar" aria-hidden="true">
-                        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="11" cy="11" r="8"></circle>
                             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                         </svg>
-                        <input type="text" id="generator-search" class="search-input" placeholder="Hledat nástroj, pasport..." autocomplete="off" spellcheck="false">
-                        <button type="button" id="search-clear" class="search-clear" aria-label="Vymazat hledání" title="Vymazat hledání" style="display:none;">&times;</button>
-                        <button type="button" id="search-close-btn" class="search-close-btn" aria-label="Zavřít hledání (Esc)" title="Zavřít hledání (Esc)">
+                        <input type="text" id="generator-search" class="search-input"
+                            placeholder="Hledat nástroj, pasport..." autocomplete="off" spellcheck="false">
+                        <button type="button" id="search-clear" class="search-clear" aria-label="Vymazat hledání"
+                            title="Vymazat hledání" style="display:none;">&times;</button>
+                        <button type="button" id="search-close-btn" class="search-close-btn"
+                            aria-label="Zavřít hledání (Esc)" title="Zavřít hledání (Esc)">
                             <kbd class="esc-kbd">Esc</kbd>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="18" y1="6" x2="6" y2="18"></line>
                                 <line x1="6" y1="6" x2="18" y2="18"></line>
                             </svg>
@@ -316,15 +323,19 @@
 
                 <!-- Tlačítko a dropdown pro Další nástroje -->
                 <div class="tools-dropdown" id="tools-dropdown">
-                    <button type="button" id="tools-toggle-btn" class="header-action-btn tools-toggle-btn" aria-label="Další nástroje a repozitáře" aria-haspopup="true" aria-expanded="false" title="Další nástroje (GitHub)">
-                        <svg class="icon-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <button type="button" id="tools-toggle-btn" class="header-action-btn tools-toggle-btn"
+                        aria-label="Další nástroje a repozitáře" aria-haspopup="true" aria-expanded="false"
+                        title="Další nástroje (GitHub)">
+                        <svg class="icon-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
                             <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
                             <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
                             <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
                             <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
                         </svg>
                         <span class="btn-label">Další nástroje</span>
-                        <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="6 9 12 15 18 9"></polyline>
                         </svg>
                     </button>
@@ -335,54 +346,62 @@
                             <span class="dropdown-author">jakubsutta</span>
                         </div>
                         <div class="dropdown-items">
-                            <a href="https://github.com/jakubsutta/qgis-AzimuthEditor-plugin" target="_blank" rel="noopener noreferrer" class="dropdown-item" role="menuitem">
+                            <a href="https://github.com/jakubsutta/qgis-AzimuthEditor-plugin" target="_blank"
+                                rel="noopener noreferrer" class="dropdown-item" role="menuitem">
                                 <div class="item-icon-box">
                                     <svg class="github-icon" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+                                        <path
+                                            d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
                                     </svg>
                                 </div>
                                 <div class="item-text">
-                                    <div class="item-title">qgis-AzimuthEditor-plugin</div>
-                                    <div class="item-sub">Editor azimutů pro QGIS</div>
+                                    <div class="item-title">QPlugin / Azimut set</div>
+                                    <div class="item-sub">Editor azimutu pro QGIS</div>
                                 </div>
                                 <span class="tag-badge tag-qgis">QGIS</span>
                             </a>
 
-                            <a href="https://github.com/jakubsutta/CAD-viewer" target="_blank" rel="noopener noreferrer" class="dropdown-item" role="menuitem">
+                            <a href="https://jakubsutta.github.io/CAD-viewer/" target="_blank" rel="noopener noreferrer"
+                                class="dropdown-item" role="menuitem">
                                 <div class="item-icon-box">
                                     <svg class="github-icon" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+                                        <path
+                                            d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
                                     </svg>
                                 </div>
                                 <div class="item-text">
-                                    <div class="item-title">CAD-viewer</div>
+                                    <div class="item-title">CAD Viewer</div>
                                     <div class="item-sub">Webový prohlížeč CAD výkresů</div>
                                 </div>
                                 <span class="tag-badge tag-html">HTML</span>
                             </a>
 
-                            <a href="https://github.com/jakubsutta/Point-elevation-calculator" target="_blank" rel="noopener noreferrer" class="dropdown-item" role="menuitem">
+                            <a href="https://jakubsutta.github.io/Point-elevation-calculator/" target="_blank"
+                                rel="noopener noreferrer" class="dropdown-item" role="menuitem">
                                 <div class="item-icon-box">
                                     <svg class="github-icon" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+                                        <path
+                                            d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
                                     </svg>
                                 </div>
                                 <div class="item-text">
-                                    <div class="item-title">Point-elevation-calculator</div>
+                                    <div class="item-title">Výpočet výšky dle sklonu a délky</div>
                                     <div class="item-sub">Kalkulačka výšek bodů</div>
                                 </div>
                                 <span class="tag-badge tag-html">HTML</span>
                             </a>
 
-                            <a href="https://github.com/jakubsutta/qgis-XML-JVF-import-plugin" target="_blank" rel="noopener noreferrer" class="dropdown-item" role="menuitem">
+                            <a href="https://github.com/jakubsutta/qgis-XML-JVF-import-plugin" target="_blank"
+                                rel="noopener noreferrer" class="dropdown-item" role="menuitem">
                                 <div class="item-icon-box">
                                     <svg class="github-icon" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+                                        <path
+                                            d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
                                     </svg>
                                 </div>
                                 <div class="item-text">
-                                    <div class="item-title">qgis-XML-JVF-import-plugin</div>
-                                    <div class="item-sub">Import XML JVF do QGIS</div>
+                                    <div class="item-title">QPlugin / JVF-1.4.3-Import</div>
+                                    <div class="item-sub">Import JVF.XML do QGIS</div>
                                 </div>
                                 <span class="tag-badge tag-qgis">QGIS</span>
                             </a>
@@ -390,9 +409,11 @@
                     </div>
                 </div>
 
-                <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Přepnout tmavý / světlý režim" title="Přepnout tmavý / světlý režim">
+                <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Přepnout tmavý / světlý režim"
+                    title="Přepnout tmavý / světlý režim">
                     <!-- Ikona sluníčka (zobrazena ve světlém režimu) -->
-                    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="5"></circle>
                         <line x1="12" y1="1" x2="12" y2="3"></line>
                         <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -404,7 +425,8 @@
                         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                     </svg>
                     <!-- Ikona měsíce (zobrazena v tmavém režimu) -->
-                    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                     </svg>
                 </button>
@@ -420,12 +442,15 @@
         <div class="columns-wrapper">
             <!-- SLOUPEC 1: PROTOKOLY -->
             <div class="column">
-                <div class="column-header" role="button" tabindex="0" aria-label="Sbalit nebo rozbalit sekci Protokoly, validace">
+                <div class="column-header" role="button" tabindex="0"
+                    aria-label="Sbalit nebo rozbalit sekci Protokoly, validace">
                     <h2 class="column-title">1) Protokoly, validace</h2>
                     <div class="column-meta">
                         <span class="column-count">4</span>
-                        <button type="button" class="column-collapse-btn" aria-label="Sbalit / rozbalit sekci" title="Sbalit / rozbalit sekci" tabindex="-1">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <button type="button" class="column-collapse-btn" aria-label="Sbalit / rozbalit sekci"
+                            title="Sbalit / rozbalit sekci" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="6 9 12 15 18 9"></polyline>
                             </svg>
                         </button>
@@ -473,12 +498,15 @@
 
             <!-- SLOUPEC 2: TABULKY, KARTY, MAPY, KALENDÁŘ -->
             <div class="column">
-                <div class="column-header" role="button" tabindex="0" aria-label="Sbalit nebo rozbalit sekci Tabulky, Mapy, Kalendář, Tisk">
+                <div class="column-header" role="button" tabindex="0"
+                    aria-label="Sbalit nebo rozbalit sekci Tabulky, Mapy, Kalendář, Tisk">
                     <h2 class="column-title">2) Tabulky, Mapy, Kalendář, Tisk</h2>
                     <div class="column-meta">
                         <span class="column-count">10</span>
-                        <button type="button" class="column-collapse-btn" aria-label="Sbalit / rozbalit sekci" title="Sbalit / rozbalit sekci" tabindex="-1">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <button type="button" class="column-collapse-btn" aria-label="Sbalit / rozbalit sekci"
+                            title="Sbalit / rozbalit sekci" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="6 9 12 15 18 9"></polyline>
                             </svg>
                         </button>
@@ -580,12 +608,15 @@
 
             <!-- SLOUPEC 3: TEXTOVÉ ČÁSTI PASPORTŮ -->
             <div class="column">
-                <div class="column-header" role="button" tabindex="0" aria-label="Sbalit nebo rozbalit sekci Textové části pasportů">
+                <div class="column-header" role="button" tabindex="0"
+                    aria-label="Sbalit nebo rozbalit sekci Textové části pasportů">
                     <h2 class="column-title">3) Textové části pasportů</h2>
                     <div class="column-meta">
                         <span class="column-count">10</span>
-                        <button type="button" class="column-collapse-btn" aria-label="Sbalit / rozbalit sekci" title="Sbalit / rozbalit sekci" tabindex="-1">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <button type="button" class="column-collapse-btn" aria-label="Sbalit / rozbalit sekci"
+                            title="Sbalit / rozbalit sekci" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="6 9 12 15 18 9"></polyline>
                             </svg>
                         </button>
@@ -922,7 +953,7 @@
                         }
                     });
                     localStorage.setItem(STORAGE_KEY_COLLAPSED, JSON.stringify(currentCollapsed));
-                } catch (e) {}
+                } catch (e) { }
             }
 
             columns.forEach((col, idx) => {
