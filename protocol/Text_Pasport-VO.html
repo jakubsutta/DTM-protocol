@@ -3,12 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Generátor textu – Pasport KAN</title>
+<title>Generátor textu – Pasport VO</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
 <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
     /* ---- Tisk / PDF ---- */
     @media print {
@@ -25,6 +26,7 @@
         .logo-obec-box { border: none !important; background: transparent !important; }
         .logo-firma-box { border: none !important; }
         .logo-placeholder { display: none !important; }
+        .rvo-item { page-break-inside: avoid; break-inside: avoid; }
         @page { size: A4; margin: 0; }
     }
 
@@ -115,12 +117,20 @@
     .autocomplete-item small { color: #90a4ae; font-size: 10px; margin-left: 6px; }
     .map-box-big { background: #eef2f5; border: 1px solid #cfd8dc; border-radius: 5px; overflow: hidden; width: 100%; height: 118mm; z-index: 1; margin-top: auto; }
 
-    /* ---- Tabulky nákladů ---- */
+    /* ---- Tabulky nákladů a přehledů ---- */
     .cost-caption { font-size: 10.5px; color: #78909c; font-style: italic; margin: 10px 0 6px; }
     .cost-table { width: 100%; border-collapse: collapse; font-size: 11.5px; margin-bottom: 6px; }
     .cost-table th { background: #f5f7fa; padding: 6px 8px; text-align: center; font-size: 10px; font-weight: 700; color: #78909c; border: 1px solid #e0e0e0; }
     .cost-table td { padding: 6px 8px; text-align: center; border: 1px solid #e0e0e0; }
     .cost-table td:first-child { color: #78909c; font-weight: 600; text-align: left; background: #fafbfc; }
+
+    /* ---- Řazení v tabulkách nákladů a přehledů ---- */
+    .cost-table th.sortable { cursor: pointer; user-select: none; }
+    .cost-table th.sortable:hover { background: #e8e8e8 !important; }
+    .sort-icon { font-size: 9px; margin-left: 4px; display: inline-block; color: #555; }
+    @media print {
+        .sort-icon { display: none !important; }
+    }
 
     /* ---- Podpis ---- */
     .sign-row { display: flex; gap: 50px; margin-top: 22px; align-items: flex-end; }
@@ -193,24 +203,71 @@ tel. +420 778 481 700</textarea>
             <div class="field-note">Nalezená obec se propíše do názvu obce, objednatele a místa řešení.</div>
         </div>
 
-        <div class="page-label">Strana 3 — Svítidla, světelné zdroje</div>
-        <div class="field"><label>1) Svítidla, světelné zdroje</label>
+        <div class="page-label">Strana 3 — Svítidla, podpěrné soustavy</div>
+        <div class="field"><label>1) Svítidla, podpěrné soustavy</label>
             <textarea id="voSvitidla">Veřejné osvětlení v obci [Název obce] má celkem 36 světelných bodů (SB) s celkem 36 svítidly.</textarea>
         </div>
-        
-        <div class="field"><label>Tab. 1 - Přehled všech svítidel v obci</label>
+
+        <div class="section-label">Import dat pasportu VO (XLSX / CSV)</div>
+        <div class="field">
+            <div class="file-field" onclick="document.getElementById('xlsxInput').click()" style="background:#fff; font-weight:600; padding:10px;">
+                📊 Importovat XLSX / CSV pasportu
+            </div>
+            <input type="file" id="xlsxInput" accept=".xlsx, .xls, .csv" style="display:none" onchange="handleXlsxUpload(this)">
+            <div class="field-note">Automaticky načte sloupce „Typ svítidla“, „Druh svítidla“, „Typ světelného zdroje“, „Příkon (W)“ a dopočítá počty pro Tab. 1 i Tab. 2 („Typ stožáru“).</div>
+            <div id="importStatusBox" style="margin-top:6px; font-size:11px; color:#78909c;">Zatím nebyl importován žádný soubor.</div>
+        </div>
+
+        <div class="field" style="margin-top:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <label style="margin:0; font-weight:700;">Tab. 1 – Přehled všech svítidel v obci</label>
+                <button type="button" class="btn btn-secondary" onclick="addVoTableRow()" style="padding:4px 8px; font-size:10px;">+ Přidat řádek</button>
+            </div>
+            <div style="display:grid; grid-template-columns: 1fr 2fr 2fr 2fr 1fr 28px; gap:4px; font-size:10px; font-weight:700; color:#78909c; margin-bottom:3px; padding:0 2px;">
+                <div>Počet</div>
+                <div>Typ svítidla</div>
+                <div>Druh svítidla</div>
+                <div>Typ zdroje</div>
+                <div>Příkon</div>
+                <div></div>
+            </div>
             <div id="voTableRows"></div>
-            <button type="button" class="btn btn-secondary" onclick="addVoTableRow()" style="margin-top:8px; padding:6px 12px; font-size:11px;">+ Přidat řádek</button>
+            <div id="formVoTable1Total" style="font-size:11px; color:#78909c; font-weight:600; margin-top:6px; text-align:right;">Počet ks celkem: <strong id="formVoTable1TotalVal" style="color:#1a1a2e;">0</strong> ks</div>
+        </div>
+
+        <div class="field" style="margin-top:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <label style="margin:0; font-weight:700;">Tab. 2 – Přehled podpěrných soustav</label>
+                <button type="button" class="btn btn-secondary" onclick="addVoTable2Row()" style="padding:4px 8px; font-size:10px;">+ Přidat řádek</button>
+            </div>
+            <div style="display:grid; grid-template-columns: 1fr 3fr 28px; gap:4px; font-size:10px; font-weight:700; color:#78909c; margin-bottom:3px; padding:0 2px;">
+                <div>Počet</div>
+                <div>Typ stožáru</div>
+                <div></div>
+            </div>
+            <div id="voTable2Rows"></div>
+            <div id="formVoTable2Total" style="font-size:11px; color:#78909c; font-weight:600; margin-top:6px; text-align:right;">Počet ks celkem: <strong id="formVoTable2TotalVal" style="color:#1a1a2e;">0</strong> ks</div>
         </div>
 
         <div class="page-label">Strana 4 — Rozvaděče a Vedení</div>
         <div class="field"><label>2) Rozvaděče, řízení, regulace</label>
-            <textarea id="voRozvadece">K napájení sítě veřejného osvětlení v obci [Název obce] slouží celkem 1 rozvaděč.
+            <textarea id="voRozvadece">K napájení sítě veřejného osvětlení v obci [Název obce] slouží celkem 1 rozvaděč.</textarea>
+        </div>
 
-Rozvaděč RVO-01 je umístěný v intravilánu obce na budově OÚ. Provedení rozvaděče – plastová skříň. Na RVO je napojeno celkem 36 světelných bodů.
+        <div class="field" style="margin-top:10px;">
+            <label style="font-weight:700;">Barva pro rozvaděč (RVO)</label>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <input type="color" id="rvoDefaultColor" value="#ea521f" style="width:42px; height:32px; padding:2px; border:1px solid #9c27b0; border-radius:4px; cursor:pointer;" onchange="onRvoDefaultColorChange(this.value)">
+                <span style="font-size:11px; color:#555;">Barva symbolu v mapě</span>
+            </div>
+        </div>
 
-Způsob spínání rozvaděče
-Stmívač/stmívací čidlo.</textarea>
+        <div class="field" style="margin-top:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <label style="margin:0; font-weight:700;">Rozvaděče (RVO)</label>
+                <button type="button" class="btn btn-secondary" onclick="addRvo()" style="padding:4px 8px; font-size:10px;">+ Přidat rozvaděč (RVO)</button>
+            </div>
+            <div id="rvoFormList"></div>
         </div>
         
         <div class="field"><label>3) Vedení, nosné prvky</label>
@@ -275,25 +332,31 @@ Veřejné osvětlení je v obci pravidelně kontrolováno a udržováno.</textar
             </table>
             <div class="sec-title">Mapa zájmového území</div>
             <div class="map-box-big" id="map-container"></div>
-            <div class="page-footer"><div>Pasport dopravního značení</div><div>2</div></div>
+            <div class="page-footer"><div>Pasport veřejného osvětlení</div><div>2</div></div>
         </div>
 
         <!-- STRANA 3 -->
         <div class="page">
-            <div class="sec-title" style="font-size:13px; text-transform:none; letter-spacing:0; color:#1a1a2e; border-bottom:2px solid #ea521f; padding-bottom:8px; margin-bottom:16px;">1) Svítidla, světelné zdroje</div>
+            <div class="sec-title" style="font-size:13px; text-transform:none; letter-spacing:0; color:#1a1a2e; border-bottom:2px solid #ea521f; padding-bottom:8px; margin-bottom:16px;">1) Svítidla, podpěrné soustavy</div>
             <div class="ptext" id="p-voSvitidla"></div>
             
             <div class="cost-caption" style="margin-top:20px; font-weight:700;">Tab. 1 – Přehled všech svítidel v obci <span id="p-tabObec"></span></div>
-            <table class="cost-table" style="margin-bottom:20px; width:100%; border-collapse: collapse; font-size: 11px;">
-                <tr style="background:#f5f5f5;">
-                    <th style="padding:6px; border:1px solid #ddd; text-align:left;">Počet (ks)</th>
-                    <th style="padding:6px; border:1px solid #ddd; text-align:left;">Typ stožáru</th>
-                    <th style="padding:6px; border:1px solid #ddd; text-align:left;">Druh svítidla</th>
-                    <th style="padding:6px; border:1px solid #ddd; text-align:left;">Typ světelného zdroje</th>
-                    <th style="padding:6px; border:1px solid #ddd; text-align:left;">Příkon (W)</th>
-                </tr>
+            <table class="cost-table" id="p-voTable1" style="margin-bottom:20px; width:100%; border-collapse: collapse; font-size: 11px;">
+                <thead>
+                    <tr style="background:#f5f7fa;" id="voTable1Head"></tr>
+                </thead>
                 <tbody id="p-voTableBody"></tbody>
             </table>
+            <div id="p-voTable1TotalBox" style="font-size:11px; margin-top:-14px; margin-bottom:18px; color:#78909c; font-weight:600; text-align:left;">Počet ks celkem: <strong id="p-voTable1TotalVal" style="color:#1a1a2e; font-weight:700;">0</strong> ks</div>
+
+            <div class="cost-caption" style="margin-top:20px; font-weight:700;">Tab. 2 – Přehled podpěrných soustav</div>
+            <table class="cost-table" id="p-voTable2" style="margin-bottom:20px; width:100%; border-collapse: collapse; font-size: 11px;">
+                <thead>
+                    <tr style="background:#f5f7fa;" id="voTable2Head"></tr>
+                </thead>
+                <tbody id="p-voTable2Body"></tbody>
+            </table>
+            <div id="p-voTable2TotalBox" style="font-size:11px; margin-top:-14px; margin-bottom:18px; color:#78909c; font-weight:600; text-align:left;">Počet ks celkem: <strong id="p-voTable2TotalVal" style="color:#1a1a2e; font-weight:700;">0</strong> ks</div>
 
             <div class="page-footer"><div>Pasport veřejného osvětlení</div><div>3</div></div>
         </div>
@@ -302,6 +365,7 @@ Veřejné osvětlení je v obci pravidelně kontrolováno a udržováno.</textar
         <div class="page">
             <div class="sec-title" style="font-size:13px; text-transform:none; letter-spacing:0; color:#1a1a2e; border-bottom:2px solid #ea521f; padding-bottom:8px; margin-bottom:16px;">2) Rozvaděče, řízení, regulace</div>
             <div class="ptext" id="p-voRozvadece"></div>
+            <div id="p-voRvoList"></div>
             
             <div class="sec-title" style="font-size:13px; text-transform:none; letter-spacing:0; color:#1a1a2e; border-bottom:2px solid #ea521f; padding-bottom:8px; margin-bottom:16px; margin-top:20px;">3) Vedení, nosné prvky</div>
             <div class="ptext" id="p-voVedeni"></div>
@@ -609,47 +673,567 @@ function setHtml(id, text) {
         }
     }
 }
-let voTableData = [
-    ["17", "sadový", "ClearWay gen2 BGP307", "LED", "21,5"],
-    ["13", "sadový", "CoreLine Malaga BRP101", "LED", "25"],
-    ["4", "silniční výložníkový", "444 19 70", "SHC", "70"],
-    ["2", "silniční výložníkový", "Atos", "LED", "70"]
+// ==== TABULKY VO (Svítidla a Podpěrné soustavy) ====
+let voTableData = [];
+let voTable2Data = [];
+
+let sortTable1 = { col: 'pocet', dir: 'desc' };
+let sortTable2 = { col: 'pocet', dir: 'desc' };
+
+function changeSortTable1(col) {
+    if (sortTable1.col === col) {
+        sortTable1.dir = sortTable1.dir === 'asc' ? 'desc' : 'asc';
+    } else {
+        sortTable1.col = col;
+        sortTable1.dir = (col === 'pocet' || col === 'prikon') ? 'desc' : 'asc';
+    }
+    updateVoTablesPreview();
+}
+
+function changeSortTable2(col) {
+    if (sortTable2.col === col) {
+        sortTable2.dir = sortTable2.dir === 'asc' ? 'desc' : 'asc';
+    } else {
+        sortTable2.col = col;
+        sortTable2.dir = (col === 'pocet') ? 'desc' : 'asc';
+    }
+    updateVoTablesPreview();
+}
+
+function getSortedData(data, sortState) {
+    const list = [...data];
+    const { col, dir } = sortState;
+    list.sort((a, b) => {
+        let valA = a[col];
+        let valB = b[col];
+
+        if (col === 'pocet') {
+            const numA = Number(valA) || 0;
+            const numB = Number(valB) || 0;
+            return dir === 'asc' ? numA - numB : numB - numA;
+        }
+
+        if (col === 'prikon') {
+            const isDashA = valA === '-' || valA === 'Neuvedeno' || !valA;
+            const isDashB = valB === '-' || valB === 'Neuvedeno' || !valB;
+            if (isDashA && isDashB) return 0;
+            if (isDashA) return 1;
+            if (isDashB) return -1;
+            const numA = parseFloat(String(valA).replace(',', '.')) || 0;
+            const numB = parseFloat(String(valB).replace(',', '.')) || 0;
+            return dir === 'asc' ? numA - numB : numB - numA;
+        }
+
+        const strA = String(valA || '');
+        const strB = String(valB || '');
+        const cmp = strA.localeCompare(strB, 'cs', { sensitivity: 'base', numeric: true });
+        return dir === 'asc' ? cmp : -cmp;
+    });
+    return list;
+}
+
+// ==== ROZVADĚČE (RVO) ====
+let rvoDefaultColor = '#ea521f';
+let rvoList = [
+    {
+        nazev: 'Rozvaděč RVO-01',
+        popis: 'Rozvaděč RVO-01 je umístěný v intravilánu obce na budově OÚ. Provedení rozvaděče – plastová skříň. Na RVO je napojeno celkem 36 světelných bodů.',
+        spinani: 'Stmívač/stmívací čidlo.',
+        color: '#ea521f'
+    }
 ];
 
-function renderVoTable() {
-    const container = document.getElementById('voTableRows');
+function onRvoDefaultColorChange(val) {
+    rvoDefaultColor = val;
+    rvoList.forEach(r => {
+        r.color = val;
+    });
+    renderRvoForm();
+    renderRvoPreview();
+}
+
+function addRvo() {
+    const num = rvoList.length + 1;
+    const numStr = String(num).padStart(2, '0');
+    rvoList.push({
+        nazev: `Rozvaděč RVO-${numStr}`,
+        popis: '',
+        spinani: '',
+        color: rvoDefaultColor
+    });
+    renderRvoForm();
+    renderRvoPreview();
+}
+
+function removeRvo(index) {
+    rvoList.splice(index, 1);
+    renderRvoForm();
+    renderRvoPreview();
+}
+
+function renderRvoForm() {
+    const container = document.getElementById('rvoFormList');
+    if (!container) return;
     container.innerHTML = '';
+
+    const colorInput = document.getElementById('rvoDefaultColor');
+    if (colorInput && colorInput.value !== rvoDefaultColor) {
+        colorInput.value = rvoDefaultColor;
+    }
+
+    if (rvoList.length === 0) {
+        container.innerHTML = '<div style="font-size:11px; color:#90a4ae; font-style:italic; padding:6px 0;">Žádné rozvaděče. Klikněte na „+ Přidat rozvaděč (RVO)“.</div>';
+        return;
+    }
+
+    rvoList.forEach((rvo, i) => {
+        const itemColor = rvo.color || rvoDefaultColor;
+        const card = document.createElement('div');
+        card.style.background = '#fff';
+        card.style.border = '1px solid #9c27b0';
+        card.style.borderRadius = '5px';
+        card.style.padding = '8px 10px';
+        card.style.marginBottom = '8px';
+
+        card.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <strong style="font-size:11px; color:#9c27b0;">Rozvaděč #${i + 1}</strong>
+                    <span style="display:inline-flex; align-items:center; gap:4px; font-size:10px; color:#555;">
+                        <span>Symbol:</span>
+                        <span id="rvoMiniSymbol_${i}" style="display:inline-block; width:11px; height:11px; background:${escapeHtml(itemColor)}; border:1.5px solid #000; vertical-align:middle;"></span>
+                    </span>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px;">
+                    <input type="color" value="${escapeHtml(itemColor)}" oninput="rvoList[${i}].color=this.value; const ms=document.getElementById('rvoMiniSymbol_${i}'); if(ms) ms.style.background=this.value; renderRvoPreview();" title="Upravit barvu pro tento rozvaděč" style="width:24px; height:22px; padding:1px; border:1px solid #ccc; border-radius:3px; cursor:pointer;">
+                    <button type="button" onclick="removeRvo(${i})" style="background:#f44336; color:#fff; border:none; border-radius:4px; width:22px; height:22px; font-size:14px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center;" title="Smazat rozvaděč">×</button>
+                </div>
+            </div>
+            <div style="margin-bottom:6px;">
+                <label style="font-size:10px; color:#78909c; display:block; margin-bottom:2px;">Označení</label>
+                <input type="text" value="${escapeHtml(rvo.nazev || '')}" oninput="rvoList[${i}].nazev=this.value; renderRvoPreview();" placeholder="např. Rozvaděč RVO-01">
+            </div>
+            <div style="margin-bottom:6px;">
+                <label style="font-size:10px; color:#78909c; display:block; margin-bottom:2px;">Popis a umístění</label>
+                <textarea oninput="rvoList[${i}].popis=this.value; renderRvoPreview();" placeholder="např. Umístěný v intravilánu obce na budově OÚ..." style="min-height:48px;">${escapeHtml(rvo.popis || '')}</textarea>
+            </div>
+            <div>
+                <label style="font-size:10px; color:#78909c; display:block; margin-bottom:2px;">Způsob spínání</label>
+                <input type="text" value="${escapeHtml(rvo.spinani || '')}" oninput="rvoList[${i}].spinani=this.value; renderRvoPreview();" placeholder="např. Stmívač/stmívací čidlo.">
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function renderRvoPreview() {
+    const container = document.getElementById('p-voRvoList');
+    if (!container) return;
+    container.innerHTML = '';
+    if (!rvoList || rvoList.length === 0) return;
+
+    rvoList.forEach(rvo => {
+        const itemColor = rvo.color || rvoDefaultColor || '#ea521f';
+        const item = document.createElement('div');
+        item.className = 'rvo-item ptext';
+        item.style.marginTop = '12px';
+        item.style.marginBottom = '14px';
+
+        item.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <strong style="color:#1a1a2e; font-size:12.5px;">${escapeHtml(rvo.nazev || 'Rozvaděč RVO')}</strong>
+                <span style="display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:600; color:#546e7a;">
+                    <span>Symbol v mapě</span>
+                    <span style="display:inline-block; width:12px; height:12px; background:${escapeHtml(itemColor)}; border:1.5px solid #000; vertical-align:middle; box-sizing:border-box;"></span>
+                </span>
+            </div>
+            ${rvo.popis ? `<p style="margin-bottom:4px;">${escapeHtml(rvo.popis).replace(/\n/g, '<br>')}</p>` : ''}
+            ${rvo.spinani ? `<p style="margin-bottom:0;"><strong>Způsob spínání rozvaděče:</strong> ${escapeHtml(rvo.spinani)}</p>` : ''}
+        `;
+        container.appendChild(item);
+    });
+}
+
+function renderVoTable() {
+    renderVoTableForm();
+    renderVoTable2Form();
+    updateVoTablesPreview();
+}
+
+function renderVoTableForm() {
+    const container = document.getElementById('voTableRows');
+    if (!container) return;
+    container.innerHTML = '';
+    if (voTableData.length === 0) {
+        container.innerHTML = '<div style="font-size:11px; color:#90a4ae; font-style:italic; padding:6px 0;">Zatím nejsou vložena žádná data (importujte soubor výše).</div>';
+        return;
+    }
     voTableData.forEach((row, i) => {
         const div = document.createElement('div');
         div.className = 'result-row5';
-        div.style.gridTemplateColumns = '1fr 2fr 2fr 2fr 1fr 30px';
+        div.style.gridTemplateColumns = '1fr 2fr 2fr 2fr 1fr 28px';
+        div.style.gap = '4px';
         div.style.marginBottom = '4px';
         div.innerHTML = `
-            <input type="text" value="${row[0]}" onchange="voTableData[${i}][0]=this.value; updatePreview()" placeholder="Počet">
-            <input type="text" value="${row[1]}" onchange="voTableData[${i}][1]=this.value; updatePreview()" placeholder="Stožár">
-            <input type="text" value="${row[2]}" onchange="voTableData[${i}][2]=this.value; updatePreview()" placeholder="Druh">
-            <input type="text" value="${row[3]}" onchange="voTableData[${i}][3]=this.value; updatePreview()" placeholder="Zdroj">
-            <input type="text" value="${row[4]}" onchange="voTableData[${i}][4]=this.value; updatePreview()" placeholder="Příkon">
+            <input type="number" min="1" value="${row.pocet ?? 1}" onchange="voTableData[${i}].pocet=parseInt(this.value)||1; updateVoTablesPreview()" placeholder="ks">
+            <input type="text" value="${escapeHtml(row.typSvitidla || '')}" onchange="voTableData[${i}].typSvitidla=this.value; updateVoTablesPreview()" placeholder="Typ svítidla">
+            <input type="text" value="${escapeHtml(row.druhSvitidla || '')}" onchange="voTableData[${i}].druhSvitidla=this.value; updateVoTablesPreview()" placeholder="Druh svítidla">
+            <input type="text" value="${escapeHtml(row.typZdroje || '')}" onchange="voTableData[${i}].typZdroje=this.value; updateVoTablesPreview()" placeholder="Typ zdroje">
+            <input type="text" value="${escapeHtml(row.prikon || '')}" onchange="voTableData[${i}].prikon=this.value; updateVoTablesPreview()" placeholder="Příkon (W)">
             <button type="button" onclick="removeVoTableRow(${i})" style="background:#f44336; color:#fff; border:none; border-radius:4px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px;" title="Smazat">×</button>
         `;
         container.appendChild(div);
     });
-    updatePreview();
+}
+
+function renderVoTable2Form() {
+    const container = document.getElementById('voTable2Rows');
+    if (!container) return;
+    container.innerHTML = '';
+    if (voTable2Data.length === 0) {
+        container.innerHTML = '<div style="font-size:11px; color:#90a4ae; font-style:italic; padding:6px 0;">Zatím nejsou vložena žádná data (importujte soubor výše).</div>';
+        return;
+    }
+    voTable2Data.forEach((row, i) => {
+        const div = document.createElement('div');
+        div.style.display = 'grid';
+        div.style.gridTemplateColumns = '1fr 3fr 28px';
+        div.style.gap = '4px';
+        div.style.marginBottom = '4px';
+        div.innerHTML = `
+            <input type="number" min="1" value="${row.pocet ?? 1}" onchange="voTable2Data[${i}].pocet=parseInt(this.value)||1; updateVoTablesPreview()" placeholder="ks">
+            <input type="text" value="${escapeHtml(row.typStozaru || '')}" onchange="voTable2Data[${i}].typStozaru=this.value; updateVoTablesPreview()" placeholder="Typ stožáru">
+            <button type="button" onclick="removeVoTable2Row(${i})" style="background:#f44336; color:#fff; border:none; border-radius:4px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px;" title="Smazat">×</button>
+        `;
+        container.appendChild(div);
+    });
 }
 
 function addVoTableRow() {
-    voTableData.push(["", "", "", "", ""]);
-    renderVoTable();
+    voTableData.push({ pocet: 1, typSvitidla: "Neuvedeno", druhSvitidla: "Neuvedeno", typZdroje: "Neuvedeno", prikon: "-" });
+    renderVoTableForm();
+    updateVoTablesPreview();
 }
 
 function removeVoTableRow(i) {
     voTableData.splice(i, 1);
+    renderVoTableForm();
+    updateVoTablesPreview();
+}
+
+function addVoTable2Row() {
+    voTable2Data.push({ pocet: 1, typStozaru: "Neuvedeno" });
+    renderVoTable2Form();
+    updateVoTablesPreview();
+}
+
+function removeVoTable2Row(i) {
+    voTable2Data.splice(i, 1);
+    renderVoTable2Form();
+    updateVoTablesPreview();
+}
+
+function updateVoTablesPreview() {
+    // 1. Hlavička Tabulka 1 (Počet je první sloupec)
+    const head1 = document.getElementById('voTable1Head');
+    if (head1) {
+        head1.innerHTML = '';
+        const cols1 = [
+            { id: 'pocet', label: 'Počet (ks)', width: '13%' },
+            { id: 'typSvitidla', label: 'Typ svítidla', width: '26%' },
+            { id: 'druhSvitidla', label: 'Druh svítidla', width: '23%' },
+            { id: 'typZdroje', label: 'Typ světelného zdroje', width: '25%' },
+            { id: 'prikon', label: 'Příkon (W)', width: '13%' }
+        ];
+        cols1.forEach(c => {
+            const th = document.createElement('th');
+            th.className = 'sortable';
+            th.style.padding = '6px 8px';
+            th.style.border = '1px solid #ddd';
+            th.style.background = '#f5f7fa';
+            th.style.color = '#78909c';
+            th.style.fontSize = '10px';
+            th.style.fontWeight = '700';
+            th.style.textAlign = 'left';
+            th.style.width = c.width;
+            th.title = 'Kliknutím seřadíte';
+            th.onclick = () => changeSortTable1(c.id);
+            const icon = sortTable1.col === c.id ? (sortTable1.dir === 'asc' ? ' ▲' : ' ▼') : ' <span style="opacity:0.3; font-size:9px;">↕</span>';
+            th.innerHTML = `${c.label}<span class="sort-icon">${icon}</span>`;
+            head1.appendChild(th);
+        });
+    }
+
+    // Tělo Tabulka 1
+    const tbody1 = document.getElementById('p-voTableBody');
+    if (tbody1) {
+        tbody1.innerHTML = '';
+        const sorted1 = getSortedData(voTableData, sortTable1);
+        if (sorted1.length === 0) {
+            tbody1.innerHTML = '<tr><td colspan="5" style="padding:10px 6px; border:1px solid #ddd; text-align:center; color:#90a4ae; font-style:italic; background:#fff;">Tabulka je prázdná – importujte soubor XLSX.</td></tr>';
+        } else {
+            sorted1.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="padding:6px 8px; border:1px solid #ddd; background:#fafbfc; color:#78909c; font-weight:600; text-align:left;">${row.pocet ?? 0}</td>
+                    <td style="padding:6px 8px; border:1px solid #ddd; background:#fff; color:#1a1a1a; text-align:center;">${escapeHtml(row.typSvitidla || 'Neuvedeno')}</td>
+                    <td style="padding:6px 8px; border:1px solid #ddd; background:#fff; color:#1a1a1a; text-align:center;">${escapeHtml(row.druhSvitidla || 'Neuvedeno')}</td>
+                    <td style="padding:6px 8px; border:1px solid #ddd; background:#fff; color:#1a1a1a; text-align:center;">${escapeHtml(row.typZdroje || 'Neuvedeno')}</td>
+                    <td style="padding:6px 8px; border:1px solid #ddd; background:#fff; color:#1a1a1a; text-align:center;">${escapeHtml(row.prikon || '-')}</td>
+                `;
+                tbody1.appendChild(tr);
+            });
+        }
+    }
+
+    // 2. Hlavička Tabulka 2 (Počet je první sloupec)
+    const head2 = document.getElementById('voTable2Head');
+    if (head2) {
+        head2.innerHTML = '';
+        const cols2 = [
+            { id: 'pocet', label: 'Počet (ks)', width: '18%' },
+            { id: 'typStozaru', label: 'Typ stožáru', width: '82%' }
+        ];
+        cols2.forEach(c => {
+            const th = document.createElement('th');
+            th.className = 'sortable';
+            th.style.padding = '6px 8px';
+            th.style.border = '1px solid #ddd';
+            th.style.background = '#f5f7fa';
+            th.style.color = '#78909c';
+            th.style.fontSize = '10px';
+            th.style.fontWeight = '700';
+            th.style.textAlign = 'left';
+            th.style.width = c.width;
+            th.title = 'Kliknutím seřadíte';
+            th.onclick = () => changeSortTable2(c.id);
+            const icon = sortTable2.col === c.id ? (sortTable2.dir === 'asc' ? ' ▲' : ' ▼') : ' <span style="opacity:0.3; font-size:9px;">↕</span>';
+            th.innerHTML = `${c.label}<span class="sort-icon">${icon}</span>`;
+            head2.appendChild(th);
+        });
+    }
+
+    // Tělo Tabulka 2
+    const tbody2 = document.getElementById('p-voTable2Body');
+    if (tbody2) {
+        tbody2.innerHTML = '';
+        const sorted2 = getSortedData(voTable2Data, sortTable2);
+        if (sorted2.length === 0) {
+            tbody2.innerHTML = '<tr><td colspan="2" style="padding:10px 6px; border:1px solid #ddd; text-align:center; color:#90a4ae; font-style:italic; background:#fff;">Tabulka je prázdná – importujte soubor XLSX.</td></tr>';
+        } else {
+            sorted2.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="padding:6px 8px; border:1px solid #ddd; background:#fafbfc; color:#78909c; font-weight:600; text-align:left;">${row.pocet ?? 0}</td>
+                    <td style="padding:6px 8px; border:1px solid #ddd; background:#fff; color:#1a1a1a; text-align:center;">${escapeHtml(row.typStozaru || 'Neuvedeno')}</td>
+                `;
+                tbody2.appendChild(tr);
+            });
+        }
+    }
+
+    // Výpočet celkového počtu kusů pro obě tabulky
+    const total1 = voTableData.reduce((sum, r) => sum + (parseInt(r.pocet, 10) || 0), 0);
+    const total2 = voTable2Data.reduce((sum, r) => sum + (parseInt(r.pocet, 10) || 0), 0);
+
+    const total1El = document.getElementById('p-voTable1TotalVal');
+    if (total1El) total1El.textContent = total1;
+
+    const total2El = document.getElementById('p-voTable2TotalVal');
+    if (total2El) total2El.textContent = total2;
+
+    const formTotal1El = document.getElementById('formVoTable1TotalVal');
+    if (formTotal1El) formTotal1El.textContent = total1;
+
+    const formTotal2El = document.getElementById('formVoTable2TotalVal');
+    if (formTotal2El) formTotal2El.textContent = total2;
+}
+
+// ==== IMPORT XLSX / CSV ====
+function handleXlsxUpload(input) {
+    const file = input.files && input.files[0];
+    if (!file) return;
+
+    const statusBox = document.getElementById('importStatusBox');
+    if (statusBox) {
+        statusBox.innerHTML = '<div style="margin-top:6px; font-size:11px; color:#9c27b0;">⏳ Načítám a zpracovávám soubor...</div>';
+    }
+
+    const isCsv = file.name.toLowerCase().endsWith('.csv');
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        try {
+            let workbook;
+            if (isCsv) {
+                const text = e.target.result;
+                workbook = XLSX.read(text, { type: 'string' });
+            } else {
+                const data = new Uint8Array(e.target.result);
+                workbook = XLSX.read(data, { type: 'array' });
+            }
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+
+            if (!rawRows || rawRows.length === 0) {
+                alert('Vybraný soubor neobsahuje žádná data.');
+                if (statusBox) statusBox.innerHTML = '<div style="margin-top:6px; color:#c62828; font-size:11px;">⚠️ Soubor neobsahuje žádná data.</div>';
+                return;
+            }
+
+            parsePasportVoRows(rawRows, file.name);
+        } catch (err) {
+            console.error('Chyba při čtení souboru:', err);
+            alert('Nepodařilo se načíst soubor XLSX/CSV: ' + (err.message || err));
+            if (statusBox) {
+                statusBox.innerHTML = `<div style="margin-top:6px; color:#c62828; font-size:11px;">⚠️ Chyba při importu: ${escapeHtml(err.message || 'Neplatný soubor')}</div>`;
+            }
+        }
+        input.value = '';
+    };
+
+    if (isCsv) {
+        reader.readAsText(file, 'UTF-8');
+    } else {
+        reader.readAsArrayBuffer(file);
+    }
+}
+
+function normalizeHeader(str) {
+    return String(str || '')
+        .trim()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+}
+
+function findHeaderRowIndex(rows) {
+    for (let i = 0; i < Math.min(rows.length, 30); i++) {
+        const row = rows[i];
+        if (!Array.isArray(row)) continue;
+        const normRow = row.map(normalizeHeader);
+        const hasTypSvitidla = normRow.some(c => c.includes('typ svitidl'));
+        const hasTypStozaru = normRow.some(c => c.includes('typ stozar') || c.includes('typ storar'));
+        const hasSb = normRow.some(c => c.includes('cislo sb') || c === 'sb');
+        if ((hasTypSvitidla && hasTypStozaru) || (hasTypSvitidla && hasSb) || (hasTypStozaru && hasSb)) {
+            return i;
+        }
+    }
+    for (let i = 0; i < Math.min(rows.length, 30); i++) {
+        const row = rows[i];
+        if (!Array.isArray(row)) continue;
+        const normRow = row.map(normalizeHeader);
+        if (normRow.some(c => c.includes('typ svitidl') || c.includes('typ stozar'))) {
+            return i;
+        }
+    }
+    return 0;
+}
+
+function parsePasportVoRows(rawRows, fileName) {
+    const headerRowIdx = findHeaderRowIndex(rawRows);
+    const headerRow = rawRows[headerRowIdx] || [];
+    const norm = headerRow.map(normalizeHeader);
+
+    function findCol(priorityPatterns) {
+        for (const pat of priorityPatterns) {
+            const idx = norm.findIndex(h => typeof pat === 'function' ? pat(h) : h.includes(pat));
+            if (idx !== -1) return idx;
+        }
+        return -1;
+    }
+
+    const colTypSvitidla = findCol(['typ svitidl']);
+    const colDruhSvitidla = findCol(['druh svitidl']);
+    const colTypZdroje = findCol(['typ svetelneho zdroje', 'svetelneho zdroje', 'sveteln', 'zdroj']);
+    const colPrikon = findCol(['prikon']);
+    const colTypStozaru = findCol(['typ stozar', 'typ storar']);
+    const colPocet = findCol(['pocet svitidel', 'pocet (ks)', h => h === 'pocet']);
+
+    const svitidlaMap = new Map();
+    const stozaryMap = new Map();
+    let totalImportedSvitidel = 0;
+    let dataRowCount = 0;
+
+    for (let i = headerRowIdx + 1; i < rawRows.length; i++) {
+        const row = rawRows[i];
+        if (!row || !Array.isArray(row)) continue;
+        const hasContent = row.some(c => c !== null && c !== undefined && String(c).trim() !== '');
+        if (!hasContent) continue;
+
+        let typSvitidla = colTypSvitidla !== -1 ? String(row[colTypSvitidla] ?? '').trim() : '';
+        let druhSvitidla = colDruhSvitidla !== -1 ? String(row[colDruhSvitidla] ?? '').trim() : '';
+        let typZdroje = colTypZdroje !== -1 ? String(row[colTypZdroje] ?? '').trim() : '';
+        let prikon = colPrikon !== -1 ? String(row[colPrikon] ?? '').trim() : '';
+        let typStozaru = colTypStozaru !== -1 ? String(row[colTypStozaru] ?? '').trim() : '';
+
+        let count = 1;
+        if (colPocet !== -1) {
+            const parsedCount = parseInt(String(row[colPocet] ?? '').trim(), 10);
+            if (!isNaN(parsedCount) && parsedCount > 0) {
+                count = parsedCount;
+            }
+        }
+
+        totalImportedSvitidel += count;
+        dataRowCount++;
+
+        // Pravidla z požadavku:
+        // Pokud jsou buňky prázdné, propíše se "Neuvedeno". U Hodnoty Příkon (W) se propíše "-"
+        if (!typSvitidla) typSvitidla = 'Neuvedeno';
+        if (!druhSvitidla) druhSvitidla = 'Neuvedeno';
+        if (!typZdroje) typZdroje = 'Neuvedeno';
+        if (!prikon) prikon = '-';
+        if (!typStozaru) typStozaru = 'Neuvedeno';
+
+        // Agregace svítidel (Tabulka 1)
+        const keySvitidla = JSON.stringify([typSvitidla, druhSvitidla, typZdroje, prikon]);
+        svitidlaMap.set(keySvitidla, (svitidlaMap.get(keySvitidla) || 0) + count);
+
+        // Agregace stožárů (Tabulka 2)
+        stozaryMap.set(typStozaru, (stozaryMap.get(typStozaru) || 0) + count);
+    }
+
+    // Převod na pole a defaultní seřazení dle Počet (ks) sestupně
+    voTableData = Array.from(svitidlaMap.entries()).map(([k, pocet]) => {
+        const [typSvitidla, druhSvitidla, typZdroje, prikon] = JSON.parse(k);
+        return { pocet, typSvitidla, druhSvitidla, typZdroje, prikon };
+    });
+    voTableData.sort((a, b) => b.pocet - a.pocet);
+
+    voTable2Data = Array.from(stozaryMap.entries()).map(([typStozaru, pocet]) => {
+        return { pocet, typStozaru };
+    });
+    voTable2Data.sort((a, b) => b.pocet - a.pocet);
+
+    sortTable1 = { col: 'pocet', dir: 'desc' };
+    sortTable2 = { col: 'pocet', dir: 'desc' };
+
+    // Indikace úspěšného importu do formulářového panelu
+    const statusBox = document.getElementById('importStatusBox');
+    if (statusBox) {
+        statusBox.innerHTML = `
+            <div style="margin-top:8px; padding:8px 10px; background:#e8f5e9; border:1px solid #a5d6a7; border-radius:4px; font-size:11px; color:#1b5e20;">
+                <div style="font-weight:700; display:flex; align-items:center; gap:6px;">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#2e7d32" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    <span>Soubor byl úspěšně importován</span>
+                </div>
+                <div style="margin-top:4px; line-height:1.45; color:#2e7d32; font-size:10.5px;">
+                    <strong>Soubor:</strong> ${escapeHtml(fileName || 'data')}<br>
+                    <strong>Načteno:</strong> ${dataRowCount} záznamů (celkem ${totalImportedSvitidel} ks svítidel)<br>
+                    <strong>Výsledek:</strong> Tab. 1: ${voTableData.length} typů svítidel | Tab. 2: ${voTable2Data.length} typů stožárů
+                </div>
+            </div>
+        `;
+    }
+
     renderVoTable();
 }
 
 // ==== HLAVNÍ AKTUALIZACE NÁHLEDU ====
 function updatePreview() {
-    setText('p-nadpis', val('nadpis') || 'PASPORT KANALIZACE');
+    setText('p-nadpis', val('nadpis') || 'PASPORT VEŘEJNÉHO OSVĚTLENÍ');
     
     const typSelect = document.getElementById('typObce');
     const typVal = typSelect ? typSelect.value : 'Obec ';
@@ -678,21 +1262,8 @@ function updatePreview() {
     setHtml('p-voZaver', val('voZaver'));
     setText('p-tabObec', val('nazevObce') || '—');
     
-    const tbody = document.getElementById('p-voTableBody');
-    if (tbody) {
-        tbody.innerHTML = '';
-        voTableData.forEach(row => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td style="padding:6px; border:1px solid #ddd;">${row[0]}</td>
-                <td style="padding:6px; border:1px solid #ddd;">${row[1]}</td>
-                <td style="padding:6px; border:1px solid #ddd;">${row[2]}</td>
-                <td style="padding:6px; border:1px solid #ddd;">${row[3]}</td>
-                <td style="padding:6px; border:1px solid #ddd;">${row[4]}</td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
+    updateVoTablesPreview();
+    renderRvoPreview();
 
     const d = val('signDate');
     setText('p-signDate', d ? new Date(d + 'T12:00:00').toLocaleDateString('cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' }) : '—');
@@ -709,6 +1280,8 @@ let quillEditors = {};
 window.onload = function() {
     initMap();
     renderVoTable();
+    renderRvoForm();
+    renderRvoPreview();
     document.getElementById('signDate').value = new Date().toISOString().slice(0, 10);
     document.getElementById('rok').value = new Date().getFullYear();
     
