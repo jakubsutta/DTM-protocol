@@ -1117,16 +1117,20 @@ body.dark-theme .theme-toggle .icon-moon {
     user-select: none;
 }
 
-/* ---- Mini Changelog nad footerem vlevo ---- */
+/* ---- Mini Changelog a Dashboard nad footerem vlevo ---- */
 .changelog-row {
     width: 100%;
     display: flex;
+    align-items: stretch;
     justify-content: flex-start;
+    gap: 12px;
     margin-top: 18px;
+    flex-wrap: wrap;
 }
 
 .changelog-widget {
     font-family: inherit;
+    display: flex;
 }
 
 .changelog-box {
@@ -1140,13 +1144,52 @@ body.dark-theme .theme-toggle .icon-moon {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    max-width: 250px;
+    max-width: 260px;
     transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 
 .changelog-box:hover {
     border-color: rgba(203, 213, 225, 1);
     box-shadow: 0 4px 14px rgba(15, 23, 42, 0.09);
+}
+
+/* Odkaz na Dashboard (Google Tabulku) */
+.feedback-box {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+.feedback-box:hover {
+    border-color: rgba(16, 185, 129, 0.55);
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.14);
+    transform: translateY(-1px);
+}
+
+.feedback-link-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 500;
+    margin-left: auto;
+    transition: color 0.15s ease;
+}
+
+.feedback-box:hover .feedback-link-text {
+    color: #059669;
+}
+
+.feedback-ext-icon {
+    width: 10px;
+    height: 10px;
+    flex-shrink: 0;
+    stroke: currentColor;
+}
+
+.feedback-arrow {
+    color: #059669;
 }
 
 .changelog-header {
@@ -1169,6 +1212,12 @@ body.dark-theme .theme-toggle .icon-moon {
     border-radius: 4px;
     text-transform: uppercase;
     letter-spacing: 0.03em;
+}
+
+.changelog-badge.feedback-badge,
+.feedback-badge {
+    background: rgba(22, 163, 74, 0.14);
+    color: #15803d;
 }
 
 .changelog-date {
@@ -1450,6 +1499,29 @@ body.dark-theme .changelog-date {
 
 body.dark-theme .changelog-list li {
     color: #cbd5e1;
+}
+
+body.dark-theme .feedback-box:hover {
+    border-color: rgba(52, 211, 153, 0.5);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+}
+
+body.dark-theme .changelog-badge.feedback-badge,
+body.dark-theme .feedback-badge {
+    background: rgba(34, 197, 94, 0.22);
+    color: #4ade80;
+}
+
+body.dark-theme .feedback-link-text {
+    color: #94a3b8;
+}
+
+body.dark-theme .feedback-box:hover .feedback-link-text {
+    color: #34d399;
+}
+
+body.dark-theme .feedback-arrow {
+    color: #34d399;
 }
 
 body.dark-theme .footer-bottom {
