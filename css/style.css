@@ -69,12 +69,12 @@ body {
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.3s ease, background-image 0.4s ease;
-    mask-image: radial-gradient(circle 130px at var(--mouse-x, -999px) var(--mouse-y, -999px), #000 0%, rgba(0, 0, 0, 0.85) 35%, rgba(0, 0, 0, 0.35) 70%, transparent 100%);
-    -webkit-mask-image: radial-gradient(circle 130px at var(--mouse-x, -999px) var(--mouse-y, -999px), #000 0%, rgba(0, 0, 0, 0.85) 35%, rgba(0, 0, 0, 0.35) 70%, transparent 100%);
+    mask-image: radial-gradient(circle 28px at var(--mouse-x, -999px) var(--mouse-y, -999px), rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.25) 50%, transparent 100%);
+    -webkit-mask-image: radial-gradient(circle 28px at var(--mouse-x, -999px) var(--mouse-y, -999px), rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.25) 50%, transparent 100%);
 }
 
 .bg-spotlight.active {
-    opacity: 1;
+    opacity: 0.7;
 }
 
 /* Tmavý režim pro pozadí (noční verze Horního náměstí v Olomouci) */
@@ -91,32 +91,32 @@ body.dark-theme .bg-spotlight {
     background-image: url('../protocol/img/bg-night.jpg');
 }
 
-/* ---- Přilepený horní Header (edge-to-edge s plynulým přechodem) ---- */
+/* ---- Přilepený horní Header (výplň a spodní ohraničení jednotné s panelem) ---- */
 .main-header {
     width: 100%;
     position: sticky;
     top: 0;
-    left: 0;
-    right: 0;
-    z-index: 40;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 255, 255, 0.75) 60%, rgba(255, 255, 255, 0) 100%);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-bottom: none;
-    box-shadow: none;
-    padding-bottom: 8px;
-    transition: background 0.3s ease;
+    z-index: 25;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 255, 255, 0.85) 65%, rgba(255, 255, 255, 0.70) 100%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.85);
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03);
+    padding-bottom: 0;
+    transition: background 0.3s ease, border-color 0.3s ease;
 }
 
 body.dark-theme .main-header {
-    background: linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(15, 23, 42, 0.75) 60%, rgba(15, 23, 42, 0) 100%);
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(15, 23, 42, 0.85) 65%, rgba(15, 23, 42, 0.70) 100%);
+    border-bottom-color: rgba(51, 65, 85, 0.85);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
 }
 
 .header-inner {
-    max-width: 1680px;
     width: 100%;
-    margin: 0 auto;
-    padding: 0 16px;
+    max-width: 100%;
+    margin: 0;
+    padding: 0 24px;
     height: 54px;
     box-sizing: border-box;
     display: flex;
@@ -659,15 +659,15 @@ body.dark-theme .theme-toggle .icon-moon {
 
 /* ---- Container pod headerem ---- */
 .container {
-    max-width: 1680px;
     width: 100%;
-    margin: 0 auto;
+    max-width: 100%;
+    margin: 0;
     flex: 1;
     min-height: 0;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    padding: 14px 16px 18px;
+    align-items: stretch;
+    padding: 14px 24px 24px 24px;
     box-sizing: border-box;
     position: relative;
     z-index: 2;
@@ -973,6 +973,56 @@ body.dark-theme .theme-toggle .icon-moon {
     text-align: left;
     overflow: hidden;
     gap: 2px;
+    padding-right: 14px;
+}
+
+/* Tlačítko Oblíbené na kartě (hvězdička) */
+.card-fav-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    opacity: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: opacity 0.15s ease, color 0.15s ease, transform 0.15s ease;
+    z-index: 3;
+}
+
+.card-fav-btn svg {
+    width: 14px;
+    height: 14px;
+    display: block;
+    stroke: currentColor;
+    transition: transform 0.15s ease;
+}
+
+.card:hover .card-fav-btn,
+.card:focus-within .card-fav-btn {
+    opacity: 0.55;
+}
+
+.card .card-fav-btn:hover {
+    opacity: 1 !important;
+    color: #eab308;
+    transform: scale(1.15);
+}
+
+.card.is-favorite .card-fav-btn {
+    opacity: 1;
+    color: #eab308;
+}
+
+.card.is-favorite .card-fav-btn svg polygon {
+    fill: #eab308;
 }
 
 .card-title {
@@ -1178,77 +1228,506 @@ body.dark-theme .theme-toggle .icon-moon {
     display: none;
 }
 
-/* ---- Nový spodní footer ---- */
-.footer-bottom {
-    margin-top: 22px;
-    padding-top: 12px;
-    border-top: 1px solid #292929;
+/* ==========================================================================
+   Nový Layout: Hlavní plocha (Header + 4 sloupce) + Pravý panel (až nahoru)
+   ========================================================================== */
+.dashboard-layout {
+    display: flex;
+    flex-direction: row;
     width: 100%;
+    min-height: 100vh;
+    align-items: stretch;
+    position: relative;
+    z-index: 2;
+}
+
+.main-layout-area {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.main-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ---- Pravý panel (Side Panel) – až nahoru, přilepený na pravý okraj ---- */
+.side-panel {
+    width: 290px;
+    min-width: 280px;
+    max-width: 290px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    box-sizing: border-box;
+    /* Bílý základ + otočený přechod z headeru (směr 270deg: zprava 96% do průhledna vlevo) */
+    background: linear-gradient(270deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 255, 255, 0.85) 65%, rgba(255, 255, 255, 0.50) 100%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-left: 1px solid rgba(226, 232, 240, 0.85);
+    box-shadow: -4px 0 20px rgba(15, 23, 42, 0.04);
+    z-index: 30;
+    overflow: hidden;
+}
+
+/* Header panelu: Hledat, Tlačítka pro režim zobrazení a motiv (oddělený pouze linkou) */
+.panel-header {
+    flex-shrink: 0;
+    padding: 12px 14px 10px;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.85);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: transparent;
+}
+
+.panel-search-box {
+    position: relative;
     display: flex;
     align-items: center;
-    justify-content: flex-end;
-    gap: 14px;
-    flex-wrap: wrap;
-    font-size: 11px;
-    color: #505050;
+    width: 100%;
 }
 
-.footer-bottom a {
-    color: #455a64;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-weight: 500;
-    transition: color 0.2s ease;
+.panel-search-input {
+    width: 100%;
+    height: 32px;
+    padding: 0 28px 0 30px;
+    font-size: 11.5px;
+    font-family: inherit;
+    color: #0f172a;
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(203, 213, 225, 0.9);
+    border-radius: 7px;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.15s, background-color 0.15s, box-shadow 0.15s;
 }
 
-.footer-bottom a:hover {
-    color: #ea521f;
-    text-decoration: underline;
+.panel-search-input:focus {
+    background: #ffffff;
+    border-color: #ea521f;
+    box-shadow: 0 0 0 3px rgba(234, 82, 31, 0.12);
 }
 
-.footer-github-icon {
+.panel-search-box .search-icon {
+    position: absolute;
+    left: 8px;
     width: 14px;
     height: 14px;
-    fill: currentColor;
-    display: inline-block;
-    vertical-align: middle;
+    stroke: #64748b;
+    pointer-events: none;
 }
 
-.footer-separator {
-    color: #4f4f4f;
-    user-select: none;
+.panel-search-count {
+    font-size: 10.5px;
+    color: #64748b;
+    padding: 0 4px;
+    font-weight: 500;
 }
 
-/* ---- Mini Changelog a Dashboard nad footerem vlevo ---- */
-.changelog-row {
-    width: 100%;
+.panel-header-controls {
     display: flex;
-    align-items: stretch;
-    justify-content: flex-start;
-    gap: 12px;
-    margin-top: 18px;
+    align-items: center;
+    gap: 6px;
+}
+
+.panel-btn {
+    flex: 1;
+    height: 29px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #334155;
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    border-radius: 6px;
+    cursor: pointer;
+    padding: 0 8px;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.panel-btn:hover {
+    background: #ffffff;
+    color: #0f172a;
+    border-color: #cbd5e1;
+}
+
+.panel-btn svg {
+    width: 13.5px;
+    height: 13.5px;
+    flex-shrink: 0;
+}
+
+/* Ikony v přepínači tmavého režimu */
+.theme-toggle .icon-sun { display: none; }
+.theme-toggle .icon-moon { display: block; }
+body.dark-theme .theme-toggle .icon-sun { display: block; }
+body.dark-theme .theme-toggle .icon-moon { display: none; }
+
+/* Scrollovatelné tělo panelu pro sekce */
+.panel-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.panel-body::-webkit-scrollbar {
+    width: 4px;
+}
+
+.panel-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.panel-body::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.35);
+    border-radius: 4px;
+}
+
+.panel-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 116, 139, 0.55);
+}
+
+/* Sekce v panelu – čisté, bez krabiček, oddělené pouze dělící linkou */
+.panel-section {
+    padding: 11px 14px;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.85);
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    background: transparent;
+}
+
+.panel-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.panel-section-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #0f172a;
+}
+
+.panel-section-icon {
+    width: 13.5px;
+    height: 13.5px;
+    flex-shrink: 0;
+}
+
+.panel-star-icon {
+    width: 13.5px;
+    height: 13.5px;
+    color: #eab308;
+    fill: #eab308;
+    flex-shrink: 0;
+}
+
+.panel-changelog-icon {
+    color: #2563eb;
+    stroke: currentColor;
+}
+
+.panel-dashboard-icon {
+    color: #059669;
+    stroke: currentColor;
+}
+
+.panel-tools-icon {
+    width: 13.5px;
+    height: 13.5px;
+    color: #64748b;
+    stroke: currentColor;
+}
+
+.panel-tools-author {
+    font-size: 9.5px;
+    font-weight: 600;
+    color: #94a3b8;
+}
+
+.panel-fav-count {
+    font-size: 10px;
+    font-weight: 700;
+    color: #64748b;
+    background: rgba(0, 0, 0, 0.05);
+    padding: 1px 6px;
+    border-radius: 10px;
+}
+
+.panel-favorites-grid {
+    display: flex;
     flex-wrap: wrap;
+    gap: 6px;
+    min-height: 32px;
+    align-items: center;
 }
 
-.changelog-widget {
-    font-family: inherit;
+.panel-fav-empty {
+    font-size: 10px;
+    color: #94a3b8;
+    line-height: 1.35;
+    text-align: center;
+    width: 100%;
+    padding: 4px 2px;
+}
+
+.panel-fav-item {
+    width: 34px;
+    height: 34px;
+    border-radius: 7px;
+    background-color: #ffffff;
+    background-image: linear-gradient(var(--bg), var(--bg));
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: var(--c);
     display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-sizing: border-box;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    position: relative;
 }
 
+.panel-fav-item:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+    border-color: var(--c);
+}
+
+.panel-fav-item svg {
+    width: 17px;
+    height: 17px;
+    display: block;
+}
+
+/* Sekce Další nástroje (přímé odkazy v panelu) */
+.panel-tools-list {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.panel-tool-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 6px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: inherit;
+    transition: background-color 0.15s ease, transform 0.12s ease;
+}
+
+.panel-tool-item:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+    transform: translateX(2px);
+}
+
+.panel-tool-icon-box {
+    width: 24px;
+    height: 24px;
+    border-radius: 5px;
+    background: #0f172a;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.panel-tool-icon-box .github-icon {
+    width: 13.5px;
+    height: 13.5px;
+    fill: currentColor;
+}
+
+.panel-tool-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.panel-tool-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: #0f172a;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.panel-tool-item:hover .panel-tool-name {
+    color: #ea521f;
+}
+
+.panel-tool-desc {
+    font-size: 9px;
+    color: #64748b;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Odkaz na Dashboard Google Tabulky (bez krabičky) */
+.panel-feedback-link {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    text-decoration: none;
+    color: inherit;
+    padding: 2px 4px;
+    margin: -2px -4px;
+    border-radius: 6px;
+    transition: background-color 0.15s ease;
+}
+
+.panel-feedback-link:hover {
+    background-color: rgba(16, 185, 129, 0.05);
+}
+
+.panel-feedback-link:hover .feedback-link-text {
+    color: #059669;
+}
+
+/* Footer panelu: připnutý trvale dole */
+.panel-footer {
+    flex-shrink: 0;
+    margin-top: auto;
+    padding: 10px 14px;
+    border-top: 1px solid rgba(226, 232, 240, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: transparent;
+}
+
+.panel-copy {
+    font-size: 10.5px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.panel-github-btn {
+    color: #64748b;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 4px;
+    transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.panel-github-btn:hover {
+    color: #ea521f;
+    transform: scale(1.1);
+}
+
+.panel-github-icon {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+    display: block;
+}
+
+/* ==========================================================================
+   Kompaktní seznam (List view) pro karty
+   ========================================================================== */
+.dashboard-layout.view-compact-list .cards {
+    grid-template-columns: 1fr;
+    gap: 4px;
+}
+
+.dashboard-layout.view-compact-list .card {
+    height: 38px;
+    padding: 4px 8px;
+    gap: 8px;
+    border-radius: 7px;
+}
+
+.dashboard-layout.view-compact-list .card-icon {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    border-radius: 6px;
+}
+
+.dashboard-layout.view-compact-list .card-icon svg {
+    width: 15px;
+    height: 15px;
+}
+
+.dashboard-layout.view-compact-list .card-body {
+    padding-right: 18px;
+}
+
+.dashboard-layout.view-compact-list .card-title {
+    font-size: 11px;
+}
+
+.dashboard-layout.view-compact-list .card-desc {
+    display: none;
+}
+
+.dashboard-layout.view-compact-list .card-fav-btn {
+    top: 8px;
+    right: 5px;
+}
+
+.card.search-hidden,
+.column.search-hidden {
+    display: none !important;
+}
+
+.no-results-msg {
+    text-align: center;
+    padding: 24px 20px;
+    color: #78909c;
+    font-size: 12.5px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    margin: 0 0 16px;
+    width: 100%;
+    max-width: 500px;
+    display: none;
+}
+
+/* Changelog a feedback box obecné styly */
 .changelog-box {
     background: rgba(255, 255, 255, 0.92);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(226, 232, 240, 0.95);
     border-radius: 9px;
-    padding: 7px 11px;
+    padding: 8px 11px;
     box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
     display: flex;
     flex-direction: column;
     gap: 4px;
-    max-width: 260px;
     transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 
@@ -1286,21 +1765,22 @@ body.dark-theme .theme-toggle .icon-moon {
 }
 
 .feedback-ext-icon {
-    width: 10px;
-    height: 10px;
+    width: 11px;
+    height: 11px;
     flex-shrink: 0;
     stroke: currentColor;
 }
 
 .feedback-arrow {
     color: #059669;
+    font-weight: 700;
 }
 
 .changelog-header {
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 10.5px;
+    font-size: 11px;
     font-weight: 700;
     color: #0f172a;
     letter-spacing: 0.02em;
@@ -1310,7 +1790,7 @@ body.dark-theme .theme-toggle .icon-moon {
 .changelog-badge {
     background: rgba(37, 99, 235, 0.10);
     color: #2563eb;
-    font-size: 9px;
+    font-size: 9.5px;
     font-weight: 700;
     padding: 1px 5px;
     border-radius: 4px;
@@ -1327,7 +1807,7 @@ body.dark-theme .theme-toggle .icon-moon {
 .changelog-date {
     color: #64748b;
     font-weight: 500;
-    font-size: 10px;
+    font-size: 10.5px;
 }
 
 .changelog-list {
@@ -1336,33 +1816,58 @@ body.dark-theme .theme-toggle .icon-moon {
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 2.5px;
+    gap: 3.5px;
 }
 
 .changelog-list li {
-    font-size: 10px;
+    font-size: 11.5px;
     color: #334155;
-    line-height: 1.25;
+    line-height: 1.35;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
     white-space: nowrap;
 }
 
 .changelog-arrow {
-    color: #ea521f;
+    color: #2563eb;
     font-weight: 700;
-    font-size: 10px;
+    font-size: 11.5px;
     line-height: 1;
 }
 
-@media (max-width: 900px) {
-    .changelog-row {
-        justify-content: center;
+@media (max-width: 1280px) {
+    .container {
+        padding: 14px 16px 18px 16px;
     }
 
-    .footer-bottom {
-        justify-content: center;
+    .dashboard-layout {
+        flex-direction: column;
+    }
+
+    .side-panel {
+        width: 100%;
+        max-width: 100%;
+        position: static;
+        height: auto;
+        margin: 16px 0 0;
+        padding: 14px;
+        border-left: none;
+        border-top: 1px solid rgba(226, 232, 240, 0.85);
+        background: #ffffff;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 12px;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+    }
+
+    body.dark-theme .side-panel {
+        background: #0f172a;
+        border-top-color: #334155;
+    }
+
+    .panel-footer {
+        grid-column: 1 / -1;
     }
 }
 
@@ -1697,4 +2202,154 @@ body.dark-theme .no-results-msg {
     background: #0f172a;
     border: 1px solid #334155;
     color: #94a3b8;
+}
+
+/* Pravý panel a sekce v tmavém režimu */
+body.dark-theme .side-panel {
+    background: linear-gradient(270deg, rgba(15, 23, 42, 0.96) 0%, rgba(15, 23, 42, 0.85) 65%, rgba(15, 23, 42, 0.50) 100%);
+    border-left-color: rgba(51, 65, 85, 0.85);
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.35);
+}
+
+body.dark-theme .panel-header {
+    border-bottom-color: #334155;
+    background: transparent;
+}
+
+body.dark-theme .panel-section {
+    border-bottom-color: #334155;
+    background: transparent;
+}
+
+body.dark-theme .panel-footer {
+    border-top-color: #334155;
+    background: transparent;
+}
+
+body.dark-theme .panel-search-input {
+    background: #1e293b;
+    border-color: #334155;
+    color: #f1f5f9;
+}
+
+body.dark-theme .panel-search-input:focus {
+    background: #0f172a;
+    border-color: #ea521f;
+    box-shadow: 0 0 0 3px rgba(234, 82, 31, 0.22);
+}
+
+body.dark-theme .panel-search-box .search-icon {
+    stroke: #94a3b8;
+}
+
+body.dark-theme .panel-btn {
+    background: #1e293b;
+    border-color: #334155;
+    color: #cbd5e1;
+}
+
+body.dark-theme .panel-btn:hover {
+    background: #334155;
+    border-color: #475569;
+    color: #f1f5f9;
+}
+
+body.dark-theme .panel-section-title {
+    color: #f1f5f9;
+}
+
+body.dark-theme .panel-fav-count {
+    background: #1e293b;
+    color: #94a3b8;
+}
+
+body.dark-theme .panel-fav-empty {
+    color: #64748b;
+}
+
+body.dark-theme .panel-fav-item {
+    background-color: #0f172a;
+    border-color: #334155;
+}
+
+body.dark-theme .panel-fav-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-theme .panel-tools-icon {
+    color: #94a3b8;
+}
+
+body.dark-theme .panel-changelog-icon {
+    color: #60a5fa;
+}
+
+body.dark-theme .panel-dashboard-icon {
+    color: #34d399;
+}
+
+body.dark-theme .changelog-arrow {
+    color: #60a5fa;
+}
+
+body.dark-theme .panel-tools-author {
+    color: #64748b;
+}
+
+body.dark-theme .panel-tool-name {
+    color: #f1f5f9;
+}
+
+body.dark-theme .panel-tool-desc {
+    color: #94a3b8;
+}
+
+body.dark-theme .panel-tool-item:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+body.dark-theme .panel-tool-item:hover .panel-tool-name {
+    color: #ff6b3d;
+}
+
+body.dark-theme .panel-tool-icon-box {
+    background: #1e293b;
+    border: 1px solid #334155;
+}
+
+body.dark-theme .panel-feedback-link:hover {
+    background-color: rgba(16, 185, 129, 0.12);
+}
+
+body.dark-theme .panel-copy {
+    color: #64748b;
+}
+
+body.dark-theme .panel-github-btn {
+    color: #64748b;
+}
+
+body.dark-theme .panel-github-btn:hover {
+    color: #ea521f;
+}
+
+body.dark-theme .card-fav-btn {
+    color: #64748b;
+}
+
+body.dark-theme .card:hover .card-fav-btn,
+body.dark-theme .card:focus-within .card-fav-btn {
+    opacity: 0.65;
+}
+
+body.dark-theme .card .card-fav-btn:hover {
+    color: #facc15;
+}
+
+body.dark-theme .card.is-favorite .card-fav-btn {
+    color: #facc15;
+}
+
+body.dark-theme .card.is-favorite .card-fav-btn svg polygon {
+    fill: #facc15;
 }

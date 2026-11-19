@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <title>J.E.N.D.A. – Jednoduché Efektivní Nástroje Do Atomiconu</title>
-    <link rel="stylesheet" href="css/style.css?v=20261119d">
+    <link rel="stylesheet" href="css/style.css?v=20261119n">
 </head>
 
 <body>
@@ -288,242 +288,129 @@
     <div class="bg-blurred" aria-hidden="true"></div>
     <div class="bg-spotlight" id="bg-spotlight" aria-hidden="true"></div>
 
-    <header class="main-header">
-        <div class="header-inner">
-            <div class="header-brand" title="J.E.N.D.A. = Jednoduché Efektivní Nástroje Do Atomiconu">
-                <div class="header-icon-tile">
-                    <svg class="header-icon" aria-hidden="true">
-                        <use href="#icon-rozcestnik" xlink:href="#icon-rozcestnik" />
-                    </svg>
-                </div>
-                <div class="brand-text">
-                    <h1 class="brand-title">J<span class="brand-dot">.</span>E<span class="brand-dot">.</span>N<span class="brand-dot">.</span>D<span class="brand-dot">.</span>A<span class="brand-dot">.</span></h1>
-                    <span class="brand-desc"><span class="acro-lead">J</span>ednoduché <span class="acro-lead">E</span>fektivní <span class="acro-lead">N</span>ástroje <span class="acro-lead">D</span>o <span class="acro-lead">A</span>tomiconu</span>
-                </div>
-            </div>
-
-            <div class="header-notice">
-                <svg class="notice-icon" aria-hidden="true">
-                    <use href="#icon-notice-alert" xlink:href="#icon-notice-alert" />
-                </svg>
-                <div class="notice-text">
-                    <span class="notice-primary">Výsledné PDF předat pro kontrolu <a href="mailto:sutta@atomicon.cz"
-                            class="has-tooltip" data-tooltip="sutta@atomicon.cz">Kubovi</a> nebo <a
-                            href="mailto:vyroubal@atomicon.cz" class="has-tooltip tooltip-radek"
-                            data-tooltip="vyroubal@atomicon.cz">Radkovi</a>!</span>
-                    <span class="notice-sep">•</span>
-                    <span class="notice-secondary">Je-li třeba elektronický podpis, předej <a
-                            href="mailto:sutta@atomicon.cz" class="has-tooltip"
-                            data-tooltip="sutta@atomicon.cz">Kubovi</a> nebo <a href="mailto:kubickova@atomicon.cz"
-                            class="has-tooltip tooltip-bara" data-tooltip="kubickova@atomicon.cz">Báře</a>.</span>
-                </div>
-            </div>
-
-            <div class="header-actions">
-                <!-- Vyhledávací pole vysouvající se doleva přímo z tlačítka -->
-                <div class="search-drawer" id="search-drawer">
-                    <button type="button" id="search-open-btn" class="header-action-btn search-trigger-btn"
-                        aria-label="Hledat nástroj (⌘F)" title="Hledat nástroj (⌘F)">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                        </svg>
-                        <span class="btn-label">Hledat</span>
-                        <kbd class="search-kbd-badge" id="search-kbd-badge">⌘F</kbd>
-                    </button>
-
-                    <div class="search-expand-bar" id="search-expand-bar" aria-hidden="true">
-                        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                        </svg>
-                        <input type="text" id="generator-search" class="search-input"
-                            placeholder="Hledat nástroj, pasport..." autocomplete="off" spellcheck="false">
-                        <button type="button" id="search-clear" class="search-clear" aria-label="Vymazat hledání"
-                            title="Vymazat hledání" style="display:none;">&times;</button>
-                        <button type="button" id="search-close-btn" class="search-close-btn"
-                            aria-label="Zavřít hledání (Esc)" title="Zavřít hledání (Esc)">
-                            <kbd class="esc-kbd">Esc</kbd>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                <line x1="6" y1="6" x2="18" y2="18"></line>
+    <div class="dashboard-layout" id="dashboard-layout">
+        <div class="main-layout-area">
+            <header class="main-header">
+                <div class="header-inner">
+                    <div class="header-brand" title="J.E.N.D.A. = Jednoduché Efektivní Nástroje Do Atomiconu">
+                        <div class="header-icon-tile">
+                            <svg class="header-icon" aria-hidden="true">
+                                <use href="#icon-rozcestnik" xlink:href="#icon-rozcestnik" />
                             </svg>
-                        </button>
-                        <div id="search-count" class="search-count" style="display:none;"></div>
+                        </div>
+                        <div class="brand-text">
+                            <h1 class="brand-title">J<span class="brand-dot">.</span>E<span class="brand-dot">.</span>N<span class="brand-dot">.</span>D<span class="brand-dot">.</span>A<span class="brand-dot">.</span></h1>
+                            <span class="brand-desc"><span class="acro-lead">J</span>ednoduché <span class="acro-lead">E</span>fektivní <span class="acro-lead">N</span>ástroje <span class="acro-lead">D</span>o <span class="acro-lead">A</span>tomiconu</span>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Tlačítko a dropdown pro Další nástroje -->
-                <div class="tools-dropdown" id="tools-dropdown">
-                    <button type="button" id="tools-toggle-btn" class="header-action-btn tools-toggle-btn"
-                        aria-label="Další nástroje a repozitáře" aria-haspopup="true" aria-expanded="false"
-                        title="Další nástroje (GitHub)">
-                        <svg class="icon-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
-                            <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
-                            <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
-                            <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+                    <div class="header-notice">
+                        <svg class="notice-icon" aria-hidden="true">
+                            <use href="#icon-notice-alert" xlink:href="#icon-notice-alert" />
                         </svg>
-                        <span class="btn-label">Další nástroje</span>
-                        <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                            stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
-                    </button>
-
-                    <div class="dropdown-menu" id="tools-menu" role="menu">
-                        <div class="dropdown-header">
-                            <span class="dropdown-title">Další nástroje &amp; repozitáře</span>
-                            <span class="dropdown-author">jakubsutta</span>
-                        </div>
-                        <div class="dropdown-items">
-                            <a href="https://github.com/jakubsutta/qgis-AzimuthEditor-plugin" target="_blank"
-                                rel="noopener noreferrer" class="dropdown-item" role="menuitem">
-                                <div class="item-icon-box">
-                                    <svg class="github-icon" viewBox="0 0 24 24" fill="currentColor">
-                                        <path
-                                            d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
-                                    </svg>
-                                </div>
-                                <div class="item-text">
-                                    <div class="item-title">QPlugin / Azimut set</div>
-                                    <div class="item-sub">Editor azimutu pro QGIS</div>
-                                </div>
-                                <span class="tag-badge tag-qgis">QGIS</span>
-                            </a>
-
-                            <a href="https://jakubsutta.github.io/CAD-viewer/" target="_blank" rel="noopener noreferrer"
-                                class="dropdown-item" role="menuitem">
-                                <div class="item-icon-box">
-                                    <svg class="github-icon" viewBox="0 0 24 24" fill="currentColor">
-                                        <path
-                                            d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
-                                    </svg>
-                                </div>
-                                <div class="item-text">
-                                    <div class="item-title">CAD Viewer</div>
-                                    <div class="item-sub">Webový prohlížeč CAD výkresů</div>
-                                </div>
-                                <span class="tag-badge tag-html">HTML</span>
-                            </a>
-
-                            <a href="https://jakubsutta.github.io/Point-elevation-calculator/" target="_blank"
-                                rel="noopener noreferrer" class="dropdown-item" role="menuitem">
-                                <div class="item-icon-box">
-                                    <svg class="github-icon" viewBox="0 0 24 24" fill="currentColor">
-                                        <path
-                                            d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
-                                    </svg>
-                                </div>
-                                <div class="item-text">
-                                    <div class="item-title">Výpočet výšky dle sklonu a délky</div>
-                                    <div class="item-sub">Kalkulačka výšek bodů</div>
-                                </div>
-                                <span class="tag-badge tag-html">HTML</span>
-                            </a>
-
-                            <a href="https://github.com/jakubsutta/qgis-XML-JVF-import-plugin" target="_blank"
-                                rel="noopener noreferrer" class="dropdown-item" role="menuitem">
-                                <div class="item-icon-box">
-                                    <svg class="github-icon" viewBox="0 0 24 24" fill="currentColor">
-                                        <path
-                                            d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
-                                    </svg>
-                                </div>
-                                <div class="item-text">
-                                    <div class="item-title">QPlugin / JVF-1.4.3-Import</div>
-                                    <div class="item-sub">Import JVF.XML do QGIS</div>
-                                </div>
-                                <span class="tag-badge tag-qgis">QGIS</span>
-                            </a>
+                        <div class="notice-text">
+                            <span class="notice-primary">Výsledné PDF předat pro kontrolu <a href="mailto:sutta@atomicon.cz"
+                                    class="has-tooltip" data-tooltip="sutta@atomicon.cz">Kubovi</a> nebo <a
+                                    href="mailto:vyroubal@atomicon.cz" class="has-tooltip tooltip-radek"
+                                    data-tooltip="vyroubal@atomicon.cz">Radkovi</a>!</span>
+                            <span class="notice-sep">•</span>
+                            <span class="notice-secondary">Je-li třeba elektronický podpis, předej <a
+                                    href="mailto:sutta@atomicon.cz" class="has-tooltip"
+                                    data-tooltip="sutta@atomicon.cz">Kubovi</a> nebo <a href="mailto:kubickova@atomicon.cz"
+                                    class="has-tooltip tooltip-bara" data-tooltip="kubickova@atomicon.cz">Báře</a>.</span>
                         </div>
                     </div>
                 </div>
+            </header>
 
-                <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Přepnout tmavý / světlý režim"
-                    title="Přepnout tmavý / světlý režim">
-                    <!-- Ikona sluníčka (zobrazena ve světlém režimu) -->
-                    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="5"></circle>
-                        <line x1="12" y1="1" x2="12" y2="3"></line>
-                        <line x1="12" y1="21" x2="12" y2="23"></line>
-                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                        <line x1="1" y1="12" x2="3" y2="12"></line>
-                        <line x1="21" y1="12" x2="23" y2="12"></line>
-                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                    </svg>
-                    <!-- Ikona měsíce (zobrazena v tmavém režimu) -->
-                    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                    </svg>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <div class="container">
-        <div id="no-results-msg" class="no-results-msg">
-            Nenalezen žádný nástroj odpovídající zadanému hledání.
-        </div>
-
-        <div class="columns-wrapper">
-            <!-- SLOUPEC 1: PROTOKOLY -->
-            <div class="column">
-                <div class="column-header" role="button" tabindex="0"
-                    aria-label="Sbalit nebo rozbalit sekci Protokoly, validace">
-                    <h2 class="column-title">1) Protokoly, validace</h2>
-                    <div class="column-meta">
-                        <span class="column-count">4</span>
-                        <button type="button" class="column-collapse-btn" aria-label="Sbalit / rozbalit sekci"
-                            title="Sbalit / rozbalit sekci" tabindex="-1">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="6 9 12 15 18 9"></polyline>
-                            </svg>
-                        </button>
+            <main class="main-content">
+                <div class="container">
+                    <div id="no-results-msg" class="no-results-msg">
+                        Nenalezen žádný nástroj odpovídající zadanému hledání.
                     </div>
-                </div>
-                <div class="cards">
-                    <a href="./protocol/Protokol_DTM-vlozeni.html" class="card vlozeni">
-                        <div class="card-icon"><svg>
-                                <use href="#icon-dtm-insert" xlink:href="#icon-dtm-insert" />
-                            </svg></div>
-                        <div class="card-body">
-                            <div class="card-title">Protokol o vložení DTM</div>
-                            <div class="card-desc">protokol o vložení dat do DTM</div>
+
+                    <div class="columns-wrapper" id="columns-wrapper">
+                    <!-- SLOUPEC 1: PROTOKOLY -->
+                    <div class="column">
+                        <div class="column-header" role="button" tabindex="0"
+                            aria-label="Sbalit nebo rozbalit sekci Protokoly, validace">
+                            <h2 class="column-title">1) Protokoly, validace</h2>
+                            <div class="column-meta">
+                                <span class="column-count">4</span>
+                                <button type="button" class="column-collapse-btn" aria-label="Sbalit / rozbalit sekci"
+                                    title="Sbalit / rozbalit sekci" tabindex="-1">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
-                    </a>
-                    <a href="./protocol/Protokol-JVF_validace.html" class="card validace">
-                        <div class="card-icon"><svg>
-                                <use href="#icon-jvf-validate" xlink:href="#icon-jvf-validate" />
-                            </svg></div>
-                        <div class="card-body">
-                            <div class="card-title">Protokol o validaci JVF</div>
-                            <div class="card-desc">protokol o validaci JVF dat v DMVS</div>
-                        </div>
-                    </a>
-                    <a href="./protocol/Protokol-predavaci.html" class="card predani">
-                        <div class="card-icon"><svg>
-                                <use href="#icon-handover" xlink:href="#icon-handover" />
-                            </svg></div>
-                        <div class="card-body">
-                            <div class="card-title">Předávací protokol</div>
-                            <div class="card-desc">předávací protokol - Atomicon</div>
-                        </div>
-                    </a>
-                    <a href="./JVF_Validator/jvf_validator.html" class="card jvf-validator">
-                        <div class="card-icon"><svg>
-                                <use href="#icon-jvf-validator" xlink:href="#icon-jvf-validator" />
-                            </svg></div>
-                        <div class="card-body">
+                        <div class="cards">
+                            <a href="./protocol/Protokol_DTM-vlozeni.html" target="_blank" rel="noopener noreferrer"
+                                class="card vlozeni" data-tool-id="vlozeni" title="Protokol o vložení DTM">
+                                <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
+                                    title="Přidat do oblíbených" tabindex="-1">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                    </svg>
+                                </button>
+                                <div class="card-icon"><svg>
+                                        <use href="#icon-dtm-insert" xlink:href="#icon-dtm-insert" />
+                                    </svg></div>
+                                <div class="card-body">
+                                    <div class="card-title">Protokol o vložení DTM</div>
+                                    <div class="card-desc">protokol o vložení dat do DTM</div>
+                                </div>
+                            </a>
+                            <a href="./protocol/Protokol-JVF_validace.html" target="_blank" rel="noopener noreferrer"
+                                class="card validace" data-tool-id="validace" title="Protokol o validaci JVF">
+                                <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
+                                    title="Přidat do oblíbených" tabindex="-1">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                    </svg>
+                                </button>
+                                <div class="card-icon"><svg>
+                                        <use href="#icon-jvf-validate" xlink:href="#icon-jvf-validate" />
+                                    </svg></div>
+                                <div class="card-body">
+                                    <div class="card-title">Protokol o validaci JVF</div>
+                                    <div class="card-desc">protokol o validaci JVF dat v DMVS</div>
+                                </div>
+                            </a>
+                            <a href="./protocol/Protokol-predavaci.html" target="_blank" rel="noopener noreferrer"
+                                class="card predani" data-tool-id="predani" title="Předávací protokol">
+                                <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
+                                    title="Přidat do oblíbených" tabindex="-1">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                    </svg>
+                                </button>
+                                <div class="card-icon"><svg>
+                                        <use href="#icon-handover" xlink:href="#icon-handover" />
+                                    </svg></div>
+                                <div class="card-body">
+                                    <div class="card-title">Předávací protokol</div>
+                                    <div class="card-desc">předávací protokol - Atomicon</div>
+                                </div>
+                            </a>
+                            <a href="./JVF_Validator/jvf_validator.html" target="_blank" rel="noopener noreferrer"
+                                class="card jvf-validator" data-tool-id="jvf-validator" title="JVF Validátor">
+                                <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
+                                    title="Přidat do oblíbených" tabindex="-1">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                    </svg>
+                                </button>
+                                <div class="card-icon"><svg>
+                                        <use href="#icon-jvf-validator" xlink:href="#icon-jvf-validator" />
+                                    </svg></div>
+                                <div class="card-body">
                             <div class="card-title">JVF Validátor</div>
                             <div class="card-desc">kontrola XML souborů JVF DTM</div>
                         </div>
@@ -531,13 +418,13 @@
                 </div>
             </div>
 
-            <!-- SLOUPEC 2: TABULKY, KARTY, MAPY, KALENDÁŘ -->
+            <!-- SLOUPEC 2: TABULKY, KARTY, KALENDÁŘ -->
             <div class="column">
                 <div class="column-header" role="button" tabindex="0"
-                    aria-label="Sbalit nebo rozbalit sekci Tabulky, Mapy, Kalendář, Tisk">
-                    <h2 class="column-title">2) Tabulky, Mapy, Kalendář, Tisk</h2>
+                    aria-label="Sbalit nebo rozbalit sekci Tabulky, Karty, Kalendář">
+                    <h2 class="column-title">2) Tabulky, Karty, Kalendář</h2>
                     <div class="column-meta">
-                        <span class="column-count">9</span>
+                        <span class="column-count">3</span>
                         <button type="button" class="column-collapse-btn" aria-label="Sbalit / rozbalit sekci"
                             title="Sbalit / rozbalit sekci" tabindex="-1">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
@@ -548,7 +435,15 @@
                     </div>
                 </div>
                 <div class="cards">
-                    <a href="./protocol/Card_Export.html" class="card export">
+                    <a href="./protocol/Card_Export.html" target="_blank" rel="noopener noreferrer"
+                        class="card export" data-tool-id="export" title="Technické karty">
+                        <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
+                            title="Přidat do oblíbených" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </button>
                         <div class="card-icon"><svg>
                                 <use href="#icon-technicke-karty" xlink:href="#icon-technicke-karty" />
                             </svg></div>
@@ -557,7 +452,15 @@
                             <div class="card-desc">univerzální export tech. karet</div>
                         </div>
                     </a>
-                    <a href="./protocol/Table_Export.html" class="card tabulky">
+                    <a href="./protocol/Table_Export.html" target="_blank" rel="noopener noreferrer"
+                        class="card tabulky" data-tool-id="tabulky" title="Export tabulek">
+                        <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
+                            title="Přidat do oblíbených" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </button>
                         <div class="card-icon"><svg>
                                 <use href="#icon-tabulky" xlink:href="#icon-tabulky" />
                             </svg></div>
@@ -566,67 +469,21 @@
                             <div class="card-desc">univerzální export tabulek</div>
                         </div>
                     </a>
-                    <a href="./protocol/Find-parcel.html" class="card parcel">
-                        <div class="card-icon"><svg>
-                                <use href="#icon-parcel" xlink:href="#icon-parcel" />
-                            </svg></div>
-                        <div class="card-body">
-                            <div class="card-title">Parcely pod komunikací</div>
-                            <div class="card-desc">vyhledání dotčených z SHP</div>
-                        </div>
-                    </a>
-                    <a href="./protocol/obecni-parcely.html" class="card obecni">
-                        <div class="card-icon"><svg>
-                                <use href="#icon-obecni-parcely" xlink:href="#icon-obecni-parcely" />
-                            </svg></div>
-                        <div class="card-body">
-                            <div class="card-title">Obecní parcely</div>
-                            <div class="card-desc">výpis LV → GeoJSON parcel</div>
-                        </div>
-                    </a>
-                    <a href="./protocol/calendar-generator.html" class="card kalendar">
+                    <a href="./protocol/calendar-generator.html" target="_blank" rel="noopener noreferrer"
+                        class="card kalendar" data-tool-id="kalendar" title="Generátor kalendáře">
+                        <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
+                            title="Přidat do oblíbených" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </button>
                         <div class="card-icon"><svg>
                                 <use href="#icon-kalendar" xlink:href="#icon-kalendar" />
                             </svg></div>
                         <div class="card-body">
                             <div class="card-title">Generátor kalendáře</div>
                             <div class="card-desc">generátor kalendáře na nástěnku</div>
-                        </div>
-                    </a>
-                    <a href="./protocol/Svazitost-plochy.html" class="card svazitost">
-                        <div class="card-icon"><svg>
-                                <use href="#icon-svazitost" xlink:href="#icon-svazitost" />
-                            </svg></div>
-                        <div class="card-body">
-                            <div class="card-title">Svažitost plochy</div>
-                            <div class="card-desc">výpočet sklonu z DMR 5G</div>
-                        </div>
-                    </a>
-                    <a href="./protocol/Propagace.html" class="card propagace">
-                        <div class="card-icon"><svg>
-                                <use href="#icon-propagace" xlink:href="#icon-propagace" />
-                            </svg></div>
-                        <div class="card-body">
-                            <div class="card-title">Generátor letáku</div>
-                            <div class="card-desc">leták, propagace a poděkování</div>
-                        </div>
-                    </a>
-                    <a href="./protocol/Post-label.html" class="card obalka">
-                        <div class="card-icon"><svg>
-                                <use href="#icon-obalka" xlink:href="#icon-obalka" />
-                            </svg></div>
-                        <div class="card-body">
-                            <div class="card-title">Adresa na obálku</div>
-                            <div class="card-desc">tisk poštovního štítku na obálku</div>
-                        </div>
-                    </a>
-                    <a href="./protocol/Mockup-web.html" class="card mockup">
-                        <div class="card-icon"><svg>
-                                <use href="#icon-mockup" xlink:href="#icon-mockup" />
-                            </svg></div>
-                        <div class="card-body">
-                            <div class="card-title">Snímek webu/mockup</div>
-                            <div class="card-desc">prezentační mockup v prohlížeči</div>
                         </div>
                     </a>
                 </div>
@@ -649,7 +506,15 @@
                     </div>
                 </div>
                 <div class="cards">
-                    <a href="./protocol/Text_Pasport-KOM.html" class="card kom">
+                    <a href="./protocol/Text_Pasport-KOM.html" target="_blank" rel="noopener noreferrer"
+                        class="card kom" data-tool-id="kom" title="Komunikace (KOM)">
+                        <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
+                            title="Přidat do oblíbených" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </button>
                         <div class="card-icon"><svg>
                                 <use href="#icon-komunikace" xlink:href="#icon-komunikace" />
                             </svg></div>
@@ -658,7 +523,15 @@
                             <div class="card-desc">textová část pasportu KOM</div>
                         </div>
                     </a>
-                    <a href="./protocol/Text_Pasport-DZ.html" class="card dz">
+                    <a href="./protocol/Text_Pasport-DZ.html" target="_blank" rel="noopener noreferrer"
+                        class="card dz" data-tool-id="dz" title="Dopravní Značení (DZ)">
+                        <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
+                            title="Přidat do oblíbených" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </button>
                         <div class="card-icon"><svg>
                                 <use href="#icon-doprava" xlink:href="#icon-doprava" />
                             </svg></div>
@@ -667,7 +540,15 @@
                             <div class="card-desc">textová část pasportu DZ</div>
                         </div>
                     </a>
-                    <a href="./protocol/Text_Pasport-NDZ.html" class="card ndz">
+                    <a href="./protocol/Text_Pasport-NDZ.html" target="_blank" rel="noopener noreferrer"
+                        class="card ndz" data-tool-id="ndz" title="Návrh dopravního značení (NDZ)">
+                        <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
+                            title="Přidat do oblíbených" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </button>
                         <div class="card-icon"><svg>
                                 <use href="#icon-ndz" xlink:href="#icon-ndz" />
                             </svg></div>
@@ -676,7 +557,15 @@
                             <div class="card-desc">textová část NDZ</div>
                         </div>
                     </a>
-                    <a href="./protocol/Text_Pasport-KAN.html" class="card kan">
+                    <a href="./protocol/Text_Pasport-KAN.html" target="_blank" rel="noopener noreferrer"
+                        class="card kan" data-tool-id="kan" title="Kanalizace (KAN)">
+                        <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
+                            title="Přidat do oblíbených" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </button>
                         <div class="card-icon"><svg>
                                 <use href="#icon-kanalizace" xlink:href="#icon-kanalizace" />
                             </svg></div>
@@ -685,7 +574,15 @@
                             <div class="card-desc">textová část pasportu KAN</div>
                         </div>
                     </a>
-                    <a href="./protocol/Text_Pasport-VOD.html" class="card vod">
+                    <a href="./protocol/Text_Pasport-VOD.html" target="_blank" rel="noopener noreferrer"
+                        class="card vod" data-tool-id="vod" title="Vodovod (VOD)">
+                        <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
+                            title="Přidat do oblíbených" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </button>
                         <div class="card-icon"><svg>
                                 <use href="#icon-vodovod" xlink:href="#icon-vodovod" />
                             </svg></div>
@@ -694,7 +591,15 @@
                             <div class="card-desc">textová část pasportu VOD</div>
                         </div>
                     </a>
-                    <a href="./protocol/Text_Pasport-VO.html" class="card vo">
+                    <a href="./protocol/Text_Pasport-VO.html" target="_blank" rel="noopener noreferrer"
+                        class="card vo" data-tool-id="vo" title="Osvětlení (VO)">
+                        <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
+                            title="Přidat do oblíbených" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </button>
                         <div class="card-icon"><svg>
                                 <use href="#icon-osvetleni" xlink:href="#icon-osvetleni" />
                             </svg></div>
@@ -703,7 +608,15 @@
                             <div class="card-desc">textová část pasportu VO</div>
                         </div>
                     </a>
-                    <a href="./protocol/Text_Pasport-OR.html" class="card or">
+                    <a href="./protocol/Text_Pasport-OR.html" target="_blank" rel="noopener noreferrer"
+                        class="card or" data-tool-id="or" title="Rozhlas (OR)">
+                        <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
+                            title="Přidat do oblíbených" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </button>
                         <div class="card-icon"><svg>
                                 <use href="#icon-rozhlas" xlink:href="#icon-rozhlas" />
                             </svg></div>
@@ -712,7 +625,15 @@
                             <div class="card-desc">textová část pasportu OR</div>
                         </div>
                     </a>
-                    <a href="./protocol/Text_Pasport-HRB.html" class="card hrb">
+                    <a href="./protocol/Text_Pasport-HRB.html" target="_blank" rel="noopener noreferrer"
+                        class="card hrb" data-tool-id="hrb" title="Hřbitov (HŘB)">
+                        <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
+                            title="Přidat do oblíbených" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </button>
                         <div class="card-icon"><svg>
                                 <use href="#icon-hrbitov" xlink:href="#icon-hrbitov" />
                             </svg></div>
@@ -721,7 +642,15 @@
                             <div class="card-desc">textová část pasportu HŘB</div>
                         </div>
                     </a>
-                    <a href="./protocol/Text_Pasport-ZEL.html" class="card zel">
+                    <a href="./protocol/Text_Pasport-ZEL.html" target="_blank" rel="noopener noreferrer"
+                        class="card zel" data-tool-id="zel" title="Zeleň (ZEL)">
+                        <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
+                            title="Přidat do oblíbených" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </button>
                         <div class="card-icon"><svg>
                                 <use href="#icon-zelen" xlink:href="#icon-zelen" />
                             </svg></div>
@@ -730,7 +659,15 @@
                             <div class="card-desc">textová část pasportu ZEL</div>
                         </div>
                     </a>
-                    <a href="./protocol/Text_Pasport-AKT.html" class="card akt">
+                    <a href="./protocol/Text_Pasport-AKT.html" target="_blank" rel="noopener noreferrer"
+                        class="card akt" data-tool-id="akt" title="Aktualizace - univerzální">
+                        <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
+                            title="Přidat do oblíbených" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </button>
                         <div class="card-icon"><svg>
                                 <use href="#icon-aktualizace" xlink:href="#icon-aktualizace" />
                             </svg></div>
@@ -742,11 +679,153 @@
                 </div>
             </div>
 
-            <!-- SLOUPEC 4: EXPERIMENTÁLNÍ NÁSTROJE -->
+            <!-- SLOUPEC 4: DATA, ANALYTICKÉ NÁSTROJE -->
+            <div class="column">
+                <div class="column-header" role="button" tabindex="0"
+                    aria-label="Sbalit nebo rozbalit sekci Data, Analytické nástroje">
+                    <h2 class="column-title">4) Data, Analytické nástroje</h2>
+                    <div class="column-meta">
+                        <span class="column-count">3</span>
+                        <button type="button" class="column-collapse-btn" aria-label="Sbalit / rozbalit sekci"
+                            title="Sbalit / rozbalit sekci" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="cards">
+                    <a href="./protocol/Find-parcel.html" target="_blank" rel="noopener noreferrer"
+                        class="card parcel" data-tool-id="parcel" title="Parcely pod komunikací">
+                        <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
+                            title="Přidat do oblíbených" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </button>
+                        <div class="card-icon"><svg>
+                                <use href="#icon-parcel" xlink:href="#icon-parcel" />
+                            </svg></div>
+                        <div class="card-body">
+                            <div class="card-title">Parcely pod komunikací</div>
+                            <div class="card-desc">vyhledání dotčených z SHP</div>
+                        </div>
+                    </a>
+                    <a href="./protocol/obecni-parcely.html" target="_blank" rel="noopener noreferrer"
+                        class="card obecni" data-tool-id="obecni" title="Obecní parcely">
+                        <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
+                            title="Přidat do oblíbených" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </button>
+                        <div class="card-icon"><svg>
+                                <use href="#icon-obecni-parcely" xlink:href="#icon-obecni-parcely" />
+                            </svg></div>
+                        <div class="card-body">
+                            <div class="card-title">Obecní parcely</div>
+                            <div class="card-desc">výpis LV → GeoJSON parcel</div>
+                        </div>
+                    </a>
+                    <a href="./protocol/Svazitost-plochy.html" target="_blank" rel="noopener noreferrer"
+                        class="card svazitost" data-tool-id="svazitost" title="Svažitost plochy">
+                        <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
+                            title="Přidat do oblíbených" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </button>
+                        <div class="card-icon"><svg>
+                                <use href="#icon-svazitost" xlink:href="#icon-svazitost" />
+                            </svg></div>
+                        <div class="card-body">
+                            <div class="card-title">Svažitost plochy</div>
+                            <div class="card-desc">výpočet sklonu z DMR 5G</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- SLOUPEC 5: PROPAGACE, TISK -->
+            <div class="column">
+                <div class="column-header" role="button" tabindex="0"
+                    aria-label="Sbalit nebo rozbalit sekci Propagace, tisk">
+                    <h2 class="column-title">5) Propagace, tisk</h2>
+                    <div class="column-meta">
+                        <span class="column-count">3</span>
+                        <button type="button" class="column-collapse-btn" aria-label="Sbalit / rozbalit sekci"
+                            title="Sbalit / rozbalit sekci" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="cards">
+                    <a href="./protocol/Propagace.html" target="_blank" rel="noopener noreferrer"
+                        class="card propagace" data-tool-id="propagace" title="Generátor letáku">
+                        <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
+                            title="Přidat do oblíbených" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </button>
+                        <div class="card-icon"><svg>
+                                <use href="#icon-propagace" xlink:href="#icon-propagace" />
+                            </svg></div>
+                        <div class="card-body">
+                            <div class="card-title">Generátor letáku</div>
+                            <div class="card-desc">leták, propagace a poděkování</div>
+                        </div>
+                    </a>
+                    <a href="./protocol/Post-label.html" target="_blank" rel="noopener noreferrer"
+                        class="card obalka" data-tool-id="obalka" title="Adresa na obálku">
+                        <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
+                            title="Přidat do oblíbených" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </button>
+                        <div class="card-icon"><svg>
+                                <use href="#icon-obalka" xlink:href="#icon-obalka" />
+                            </svg></div>
+                        <div class="card-body">
+                            <div class="card-title">Adresa na obálku</div>
+                            <div class="card-desc">tisk poštovního štítku na obálku</div>
+                        </div>
+                    </a>
+                    <a href="./protocol/Mockup-web.html" target="_blank" rel="noopener noreferrer"
+                        class="card mockup" data-tool-id="mockup" title="Snímek webu/mockup">
+                        <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
+                            title="Přidat do oblíbených" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </button>
+                        <div class="card-icon"><svg>
+                                <use href="#icon-mockup" xlink:href="#icon-mockup" />
+                            </svg></div>
+                        <div class="card-body">
+                            <div class="card-title">Snímek webu/mockup</div>
+                            <div class="card-desc">prezentační mockup v prohlížeči</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- SLOUPEC 6: EXPERIMENTÁLNÍ NÁSTROJE -->
             <div class="column">
                 <div class="column-header" role="button" tabindex="0"
                     aria-label="Sbalit nebo rozbalit sekci Experimentální nástroje">
-                    <h2 class="column-title">4) Experimentální nástroje</h2>
+                    <h2 class="column-title">6) Experimentální nástroje</h2>
                     <div class="column-meta">
                         <span class="column-count">4</span>
                         <button type="button" class="column-collapse-btn" aria-label="Sbalit / rozbalit sekci"
@@ -759,8 +838,15 @@
                     </div>
                 </div>
                 <div class="cards">
-                    <a href="./Map/map-generator.html" class="card experimental exp-mapa"
-                        title="Generátor map">
+                    <a href="./Map/map-generator.html" target="_blank" rel="noopener noreferrer"
+                        class="card experimental exp-mapa" data-tool-id="exp-mapa" title="Generátor map">
+                        <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
+                            title="Přidat do oblíbených" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </button>
                         <div class="card-icon"><svg>
                                 <use href="#icon-mapa" xlink:href="#icon-mapa" />
                             </svg></div>
@@ -769,8 +855,15 @@
                             <div class="card-desc">univerzální mapový výstup</div>
                         </div>
                     </a>
-                    <a href="./protocol/3d-prohlizec.html" class="card experimental exp-3d"
-                        title="Prohlížeč 3D dat">
+                    <a href="./protocol/3d-prohlizec.html" target="_blank" rel="noopener noreferrer"
+                        class="card experimental exp-3d" data-tool-id="exp-3d" title="Prohlížeč 3D dat">
+                        <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
+                            title="Přidat do oblíbených" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </button>
                         <div class="card-icon"><svg>
                                 <use href="#icon-3d-box" xlink:href="#icon-3d-box" />
                             </svg></div>
@@ -779,8 +872,16 @@
                             <div class="card-desc">prohlížeč 3D modelů pro GISAdmin</div>
                         </div>
                     </a>
-                    <a href="./protocol/navod-kontrola.html" class="card experimental exp-navod"
+                    <a href="./protocol/navod-kontrola.html" target="_blank" rel="noopener noreferrer"
+                        class="card experimental exp-navod" data-tool-id="exp-navod"
                         title="Generátor návodu pro kontrolu dat v GISAdmin">
+                        <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
+                            title="Přidat do oblíbených" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </button>
                         <div class="card-icon"><svg>
                                 <use href="#icon-navod-kontrola" xlink:href="#icon-navod-kontrola" />
                             </svg></div>
@@ -789,8 +890,16 @@
                             <div class="card-desc">kontrola dat v GISAdmin</div>
                         </div>
                     </a>
-                    <a href="./protocol/Obec-GA-banner.html" class="card experimental exp-banner"
+                    <a href="./protocol/Obec-GA-banner.html" target="_blank" rel="noopener noreferrer"
+                        class="card experimental exp-banner" data-tool-id="exp-banner"
                         title="Generátor banneru GISAdmin na obecní web">
+                        <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
+                            title="Přidat do oblíbených" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </button>
                         <div class="card-icon"><svg>
                                 <use href="#icon-obec-banner" xlink:href="#icon-obec-banner" />
                             </svg></div>
@@ -802,30 +911,120 @@
                 </div>
             </div>
         </div>
+    </div>
+    </main>
+</div>
 
-        <!-- Mini Changelog a Dashboard nad footerem vlevo -->
-        <div class="changelog-row">
-            <aside class="changelog-widget" aria-label="Historie změn">
-                <div class="changelog-box">
-                    <div class="changelog-header">
-                        <span class="changelog-badge">Aktualizace</span>
-                        <span class="changelog-date">19. 11. 2026</span>
-                    </div>
-                    <ul class="changelog-list">
-                        <li><span class="changelog-arrow">→</span> sekce „Experimentální nástroje“</li>
-                        <li><span class="changelog-arrow">→</span> nástroje 3D, Návod, GA banner</li>
-                        <li><span class="changelog-arrow">→</span> nový design (redesign UI/header)</li>
-                        <li><span class="changelog-arrow">→</span> odkaz na Dashboard požadavků</li>
-                    </ul>
+    <!-- HLAVNÍ PRAVÝ PANEL (AŽ NAHORU, OD TOP: 0) -->
+    <aside class="side-panel" id="side-panel" aria-label="Hlavní řídící panel">
+        <!-- Header panelu: Hledat + Přepínač List/Grid view + Přepínač Tmavý režim -->
+        <div class="panel-header">
+            <div class="panel-search-box">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="generator-search" class="panel-search-input"
+                    placeholder="Hledat nástroj... (⌘F)" autocomplete="off" spellcheck="false"
+                    aria-label="Hledat nástroj">
+                <button type="button" id="search-clear" class="search-clear" aria-label="Vymazat hledání"
+                    title="Vymazat hledání" style="display:none;">&times;</button>
+            </div>
+            <div id="search-count" class="panel-search-count" style="display:none;"></div>
+
+            <div class="panel-header-controls">
+                <!-- Přepínač Kompaktní seznam (List view) / Karty (Grid view) -->
+                <button type="button" id="view-mode-toggle" class="panel-btn view-toggle-btn"
+                    aria-label="Přepnout na kompaktní seznam" title="Přepnout zobrazení: Karty / Seznam">
+                    <svg class="icon-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="8" y1="6" x2="21" y2="6"></line>
+                        <line x1="8" y1="12" x2="21" y2="12"></line>
+                        <line x1="8" y1="18" x2="21" y2="18"></line>
+                        <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                        <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                        <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                    </svg>
+                    <span class="btn-label" id="view-mode-label">Seznam</span>
+                </button>
+
+                <!-- Přepínač na Tmavý režim -->
+                <button type="button" id="theme-toggle" class="panel-btn theme-toggle"
+                    aria-label="Přepnout tmavý / světlý režim" title="Přepnout tmavý / světlý režim">
+                    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <span class="btn-label" id="theme-mode-label">Motiv</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tělo panelu: sekce oddělené linií, bez boxů -->
+        <div class="panel-body">
+            <!-- 1. sekce panelu: Oblíbené (pouze ikony) -->
+            <section class="panel-section panel-favorites-section">
+                <div class="panel-section-header">
+                    <span class="panel-section-title">
+                        <svg class="panel-star-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                        Oblíbené
+                    </span>
+                    <span class="panel-fav-count" id="panel-fav-count">0</span>
                 </div>
-            </aside>
+                <div class="panel-favorites-grid" id="panel-favorites-grid">
+                    <!-- Renderováno dynamicky z JS -->
+                </div>
+            </section>
 
-            <aside class="changelog-widget feedback-widget" aria-label="Návrhy a hlášení chyb">
+            <!-- 2. sekce panelu: Changelog (jednotný nadpis s ikonou) -->
+            <section class="panel-section panel-changelog-section">
+                <div class="panel-section-header">
+                    <span class="panel-section-title">
+                        <svg class="panel-section-icon panel-changelog-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        Changelog
+                    </span>
+                    <span class="changelog-date">19. 11. 2026</span>
+                </div>
+                <ul class="changelog-list">
+                    <li><span class="changelog-arrow">→</span> sekce „Experimentální nástroje“</li>
+                    <li><span class="changelog-arrow">→</span> nástroje 3D, Návod, GA banner</li>
+                    <li><span class="changelog-arrow">→</span> nový pravý panel &amp; oblíbené</li>
+                    <li><span class="changelog-arrow">→</span> kompaktní režim seznamu</li>
+                </ul>
+            </section>
+
+            <!-- 3. sekce panelu: Dashboard Google Tabulka (jednotný nadpis s ikonou) -->
+            <section class="panel-section panel-feedback-section">
                 <a href="https://docs.google.com/spreadsheets/d/1aT9liTVAW8GqX8N_xchDaT6sUjEsCrkg5GBw4Oia_dY/edit?usp=sharing"
-                    target="_blank" rel="noopener noreferrer" class="changelog-box feedback-box"
+                    target="_blank" rel="noopener noreferrer" class="panel-feedback-link"
                     title="Otevřít dashboard návrhů a chyb v Google Tabulkách">
-                    <div class="changelog-header">
-                        <span class="changelog-badge feedback-badge">Dashboard</span>
+                    <div class="panel-section-header">
+                        <span class="panel-section-title">
+                            <svg class="panel-section-icon panel-dashboard-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                                <path d="M3 9h18"></path>
+                                <path d="M9 21V9"></path>
+                            </svg>
+                            Dashboard
+                        </span>
                         <span class="feedback-link-text">
                             <span>Google Tabulka</span>
                             <svg class="feedback-ext-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -842,81 +1041,118 @@
                         <li><span class="changelog-arrow feedback-arrow">→</span> otevřený zápis pro uživatele</li>
                     </ul>
                 </a>
-            </aside>
+            </section>
+
+            <!-- 4. sekce panelu: Další nástroje (poslední sekce pod Dashboardem) -->
+            <section class="panel-section panel-tools-section">
+                <div class="panel-section-header">
+                    <span class="panel-section-title">
+                        <svg class="panel-section-icon panel-tools-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+                            <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+                            <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+                            <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+                        </svg>
+                        Další nástroje
+                    </span>
+                    <span class="panel-tools-author">jakubsutta</span>
+                </div>
+                <div class="panel-tools-list">
+                    <a href="https://github.com/jakubsutta/qgis-AzimuthEditor-plugin" target="_blank"
+                        rel="noopener noreferrer" class="panel-tool-item">
+                        <div class="panel-tool-icon-box">
+                            <svg class="github-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+                            </svg>
+                        </div>
+                        <div class="panel-tool-info">
+                            <div class="panel-tool-name">QPlugin / Azimut set</div>
+                            <div class="panel-tool-desc">Editor azimutu pro QGIS</div>
+                        </div>
+                        <span class="tag-badge tag-qgis">QGIS</span>
+                    </a>
+
+                    <a href="https://jakubsutta.github.io/CAD-viewer/" target="_blank" rel="noopener noreferrer"
+                        class="panel-tool-item">
+                        <div class="panel-tool-icon-box">
+                            <svg class="github-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+                            </svg>
+                        </div>
+                        <div class="panel-tool-info">
+                            <div class="panel-tool-name">CAD Viewer</div>
+                            <div class="panel-tool-desc">Webový prohlížeč CAD výkresů</div>
+                        </div>
+                        <span class="tag-badge tag-html">HTML</span>
+                    </a>
+
+                    <a href="https://jakubsutta.github.io/Point-elevation-calculator/" target="_blank"
+                        rel="noopener noreferrer" class="panel-tool-item">
+                        <div class="panel-tool-icon-box">
+                            <svg class="github-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+                            </svg>
+                        </div>
+                        <div class="panel-tool-info">
+                            <div class="panel-tool-name">Výpočet výšky dle sklonu</div>
+                            <div class="panel-tool-desc">Kalkulačka výšek bodů</div>
+                        </div>
+                        <span class="tag-badge tag-html">HTML</span>
+                    </a>
+
+                    <a href="https://github.com/jakubsutta/qgis-XML-JVF-import-plugin" target="_blank"
+                        rel="noopener noreferrer" class="panel-tool-item">
+                        <div class="panel-tool-icon-box">
+                            <svg class="github-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path
+                                    d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+                            </svg>
+                        </div>
+                        <div class="panel-tool-info">
+                            <div class="panel-tool-name">QPlugin / JVF-Import</div>
+                            <div class="panel-tool-desc">Import JVF.XML do QGIS</div>
+                        </div>
+                        <span class="tag-badge tag-qgis">QGIS</span>
+                    </a>
+                </div>
+            </section>
         </div>
 
-        <footer class="footer-bottom">
-            <span>&copy; 2026 Jakub Šutta</span>
-            <span class="footer-separator">•</span>
-            <a href="https://github.com/jakubsutta/DTM-protocol" target="_blank" rel="noopener noreferrer">
-                <svg class="footer-github-icon" viewBox="0 0 24 24" fill="currentColor">
+        <!-- Footer panelu: připnutý dole (copyright + github) -->
+        <footer class="panel-footer">
+            <span class="panel-copy">&copy; 2026 Jakub Šutta</span>
+            <a href="https://github.com/jakubsutta/DTM-protocol" target="_blank" rel="noopener noreferrer"
+                class="panel-github-btn" title="GitHub: DTM-protocol" aria-label="GitHub: DTM-protocol">
+                <svg class="panel-github-icon" viewBox="0 0 24 24" fill="currentColor">
                     <path
                         d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
                 </svg>
-                <span>GitHub: DTM-protocol</span>
             </a>
         </footer>
-    </div>
+    </aside>
+</div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const searchDrawer = document.getElementById('search-drawer');
-            const searchOpenBtn = document.getElementById('search-open-btn');
-            const searchCloseBtn = document.getElementById('search-close-btn');
-            const searchExpandBar = document.getElementById('search-expand-bar');
+            const dashboardLayout = document.getElementById('dashboard-layout');
             const searchInput = document.getElementById('generator-search');
             const clearBtn = document.getElementById('search-clear');
             const searchCount = document.getElementById('search-count');
             const noResultsMsg = document.getElementById('no-results-msg');
-            const searchKbdBadge = document.getElementById('search-kbd-badge');
             const columns = document.querySelectorAll('.column');
             const cards = document.querySelectorAll('.card');
 
-            const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0 || navigator.userAgent.toUpperCase().indexOf('MAC') >= 0;
-            if (searchKbdBadge) {
-                searchKbdBadge.textContent = isMac ? '⌘F' : 'Ctrl+F';
-            }
-
-            function openSearch() {
-                if (!searchDrawer) return;
-                searchDrawer.classList.add('is-open');
-                if (searchExpandBar) searchExpandBar.setAttribute('aria-hidden', 'false');
-                setTimeout(() => {
+            // Klávesová zkratka ⌘F / Ctrl+F pro zaostření vyhledávacího pole v panelu
+            document.addEventListener('keydown', function (e) {
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') {
+                    e.preventDefault();
                     if (searchInput) {
                         searchInput.focus();
                         searchInput.select();
                     }
-                }, 50);
-            }
-
-            function closeSearch() {
-                if (!searchDrawer) return;
-                searchDrawer.classList.remove('is-open');
-                if (searchExpandBar) searchExpandBar.setAttribute('aria-hidden', 'true');
-            }
-
-            if (searchOpenBtn) {
-                searchOpenBtn.addEventListener('click', function (e) {
-                    e.stopPropagation();
-                    openSearch();
-                });
-            }
-
-            if (searchCloseBtn) {
-                searchCloseBtn.addEventListener('click', function (e) {
-                    e.stopPropagation();
-                    if (searchInput && searchInput.value) {
-                        searchInput.value = '';
-                        filterCards();
-                    }
-                    closeSearch();
-                });
-            }
-
-            document.addEventListener('keydown', function (e) {
-                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') {
-                    e.preventDefault();
-                    openSearch();
                 }
             });
 
@@ -927,20 +1163,11 @@
                             searchInput.value = '';
                             filterCards();
                         } else {
-                            closeSearch();
+                            searchInput.blur();
                         }
                     }
                 });
             }
-
-            // Kliknutí mimo search drawer zavře prázdné vyhledávání
-            document.addEventListener('click', function (e) {
-                if (searchDrawer && !searchDrawer.contains(e.target)) {
-                    if (searchDrawer.classList.contains('is-open') && (!searchInput || !searchInput.value)) {
-                        closeSearch();
-                    }
-                }
-            });
 
             function removeDiacritics(str) {
                 return (str || '')
@@ -963,9 +1190,6 @@
             function filterCards() {
                 const query = removeDiacritics(searchInput.value);
                 if (clearBtn) clearBtn.style.display = query.length > 0 ? 'flex' : 'none';
-                if (searchExpandBar) {
-                    searchExpandBar.classList.toggle('has-val', query.length > 0);
-                }
 
                 if (!query) {
                     cardData.forEach(item => item.element.classList.remove('search-hidden'));
@@ -1043,7 +1267,155 @@
                 });
             }
 
+            // =========================================================================
+            // Přepínač zobrazení: Kompaktní seznam (List view) / Karty (Grid view)
+            // =========================================================================
+            const viewModeToggleBtn = document.getElementById('view-mode-toggle');
+            const viewModeLabel = document.getElementById('view-mode-label');
+            const STORAGE_KEY_VIEW = 'dtm_view_mode';
+            let currentViewMode = localStorage.getItem(STORAGE_KEY_VIEW) || 'grid';
+
+            function applyViewMode(mode) {
+                currentViewMode = mode;
+                if (mode === 'list') {
+                    dashboardLayout.classList.add('view-compact-list');
+                    if (viewModeLabel) viewModeLabel.textContent = 'Karty';
+                    if (viewModeToggleBtn) {
+                        viewModeToggleBtn.setAttribute('title', 'Přepnout na standardní zobrazení karet');
+                        viewModeToggleBtn.setAttribute('aria-label', 'Přepnout na standardní zobrazení karet');
+                    }
+                } else {
+                    dashboardLayout.classList.remove('view-compact-list');
+                    if (viewModeLabel) viewModeLabel.textContent = 'Seznam';
+                    if (viewModeToggleBtn) {
+                        viewModeToggleBtn.setAttribute('title', 'Přepnout na kompaktní seznam');
+                        viewModeToggleBtn.setAttribute('aria-label', 'Přepnout na kompaktní seznam');
+                    }
+                }
+                try {
+                    localStorage.setItem(STORAGE_KEY_VIEW, mode);
+                } catch (e) { }
+            }
+
+            applyViewMode(currentViewMode);
+
+            if (viewModeToggleBtn) {
+                viewModeToggleBtn.addEventListener('click', function () {
+                    const newMode = currentViewMode === 'list' ? 'grid' : 'list';
+                    applyViewMode(newMode);
+                });
+            }
+
+            // =========================================================================
+            // Správa Oblíbených (Favorites) s ukládáním do localStorage
+            // =========================================================================
+            const favoritesGrid = document.getElementById('panel-favorites-grid');
+            const favCountBadge = document.getElementById('panel-fav-count');
+            const STORAGE_KEY_FAVORITES = 'dtm_favorite_tools';
+            let favoriteIds = [];
+
+            try {
+                const storedFavs = localStorage.getItem(STORAGE_KEY_FAVORITES);
+                if (storedFavs) {
+                    favoriteIds = JSON.parse(storedFavs) || [];
+                }
+            } catch (e) {
+                favoriteIds = [];
+            }
+
+            function saveFavorites() {
+                try {
+                    localStorage.setItem(STORAGE_KEY_FAVORITES, JSON.stringify(favoriteIds));
+                } catch (e) { }
+            }
+
+            function renderFavorites() {
+                if (favCountBadge) {
+                    favCountBadge.textContent = favoriteIds.length;
+                }
+
+                if (!favoritesGrid) return;
+                favoritesGrid.innerHTML = '';
+
+                if (favoriteIds.length === 0) {
+                    const emptyMsg = document.createElement('div');
+                    emptyMsg.className = 'panel-fav-empty';
+                    emptyMsg.innerHTML = 'Zatím žádné oblíbené karty.<br>Klikněte na ⭐ u karty pro rychlý přístup.';
+                    favoritesGrid.appendChild(emptyMsg);
+                    return;
+                }
+
+                favoriteIds.forEach(toolId => {
+                    const card = document.querySelector(`.card[data-tool-id="${toolId}"]`);
+                    if (!card) return;
+
+                    const title = card.querySelector('.card-title')?.textContent || toolId;
+                    const href = card.getAttribute('href');
+                    const svgIcon = card.querySelector('.card-icon svg');
+                    
+                    // Zjistíme specifické třídy karty (např. vlozeni, validace, exp-3d...)
+                    const cardClasses = Array.from(card.classList).filter(c => c !== 'card' && c !== 'search-hidden' && c !== 'is-favorite');
+
+                    const favLink = document.createElement('a');
+                    favLink.href = href;
+                    favLink.target = '_blank';
+                    favLink.rel = 'noopener noreferrer';
+                    favLink.className = `panel-fav-item ${cardClasses.join(' ')}`;
+                    favLink.title = title;
+                    favLink.setAttribute('aria-label', title);
+
+                    if (svgIcon) {
+                        favLink.innerHTML = svgIcon.outerHTML;
+                    }
+
+                    favoritesGrid.appendChild(favLink);
+                });
+            }
+
+            function updateCardFavoriteStates() {
+                cards.forEach(card => {
+                    const toolId = card.getAttribute('data-tool-id');
+                    const isFav = favoriteIds.includes(toolId);
+                    card.classList.toggle('is-favorite', isFav);
+                    const favBtn = card.querySelector('.card-fav-btn');
+                    if (favBtn) {
+                        favBtn.setAttribute('title', isFav ? 'Odebrat z oblíbených' : 'Přidat do oblíbených');
+                        favBtn.setAttribute('aria-label', isFav ? 'Odebrat z oblíbených' : 'Přidat do oblíbených');
+                    }
+                });
+            }
+
+            // Obsluha kliknutí na hvězdičku u karet
+            cards.forEach(card => {
+                const favBtn = card.querySelector('.card-fav-btn');
+                if (favBtn) {
+                    favBtn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const toolId = card.getAttribute('data-tool-id');
+                        if (!toolId) return;
+
+                        const idx = favoriteIds.indexOf(toolId);
+                        if (idx >= 0) {
+                            favoriteIds.splice(idx, 1);
+                        } else {
+                            favoriteIds.push(toolId);
+                        }
+
+                        saveFavorites();
+                        updateCardFavoriteStates();
+                        renderFavorites();
+                    });
+                }
+            });
+
+            // Inicializace oblíbených
+            updateCardFavoriteStates();
+            renderFavorites();
+
+            // =========================================================================
             // Sbalení / rozbalení sekcí (sloupců) s ukládáním do localStorage
+            // =========================================================================
             const STORAGE_KEY_COLLAPSED = 'dtm_collapsed_sections';
             let collapsedIndices = [];
             try {
@@ -1098,32 +1470,6 @@
                     });
                 }
             });
-
-            // Dropdown menu "Další nástroje"
-            const toolsDropdown = document.getElementById('tools-dropdown');
-            const toolsToggleBtn = document.getElementById('tools-toggle-btn');
-
-            if (toolsDropdown && toolsToggleBtn) {
-                toolsToggleBtn.addEventListener('click', function (e) {
-                    e.stopPropagation();
-                    const isOpen = toolsDropdown.classList.toggle('open');
-                    toolsToggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-                });
-
-                document.addEventListener('click', function (e) {
-                    if (!toolsDropdown.contains(e.target)) {
-                        toolsDropdown.classList.remove('open');
-                        toolsToggleBtn.setAttribute('aria-expanded', 'false');
-                    }
-                });
-
-                document.addEventListener('keydown', function (e) {
-                    if (e.key === 'Escape' && toolsDropdown.classList.contains('open')) {
-                        toolsDropdown.classList.remove('open');
-                        toolsToggleBtn.setAttribute('aria-expanded', 'false');
-                    }
-                });
-            }
 
             // Interaktivní reflektor na pozadí podle polohy myši
             const spotlight = document.getElementById('bg-spotlight');
