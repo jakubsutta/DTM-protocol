@@ -117,7 +117,7 @@ body.dark-theme .main-header {
     width: 100%;
     margin: 0 auto;
     padding: 0 16px;
-    height: 48px;
+    height: 54px;
     box-sizing: border-box;
     display: flex;
     align-items: center;
@@ -128,41 +128,76 @@ body.dark-theme .main-header {
 .header-brand {
     display: flex;
     align-items: center;
-    gap: 9px;
+    gap: 12px;
     flex-shrink: 0;
+    cursor: default;
+    user-select: none;
 }
 
 .header-icon-tile {
-    width: 28px;
-    height: 28px;
-    border-radius: 7px;
+    width: 38px;
+    height: 38px;
+    border-radius: 9px;
     background: rgba(234, 82, 31, 0.10);
     color: #ea521f;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.header-brand:hover .header-icon-tile {
+    background: rgba(234, 82, 31, 0.16);
+    transform: scale(1.05);
 }
 
 .header-icon {
-    width: 16px;
-    height: 16px;
+    width: 22px;
+    height: 22px;
     display: block;
 }
 
 .brand-text {
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
 }
 
-h1 {
-    font-size: 13px;
-    font-weight: 700;
+h1,
+h1.brand-title {
+    font-size: 18px;
+    font-weight: 800;
     color: #0f172a;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     margin: 0;
+    line-height: 1.1;
     white-space: nowrap;
+    display: inline-flex;
+    align-items: baseline;
+}
+
+h1.brand-title .brand-dot {
+    color: #ea521f;
+    font-weight: 900;
+    margin: 0 0.5px;
+    transition: color 0.2s ease;
+}
+
+.brand-desc {
+    font-size: 10px;
+    font-weight: 500;
+    color: #64748b;
+    line-height: 1.2;
+    white-space: nowrap;
+    letter-spacing: 0.015em;
+}
+
+.brand-desc .acro-lead {
+    color: #ea521f;
+    font-weight: 700;
 }
 
 /* ---- Upozornění v Headeru (jednoduchý pruh uprostřed) ---- */
@@ -1041,6 +1076,26 @@ body.dark-theme .theme-toggle .icon-moon {
 }
 
 @media (max-width: 1250px) {
+    .brand-desc {
+        font-size: 9px;
+        letter-spacing: 0;
+    }
+
+    h1,
+    h1.brand-title {
+        font-size: 16px;
+    }
+
+    .header-icon-tile {
+        width: 34px;
+        height: 34px;
+    }
+
+    .header-icon {
+        width: 19px;
+        height: 19px;
+    }
+
     .notice-text {
         font-size: 10px;
         gap: 5px;
@@ -1058,6 +1113,11 @@ body.dark-theme .theme-toggle .icon-moon {
 
     .header-brand {
         justify-content: center;
+    }
+
+    .brand-text {
+        align-items: center;
+        text-align: center;
     }
 
     .header-notice {
@@ -1314,8 +1374,21 @@ body.dark-theme {
 }
 
 body.dark-theme h1,
-body.dark-theme .header-brand h1 {
+body.dark-theme .header-brand h1,
+body.dark-theme h1.brand-title {
     color: #f1f5f9;
+}
+
+body.dark-theme h1.brand-title .brand-dot {
+    color: #ff6b3d;
+}
+
+body.dark-theme .brand-desc {
+    color: #94a3b8;
+}
+
+body.dark-theme .brand-desc .acro-lead {
+    color: #ff6b3d;
 }
 
 body.dark-theme .header-notice .notice-primary {
