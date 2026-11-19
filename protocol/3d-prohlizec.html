@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3D prohlížeč – GISAdmin</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap">
+<style>
+:root{--or:#e85417;--or-l:#ee8552;--bl:#4484f5;--nv:#0c4c98;--pan:#eeedec;--bd:#d2d6d8;--tx:#3e4041;--mu:#717273}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{display:flex;flex-direction:column;padding:6px 7px 8px;background:#fff;color:var(--tx);font:13px/1.4 "Open Sans","Segoe UI",Helvetica,Arial,sans-serif}
+header{flex:none;border-bottom:2px solid var(--or-l)}
+.top{display:flex;align-items:center;gap:14px;min-height:40px}
+.top img{height:28px;display:block}
+.brand{font-weight:700;letter-spacing:1px;color:var(--or);font-size:20px}
+.pt{margin-left:auto;font-size:14px;font-weight:600;color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.pt b{color:var(--or)}
+#ttl:not(:empty)::before{content:" – "}
+nav{display:flex;flex-wrap:wrap;align-items:center;gap:2px;padding:2px 0 4px}
+.mi{font:inherit;font-size:12.5px;color:#444;background:none;border:0;padding:3px 9px;cursor:pointer;border-radius:3px;display:inline-block}
+.mi:hover{color:var(--or);background:#f6f6f6}
+.mi.on{color:var(--or);font-weight:600}
+.sep{width:1px;height:14px;background:#ccc;margin:0 4px}
+#stage{position:relative;flex:1;min-height:0;margin-top:8px;overflow:hidden;background:#e7eaed}
+#stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block;outline:0}
+.lbar,.rbtn{position:absolute;z-index:5;border:2px solid rgba(0,0,0,.2);border-radius:4px;background:#fff;background-clip:padding-box}
+.lbar{left:10px;top:10px}
+.rbtn{right:10px;top:10px}
+.lbar button,.rbtn button{display:flex;align-items:center;justify-content:center;width:30px;height:30px;padding:0;border:0;border-bottom:1px solid #ccc;background:#fff;color:#000;cursor:pointer;font:700 17px "Open Sans",Arial,sans-serif}
+.lbar button:last-child,.rbtn button{border-bottom:0}
+.lbar button:hover,.rbtn button:hover{background:#f4f4f4}
+.lbar svg{width:15px;height:15px;fill:none;stroke:#000;stroke-width:2;stroke-linecap:square;stroke-linejoin:miter}
+#help{position:absolute;z-index:6;top:10px;right:52px;width:236px;max-height:calc(100% - 20px);overflow:auto;background:var(--pan);border-radius:4px;padding:9px 11px 11px;box-shadow:0 1px 5px rgba(0,0,0,.25)}
+#help h4{margin:0 0 9px;font-size:12px;font-weight:600;color:var(--or)}
+#help h4::before{content:"\25B6";font-size:9px;margin-right:7px}
+#help-x{position:absolute;right:8px;top:3px;font-size:24px;line-height:1;color:#000;cursor:pointer}
+.tabs{display:flex;gap:2px;border-bottom:1px solid #e3c3b4;margin-bottom:9px}
+.tab{font:inherit;font-size:11px;padding:5px 9px;cursor:pointer;border:1px solid transparent;border-bottom:0;color:var(--mu);background:none}
+.tab.on{color:var(--or);font-weight:600;background:#fff6f2;border-color:#f0c9b8;border-radius:3px 3px 0 0}
+.pane{font-size:12px}
+.pane dt{font-weight:600;color:var(--tx)}
+.pane dt::before{content:"\25B6";font-size:8px;margin-right:6px;color:var(--mu)}
+.pane dd{margin:0 0 8px 14px;color:var(--mu)}
+.pane dl{margin:0}
+#info{position:absolute;z-index:5;left:10px;bottom:10px;background:rgba(255,255,255,.88);border:1px solid #999;padding:2px 7px;font-size:10.5px;color:#333}
+#drop{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:4;max-width:88%;text-align:center;background:#fff;border:2px dashed var(--or-l);border-radius:4px;padding:26px 34px}
+#drop p{margin:6px 0 16px;color:var(--mu)}
+.btn-b{display:inline-block;background:var(--bl);color:#fff;border:0;border-radius:4px;padding:7px 16px;font:inherit;cursor:pointer}
+.btn-b:hover{background:#2f6fe0}
+#msg{position:absolute;z-index:7;left:50%;top:10px;transform:translateX(-50%);background:#fff;border:1px solid var(--bd);border-radius:4px;padding:6px 14px;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+#msg.err{background:#fdeceb;border-color:#e0a79f;color:#a12b1c}
+footer{flex:none;margin-top:14px;display:flex;align-items:center;justify-content:space-between;gap:10px 22px;flex-wrap:wrap;background:#f0f0f0;padding:6px 12px}
+footer img{height:26px;display:block}
+.links{display:flex;gap:10px 34px;flex-wrap:wrap}
+footer a{display:inline-flex;align-items:center;gap:6px;color:var(--nv);font-weight:700;text-decoration:none;font-size:13px}
+footer a:hover{color:var(--or)}
+.fi{width:14px;height:14px;fill:var(--nv);stroke:none}
+.fi.l{fill:none;stroke:var(--nv);stroke-width:1.5}
+.addr{color:#e85400;font-size:11.5px;text-align:right;line-height:1.35}
+.hidden{display:none!important}
+@media(max-width:760px){#help{right:10px;top:50px;width:auto;left:10px}.addr{text-align:left}.pt{display:none}}
+</style>
+<script type="importmap">
+{"imports":{
+"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+"three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+</head>
+<body>
+<header>
+  <div class="top">
+    <img src="https://gisadmin.atomicon.cz/static/images/logo2.png" alt="GISAdmin" onerror="this.outerHTML='<span class=brand>GISADMIN</span>'">
+    <div class="pt"><b>3D prohlížeč</b><span id="ttl"></span></div>
+  </div>
+  <nav>
+    <label class="mi">Otevřít soubor<input id="file" type="file" hidden accept=".glb,.gltf,.obj,.stl,.fbx,.ply"></label>
+    <span class="sep"></span>
+    <button class="mi" id="m-reset" title="Klávesa R">Výchozí pohled</button>
+    <button class="mi on" id="b-grid">Mřížka</button>
+    <button class="mi" id="b-wire">Drátový model</button>
+    <button class="mi" id="b-zup" title="Pro CAD/GIS modely, kde směr nahoru je osa Z">Osa Z nahoru</button>
+    <button class="mi" id="b-dark">Tmavé pozadí</button>
+  </nav>
+</header>
+
+<div id="stage">
+  <div class="lbar">
+    <button id="z-in" title="Přiblížit"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg></button>
+    <button id="b-reset" title="Výchozí pohled (R)"><svg viewBox="0 0 16 16"><path d="M2 8l6-5 6 5M4 7v7h3V10h2v4h3V7"/></svg></button>
+    <button id="z-out" title="Oddálit"><svg viewBox="0 0 16 16"><path d="M3 8h10"/></svg></button>
+    <button id="z-full" title="Celá obrazovka"><svg viewBox="0 0 16 16"><path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4"/></svg></button>
+  </div>
+  <div class="rbtn"><button id="b-help" title="Nápověda">?</button></div>
+
+  <div id="help">
+    <span id="help-x" title="Zavřít">×</span>
+    <h4>Nápověda</h4>
+    <div class="tabs"><button class="tab on" data-p="p1">Ovládání</button><button class="tab" data-p="p2">Formáty</button></div>
+    <div class="pane" id="p1"><dl>
+      <dt>Otáčení</dt><dd>levé tlačítko myši + tažení</dd>
+      <dt>Posun</dt><dd>pravé tlačítko myši (nebo Shift + levé)</dd>
+      <dt>Přiblížení / oddálení</dt><dd>kolečko myši</dd>
+      <dt>Dotyková obrazovka</dt><dd>1 prst otáčí, 2 prsty posouvají a zoomují</dd>
+      <dt>Výchozí pohled</dt><dd>klávesa R nebo tlačítko domů</dd>
+    </dl></div>
+    <div class="pane hidden" id="p2"><dl>
+      <dt>GLB / GLTF</dt><dd>doporučený formát, včetně textur</dd>
+      <dt>OBJ, STL, PLY</dt><dd>zobrazí se jednobarevně (PLY s barvami vrcholů zůstane barevný)</dd>
+      <dt>FBX</dt><dd>včetně vložených materiálů</dd>
+      <dt>Osa Z nahoru</dt><dd>zapněte u CAD/GIS modelů, které jsou „položené“ na boku</dd>
+    </dl></div>
+  </div>
+
+  <div id="drop">
+    <strong>Přetáhněte sem 3D model</strong>
+    <p>Podporované formáty: GLB, GLTF, OBJ, STL, FBX, PLY</p>
+    <label class="btn-b">Vybrat soubor<input id="file2" type="file" hidden accept=".glb,.gltf,.obj,.stl,.fbx,.ply"></label>
+  </div>
+  <div id="msg" class="hidden"></div>
+  <div id="info" class="hidden"></div>
+</div>
+
+<footer>
+  <a href="https://www.atomicon.cz" target="_blank"><img src="https://gisadmin.atomicon.cz/static/images/logo3.png" alt="ATOMICON"></a>
+  <div class="links">
+    <a href="https://www.atomicon.cz/pasportizace" target="_blank"><svg class="fi" viewBox="0 0 16 16"><path d="M8 1a5 5 0 0 0-5 5c0 4 5 9 5 9s5-5 5-9a5 5 0 0 0-5-5zm0 7a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/></svg>Pasportizace</a>
+    <a href="https://www.atomicon.cz/nabizime/dtm" target="_blank"><svg class="fi l" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5"/><path d="M1.5 8h13M8 1.5c-3 3-3 10 0 13M8 1.5c3 3 3 10 0 13"/></svg>DTM ČR</a>
+    <a href="https://www.atomicon.cz/nabizime/uzemni-plany" target="_blank"><svg class="fi l" viewBox="0 0 16 16"><path d="M2 2.5h12v11H2zM5 8l2 2 4-4"/></svg>Standardizace ÚP</a>
+    <a href="https://www.atomicon.cz/gisadmin" target="_blank"><svg class="fi" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm-.8 3h1.6v1.6H7.2zm0 3h1.6v5H7.2z"/></svg>O aplikaci</a>
+    <a href="https://docs.google.com/document/d/1n3HwmEzjkcyK36FW2kDfIVGBzTZKgstAPa6cHMaKMnc/edit?usp=sharing" target="_blank"><svg class="fi" viewBox="0 0 16 16"><path d="M3 1.5h9.5v13H3zM5 4v1.2h5.5V4z" fill-rule="evenodd"/></svg>Uživatelský manuál</a>
+  </div>
+  <div class="addr">ATOMICON s. r. o., Stupkova 952/18, Olomouc 779 00<br>tel. +420 778 481 700</div>
+</footer>
+
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
+import {MeshoptDecoder} from 'three/addons/libs/meshopt_decoder.module.js';
+import {OBJLoader} from 'three/addons/loaders/OBJLoader.js';
+import {STLLoader} from 'three/addons/loaders/STLLoader.js';
+import {FBXLoader} from 'three/addons/loaders/FBXLoader.js';
+import {PLYLoader} from 'three/addons/loaders/PLYLoader.js';
+import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+
+const $ = id => document.getElementById(id);
+const stage = $('stage');
+const params = new URLSearchParams(location.search);
+const st = {grid:true, wire:false, dark:false, zup:params.get('up') === 'z'};
+
+// --- scéna ---
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+stage.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x8899aa, 0.5));
+const sun = new THREE.DirectionalLight(0xffffff, 0.9);
+scene.add(sun, sun.target);
+
+function resize(){
+  const w = stage.clientWidth, h = stage.clientHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / Math.max(h, 1);
+  camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(stage);
+resize();
+
+(function loop(){
+  requestAnimationFrame(loop);
+  controls.update();
+  sun.position.copy(camera.position);
+  sun.target.position.copy(controls.target);
+  renderer.render(scene, camera);
+})();
+
+// --- stav a UI ---
+let holder = null, grid = null, home = null, span = 10;
+
+function sync(){
+  for (const k of Object.keys(st)) $('b-' + k).classList.toggle('on', st[k]);
+  scene.background = new THREE.Color(st.dark ? 0x262b30 : 0xe7eaed);
+  if (grid) { scene.remove(grid); grid.geometry.dispose(); grid = null; }
+  if (holder && st.grid) {
+    grid = new THREE.GridHelper(span, 20, st.dark ? 0x6b7884 : 0x9aa6b2, st.dark ? 0x38444f : 0xcfd6dd);
+    scene.add(grid);
+  }
+  if (holder) holder.traverse(o => { if (o.isMesh) [].concat(o.material).forEach(m => m.wireframe = st.wire); });
+}
+for (const k of ['grid', 'wire', 'dark']) $('b-' + k).onclick = () => { st[k] = !st[k]; sync(); };
+$('b-zup').onclick = () => { st.zup = !st.zup; if (holder) fit(); sync(); };
+$('b-reset').onclick = reset;
+$('m-reset').onclick = reset;
+function zoom(f){
+  if (!home) return;
+  const v = camera.position.clone().sub(controls.target);
+  const d = THREE.MathUtils.clamp(v.length() * f, controls.minDistance, controls.maxDistance);
+  camera.position.copy(controls.target).add(v.setLength(d));
+}
+$('z-in').onclick = () => zoom(0.8);
+$('z-out').onclick = () => zoom(1.25);
+$('z-full').onclick = () => document.fullscreenElement ? document.exitFullscreen() : stage.requestFullscreen();
+document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
+  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('on', x === t));
+  document.querySelectorAll('.pane').forEach(p => p.classList.toggle('hidden', p.id !== t.dataset.p));
+});
+$('b-help').onclick = () => $('help').classList.toggle('hidden');
+$('help-x').onclick = () => $('help').classList.add('hidden');
+addEventListener('keydown', e => { if (e.key.toLowerCase() === 'r' && !e.ctrlKey && !e.metaKey) reset(); });
+
+function msg(text, err){
+  const m = $('msg');
+  m.textContent = text || '';
+  m.classList.toggle('err', !!err);
+  m.classList.toggle('hidden', !text);
+}
+
+function reset(){
+  if (!home) return;
+  camera.position.copy(home.pos);
+  controls.target.copy(home.target);
+  controls.update();
+}
+
+function fit(){
+  holder.rotation.set(st.zup ? -Math.PI / 2 : 0, 0, 0);
+  holder.position.set(0, 0, 0);
+  holder.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(holder);
+  if (box.isEmpty()) throw new Error('Soubor neobsahuje žádnou zobrazitelnou geometrii.');
+  const c = box.getCenter(new THREE.Vector3()), s = box.getSize(new THREE.Vector3());
+  holder.position.set(-c.x, -box.min.y, -c.z);
+  const r = Math.max(s.length() / 2, 1e-6);
+  span = Math.max(Math.ceil(Math.max(s.x, s.z) * 2), 1);
+  const target = new THREE.Vector3(0, s.y / 2, 0);
+  camera.position.copy(target).add(new THREE.Vector3(1, 0.7, 1).normalize().multiplyScalar(r * 2.8));
+  camera.near = r / 200; camera.far = r * 200; camera.updateProjectionMatrix();
+  controls.minDistance = r * 0.05; controls.maxDistance = r * 30;
+  controls.target.copy(target); controls.update();
+  home = {pos: camera.position.clone(), target: target.clone()};
+  return s;
+}
+
+function disposeHolder(){
+  if (!holder) return;
+  scene.remove(holder);
+  holder.traverse(o => {
+    if (o.geometry) o.geometry.dispose();
+    if (o.material) [].concat(o.material).forEach(m => {
+      for (const k in m) if (m[k] && m[k].isTexture) m[k].dispose();
+      m.dispose();
+    });
+  });
+  holder = null;
+}
+
+// --- načítání ---
+const draco = new DRACOLoader().setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/libs/draco/gltf/');
+const gltfLoader = new GLTFLoader().setDRACOLoader(draco).setMeshoptDecoder(MeshoptDecoder);
+const grey = () => new THREE.MeshStandardMaterial({color:0xb8c2cc, roughness:0.7, metalness:0.1});
+
+async function parse(url, ext){
+  switch (ext) {
+    case 'glb': case 'gltf': return (await gltfLoader.loadAsync(url)).scene;
+    case 'fbx': return await new FBXLoader().loadAsync(url);
+    case 'obj': {
+      const o = await new OBJLoader().loadAsync(url);
+      o.traverse(m => { if (m.isMesh) m.material = grey(); });
+      return o;
+    }
+    case 'stl': return new THREE.Mesh(await new STLLoader().loadAsync(url), grey());
+    case 'ply': {
+      const g = await new PLYLoader().loadAsync(url);
+      const col = !!g.attributes.color;
+      if (g.index) {
+        g.computeVertexNormals();
+        const m = grey(); m.vertexColors = col;
+        if (col) m.color.set(0xffffff);
+        return new THREE.Mesh(g, m);
+      }
+      return new THREE.Points(g, new THREE.PointsMaterial({size:Math.max(1e-6, 0.003), vertexColors:col, sizeAttenuation:true}));
+    }
+    default: throw new Error('Nepodporovaný formát: .' + ext);
+  }
+}
+
+async function load(url, name){
+  const ext = name.split(/[?#]/)[0].split('.').pop().toLowerCase();
+  msg('Načítám model…');
+  try {
+    const obj = await parse(url, ext);
+    disposeHolder();
+    holder = new THREE.Group();
+    holder.add(obj);
+    let tri = 0;
+    obj.traverse(o => {
+      if (o.isMesh) {
+        [].concat(o.material).forEach(m => m.side = THREE.DoubleSide);
+        const g = o.geometry;
+        tri += (g.index ? g.index.count : g.attributes.position.count) / 3;
+      }
+    });
+    scene.add(holder);
+    const s = fit();
+    sync();
+    if (obj.isPoints) obj.material.size = Math.max(s.length() / 400, 1e-6);
+    const f = n => n.toLocaleString('cs', {maximumFractionDigits: 2});
+    $('ttl').innerHTML = '';
+    $('ttl').textContent = decodeURIComponent(name.split(/[?#]/)[0].split('/').pop());
+    $('info').textContent = [decodeURIComponent(name.split(/[?#]/)[0].split('/').pop()), tri ? f(Math.round(tri)) + ' trojúhelníků' : '', f(s.x) + ' × ' + f(s.y) + ' × ' + f(s.z)].filter(Boolean).join(' | ');
+    $('info').classList.remove('hidden');
+    $('drop').classList.add('hidden');
+    msg('');
+  } catch (e) {
+    console.error(e);
+    msg('Model se nepodařilo načíst: ' + (e.message || e), true);
+  }
+}
+
+function openFile(f){
+  if (!f) return;
+  const url = URL.createObjectURL(f);
+  load(url, f.name).finally(() => setTimeout(() => URL.revokeObjectURL(url), 1000));
+}
+$('file').onchange = e => { openFile(e.target.files[0]); e.target.value = ''; };
+$('file2').onchange = e => { openFile(e.target.files[0]); e.target.value = ''; };
+addEventListener('dragover', e => e.preventDefault());
+addEventListener('drop', e => { e.preventDefault(); openFile(e.dataTransfer.files[0]); });
+
+// odkaz z mapy: 3d-prohlizec.html?model=modely/objekt1.glb[&up=z]
+sync();
+const m = params.get('model');
+if (m) load(m, m);
+</script>
+</body>
+</html>

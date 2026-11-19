@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Návod ke kontrole – anotace screenshotu</title>
+<style>
+:root{--bg:#eef1f4;--fg:#18222d;--card:#fff;--bd:#c9d0d8;--ac:#0b6e99}
+@media(prefers-color-scheme:dark){:root{--bg:#131a21;--fg:#e4eaf0;--card:#1e2730;--bd:#38444f}}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.4 "Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--fg)}
+header{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 14px;background:var(--card);border-bottom:1px solid var(--bd)}
+button,input,label.btn{font:inherit;padding:6px 12px;border:1px solid var(--bd);border-radius:6px;background:var(--card);color:var(--fg);cursor:pointer}
+button:hover,label.btn:hover{border-color:var(--ac)}
+button:focus-visible,input:focus-visible,label.btn:focus-within{outline:2px solid var(--ac);outline-offset:2px}
+input[type=text]{cursor:text;min-width:260px;flex:1}
+input[type=color]{padding:2px;width:40px;height:34px}
+main{padding:14px}
+canvas{display:block;max-width:100%;height:auto;border:1px solid var(--bd);background:var(--card);touch-action:none}
+p.hint{margin:0 0 10px;opacity:.8}
+</style>
+</head>
+<body>
+<header>
+  <label class="btn">Vybrat screenshot<input id="file" type="file" accept="image/*" hidden></label>
+  <input id="title" type="text" placeholder="Nadpis (např. Kontrola dat – obec Příklad)">
+  <input id="col" type="color" value="#0b6e99" title="Barva nových šipek; při vybrané šipce změní její barvu">
+  <button id="edit">Upravit text</button>
+  <button id="del">Smazat vybranou</button>
+  <button id="undo">Zpět</button>
+  <button id="clear">Smazat vše</button>
+  <button id="copy">Kopírovat obrázek</button>
+  <button id="save">Uložit PNG</button>
+</header>
+<main>
+  <p class="hint">Nová šipka: tažení od popisku k cíli. Popisek přesunete tažením za něj, špičku šipky tažením za její hrot. Text upravíte dvojklikem na popisek, vybranou šipku smažete klávesou Delete.</p>
+  <canvas id="c" width="900" height="300"></canvas>
+</main>
+<script>
+const $=id=>document.getElementById(id),c=$('c'),x=c.getContext('2d');
+let img=null,items=[],sel=-1,act=null;
+const fs=()=>Math.max(16,Math.round((img?img.width:1000)/55));
+const band=()=>$('title').value.trim()?Math.round(fs()*2.4):0;
+const FONT=s=>'bold '+s+'px "Segoe UI",system-ui,sans-serif';
+
+function arrow(it,n,b,f,selected){
+  const x1=it.x1,y1=it.y1+b,x2=it.x2,y2=it.y2+b,a=Math.atan2(y2-y1,x2-x1),h=f*1.1;
+  x.strokeStyle=x.fillStyle=it.col;x.lineWidth=Math.max(3,f/5);x.lineCap='round';
+  x.beginPath();x.moveTo(x1,y1);x.lineTo(x2,y2);x.stroke();
+  x.beginPath();x.moveTo(x2,y2);
+  x.lineTo(x2-h*Math.cos(a-.4),y2-h*Math.sin(a-.4));
+  x.lineTo(x2-h*Math.cos(a+.4),y2-h*Math.sin(a+.4));x.closePath();x.fill();
+  const t=it.text?n+'. '+it.text:String(n);
+  x.font=FONT(f);x.textBaseline='middle';x.textAlign='left';
+  const w=x.measureText(t).width+f,hh=f*1.7;
+  it.box={x:x1-w/2,y:y1-hh/2-b,w:w,h:hh};
+  x.fillStyle=it.col;x.beginPath();x.roundRect(x1-w/2,y1-hh/2,w,hh,hh/4);x.fill();
+  x.fillStyle='#fff';x.fillText(t,x1-w/2+f/2,y1);
+  if(selected){
+    x.save();x.setLineDash([7,5]);x.lineWidth=3;x.strokeStyle='#ff9800';
+    x.strokeRect(x1-w/2-5,y1-hh/2-5,w+10,hh+10);
+    x.beginPath();x.arc(x2,y2,f*.9,0,7);x.stroke();x.restore();
+  }
+}
+
+function render(showSel=true){
+  if(!img){
+    c.width=900;c.height=300;x.fillStyle='#8a96a3';x.font='20px sans-serif';x.textBaseline='middle';
+    x.fillText('Zde se zobrazí screenshot (Ctrl+V, přetažení nebo tlačítko)',30,150);return;
+  }
+  const b=band(),f=fs();
+  c.width=img.width;c.height=img.height+b;
+  x.drawImage(img,0,b);
+  if(b){
+    x.fillStyle='#1b2a38';x.fillRect(0,0,c.width,b);
+    x.fillStyle='#fff';x.font=FONT(f*1.2);x.textBaseline='middle';x.textAlign='left';
+    x.fillText($('title').value,f,b/2);
+  }
+  items.forEach((it,i)=>arrow(it,i+1,b,f,showSel&&i===sel));
+}
+
+function pos(e){
+  const r=c.getBoundingClientRect(),k=c.width/r.width;
+  return{x:(e.clientX-r.left)*k,y:(e.clientY-r.top)*k-band()};
+}
+function hitAt(p){
+  const f=fs();
+  for(let i=items.length-1;i>=0;i--){
+    const it=items[i],q=it.box;
+    if(q&&p.x>=q.x&&p.x<=q.x+q.w&&p.y>=q.y&&p.y<=q.y+q.h)return{i,mode:'label'};
+    if(Math.hypot(p.x-it.x2,p.y-it.y2)<f*1.2)return{i,mode:'tip'};
+  }
+  return null;
+}
+function editText(i){
+  const t=prompt('Popis kroku:',items[i].text);
+  if(t!==null){items[i].text=t;render();}
+}
+
+c.onpointerdown=e=>{
+  if(!img)return;
+  const p=pos(e),h=hitAt(p);let mode;
+  if(h){sel=h.i;mode=h.mode;}
+  else{items.push({x1:p.x,y1:p.y,x2:p.x,y2:p.y,text:'',col:$('col').value});sel=items.length-1;mode='new';}
+  act={mode,ox:p.x,oy:p.y};
+  c.setPointerCapture(e.pointerId);render();
+};
+c.onpointermove=e=>{
+  const p=pos(e);
+  if(!act){const h=img&&hitAt(p);c.style.cursor=h?(h.mode==='label'?'move':'pointer'):'crosshair';return;}
+  const it=items[sel];
+  if(act.mode==='label'){it.x1+=p.x-act.ox;it.y1+=p.y-act.oy;}
+  else{it.x2=p.x;it.y2=p.y;}
+  act.ox=p.x;act.oy=p.y;render();
+};
+c.onpointerup=()=>{
+  if(!act)return;
+  const a=act,it=items[sel];act=null;
+  if(a.mode==='new'){
+    if(Math.hypot(it.x2-it.x1,it.y2-it.y1)>15){
+      const t=prompt('Popis kroku (např. „Zapnout vrstvu Vodovod“):');
+      if(t!==null)it.text=t;else{items.pop();sel=-1;}
+    }else{items.pop();sel=-1;}
+  }
+  render();
+};
+c.ondblclick=e=>{const h=img&&hitAt(pos(e));if(h)editText(h.i);};
+
+function load(file){
+  if(!file||!file.type.startsWith('image/'))return;
+  const i=new Image();
+  i.onload=()=>{img=i;items=[];sel=-1;render();};
+  i.src=URL.createObjectURL(file);
+}
+$('file').onchange=e=>load(e.target.files[0]);
+addEventListener('paste',e=>{for(const it of e.clipboardData.items)if(it.type.startsWith('image/'))load(it.getAsFile());});
+addEventListener('dragover',e=>e.preventDefault());
+addEventListener('drop',e=>{e.preventDefault();load(e.dataTransfer.files[0]);});
+addEventListener('keydown',e=>{
+  if((e.key==='Delete'||e.key==='Backspace')&&sel>=0&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName)){
+    e.preventDefault();items.splice(sel,1);sel=-1;render();
+  }
+});
+$('edit').onclick=()=>{if(sel>=0)editText(sel);};
+$('del').onclick=()=>{if(sel>=0){items.splice(sel,1);sel=-1;render();}};
+$('undo').onclick=()=>{items.pop();sel=-1;render();};
+$('clear').onclick=()=>{items=[];sel=-1;render();};
+$('title').oninput=()=>render();
+$('col').oninput=()=>{if(sel>=0)items[sel].col=$('col').value;render();};
+function snapshot(cb){render(false);c.toBlob(cb);render();}
+$('save').onclick=()=>snapshot(b=>{
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(b);
+  a.download='kontrola-'+($('title').value||'navod').replace(/\W+/g,'-')+'.png';
+  a.click();
+});
+$('copy').onclick=()=>snapshot(b=>{
+  navigator.clipboard.write([new ClipboardItem({'image/png':b})])
+    .then(()=>alert('Obrázek je ve schránce, vložte ho do e-mailu (Ctrl+V).'),
+          ()=>alert('Kopírování se nezdařilo, použijte Uložit PNG.'));
+});
+render();
+</script>
+</body>
+</html>

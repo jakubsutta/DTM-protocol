@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <title>Rozcestník nástrojů - Atomicon</title>
-    <link rel="stylesheet" href="css/style.css?v=20261118b">
+    <link rel="stylesheet" href="css/style.css?v=20261119b">
 </head>
 
 <body>
@@ -248,6 +248,40 @@
             <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
             <line x1="12" y1="9" x2="12" y2="13" />
             <line x1="12" y1="17" x2="12.01" y2="17" />
+        </symbol>
+
+        <symbol id="icon-3d-box" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+            stroke-linecap="round" stroke-linejoin="round">
+            <!-- Izometrická 3D krychle -->
+            <path d="M12 2.5L20.5 7.4V16.6L12 21.5L3.5 16.6V7.4L12 2.5Z" />
+            <path d="M12 12v9.5" />
+            <path d="M12 12L3.5 7.4" />
+            <path d="M12 12l8.5-4.6" />
+        </symbol>
+
+        <symbol id="icon-navod-kontrola" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+            stroke-linecap="round" stroke-linejoin="round">
+            <!-- Obrazovka screenshotu s anotací -->
+            <rect x="2.5" y="3.5" width="19" height="13" rx="2" />
+            <line x1="2.5" y1="7" x2="21.5" y2="7" />
+            <circle cx="7" cy="11.5" r="1.5" />
+            <path d="M11 12h5" />
+            <path d="M13.5 9.5L16 12l-2.5 2.5" />
+            <path d="M8 20.5h8" />
+            <path d="M12 16.5v4" />
+        </symbol>
+
+        <symbol id="icon-obec-banner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+            stroke-linecap="round" stroke-linejoin="round">
+            <!-- Webový banner s tlačítkem a textem -->
+            <rect x="2.5" y="4.5" width="19" height="11" rx="2" />
+            <path d="M5.5 8.5h6" />
+            <path d="M5.5 11.5h4" />
+            <rect x="14" y="8" width="5" height="4" rx="1" />
+            <path d="M8 15.5L6.5 20" />
+            <path d="M16 15.5L17.5 20" />
+            <path d="M5 20h3" />
+            <path d="M16 20h3" />
         </symbol>
     </svg>
 
@@ -502,7 +536,7 @@
                     aria-label="Sbalit nebo rozbalit sekci Tabulky, Mapy, Kalendář, Tisk">
                     <h2 class="column-title">2) Tabulky, Mapy, Kalendář, Tisk</h2>
                     <div class="column-meta">
-                        <span class="column-count">10</span>
+                        <span class="column-count">9</span>
                         <button type="button" class="column-collapse-btn" aria-label="Sbalit / rozbalit sekci"
                             title="Sbalit / rozbalit sekci" tabindex="-1">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
@@ -547,15 +581,6 @@
                         <div class="card-body">
                             <div class="card-title">Obecní parcely</div>
                             <div class="card-desc">výpis LV → GeoJSON parcel</div>
-                        </div>
-                    </a>
-                    <a href="./Map/map-generator.html" class="card mapa">
-                        <div class="card-icon"><svg>
-                                <use href="#icon-mapa" xlink:href="#icon-mapa" />
-                            </svg></div>
-                        <div class="card-body">
-                            <div class="card-title">Generátor map</div>
-                            <div class="card-desc">univerzální mapový výstup</div>
                         </div>
                     </a>
                     <a href="./protocol/calendar-generator.html" class="card kalendar">
@@ -715,6 +740,66 @@
                     </a>
                 </div>
             </div>
+
+            <!-- SLOUPEC 4: EXPERIMENTÁLNÍ NÁSTROJE -->
+            <div class="column">
+                <div class="column-header" role="button" tabindex="0"
+                    aria-label="Sbalit nebo rozbalit sekci Experimentální nástroje">
+                    <h2 class="column-title">4) Experimentální nástroje</h2>
+                    <div class="column-meta">
+                        <span class="column-count">4</span>
+                        <button type="button" class="column-collapse-btn" aria-label="Sbalit / rozbalit sekci"
+                            title="Sbalit / rozbalit sekci" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="cards">
+                    <a href="./Map/map-generator.html" class="card experimental exp-mapa"
+                        title="Generátor map">
+                        <div class="card-icon"><svg>
+                                <use href="#icon-mapa" xlink:href="#icon-mapa" />
+                            </svg></div>
+                        <div class="card-body">
+                            <div class="card-title">Generátor map</div>
+                            <div class="card-desc">univerzální mapový výstup</div>
+                        </div>
+                    </a>
+                    <a href="./protocol/3d-prohlizec.html" class="card experimental exp-3d"
+                        title="Prohlížeč 3D dat">
+                        <div class="card-icon"><svg>
+                                <use href="#icon-3d-box" xlink:href="#icon-3d-box" />
+                            </svg></div>
+                        <div class="card-body">
+                            <div class="card-title">Prohlížeč 3D dat</div>
+                            <div class="card-desc">prohlížeč 3D modelů pro GISAdmin</div>
+                        </div>
+                    </a>
+                    <a href="./protocol/navod-kontrola.html" class="card experimental exp-navod"
+                        title="Generátor návodu pro kontrolu dat v GISAdmin">
+                        <div class="card-icon"><svg>
+                                <use href="#icon-navod-kontrola" xlink:href="#icon-navod-kontrola" />
+                            </svg></div>
+                        <div class="card-body">
+                            <div class="card-title">Generátor návodu</div>
+                            <div class="card-desc">kontrola dat v GISAdmin</div>
+                        </div>
+                    </a>
+                    <a href="./protocol/Obec-GA-banner.html" class="card experimental exp-banner"
+                        title="Generátor banneru GISAdmin na obecní web">
+                        <div class="card-icon"><svg>
+                                <use href="#icon-obec-banner" xlink:href="#icon-obec-banner" />
+                            </svg></div>
+                        <div class="card-body">
+                            <div class="card-title">Generátor banneru</div>
+                            <div class="card-desc">banner GISAdmin na obecní web</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
         </div>
 
         <!-- Mini Changelog a Dashboard nad footerem vlevo -->
@@ -723,13 +808,13 @@
                 <div class="changelog-box">
                     <div class="changelog-header">
                         <span class="changelog-badge">Aktualizace</span>
-                        <span class="changelog-date">15. 11. 2026</span>
+                        <span class="changelog-date">19. 11. 2026</span>
                     </div>
                     <ul class="changelog-list">
+                        <li><span class="changelog-arrow">→</span> sekce „Experimentální nástroje“</li>
+                        <li><span class="changelog-arrow">→</span> nástroje 3D, Návod, GA banner</li>
                         <li><span class="changelog-arrow">→</span> nový design (redesign UI/header)</li>
-                        <li><span class="changelog-arrow">→</span> nástroj „Snímek webu/mockup“</li>
-                        <li><span class="changelog-arrow">→</span> nástroj „JVF validátor“</li>
-                        <li><span class="changelog-arrow">→</span> odkaz na Dahsboard požadavků</li>
+                        <li><span class="changelog-arrow">→</span> odkaz na Dashboard požadavků</li>
                     </ul>
                 </div>
             </aside>

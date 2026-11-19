@@ -113,7 +113,7 @@ body.dark-theme .main-header {
 }
 
 .header-inner {
-    max-width: 1360px;
+    max-width: 1680px;
     width: 100%;
     margin: 0 auto;
     padding: 0 16px;
@@ -624,7 +624,7 @@ body.dark-theme .theme-toggle .icon-moon {
 
 /* ---- Container pod headerem ---- */
 .container {
-    max-width: 1360px;
+    max-width: 1680px;
     width: 100%;
     margin: 0 auto;
     flex: 1;
@@ -717,9 +717,9 @@ body.dark-theme .theme-toggle .icon-moon {
 .has-tooltip::after {
     content: attr(data-tooltip);
     position: absolute;
-    bottom: calc(100% + 7px);
+    top: calc(100% + 7px);
     left: 50%;
-    transform: translateX(-50%) translateY(4px);
+    transform: translateX(-50%) translateY(-4px);
     background: #0f172a;
     color: #ffffff;
     font-size: 10px;
@@ -740,11 +740,11 @@ body.dark-theme .theme-toggle .icon-moon {
 .has-tooltip::before {
     content: '';
     position: absolute;
-    bottom: calc(100% + 2px);
+    top: calc(100% + 2px);
     left: 50%;
-    transform: translateX(-50%) translateY(4px);
+    transform: translateX(-50%) translateY(-4px);
     border: 5px solid transparent;
-    border-top-color: #0f172a;
+    border-bottom-color: #0f172a;
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
@@ -763,7 +763,7 @@ body.dark-theme .theme-toggle .icon-moon {
 .columns-wrapper {
     flex: 1;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 16px;
     width: 100%;
     align-items: start;
@@ -995,7 +995,51 @@ body.dark-theme .theme-toggle .icon-moon {
 .card.zel           { --c: #15803d; --bg: rgba(21, 128, 61, 0.10); }
 .card.akt           { --c: #a16207; --bg: rgba(161, 98, 7, 0.10); }
 
+/* ---- Experimentální nástroje (světlejší barvy, jemná průhlednost, kurzíva, šedé ikony) ---- */
+.card.experimental {
+    --c: #64748b;
+    --bg: rgba(100, 116, 139, 0.12);
+    background-color: rgba(255, 255, 255, 0.68);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(203, 213, 225, 0.75);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02);
+}
+
+.card.experimental:hover {
+    background-color: rgba(255, 255, 255, 0.88);
+    background-image: linear-gradient(rgba(100, 116, 139, 0.06), rgba(100, 116, 139, 0.06));
+    border-color: rgba(148, 163, 184, 0.55);
+}
+
+.card.experimental .card-icon {
+    background: rgba(100, 116, 139, 0.10);
+    color: #64748b;
+}
+
+.card.experimental .card-title {
+    color: #334155;
+    font-style: italic;
+    letter-spacing: 0.01em;
+}
+
+.card.experimental .card-desc {
+    color: #64748b;
+    font-style: italic;
+}
+
+.card.experimental:hover .card-title {
+    color: #0f172a;
+}
+
 /* ---- Responzivita ---- */
+@media (max-width: 1420px) {
+    .columns-wrapper {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 18px;
+    }
+}
+
 @media (max-width: 1250px) {
     .notice-text {
         font-size: 10px;
@@ -1310,7 +1354,7 @@ body.dark-theme .has-tooltip::after {
 }
 
 body.dark-theme .has-tooltip::before {
-    border-top-color: #334155;
+    border-bottom-color: #334155;
 }
 
 body.dark-theme .header-action-btn {
@@ -1480,6 +1524,41 @@ body.dark-theme .card-title {
 
 body.dark-theme .card-desc {
     color: #94a3b8;
+}
+
+body.dark-theme .card.experimental {
+    --c: #94a3b8;
+    --bg: rgba(148, 163, 184, 0.10);
+    background-color: rgba(15, 23, 42, 0.52);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-color: rgba(51, 65, 85, 0.65);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-theme .card.experimental:hover {
+    background-color: rgba(30, 41, 59, 0.65);
+    background-image: linear-gradient(rgba(148, 163, 184, 0.08), rgba(148, 163, 184, 0.08));
+    border-color: rgba(100, 116, 139, 0.55);
+}
+
+body.dark-theme .card.experimental .card-icon {
+    background: rgba(148, 163, 184, 0.12);
+    color: #94a3b8;
+}
+
+body.dark-theme .card.experimental .card-title {
+    color: #cbd5e1;
+    font-style: italic;
+}
+
+body.dark-theme .card.experimental .card-desc {
+    color: #94a3b8;
+    font-style: italic;
+}
+
+body.dark-theme .card.experimental:hover .card-title {
+    color: #f1f5f9;
 }
 
 /* Changelog a footer v tmavém režimu */
