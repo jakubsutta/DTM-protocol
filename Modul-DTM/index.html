@@ -17,7 +17,7 @@
   <!-- Shared Atomicon Design System -->
   <link rel="stylesheet" href="../shared/css/design-system.css">
   <!-- Modul DTM Styles -->
-  <link rel="stylesheet" href="style.css?v=2">
+  <link rel="stylesheet" href="style.css?v=15">
 </head>
 <body>
 
@@ -43,46 +43,15 @@
           </div>
           <div class="brand-title">
             <strong>Modul DTM</strong>
-            <span>ČÚZK IS DMVS • WMS prohlížeč</span>
+            <span>ČÚZK IS DMVS • Rychlý WMTS prohlížeč</span>
           </div>
         </div>
       </div>
 
       <div class="header-center">
-        <div class="coords-box" title="Aktuální souřadnice kurzoru">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="8" x2="12" y2="16"></line>
-            <line x1="8" y1="12" x2="16" y2="12"></line>
-          </svg>
-          <span id="coords-display">Přesuňte kurzor nad mapu</span>
-        </div>
-        <span id="zoom-badge" class="zoom-badge">Zoom: 8</span>
       </div>
 
       <div class="header-right">
-        <a href="https://cuzk.gov.cz/DMVS/Poskytovani-dat.aspx" target="_blank" rel="noopener noreferrer" class="header-btn" title="Oficiální portál ČÚZK pro poskytování dat DTM">
-          <span>ČÚZK DMVS</span>
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-            <polyline points="15 3 21 3 21 9"></polyline>
-            <line x1="10" y1="14" x2="21" y2="3"></line>
-          </svg>
-        </a>
-
-        <button id="theme-toggle" class="header-btn theme-toggle-btn" title="Přepnout tmavý / světlý režim" aria-label="Přepnout motiv vzhledu">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-          </svg>
-        </button>
-
-        <button id="sidebar-toggle" class="header-btn btn-sidebar-toggle active" title="Zobrazit / skrýt panel vrstev">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-            <line x1="15" y1="3" x2="15" y2="21"></line>
-          </svg>
-          <span>Vrstvy</span>
-        </button>
       </div>
     </header>
 
@@ -91,7 +60,13 @@
       <!-- Leaflet Mapa -->
       <div id="map"></div>
 
-      <!-- Pravý panel s přepínačem vrstev -->
+      <!-- Plovoucí stavový řádek dotazování na mapě -->
+      <div class="map-floating-status" id="map-floating-status">
+        <span class="status-dot" id="status-dot"></span>
+        <span id="map-status-text">Klikněte na prvek v mapě pro zobrazení vlastností</span>
+      </div>
+
+      <!-- Pravý panel s přepínačem vrstev (napevno) -->
       <aside id="sidebar-panel" class="sidebar-panel">
         <div class="sidebar-header">
           <div class="sidebar-title">
@@ -105,40 +80,11 @@
           <div class="sidebar-header-actions">
             <button id="btn-all-dtm" class="btn-sidebar-action" title="Zapnout všechny DTM vrstvy">Vše</button>
             <button id="btn-reset-layers" class="btn-sidebar-action" title="Obnovit výchozí zobrazení">Reset</button>
-            <button id="btn-close-sidebar" class="btn-sidebar-action" title="Zavřít panel">✕</button>
           </div>
         </div>
 
         <div class="sidebar-body">
-          <!-- 1. Podkladové mapy -->
-          <div class="layer-section">
-            <div class="section-label">Podkladová mapa</div>
-            <div class="base-map-options">
-              <div class="base-map-item active" data-base="orto">
-                <div class="base-map-radio"></div>
-                <div class="base-map-info">
-                  <span class="base-map-name">Ortofotomapa ČÚZK</span>
-                  <span class="base-map-desc">Aktuální letecké snímky ČR</span>
-                </div>
-              </div>
-              <div class="base-map-item" data-base="ztm">
-                <div class="base-map-radio"></div>
-                <div class="base-map-info">
-                  <span class="base-map-name">Základní topografická mapa</span>
-                  <span class="base-map-desc">ČÚZK ZTM s místopisem</span>
-                </div>
-              </div>
-              <div class="base-map-item" data-base="osm">
-                <div class="base-map-radio"></div>
-                <div class="base-map-info">
-                  <span class="base-map-name">OpenStreetMap</span>
-                  <span class="base-map-desc">Globální otevřená uliční mapa</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 2. DTM vrstvy (ČÚZK IS DMVS) -->
+          <!-- 1. DTM vrstvy (ČÚZK IS DMVS) -->
           <div class="layer-section">
             <div class="section-label">
               <span>Digitální technická mapa</span>
@@ -146,55 +92,139 @@
             </div>
 
             <div class="dtm-notice">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="12" y1="16" x2="12" y2="12"></line>
                 <line x1="12" y1="8" x2="12.01" y2="8"></line>
               </svg>
-              <span>Vrstvy DTM se zobrazují při větším přiblížení (zoom 14+). Služby agregují data všech krajů ČR.</span>
+              <span>Vrstvy DTM od zoomu 14+. Kliknutím do mapy zobrazíte atributy sítě i parcely.</span>
             </div>
 
-            <!-- Vrstva: DI -->
-            <div class="layer-card is-active" data-layer="dtm_di">
-              <div class="layer-card-main">
-                <label class="layer-label-group">
+            <!-- Skupina: DI (Dopravní infrastruktura s podskupinami) -->
+            <div class="layer-group-card is-active" data-group="dtm_di">
+              <div class="layer-group-header" title="Klikněte pro rozbalení / sbalení podskupin DI">
+                <div class="layer-group-left">
                   <span class="layer-color-pill" style="background-color: #ea521f;"></span>
-                  <div class="layer-texts">
-                    <span class="layer-title">Dopravní infrastruktura (DI)</span>
-                    <span class="layer-desc">Silnice, železnice, objekty DI</span>
-                  </div>
-                </label>
-                <label class="switch-control">
-                  <input type="checkbox" checked>
-                  <span class="slider-round"></span>
-                </label>
+                  <span class="layer-title">Dopravní infrastruktura (DI)</span>
+                  <span class="group-count-badge" id="badge-count-di">3/3</span>
+                </div>
+                <div class="group-header-right">
+                  <label class="switch-control" title="Zapnout / vypnout celou DI">
+                    <input type="checkbox" class="group-master-switch" checked>
+                    <span class="slider-round"></span>
+                  </label>
+                  <span class="group-chevron-icon" aria-hidden="true">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </span>
+                </div>
               </div>
-              <div class="layer-opacity-row">
-                <span>Průhlednost:</span>
-                <input type="range" class="opacity-slider" min="0" max="1" step="0.05" value="0.9">
-                <span class="opacity-val">90%</span>
+              <div class="sublayer-list">
+                <div class="group-sublayer-toolbar">
+                  <span class="toolbar-label">Průhlednost:</span>
+                  <input type="range" class="opacity-slider group-opacity-slider" min="0" max="1" step="0.05" value="0.9">
+                  <span class="opacity-val">90%</span>
+                </div>
+                <div class="sublayer-item" data-sublayer="pozemni_komunikace">
+                  <label class="sublayer-label">
+                    <input type="checkbox" class="sublayer-checkbox" checked>
+                    <span class="sublayer-color-dot" style="background-color: #ea521f;"></span>
+                    <span class="sublayer-name">Pozemní komunikace</span>
+                  </label>
+                </div>
+                <div class="sublayer-item" data-sublayer="draha">
+                  <label class="sublayer-label">
+                    <input type="checkbox" class="sublayer-checkbox" checked>
+                    <span class="sublayer-color-dot" style="background-color: #7c3aed;"></span>
+                    <span class="sublayer-name">Drážní doprava</span>
+                  </label>
+                </div>
+                <div class="sublayer-item" data-sublayer="letiste">
+                  <label class="sublayer-label">
+                    <input type="checkbox" class="sublayer-checkbox" checked>
+                    <span class="sublayer-color-dot" style="background-color: #0284c7;"></span>
+                    <span class="sublayer-name">Letecká a vodní doprava</span>
+                  </label>
+                </div>
               </div>
             </div>
 
-            <!-- Vrstva: TI -->
-            <div class="layer-card is-active" data-layer="dtm_ti">
-              <div class="layer-card-main">
-                <label class="layer-label-group">
+            <!-- Skupina: TI (Technická infrastruktura s podskupinami) -->
+            <div class="layer-group-card is-active" data-group="dtm_ti">
+              <div class="layer-group-header" title="Klikněte pro rozbalení / sbalení podskupin TI">
+                <div class="layer-group-left">
                   <span class="layer-color-pill" style="background-color: #2563eb;"></span>
-                  <div class="layer-texts">
-                    <span class="layer-title">Technická infrastruktura (TI)</span>
-                    <span class="layer-desc">Voda, kanalizace, elektro, plyn, spoje</span>
-                  </div>
-                </label>
-                <label class="switch-control">
-                  <input type="checkbox" checked>
-                  <span class="slider-round"></span>
-                </label>
+                  <span class="layer-title">Technická infrastruktura (TI)</span>
+                  <span class="group-count-badge" id="badge-count-ti">7/7</span>
+                </div>
+                <div class="group-header-right">
+                  <label class="switch-control" title="Zapnout / vypnout celou TI">
+                    <input type="checkbox" class="group-master-switch" checked>
+                    <span class="slider-round"></span>
+                  </label>
+                  <span class="group-chevron-icon" aria-hidden="true">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </span>
+                </div>
               </div>
-              <div class="layer-opacity-row">
-                <span>Průhlednost:</span>
-                <input type="range" class="opacity-slider" min="0" max="1" step="0.05" value="0.9">
-                <span class="opacity-val">90%</span>
+              <div class="sublayer-list">
+                <div class="group-sublayer-toolbar">
+                  <span class="toolbar-label">Průhlednost:</span>
+                  <input type="range" class="opacity-slider group-opacity-slider" min="0" max="1" step="0.05" value="0.9">
+                  <span class="opacity-val">90%</span>
+                </div>
+                <div class="sublayer-item" data-sublayer="vodovod">
+                  <label class="sublayer-label">
+                    <input type="checkbox" class="sublayer-checkbox" checked>
+                    <span class="sublayer-color-dot" style="background-color: #0284c7;"></span>
+                    <span class="sublayer-name">Vodovod</span>
+                  </label>
+                </div>
+                <div class="sublayer-item" data-sublayer="kanalizace">
+                  <label class="sublayer-label">
+                    <input type="checkbox" class="sublayer-checkbox" checked>
+                    <span class="sublayer-color-dot" style="background-color: #78350f;"></span>
+                    <span class="sublayer-name">Kanalizace</span>
+                  </label>
+                </div>
+                <div class="sublayer-item" data-sublayer="elektro">
+                  <label class="sublayer-label">
+                    <input type="checkbox" class="sublayer-checkbox" checked>
+                    <span class="sublayer-color-dot" style="background-color: #dc2626;"></span>
+                    <span class="sublayer-name">Elektroenergetika</span>
+                  </label>
+                </div>
+                <div class="sublayer-item" data-sublayer="plynovod">
+                  <label class="sublayer-label">
+                    <input type="checkbox" class="sublayer-checkbox" checked>
+                    <span class="sublayer-color-dot" style="background-color: #ca8a04;"></span>
+                    <span class="sublayer-name">Plynárenství</span>
+                  </label>
+                </div>
+                <div class="sublayer-item" data-sublayer="teplovod">
+                  <label class="sublayer-label">
+                    <input type="checkbox" class="sublayer-checkbox" checked>
+                    <span class="sublayer-color-dot" style="background-color: #ea580c;"></span>
+                    <span class="sublayer-name">Teplárenství</span>
+                  </label>
+                </div>
+                <div class="sublayer-item" data-sublayer="elektronicke_komunikace">
+                  <label class="sublayer-label">
+                    <input type="checkbox" class="sublayer-checkbox" checked>
+                    <span class="sublayer-color-dot" style="background-color: #16a34a;"></span>
+                    <span class="sublayer-name">Elektronické komunikace</span>
+                  </label>
+                </div>
+                <div class="sublayer-item" data-sublayer="produktovod">
+                  <label class="sublayer-label">
+                    <input type="checkbox" class="sublayer-checkbox" checked>
+                    <span class="sublayer-color-dot" style="background-color: #9333ea;"></span>
+                    <span class="sublayer-name">Produktovody</span>
+                  </label>
+                </div>
               </div>
             </div>
 
@@ -203,12 +233,9 @@
               <div class="layer-card-main">
                 <label class="layer-label-group">
                   <span class="layer-color-pill" style="background-color: #9333ea;"></span>
-                  <div class="layer-texts">
-                    <span class="layer-title">Přípojky TI</span>
-                    <span class="layer-desc">Přípojky inženýrských sítí</span>
-                  </div>
+                  <span class="layer-title">Přípojky TI</span>
                 </label>
-                <label class="switch-control">
+                <label class="switch-control" title="Zapnout / vypnout Přípojky TI">
                   <input type="checkbox">
                   <span class="slider-round"></span>
                 </label>
@@ -225,12 +252,9 @@
               <div class="layer-card-main">
                 <label class="layer-label-group">
                   <span class="layer-color-pill" style="background-color: #475569;"></span>
-                  <div class="layer-texts">
-                    <span class="layer-title">ZPS – Linie a body</span>
-                    <span class="layer-desc">Obrubníky, terénní hrany, stavby</span>
-                  </div>
+                  <span class="layer-title">ZPS – Linie a body</span>
                 </label>
-                <label class="switch-control">
+                <label class="switch-control" title="Zapnout / vypnout ZPS linie a body">
                   <input type="checkbox" checked>
                   <span class="slider-round"></span>
                 </label>
@@ -247,12 +271,9 @@
               <div class="layer-card-main">
                 <label class="layer-label-group">
                   <span class="layer-color-pill" style="background-color: #16a34a;"></span>
-                  <div class="layer-texts">
-                    <span class="layer-title">ZPS – Plochy (barevné)</span>
-                    <span class="layer-desc">Plochy komunikací, budov a zeleně</span>
-                  </div>
+                  <span class="layer-title">ZPS – Plochy (barevné)</span>
                 </label>
-                <label class="switch-control">
+                <label class="switch-control" title="Zapnout / vypnout ZPS barevné plochy">
                   <input type="checkbox">
                   <span class="slider-round"></span>
                 </label>
@@ -269,12 +290,9 @@
               <div class="layer-card-main">
                 <label class="layer-label-group">
                   <span class="layer-color-pill" style="background-color: #64748b;"></span>
-                  <div class="layer-texts">
-                    <span class="layer-title">ZPS – Plochy (šedé)</span>
-                    <span class="layer-desc">Neutrální šedé podbarvení ploch</span>
-                  </div>
+                  <span class="layer-title">ZPS – Plochy (šedé)</span>
                 </label>
-                <label class="switch-control">
+                <label class="switch-control" title="Zapnout / vypnout ZPS šedé plochy">
                   <input type="checkbox">
                   <span class="slider-round"></span>
                 </label>
@@ -287,19 +305,16 @@
             </div>
           </div>
 
-          <!-- 3. Doplňkové vrstvy -->
+          <!-- 2. Katastr nemovitostí -->
           <div class="layer-section">
             <div class="section-label">Katastr nemovitostí (KN)</div>
             <div class="layer-card" data-layer="kn">
               <div class="layer-card-main">
                 <label class="layer-label-group">
                   <span class="layer-color-pill" style="background-color: #c51f1f;"></span>
-                  <div class="layer-texts">
-                    <span class="layer-title">Katastrální mapa (ČÚZK)</span>
-                    <span class="layer-desc">Hranice parcel a parcelní čísla (od z13)</span>
-                  </div>
+                  <span class="layer-title">Katastrální mapa (ČÚZK)</span>
                 </label>
-                <label class="switch-control">
+                <label class="switch-control" title="Zapnout / vypnout Katastrální mapu">
                   <input type="checkbox">
                   <span class="slider-round"></span>
                 </label>
@@ -332,8 +347,8 @@
 
         <!-- Patička panelu -->
         <div class="sidebar-footer">
-          <span>Zdroj: <a href="https://cuzk.gov.cz/DMVS/Poskytovani-dat.aspx" target="_blank" rel="noopener noreferrer">ČÚZK IS DMVS</a></span>
-          <span>EPSG:3857 / WMS</span>
+          <span>Zdroj: ČÚZK IS DMVS</span>
+          <span>EPSG:3857 / WMTS</span>
         </div>
       </aside>
     </div>
@@ -341,9 +356,11 @@
 
   <!-- Leaflet JS -->
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Proj4 JS pro přesný přepočet do S-JTSK (EPSG:5514) -->
+  <script src="https://cdn.jsdelivr.net/npm/proj4@2/dist/proj4.js"></script>
   <!-- Shared Atomicon Core (Theme manager) -->
   <script src="../shared/js/atomicon-core.js"></script>
   <!-- App JS -->
-  <script src="app.js"></script>
+  <script src="app.js?v=15"></script>
 </body>
 </html>
