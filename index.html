@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <title>J.E.N.D.A. – Jednoduché Efektivní Nástroje Do Atomiconu</title>
-    <link rel="stylesheet" href="css/style.css?v=20261119n">
+    <link rel="stylesheet" href="css/style.css?v=20261120g">
 </head>
 
 <body>
@@ -282,6 +282,30 @@
             <path d="M16 15.5L17.5 20" />
             <path d="M5 20h3" />
             <path d="M16 20h3" />
+        </symbol>
+
+        <symbol id="icon-seznam-dz" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3L2 20h20L12 3z" />
+            <line x1="12" y1="9" x2="12" y2="13" />
+            <line x1="12" y1="16.5" x2="12.01" y2="16.5" stroke-width="2" />
+        </symbol>
+
+        <symbol id="icon-info-obec" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="8" width="18" height="14" rx="1"/>
+            <path d="M12 2L3 8h18L12 2z"/>
+            <line x1="8" y1="12" x2="8" y2="14"/>
+            <line x1="12" y1="12" x2="12" y2="14"/>
+            <line x1="16" y1="12" x2="16" y2="14"/>
+            <line x1="12" y1="17" x2="12" y2="22"/>
+        </symbol>
+
+        <symbol id="icon-metodika-dtm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+            <polyline points="2 17 12 22 22 17"/>
+            <polyline points="2 12 12 17 22 12"/>
         </symbol>
     </svg>
 
@@ -821,11 +845,82 @@
                 </div>
             </div>
 
-            <!-- SLOUPEC 6: EXPERIMENTÁLNÍ NÁSTROJE -->
+            <!-- SLOUPEC 6: DATABÁZE, POMŮCKY -->
+            <div class="column">
+                <div class="column-header" role="button" tabindex="0"
+                    aria-label="Sbalit nebo rozbalit sekci Databáze, Pomůcky">
+                    <h2 class="column-title">6) Databáze, Pomůcky</h2>
+                    <div class="column-meta">
+                        <span class="column-count">3</span>
+                        <button type="button" class="column-collapse-btn" aria-label="Sbalit / rozbalit sekci"
+                            title="Sbalit / rozbalit sekci" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="cards">
+                    <a href="./protocol/Seznam-DZ.html" target="_blank" rel="noopener noreferrer"
+                        class="card seznam-dz" data-tool-id="seznam-dz" title="Seznam DZ">
+                        <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
+                            title="Přidat do oblíbených" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </button>
+                        <div class="card-icon"><svg>
+                                <use href="#icon-seznam-dz" xlink:href="#icon-seznam-dz" />
+                            </svg></div>
+                        <div class="card-body">
+                            <div class="card-title">Seznam DZ</div>
+                            <div class="card-desc">databáze dopravních značek ČR</div>
+                        </div>
+                    </a>
+                    <a href="./City-Info/index.html" target="_blank" rel="noopener noreferrer"
+                        class="card info-obec" data-tool-id="info-obec" title="Info o obci">
+                        <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
+                            title="Přidat do oblíbených" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </button>
+                        <div class="card-icon"><svg>
+                                <use href="#icon-info-obec" xlink:href="#icon-info-obec" />
+                            </svg></div>
+                        <div class="card-body">
+                            <div class="card-title">Info o obci</div>
+                            <div class="card-desc">informace a kontakty obcí ČR</div>
+                        </div>
+                    </a>
+                    <a href="./Metodika-DTM/index.html" target="_blank" rel="noopener noreferrer"
+                        class="card metodika-dtm" data-tool-id="metodika-dtm" title="Metodika DTM">
+                        <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
+                            title="Přidat do oblíbených" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </button>
+                        <div class="card-icon"><svg>
+                                <use href="#icon-metodika-dtm" xlink:href="#icon-metodika-dtm" />
+                            </svg></div>
+                        <div class="card-body">
+                            <div class="card-title">Metodika DTM</div>
+                            <div class="card-desc">pravidla a standardy DI a TI</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- SLOUPEC 7: EXPERIMENTÁLNÍ NÁSTROJE -->
             <div class="column">
                 <div class="column-header" role="button" tabindex="0"
                     aria-label="Sbalit nebo rozbalit sekci Experimentální nástroje">
-                    <h2 class="column-title">6) Experimentální nástroje</h2>
+                    <h2 class="column-title">7) Experimentální nástroje</h2>
                     <div class="column-meta">
                         <span class="column-count">4</span>
                         <button type="button" class="column-collapse-btn" aria-label="Sbalit / rozbalit sekci"
@@ -991,7 +1086,7 @@
                 </div>
             </section>
 
-            <!-- 2. sekce panelu: Changelog (jednotný nadpis s ikonou) -->
+            <!-- 2. sekce panelu: Novinky (jednotný nadpis s ikonou) -->
             <section class="panel-section panel-changelog-section">
                 <div class="panel-section-header">
                     <span class="panel-section-title">
@@ -999,15 +1094,16 @@
                             <circle cx="12" cy="12" r="10"></circle>
                             <polyline points="12 6 12 12 16 14"></polyline>
                         </svg>
-                        Changelog
+                        Novinky
                     </span>
-                    <span class="changelog-date">19. 11. 2026</span>
+                    <span class="changelog-date">20. 11. 2026</span>
                 </div>
                 <ul class="changelog-list">
+                    <li><span class="changelog-arrow">→</span> v panelu nový „Modul DTM“ (WMS DI, TI, ZPS)</li>
+                    <li><span class="changelog-arrow">→</span> sekce „Databáze, Pomůcky“ (Seznam DZ, Info o obci, Metodika DTM)</li>
                     <li><span class="changelog-arrow">→</span> sekce „Experimentální nástroje“</li>
                     <li><span class="changelog-arrow">→</span> nástroje 3D, Návod, GA banner</li>
                     <li><span class="changelog-arrow">→</span> nový pravý panel &amp; oblíbené</li>
-                    <li><span class="changelog-arrow">→</span> kompaktní režim seznamu</li>
                 </ul>
             </section>
 
@@ -1116,6 +1212,38 @@
                             <div class="panel-tool-desc">Import JVF.XML do QGIS</div>
                         </div>
                         <span class="tag-badge tag-qgis">QGIS</span>
+                    </a>
+                </div>
+            </section>
+
+            <!-- 5. sekce panelu: Modul DTM -->
+            <section class="panel-section panel-dtm-section">
+                <div class="panel-section-header">
+                    <span class="panel-section-title">
+                        <svg class="panel-section-icon panel-dtm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                            <polyline points="2 17 12 22 22 17"></polyline>
+                            <polyline points="2 12 12 17 22 12"></polyline>
+                        </svg>
+                        Modul DTM
+                    </span>
+                    <span class="panel-tools-author">ČÚZK / DMVS</span>
+                </div>
+                <div class="panel-tools-list">
+                    <a href="./Modul-DTM/index.html" target="_blank" rel="noopener noreferrer"
+                        class="panel-tool-item">
+                        <div class="panel-tool-icon-box dtm-icon-box">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="panel-tool-dtm-svg">
+                                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                                <polyline points="2 17 12 22 22 17"></polyline>
+                                <polyline points="2 12 12 17 22 12"></polyline>
+                            </svg>
+                        </div>
+                        <div class="panel-tool-info">
+                            <div class="panel-tool-name">DTM Mapový prohlížeč</div>
+                            <div class="panel-tool-desc">Ortofoto, WMS DI, TI a ZPS</div>
+                        </div>
+                        <span class="tag-badge tag-dtm-map">MAPA</span>
                     </a>
                 </div>
             </section>

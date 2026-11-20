@@ -500,6 +500,12 @@ body.dark-theme .theme-toggle .icon-moon {
     border: 1px solid rgba(37, 99, 235, 0.25);
 }
 
+.tag-dtm-map {
+    background: rgba(16, 55, 120, 0.12);
+    color: #103778;
+    border: 1px solid rgba(16, 55, 120, 0.25);
+}
+
 /* ---- Vysouvací vyhledávací pole z tlačítka směrem doleva s blurem ---- */
 .search-drawer {
     position: relative;
@@ -1079,6 +1085,9 @@ body.dark-theme .theme-toggle .icon-moon {
 .card.hrb           { --c: #4b5563; --bg: rgba(75, 85, 99, 0.10); }
 .card.zel           { --c: #15803d; --bg: rgba(21, 128, 61, 0.10); }
 .card.akt           { --c: #a16207; --bg: rgba(161, 98, 7, 0.10); }
+.card.seznam-dz     { --c: #c51f1f; --bg: rgba(197, 31, 31, 0.10); }
+.card.info-obec     { --c: #ca8a04; --bg: rgba(202, 138, 4, 0.12); }
+.card.metodika-dtm  { --c: #103778; --bg: rgba(16, 55, 120, 0.12); }
 
 /* ---- Experimentální nástroje (světlejší barvy, jemná průhlednost, kurzíva, šedé ikony) ---- */
 .card.experimental {
@@ -1459,6 +1468,27 @@ body.dark-theme .theme-toggle .icon-moon { display: none; }
     stroke: currentColor;
 }
 
+.panel-dtm-icon {
+    width: 13.5px;
+    height: 13.5px;
+    color: #103778;
+    stroke: currentColor;
+    flex-shrink: 0;
+}
+
+.panel-tool-icon-box.dtm-icon-box {
+    background: linear-gradient(135deg, #103778 0%, #1e40af 100%);
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(16, 55, 120, 0.35);
+}
+
+.panel-tool-icon-box.dtm-icon-box .panel-tool-dtm-svg {
+    width: 14px;
+    height: 14px;
+    color: #ffffff;
+    stroke: #ffffff;
+}
+
 .panel-tools-author {
     font-size: 9.5px;
     font-weight: 600;
@@ -1822,18 +1852,26 @@ body.dark-theme .theme-toggle .icon-moon { display: none; }
 .changelog-list li {
     font-size: 11.5px;
     color: #334155;
-    line-height: 1.35;
+    line-height: 1.4;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 6px;
-    white-space: nowrap;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 .changelog-arrow {
     color: #2563eb;
     font-weight: 700;
     font-size: 11.5px;
-    line-height: 1;
+    line-height: 1.4;
+    flex-shrink: 0;
+}
+
+.changelog-arrow.feedback-arrow,
+.panel-feedback-section .changelog-arrow {
+    color: #059669;
 }
 
 @media (max-width: 1280px) {
@@ -2104,6 +2142,11 @@ body.dark-theme .card-desc {
     color: #94a3b8;
 }
 
+body.dark-theme .card.metodika-dtm {
+    --c: #4f8bf9;
+    --bg: rgba(79, 139, 249, 0.15);
+}
+
 body.dark-theme .card.experimental {
     --c: #94a3b8;
     --bg: rgba(148, 163, 184, 0.10);
@@ -2280,6 +2323,27 @@ body.dark-theme .panel-tools-icon {
     color: #94a3b8;
 }
 
+body.dark-theme .panel-dtm-icon {
+    color: #60a5fa;
+}
+
+body.dark-theme .panel-tool-icon-box.dtm-icon-box {
+    background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+}
+
+body.dark-theme .panel-tool-icon-box.dtm-icon-box .panel-tool-dtm-svg {
+    color: #ffffff;
+    stroke: #ffffff;
+}
+
+body.dark-theme .tag-dtm-map {
+    background: rgba(59, 130, 246, 0.18);
+    color: #93c5fd;
+    border-color: rgba(59, 130, 246, 0.35);
+}
+
 body.dark-theme .panel-changelog-icon {
     color: #60a5fa;
 }
@@ -2290,6 +2354,11 @@ body.dark-theme .panel-dashboard-icon {
 
 body.dark-theme .changelog-arrow {
     color: #60a5fa;
+}
+
+body.dark-theme .changelog-arrow.feedback-arrow,
+body.dark-theme .panel-feedback-section .changelog-arrow {
+    color: #34d399;
 }
 
 body.dark-theme .panel-tools-author {

@@ -1,0 +1,1642 @@
+/* ==========================================================================
+   DTM ČR – Technický a metodický portál DI a TI
+   Barevný motiv: Primární (#ea521f) + Sekundární (#26292b) + Terciární (#4483fc)
+   Kompaktní rozhraní • Spojovníkový navigační strom • Vysoká informační hustota
+   ========================================================================== */
+
+:root {
+  /* 1. BRAND PALETTE (Navy / Tmavě modrá pro DTM-methodology dle požadavku) */
+  --brand-primary: #103778;         /* Hlavní primární barva (#103778) - header, hlavní akcenty */
+  --brand-primary-hover: #0b2756;
+  --brand-primary-dark: #081d42;
+  --brand-primary-subtle: #edf3fc;
+
+  --brand-secondary: #26292b;       /* Sekundární barva (#26292b) - písmo, tmavé prvky */
+  --brand-secondary-hover: #363a3d;
+
+  --brand-tertiary: #4483fc;        /* Terciární barva (#4483fc) - technologická modrá */
+  --brand-tertiary-hover: #296ff0;
+  --brand-tertiary-dark: #1b5cd6;
+  --brand-tertiary-subtle: #edf4ff;
+
+  --brand-blue: var(--brand-primary);
+  --brand-blue-hover: var(--brand-primary-hover);
+  --brand-blue-dark: var(--brand-primary-dark);
+  --brand-blue-subtle: var(--brand-primary-subtle);
+
+  --brand-orange: var(--brand-primary);
+  --brand-orange-hover: var(--brand-primary-hover);
+  --brand-orange-subtle: var(--brand-primary-subtle);
+
+  /* 2. PEVNÝ RÁMEC (Chrome) */
+  --chrome-header-bg: #103778;     /* Tmavě modrá / navy pro fixní hlavičku */
+  --chrome-header-text: #ffffff;
+  --chrome-header-border: #0b2756;
+
+  --chrome-crumb-bg: #eceef0;      /* Světle šedá */
+  --chrome-crumb-border: #dbe0e6;
+
+  --chrome-sidebar-bg: #eceef0;    /* Světle šedá */
+  --chrome-sidebar-border: #dbe0e6;
+  --chrome-sidebar-hover: #e2e6eb;
+  --chrome-sidebar-active-bg: #ffffff;
+  --chrome-sidebar-active-text: #103778;
+  --tree-line-color: #8c96a0;
+
+  /* 3. PLOCHA OBSAHU (Content Workspace) */
+  --content-bg: #ffffff;
+  --content-app-bg: #f4f6f8;
+
+  /* 4. TYPOGRAFIE & KONTRAST */
+  --text-primary: #26292b;         /* Sekundární barva #26292b pro písmo */
+  --text-secondary: #4b5257;       /* Tělo textu */
+  --text-muted: #6f777e;           /* Metadata */
+  --text-faint: #9ea7ae;
+
+  /* 5. JEDNOTNÝ SYSTÉM CALLOUTŮ (Alert, Tip, Doporučení, Schéma, Kód, Info) */
+  --callout-alert-border: #dc2626;
+  --callout-alert-bg: #fef2f2;
+  --callout-alert-subtle: #fee2e2;
+  --callout-alert-title: #b91c1c;
+  --callout-alert-text: #7f1d1d;
+
+  --callout-tip-border: #ea521f;
+  --callout-tip-bg: #fef5f1;
+  --callout-tip-subtle: #fee8de;
+  --callout-tip-title: #c43d10;
+  --callout-tip-text: #662008;
+
+  --callout-rec-border: #4483fc;    /* Terciární barva pro doporučení a standardy */
+  --callout-rec-bg: #f2f7ff;
+  --callout-rec-subtle: #dbe8fe;
+  --callout-rec-title: #1d5ed8;
+  --callout-rec-text: #0e3b91;
+
+  --callout-schema-border: #0284c7;
+  --callout-schema-bg: #f0f9ff;
+  --callout-schema-subtle: #e0f2fe;
+  --callout-schema-title: #0369a1;
+  --callout-schema-text: #0c4a6e;
+
+  --callout-code-border: #6366f1;
+  --callout-code-bg: #f5f3ff;
+  --callout-code-subtle: #ede9fe;
+  --callout-code-title: #4f46e5;
+  --callout-code-text: #312e81;
+
+  --callout-info-border: #059669;
+  --callout-info-bg: #ecfdf5;
+  --callout-info-subtle: #d1fae5;
+  --callout-info-title: #047857;
+  --callout-info-text: #064e3b;
+
+  /* Zpětná kompatibilita proměnných */
+  --callout-human-bg: var(--callout-tip-bg);
+  --callout-human-border: var(--callout-tip-border);
+  --callout-human-title: var(--callout-tip-title);
+  --callout-human-text: var(--callout-tip-text);
+  --callout-rule-bg: var(--callout-rec-bg);
+  --callout-rule-border: var(--callout-rec-border);
+  --callout-rule-title: var(--callout-rec-title);
+  --callout-rule-text: var(--callout-rec-text);
+  --callout-warn-bg: var(--callout-alert-bg);
+  --callout-warn-border: var(--callout-alert-border);
+  --callout-warn-title: var(--callout-alert-title);
+  --callout-warn-text: var(--callout-alert-text);
+
+  --code-bg: #eef1f4;
+  --code-border: #dbe0e6;
+  --code-text: #26292b;
+
+  /* 6. PŘÍJEMNÉ ROZMĚRY */
+  --header-height: 48px;
+  --crumb-height: 36px;
+  --sidebar-width: 380px;
+  --rail-width: 270px;
+
+  --radius-xs: 3px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* ==========================================================================
+   TMAVÝ REŽIM
+   ========================================================================== */
+[data-theme="dark"] {
+  --brand-primary: #f06435;
+  --brand-primary-hover: #fa7749;
+  --brand-primary-dark: #d24414;
+  --brand-primary-subtle: rgba(234, 82, 31, 0.18);
+
+  --brand-secondary: #17191b;
+  --brand-tertiary: #5c93fc;
+  --brand-tertiary-hover: #7ba8ff;
+  --brand-tertiary-subtle: rgba(68, 131, 252, 0.18);
+
+  --brand-blue: var(--brand-primary);
+  --brand-orange: var(--brand-primary);
+
+  --chrome-header-bg: #9e320d;     /* Hlubší cihlově-oranžová pro hlavičku v tmavém režimu */
+  --chrome-header-text: #ffffff;
+  --chrome-header-border: #ea521f;
+
+  --chrome-crumb-bg: #1c1f22;
+  --chrome-crumb-border: #2a2e33;
+
+  --chrome-sidebar-bg: #17191b;
+  --chrome-sidebar-border: #2a2e33;
+  --chrome-sidebar-hover: #23272b;
+  --chrome-sidebar-active-bg: rgba(234, 82, 31, 0.22);
+  --chrome-sidebar-active-text: #f87d55;
+  --tree-line-color: #434a52;
+
+  --content-bg: #1e2124;
+  --content-app-bg: #151719;
+
+  --text-primary: #f1f3f5;
+  --text-secondary: #c5cbd1;
+  --text-muted: #88929b;
+  --text-faint: #575e66;
+
+  --callout-alert-border: #ef4444;
+  --callout-alert-bg: rgba(220, 38, 38, 0.14);
+  --callout-alert-subtle: rgba(220, 38, 38, 0.25);
+  --callout-alert-title: #fca5a5;
+  --callout-alert-text: #fee2e2;
+
+  --callout-tip-border: #f06435;
+  --callout-tip-bg: rgba(234, 82, 31, 0.14);
+  --callout-tip-subtle: rgba(234, 82, 31, 0.25);
+  --callout-tip-title: #fdba74;
+  --callout-tip-text: #ffedd5;
+
+  --callout-rec-border: #5c93fc;
+  --callout-rec-bg: rgba(68, 131, 252, 0.15);
+  --callout-rec-subtle: rgba(68, 131, 252, 0.25);
+  --callout-rec-title: #9bbdfd;
+  --callout-rec-text: #e0edff;
+
+  --callout-schema-border: #38bdf8;
+  --callout-schema-bg: rgba(2, 132, 199, 0.14);
+  --callout-schema-subtle: rgba(56, 189, 248, 0.25);
+  --callout-schema-title: #7dd3fc;
+  --callout-schema-text: #e0f2fe;
+
+  --callout-code-border: #818cf8;
+  --callout-code-bg: rgba(99, 102, 241, 0.14);
+  --callout-code-subtle: rgba(129, 140, 248, 0.25);
+  --callout-code-title: #c7d2fe;
+  --callout-code-text: #e0e7ff;
+
+  --callout-info-border: #10b981;
+  --callout-info-bg: rgba(5, 150, 105, 0.14);
+  --callout-info-subtle: rgba(16, 185, 129, 0.25);
+  --callout-info-title: #6ee7b7;
+  --callout-info-text: #d1fae5;
+
+  /* Zpětná kompatibilita */
+  --callout-human-bg: var(--callout-tip-bg);
+  --callout-human-border: var(--callout-tip-border);
+  --callout-human-title: var(--callout-tip-title);
+  --callout-human-text: var(--callout-tip-text);
+  --callout-rule-bg: var(--callout-rec-bg);
+  --callout-rule-border: var(--callout-rec-border);
+  --callout-rule-title: var(--callout-rec-title);
+  --callout-rule-text: var(--callout-rec-text);
+  --callout-warn-bg: var(--callout-alert-bg);
+  --callout-warn-border: var(--callout-alert-border);
+  --callout-warn-title: var(--callout-alert-title);
+  --callout-warn-text: var(--callout-alert-text);
+
+  --code-bg: #23272b;
+  --code-border: #353b41;
+  --code-text: #f1f3f5;
+}
+
+/* Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--content-app-bg);
+  color: var(--text-primary);
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ==========================================================================
+   1. KOMPAKTNÍ FIXNÍ HLAVIČKA
+   ========================================================================== */
+header.app-header {
+  height: var(--header-height);
+  background: var(--chrome-header-bg);
+  color: var(--chrome-header-text);
+  border-bottom: 2px solid var(--chrome-header-border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+}
+
+.brand-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+  min-width: 0;
+}
+
+.brand-logo-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.brand-logo-icon svg {
+  display: block;
+}
+
+.brand-badge {
+  background: var(--brand-secondary);
+  color: #ffffff;
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 0.75rem;
+  padding: 2px 7px;
+  border-radius: var(--radius-xs);
+  letter-spacing: 0.5px;
+}
+
+.brand-title {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-title strong {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.2px;
+  line-height: 1.15;
+}
+
+.brand-title span {
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-family: var(--font-mono);
+}
+
+.header-search {
+  flex: 1;
+  max-width: 580px;
+}
+
+.search-input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: var(--radius-sm);
+  padding: 3px 10px;
+  transition: all 0.12s ease;
+}
+
+.search-input-group:focus-within {
+  background: #ffffff;
+  border-color: var(--brand-secondary);
+  box-shadow: 0 0 0 2px rgba(38, 41, 43, 0.25);
+}
+
+.search-input-group:focus-within input {
+  color: var(--text-primary);
+}
+
+.search-input-group:focus-within svg {
+  stroke: var(--brand-primary);
+}
+
+.search-input-group input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: 2px 8px;
+  font-size: 0.82rem;
+  color: #ffffff;
+  font-family: inherit;
+}
+
+.search-input-group input::placeholder {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+.search-input-group input::-webkit-input-placeholder {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+.search-input-group input::-moz-placeholder {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+.search-input-group:focus-within input::placeholder {
+  color: #6f777e !important;
+  opacity: 0.85 !important;
+}
+
+.search-input-group svg {
+  width: 14px;
+  height: 14px;
+  stroke: rgba(255, 255, 255, 0.9);
+  flex-shrink: 0;
+}
+
+.search-shortcut {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  border-radius: 2px;
+  padding: 1px 5px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.header-btn {
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+  padding: 4px 10px;
+  border-radius: var(--radius-xs);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  text-decoration: none;
+  transition: all 0.12s;
+}
+
+.header-btn:hover {
+  background: var(--brand-secondary);
+  border-color: var(--brand-secondary);
+  color: #ffffff;
+}
+
+.header-btn.active {
+  background: var(--brand-secondary);
+  border-color: var(--brand-secondary);
+  color: #ffffff;
+}
+
+.menu-burger-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  padding: 2px;
+}
+
+/* ==========================================================================
+   2. KOMPAKTNÍ DROBEČKOVÁ LIŠTA (Breadcrumb Bar)
+   ========================================================================== */
+.breadcrumb-bar {
+  height: var(--crumb-height);
+  background: var(--chrome-crumb-bg);
+  border-bottom: 1px solid var(--chrome-crumb-border);
+  position: sticky;
+  top: var(--header-height);
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+}
+
+.breadcrumb-path {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+}
+
+.crumb-link {
+  color: var(--brand-primary);
+  text-decoration: none;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.crumb-link:hover {
+  color: var(--brand-tertiary);
+  text-decoration: underline;
+}
+
+.crumb-separator {
+  color: var(--text-faint);
+  font-size: 0.7rem;
+}
+
+.crumb-current {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.crumb-tag {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: var(--brand-tertiary-subtle);
+  border: 1px solid #bfdbfe;
+  color: var(--brand-tertiary);
+}
+
+[data-theme="dark"] .crumb-tag {
+  background: rgba(68, 131, 252, 0.16);
+  border-color: rgba(68, 131, 252, 0.35);
+  color: #9bbdfd;
+}
+
+/* ==========================================================================
+   3. HIERARCHICKÝ SPOJOVNÍKOVÝ STROM V LEVÉM PANELU (Dle předlohy screenshotu)
+   ========================================================================== */
+.app-container {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  min-height: calc(100vh - var(--header-height) - var(--crumb-height));
+}
+
+aside.app-sidebar {
+  width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
+  background: var(--chrome-sidebar-bg);
+  border-right: 2px solid var(--chrome-sidebar-border);
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: sticky;
+  top: calc(var(--header-height) + var(--crumb-height));
+  height: calc(100vh - var(--header-height) - var(--crumb-height));
+  padding: 14px 10px 24px 6px;
+  box-sizing: border-box;
+  z-index: 80;
+}
+
+/* Hlavní kontejner stromu */
+.tree-root {
+  width: 100%;
+}
+
+.tree-root-branch {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 16px;
+  position: relative;
+}
+
+/* VNĚJŠÍ SVISLÁ ČÁRA PROPOJUJÍCÍ HLAVNÍ KAPITOLY */
+.tree-root-branch::before {
+  content: "";
+  position: absolute;
+  top: 16px;
+  bottom: 16px;
+  left: 16px;
+  width: 0;
+  border-left: 1px dashed var(--tree-line-color);
+  pointer-events: none;
+}
+
+/* Hlavní uzel stromu (Rozcestník, Kapitoly 1..4) */
+.tree-root-node {
+  position: relative;
+  margin-bottom: 8px;
+  padding-left: 16px;
+}
+
+/* Vodorovná odbočka od vnější svislé čáry k uzlu kapitoly */
+.tree-root-node::before {
+  content: "";
+  position: absolute;
+  top: 15px;
+  left: 0;
+  width: 16px;
+  height: 0;
+  border-top: 1px dashed var(--tree-line-color);
+  pointer-events: none;
+}
+
+/* Poslední hlavní uzel ořízne vnější svislou čáru pod sebou (vytvoří └──) */
+.tree-root-node:last-child::after {
+  content: "";
+  position: absolute;
+  top: 16px;
+  left: -2px;
+  bottom: -10px;
+  width: 4px;
+  background: var(--chrome-sidebar-bg);
+  pointer-events: none;
+}
+
+/* Řádek hlavičky kapitoly */
+.tree-group-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 30px;
+  min-width: 0;
+  width: 100%;
+}
+
+/* ŠIPKA SBALENÍ / ROZBALENÍ */
+.tree-expander {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  transition: all 0.12s;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.tree-expander:hover {
+  color: var(--brand-orange);
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.tree-expander-arrow {
+  display: block;
+  transition: transform 0.15s ease;
+  fill: currentColor;
+}
+
+/* Sbalený stav: šipka otočena vpravo (▶) */
+.tree-root-node.is-collapsed .tree-expander-arrow {
+  transform: rotate(-90deg);
+}
+
+.tree-root-node.is-collapsed .tree-children {
+  display: none;
+}
+
+/* Titulek kapitoly */
+.tree-group-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  padding: 5px 8px;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  font-size: 0.81rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  user-select: none;
+  transition: background 0.12s, color 0.12s;
+}
+
+.tree-group-title:hover {
+  background: var(--chrome-sidebar-hover);
+  color: var(--brand-orange);
+}
+
+.tree-folder-icon {
+  display: inline-flex;
+  align-items: center;
+  color: var(--brand-primary);
+  flex-shrink: 0;
+}
+
+[data-theme="dark"] .tree-folder-icon {
+  color: #f87d55;
+}
+
+/* VNITŘNÍ VĚTEV PODKAPITOL */
+.tree-children {
+  list-style: none;
+  margin: 3px 0 4px 6px;
+  padding: 0 0 0 18px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Vnitřní svislá čára větve propojující podkapitoly */
+.tree-children::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 14px;
+  left: 6px;
+  width: 0;
+  border-left: 1px dashed var(--tree-line-color);
+  pointer-events: none;
+}
+
+/* Jednotlivá podkapitola */
+.tree-child-node {
+  position: relative;
+  min-height: 29px;
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+/* Vodorovný spojovník k podkapitole */
+.tree-child-node::before {
+  content: "";
+  position: absolute;
+  top: 14px;
+  left: -12px;
+  width: 12px;
+  height: 0;
+  border-top: 1px dashed var(--tree-line-color);
+  pointer-events: none;
+}
+
+/* Poslední podkapitola ořízne vnitřní svislou čáru */
+.tree-child-node:last-child::after {
+  content: "";
+  position: absolute;
+  top: 15px;
+  left: -13px;
+  bottom: 0;
+  width: 3px;
+  background: var(--chrome-sidebar-bg);
+  pointer-events: none;
+}
+
+/* ODKAZ V NAVIGAČNÍM STROMU */
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: var(--radius-xs);
+  font-size: 0.81rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  line-height: 1.4;
+  box-sizing: border-box;
+}
+
+.sidebar-link:hover {
+  background: var(--chrome-sidebar-hover);
+  color: var(--brand-primary);
+}
+
+/* Aktivní položka ve stromu */
+.sidebar-link.active {
+  background: var(--chrome-sidebar-active-bg);
+  color: var(--brand-primary);
+  font-weight: 700;
+  border-left: 3px solid var(--brand-primary);
+  padding-left: 6px;
+}
+
+[data-theme="dark"] .sidebar-link.active {
+  color: #fa7749;
+}
+
+/* IKONKA POLOŽKY */
+.tree-item-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: color 0.1s;
+}
+
+.sidebar-link:hover .tree-item-icon,
+.sidebar-link.active .tree-item-icon {
+  color: var(--brand-primary);
+}
+
+.tree-label {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tree-node-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.tree-link-root {
+  font-weight: 700;
+  color: var(--text-primary);
+  padding: 5px 8px;
+}
+
+/* KÓDY A ŠTÍTKY */
+.link-code {
+  font-family: var(--font-mono);
+  font-size: 0.67rem;
+  font-weight: 700;
+  padding: 2px 5px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.sidebar-link.active .link-code {
+  background: rgba(234, 82, 31, 0.15);
+  color: var(--brand-primary);
+}
+
+[data-theme="dark"] .link-code {
+  background: rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .sidebar-link.active .link-code {
+  background: rgba(234, 82, 31, 0.35);
+  color: #fa7749;
+}
+
+.link-code-di {
+  background: var(--brand-primary);
+  color: #ffffff;
+}
+
+.link-code-ti {
+  background: var(--brand-tertiary);
+  color: #ffffff;
+}
+
+.link-code-meta {
+  background: var(--brand-secondary);
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   4. PŘÍJEMNÝ OBSAHOVÝ PROSTOR S DOSTATKEM MÍSTA
+   ========================================================================== */
+main.app-content {
+  flex: 1;
+  min-width: 0;
+  background: var(--content-bg);
+  padding: 26px 36px;
+}
+
+@media (min-width: 1200px) {
+  main.app-content {
+    max-width: calc(100% - var(--sidebar-width) - var(--rail-width));
+  }
+}
+
+/* Pravý panel */
+aside.app-rail {
+  width: var(--rail-width);
+  min-width: var(--rail-width);
+  background: var(--chrome-sidebar-bg);
+  border-left: 2px solid var(--chrome-sidebar-border);
+  overflow-y: auto;
+  position: sticky;
+  top: calc(var(--header-height) + var(--crumb-height));
+  height: calc(100vh - var(--header-height) - var(--crumb-height));
+  padding: 18px 16px;
+  font-size: 0.8rem;
+  display: none;
+}
+
+@media (min-width: 1200px) {
+  aside.app-rail {
+    display: block;
+  }
+}
+
+.rail-box {
+  margin-bottom: 22px;
+}
+
+.rail-heading {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--brand-blue);
+  margin-bottom: 8px;
+}
+
+.rail-nav-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rail-nav-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 8px;
+  border-radius: var(--radius-xs);
+  font-size: 0.78rem;
+  transition: all 0.1s;
+  cursor: pointer;
+}
+
+.rail-nav-link svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  flex-shrink: 0;
+}
+
+.rail-nav-link:hover {
+  color: var(--brand-orange);
+  background: var(--chrome-sidebar-hover);
+}
+
+.rail-nav-link:hover svg {
+  stroke: var(--brand-orange);
+}
+
+.meta-spec-card {
+  background: var(--content-bg);
+  border: 1px solid var(--chrome-crumb-border);
+  border-radius: var(--radius-xs);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.meta-spec-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--chrome-crumb-border);
+  font-size: 0.74rem;
+}
+
+.meta-spec-row:last-child {
+  border-bottom: none;
+}
+
+.meta-spec-label {
+  color: var(--text-muted);
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.meta-spec-val {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.74rem;
+  color: var(--brand-tertiary);
+  text-align: right;
+  white-space: nowrap;
+}
+
+[data-theme="dark"] .meta-spec-val {
+  color: #7ba8ff;
+}
+
+/* ==========================================================================
+   5. PŘÍJEMNÁ STRUKTURA ČLÁNKU / KAPITOLY
+   ========================================================================== */
+.topic-page {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  max-width: 1100px;
+}
+
+.topic-hero {
+  border-bottom: 2px solid var(--chrome-crumb-border);
+  padding-bottom: 14px;
+}
+
+.topic-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.badge-topic-code {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 3px;
+  background: var(--brand-primary);
+  color: #ffffff;
+}
+
+.badge-topic-cat {
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-topic-cat.cat-di {
+  background: #feeae2;
+  color: var(--brand-primary);
+  border: 1px solid #fbd6c8;
+}
+
+.badge-topic-cat.cat-ti {
+  background: var(--brand-tertiary-subtle);
+  color: var(--brand-tertiary);
+  border: 1px solid #bfdbfe;
+}
+
+.badge-topic-cat.cat-meta {
+  background: #f1f3f5;
+  color: var(--brand-secondary);
+  border: 1px solid #d5dbe2;
+}
+
+.topic-main-title {
+  font-size: 1.55rem;
+  font-weight: 800;
+  line-height: 1.3;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  letter-spacing: -0.3px;
+}
+
+[data-theme="dark"] .topic-main-title {
+  color: #f1f3f5;
+}
+
+.topic-standard-cite {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+/* ==========================================================================
+   NAVIGAČNÍ ZÁLOŽKY DLE GISADMIN (Screenshot reference)
+   ========================================================================== */
+.topic-module-nav {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  border-bottom: 1px solid var(--brand-primary);
+  margin-bottom: 20px;
+  padding: 0;
+  position: relative;
+  overflow: visible;
+}
+
+.module-tab-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom: none;
+  padding: 5px 14px 6px 14px;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: #555e68;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px 4px 0 0;
+  position: relative;
+  bottom: -1px;
+  margin: 0;
+  transition: color 0.12s ease;
+  white-space: nowrap;
+  font-family: inherit;
+  line-height: 1.35;
+}
+
+.module-tab-btn:hover {
+  color: var(--brand-primary);
+  background: transparent;
+}
+
+.module-tab-btn.active {
+  background: var(--content-bg);
+  border: 1px solid var(--brand-primary);
+  border-bottom: 2px solid var(--content-bg);
+  color: var(--brand-primary);
+  font-weight: 600;
+  z-index: 2;
+  bottom: -1px;
+  padding-bottom: 5px;
+}
+
+[data-theme="dark"] .module-tab-btn {
+  color: #9ba3af;
+}
+
+[data-theme="dark"] .module-tab-btn:hover {
+  color: #fa7749;
+}
+
+[data-theme="dark"] .module-tab-btn.active {
+  background: var(--content-bg);
+  border: 1px solid var(--brand-primary);
+  border-bottom: 2px solid var(--content-bg);
+  color: #fa7749;
+}
+
+.module-tab-btn svg {
+  display: none;
+}
+
+/* ==========================================================================
+   JEDNOTNÝ SYSTÉM CALLOUTŮ (Alert, Tip, Doporučení, Schéma, Kód, Info)
+   ========================================================================== */
+.callout {
+  position: relative;
+  border-left: 4px solid var(--callout-border, var(--callout-tip-border));
+  border-top: 1px solid var(--callout-subtle, rgba(0, 0, 0, 0.06));
+  border-right: 1px solid var(--callout-subtle, rgba(0, 0, 0, 0.06));
+  border-bottom: 1px solid var(--callout-subtle, rgba(0, 0, 0, 0.06));
+  background: var(--callout-bg, var(--callout-tip-bg));
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 14px 18px;
+  margin-bottom: 18px;
+  transition: all 0.15s ease;
+}
+
+.callout-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--callout-title, var(--callout-tip-title));
+  margin-bottom: 8px;
+}
+
+.callout-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: currentColor;
+}
+
+.callout-icon svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+}
+
+.callout-label {
+  font-weight: 800;
+}
+
+.callout-title-extra {
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+  opacity: 0.88;
+  font-size: 0.8rem;
+  margin-left: 4px;
+}
+
+.callout-body {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--callout-text, var(--callout-tip-text));
+  font-weight: 500;
+}
+
+.callout-body p:not(:last-child) {
+  margin-bottom: 8px;
+}
+
+/* Modifikátory typů calloutů: */
+
+/* 1. ALERT / UPOZORNĚNÍ (Červená - Kritická varování, chyby, rizika) */
+.callout--alert {
+  --callout-border: var(--callout-alert-border);
+  --callout-bg: var(--callout-alert-bg);
+  --callout-subtle: var(--callout-alert-subtle);
+  --callout-title: var(--callout-alert-title);
+  --callout-text: var(--callout-alert-text);
+}
+
+/* 2. TIP & RADA (Oranžová - Praktické vysvětlení, rady z terénu, lidská řeč) */
+.callout--tip,
+.callout-human { /* zpětná kompatibilita pro staré třídy */
+  --callout-border: var(--callout-tip-border);
+  --callout-bg: var(--callout-tip-bg);
+  --callout-subtle: var(--callout-tip-subtle);
+  --callout-title: var(--callout-tip-title);
+  --callout-text: var(--callout-tip-text);
+}
+
+.callout-human-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--callout-tip-title);
+  margin-bottom: 8px;
+}
+
+.callout-human-body {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--callout-tip-text);
+  font-weight: 500;
+}
+
+/* 3. DOPORUČENÍ & PRAVIDLO (Hluboká modrá - MPS DTM standardy, závazná pravidla) */
+.callout--recommendation {
+  --callout-border: var(--callout-rec-border);
+  --callout-bg: var(--callout-rec-bg);
+  --callout-subtle: var(--callout-rec-subtle);
+  --callout-title: var(--callout-rec-title);
+  --callout-text: var(--callout-rec-text);
+}
+
+/* 4. SCHÉMA (Tyrkysová / Ocelová azurová - Technické CAD výkresy, geometrická pravidla) */
+.callout--schema {
+  --callout-border: var(--callout-schema-border);
+  --callout-bg: var(--callout-schema-bg);
+  --callout-subtle: var(--callout-schema-subtle);
+  --callout-title: var(--callout-schema-title);
+  --callout-text: var(--callout-schema-text);
+}
+
+/* 5. KÓD (Indigo / Fialová - Datový model JVF DTM, XML, atributy) */
+.callout--code {
+  --callout-border: var(--callout-code-border);
+  --callout-bg: var(--callout-code-bg);
+  --callout-subtle: var(--callout-code-subtle);
+  --callout-title: var(--callout-code-title);
+  --callout-text: var(--callout-code-text);
+}
+
+.callout--code .callout-body {
+  font-family: var(--font-mono);
+  font-size: 0.84rem;
+}
+
+/* 6. INFO (Smaragdová zelená - Obecné informace, metodická shrnutí, kontext) */
+.callout--info {
+  --callout-border: var(--callout-info-border);
+  --callout-bg: var(--callout-info-bg);
+  --callout-subtle: var(--callout-info-subtle);
+  --callout-title: var(--callout-info-title);
+  --callout-text: var(--callout-info-text);
+}
+
+/* Kontejner pro CAD schéma uvnitř calloutu */
+.cad-viewport {
+  background: var(--content-bg);
+  border: 1px solid var(--chrome-crumb-border);
+  border-radius: var(--radius-xs);
+  padding: 12px;
+  margin: 10px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.cad-desc {
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-top: 6px;
+}
+
+/* Technická pravidla */
+.rule-card {
+  background: var(--content-bg);
+  border: 1px solid var(--chrome-crumb-border);
+  border-left: 3px solid var(--brand-blue);
+  border-radius: var(--radius-xs);
+  padding: 11px 16px;
+  margin-bottom: 9px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  transition: border-color 0.12s;
+}
+
+.rule-card:hover {
+  border-color: #93c5fd;
+}
+
+.rule-idx {
+  background: var(--brand-blue-subtle);
+  color: var(--brand-blue);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 800;
+  min-width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.rule-content {
+  font-size: 0.88rem;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+/* Karta legislativy a zdrojů */
+.legal-card-box {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-sm);
+  padding: 18px 20px;
+  margin-bottom: 18px;
+}
+
+[data-theme="dark"] .legal-card-box {
+  background: #06192d;
+  border-color: #0c3566;
+}
+
+.legal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 12px 0 16px 0;
+}
+
+@media (max-width: 800px) {
+  .legal-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.legal-item {
+  background: var(--content-bg);
+  border: 1px solid var(--chrome-crumb-border);
+  border-radius: var(--radius-xs);
+  padding: 10px 12px;
+}
+
+.legal-item-label {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.legal-item-value {
+  font-size: 0.84rem;
+  color: var(--text-primary);
+  line-height: 1.45;
+}
+
+.btn-source-cuzk {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--brand-orange);
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: var(--radius-xs);
+  transition: background 0.12s;
+}
+
+.btn-source-cuzk:hover {
+  background: var(--brand-orange-hover);
+}
+
+/* ==========================================================================
+   6. PŘEHLEDNÝ A ODLIŠENÝ KATALOG (Overview)
+   ========================================================================== */
+.catalog-section {
+  margin-bottom: 24px;
+}
+
+/* Výrazně odlišené záhlaví každé hlavní kapitoly v Rozcestníku */
+.catalog-section-head {
+  background: var(--brand-primary-subtle);
+  border: 1px solid #fbd6c8;
+  border-left: 4px solid var(--brand-primary);
+  padding: 10px 16px;
+  border-radius: var(--radius-xs);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+[data-theme="dark"] .catalog-section-head {
+  background: rgba(234, 82, 31, 0.16);
+  border-color: rgba(234, 82, 31, 0.3);
+  border-left-color: var(--brand-primary);
+}
+
+.catalog-section-head h2 {
+  font-size: 1.08rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .catalog-section-head h2 {
+  color: #f1f3f5;
+}
+
+.catalog-section-head span {
+  font-size: 0.74rem;
+  font-weight: 700;
+  background: #ffffff;
+  padding: 3px 8px;
+  border-radius: 3px;
+  color: var(--brand-primary);
+  border: 1px solid #fbd6c8;
+}
+
+[data-theme="dark"] .catalog-section-head span {
+  background: #17191b;
+  border-color: rgba(234, 82, 31, 0.35);
+  color: #fa7749;
+}
+
+.catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 12px;
+}
+
+.catalog-item-card {
+  background: var(--content-bg);
+  border: 1px solid var(--chrome-crumb-border);
+  border-radius: var(--radius-xs);
+  padding: 14px 16px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.12s ease;
+}
+
+.catalog-item-card:hover {
+  border-color: var(--brand-orange);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transform: translateY(-1px);
+}
+
+.catalog-item-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.catalog-item-title {
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  line-height: 1.35;
+}
+
+.catalog-item-summary {
+  font-size: 0.83rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin-bottom: 10px;
+  flex-grow: 1;
+}
+
+.catalog-item-bottom {
+  border-top: 1px solid var(--chrome-crumb-border);
+  padding-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.74rem;
+}
+
+.catalog-item-link {
+  color: var(--brand-orange);
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   7. TABULKY & MISTAKES (Kompaktní)
+   ========================================================================== */
+.tech-table-box {
+  border: 1px solid var(--chrome-crumb-border);
+  border-radius: var(--radius-xs);
+  overflow-x: auto;
+  margin: 10px 0 20px;
+}
+
+table.tech-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+table.tech-table th {
+  background: var(--chrome-sidebar-bg);
+  padding: 10px 14px;
+  font-weight: 800;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  color: var(--brand-blue);
+  border-bottom: 2px solid var(--chrome-crumb-border);
+}
+
+table.tech-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--chrome-crumb-border);
+  vertical-align: top;
+  line-height: 1.5;
+}
+
+.mistake-box {
+  border: 1px solid var(--chrome-crumb-border);
+  border-radius: var(--radius-xs);
+  margin-bottom: 14px;
+}
+
+.mistake-bar {
+  background: var(--chrome-sidebar-bg);
+  border-bottom: 1px solid var(--chrome-crumb-border);
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.mistake-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+@media (max-width: 800px) {
+  .mistake-cols {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mistake-bad {
+  background: var(--callout-warn-bg);
+  padding: 14px 16px;
+  border-right: 1px solid var(--chrome-crumb-border);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.mistake-good {
+  background: rgba(22, 163, 74, 0.05);
+  padding: 14px 16px;
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+/* Rádce / Akordeon */
+.accordion-item {
+  border: 1px solid var(--chrome-crumb-border);
+  border-radius: var(--radius-xs);
+  margin-bottom: 10px;
+}
+
+.accordion-trigger {
+  width: 100%;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: color 0.12s;
+}
+
+.accordion-trigger:hover {
+  color: var(--brand-orange);
+}
+
+.accordion-body {
+  padding: 14px 16px;
+  background: var(--chrome-sidebar-bg);
+  border-top: 1px solid var(--chrome-crumb-border);
+  font-size: 0.86rem;
+  line-height: 1.55;
+  display: none;
+}
+
+.accordion-item.active .accordion-body {
+  display: block;
+}
+
+/* Search highlight */
+mark.search-highlight {
+  background: #fef08a;
+  color: #854d0e;
+  font-weight: 700;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+[data-theme="dark"] mark.search-highlight {
+  background: rgba(234, 82, 31, 0.45);
+  color: #ffffff;
+}
+
+/* Mobile */
+@media (max-width: 900px) {
+  .menu-burger-btn {
+    display: block;
+  }
+
+  aside.app-sidebar {
+    position: fixed;
+    left: -100%;
+    top: calc(var(--header-height) + var(--crumb-height));
+    height: calc(100vh - var(--header-height) - var(--crumb-height));
+    transition: left 0.18s ease;
+    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.25);
+  }
+
+  aside.app-sidebar.open {
+    left: 0;
+  }
+
+  main.app-content {
+    padding: 14px;
+    max-width: 100%;
+  }
+
+  .catalog-grid {
+    grid-template-columns: 1fr;
+  }
+}

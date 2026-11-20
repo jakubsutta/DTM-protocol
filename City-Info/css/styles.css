@@ -1,0 +1,788 @@
+/* ================================================
+   City-Info – Design System (Atomicon GIS)
+   Palette:  primary #ca8a04 (Žlutá dle požadavku), secondary #4483fc
+   Style:    DESIGN_SYSTEM.md aligned
+   Layout:   Split-pane (left=yellow, right=blue)
+   ================================================ */
+
+/* ---------- CSS Variables ---------- */
+:root {
+  /* Žlutá primární barva pro City-Info dle požadavku */
+  --brand-primary: #ca8a04;
+  --brand-primary-hover: #a16207;
+  --brand-primary-dark: #854d0e;
+  --brand-primary-subtle: #fefce8;
+  --chrome-header-bg: #ca8a04;
+  --chrome-header-border: #a16207;
+
+  --primary: #ca8a04;
+  --primary-dark: #a16207;
+  --primary-light: #eab308;
+  --primary-bg: #fefce8;
+  --primary-bg-light: #ffffff;
+  --secondary: var(--brand-tertiary, #4483fc);
+  --secondary-dark: #2f6ad9;
+  --secondary-light: #6fa0ff;
+  --secondary-bg: #eef3fe;
+  --secondary-bg-light: #f6f9ff;
+  --tertiary: #eceef0;
+
+  --bg: var(--content-app-bg, #f4f6f8);
+  --panel: var(--content-bg, #ffffff);
+  --border: var(--chrome-crumb-border, #dbe0e6);
+  --border-strong: #8c96a0;
+  --text: var(--text-primary, #26292b);
+  --muted: var(--text-muted, #6f777e);
+  --accent: #ca8a04;
+  --accent-dark: #a16207;
+  --link: var(--brand-tertiary, #4483fc);
+  --link-hover: #2b6fe8;
+  --err: #c0392b;
+  --close: #a81100;
+  --close-bg: #ffd4cf;
+  --close-bg-hover: #fcb5ac;
+
+  --radius: 4px;
+  --font: var(--font-sans, "Inter", system-ui, -apple-system, sans-serif);
+  --font-mono: var(--font-mono, "JetBrains Mono", monospace);
+
+  box-sizing: border-box;
+}
+
+/* ---------- Dark Mode ---------- */
+[data-theme="dark"] {
+  --bg: var(--content-app-bg, #141618);
+  --panel: var(--content-bg, #1c1f22);
+  --border: #2a2e33;
+  --border-strong: #4b5257;
+  --text: var(--text-primary, #f1f3f5);
+  --muted: var(--text-muted, #878f97);
+  --accent: #facc15;
+  --accent-dark: #eab308;
+  --link: #6fa0ff;
+  --link-hover: #9dbfff;
+  --err: #e74c3c;
+  --primary-bg: #2a2412;
+  --primary-bg-light: #201b0c;
+  --secondary-bg: #171f2c;
+  --secondary-bg-light: #131924;
+}
+
+/* ---------- Reset ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Monospace pro technické údaje, kódy a IČO */
+.value, .badge, .status, .api-sources-list, code, kbd {
+  font-family: var(--font-mono);
+}
+
+/* ---------- Split Layout ---------- */
+.split-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  min-height: 0;
+}
+
+@media (max-width: 768px) {
+  .split-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Split Panes ---------- */
+.split-pane {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid var(--border);
+}
+
+.pane-left {
+  border-right: 2px solid var(--border-strong);
+}
+
+@media (max-width: 768px) {
+  .pane-left {
+    border-right: none;
+  }
+}
+
+/* Pane header – section label strip */
+.pane-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  user-select: none;
+}
+
+.pane-header .pane-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.pane-header--primary {
+  background: var(--primary-bg);
+  color: var(--primary);
+  border-bottom: 2px solid var(--primary);
+}
+
+.pane-header--secondary {
+  background: var(--secondary-bg);
+  color: var(--secondary);
+  border-bottom: 2px solid var(--secondary);
+}
+
+/* Pane body */
+.pane-body {
+  flex: 1;
+  padding: 14px;
+  background: var(--panel);
+  display: flex;
+  flex-direction: column;
+}
+
+.pane-left .pane-body {
+  background: var(--panel, #ffffff);
+}
+
+.pane-right .pane-body {
+  background: var(--panel, #ffffff);
+}
+
+/* ---------- Result wrapper ---------- */
+.result-wrapper {
+  padding: 14px 14px 40px;
+}
+
+/* ---------- Panel ---------- */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+
+/* ---------- Search input ---------- */
+.search-box {
+  position: relative;
+}
+
+.search-box .input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-box .input-icon {
+  position: absolute;
+  left: 10px;
+  width: 16px;
+  height: 16px;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 9px 34px 9px 34px;
+  font-family: var(--font);
+  font-size: 13px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+}
+
+input[type="text"]::placeholder {
+  color: var(--muted);
+}
+
+input[type="text"]:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(202, 138, 4, 0.2);
+}
+
+.clear-btn {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, background-color 0.15s;
+}
+
+.clear-btn:hover {
+  color: var(--text);
+  background: var(--border);
+}
+
+.clear-btn .clear-icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* ---------- Suggestions ---------- */
+.suggestions {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 1500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: none;
+}
+
+.suggestions.show {
+  display: block;
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 12.5px;
+  border-bottom: 1px solid var(--border);
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.suggestion-item:hover,
+.suggestion-item.hi {
+  background: var(--bg);
+}
+
+.suggest-name {
+  flex: 1;
+  min-width: 0;
+}
+
+.suggest-kod {
+  flex-shrink: 0;
+  font-size: 10px;
+  color: var(--muted);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-family: var(--font);
+}
+
+/* ---------- Hint ---------- */
+.hint {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
+/* ---------- API Sources Box ---------- */
+.api-sources-box {
+  margin-top: 16px;
+  padding: 8px 0;
+  font-size: 10.5px;
+  color: var(--muted);
+}
+
+.api-sources-title {
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.api-sources-list {
+  margin: 0;
+  padding: 0 0 0 16px;
+  list-style-type: square;
+}
+
+.api-sources-list li {
+  margin-bottom: 4px;
+}
+
+.api-sources-list li:last-child {
+  margin-bottom: 0;
+}
+
+.api-sources-list strong {
+  font-weight: 600;
+}
+
+.source-link {
+  display: inline-flex;
+  align-items: center;
+  color: var(--muted);
+  text-decoration: none;
+  margin-left: 4px;
+  vertical-align: -2px;
+  transition: color 0.15s;
+}
+
+.source-link:hover {
+  color: var(--link);
+}
+
+.source-link svg {
+  width: 10px;
+  height: 10px;
+}
+
+/* ---------- Map ---------- */
+#map {
+  flex: 1;
+  min-height: 300px;
+  border-radius: var(--radius);
+  z-index: 1;
+  border: 1px solid var(--border);
+}
+
+.map-controls {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* ---------- Chip button ---------- */
+.chip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 11.5px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.chip-btn .chip-icon {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+
+.chip-btn:hover {
+  border-color: var(--border-strong);
+}
+
+.chip-btn.active {
+  background: var(--secondary);
+  border-color: var(--secondary);
+  color: #fff;
+}
+
+/* ---------- Status ---------- */
+.status {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 8px;
+  min-height: 18px;
+}
+
+.status.err {
+  color: var(--err);
+}
+
+/* ---------- Result title ---------- */
+.result-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid var(--text);
+}
+
+.result-title h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.city-logo {
+  height: 20px;
+  width: auto;
+  object-fit: contain;
+  margin-right: 2px;
+}
+
+.result-title-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.badge {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: var(--font);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.close-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--close);
+  background: var(--close-bg);
+  color: var(--close);
+  font-family: var(--font);
+  font-size: 11px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.close-btn:hover {
+  background-color: var(--close-bg-hover);
+}
+
+/* ---------- Grid ---------- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px 12px;
+}
+
+.grid-2col {
+  grid-template-columns: 1fr 1fr;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+
+  .grid,
+  .grid-2col {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Field ---------- */
+.field {
+  border-top: 1px solid var(--border);
+  padding-top: 5px;
+}
+
+.field .label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin-bottom: 2px;
+  font-weight: 600;
+}
+
+.field .value-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.field .value {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.copy-field-btn {
+  background: transparent;
+  border: none;
+  color: var(--primary);
+  padding: 4px;
+  cursor: pointer;
+  border-radius: var(--radius);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  opacity: 1;
+}
+
+.field:hover .copy-field-btn {
+  opacity: 1;
+}
+
+.copy-field-btn:hover {
+  background: var(--primary-bg);
+  color: var(--primary-dark);
+}
+
+.copy-field-btn.copied {
+  color: #10b981;
+  /* Green checkmark */
+  background: rgba(16, 185, 129, 0.1);
+  opacity: 1;
+}
+
+.copy-field-btn svg {
+  width: 12px;
+  height: 12px;
+}
+
+.field .value a {
+  color: var(--link);
+  text-decoration: none;
+}
+
+.field .value a:hover {
+  color: var(--link-hover);
+  text-decoration: underline;
+}
+
+.field .value.muted {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.full {
+  grid-column: 1 / -1;
+}
+
+/* ---------- Sources ---------- */
+.sources {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border);
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.sources a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  color: var(--link);
+  text-decoration: none;
+  border: 1px solid var(--border);
+  padding: 3px 7px;
+  border-radius: var(--radius);
+}
+
+.sources a:hover {
+  background: var(--bg);
+  border-color: var(--border-strong);
+}
+
+/* ---------- Note ---------- */
+.note {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+/* ---------- Spinner ---------- */
+.spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle;
+  margin-right: 5px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- Leaflet custom styling ---------- */
+.leaflet-pane {
+  z-index: 1;
+}
+
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 2;
+}
+
+/* Zoom controls */
+.leaflet-control-zoom {
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius) !important;
+  overflow: hidden;
+  box-shadow: none !important;
+}
+
+.leaflet-control-zoom a {
+  width: 28px !important;
+  height: 28px !important;
+  line-height: 28px !important;
+  font-size: 14px !important;
+  color: var(--text) !important;
+  background: var(--panel) !important;
+  border-bottom: 1px solid var(--border) !important;
+  font-family: var(--font) !important;
+}
+
+.leaflet-control-zoom a:last-child {
+  border-bottom: none !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background: var(--bg) !important;
+  color: var(--primary) !important;
+}
+
+/* Attribution */
+.leaflet-control-attribution {
+  background: rgba(243, 245, 242, 0.85) !important;
+  font-family: var(--font) !important;
+  font-size: 9px !important;
+  color: var(--muted) !important;
+  padding: 2px 6px !important;
+  border-radius: var(--radius) 0 0 0 !important;
+}
+
+.leaflet-control-attribution a {
+  color: var(--link) !important;
+}
+
+/* Custom ortofoto toggle control inside map */
+.leaflet-control-ortofoto {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.leaflet-control-ortofoto .ortofoto-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 11px;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.leaflet-control-ortofoto .ortofoto-btn:hover {
+  border-color: var(--border-strong);
+}
+
+.leaflet-control-ortofoto .ortofoto-btn.active {
+  background: var(--secondary);
+  border-color: var(--secondary);
+  color: #fff;
+}
+
+.leaflet-control-ortofoto .ortofoto-btn svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+
+/* Fullscreen button inside zoom bar */
+.leaflet-control-fullscreen-btn {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  border-top: 1px solid #ccc !important;
+}
+
+.leaflet-control-fullscreen-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Custom SVG marker */
+.ci-marker-icon {
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.25));
+}
+
+/* ---------- ORP Labels ---------- */
+.orp-label {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  white-space: nowrap;
+}
+
+.orp-label span {
+  display: block;
+  font-family: var(--font);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--primary-dark);
+  text-shadow:
+    -1px -1px 0 rgba(255,255,255,.85),
+     1px -1px 0 rgba(255,255,255,.85),
+    -1px  1px 0 rgba(255,255,255,.85),
+     1px  1px 0 rgba(255,255,255,.85),
+     0    0   3px rgba(255,255,255,.6);
+  pointer-events: none;
+  text-transform: uppercase;
+  opacity: 0.85;
+}

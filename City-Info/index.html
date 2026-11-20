@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Info o obci – Atomicon GIS</title>
+<link rel="icon" type="image/svg+xml" href="img/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared/css/design-system.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+<link rel="stylesheet" href="css/styles.css" />
+<script src="../shared/js/atomicon-core.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+</head>
+<body>
+
+<!-- SVG icon sprite (hidden) -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none;">
+  <symbol id="icon-building" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="8" width="18" height="14" rx="1"/>
+    <path d="M12 2L3 8h18L12 2z"/>
+    <line x1="8" y1="12" x2="8" y2="14"/>
+    <line x1="12" y1="12" x2="12" y2="14"/>
+    <line x1="16" y1="12" x2="16" y2="14"/>
+    <line x1="8" y1="17" x2="8" y2="19"/>
+    <line x1="12" y1="17" x2="12" y2="22"/>
+    <line x1="16" y1="17" x2="16" y2="19"/>
+  </symbol>
+  <symbol id="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="10.5" cy="10.5" r="7"/>
+    <line x1="15.5" y1="15.5" x2="21" y2="21"/>
+  </symbol>
+  <symbol id="icon-map-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+    <circle cx="12" cy="9" r="2.5"/>
+  </symbol>
+  <symbol id="icon-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="12,2 2,7 12,12 22,7"/>
+    <polyline points="2,17 12,22 22,17"/>
+    <polyline points="2,12 12,17 22,12"/>
+  </symbol>
+  <symbol id="icon-external" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+    <polyline points="15,3 21,3 21,9"/>
+    <line x1="10" y1="14" x2="21" y2="3"/>
+  </symbol>
+  <symbol id="icon-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18"/>
+    <line x1="6" y1="6" x2="18" y2="18"/>
+  </symbol>
+  <symbol id="icon-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+  </symbol>
+  <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="20 6 9 17 4 12"/>
+  </symbol>
+</svg>
+
+<header class="app-header">
+  <div class="header-left">
+    <a href="../index.html" class="btn-back-dashboard" title="Zpět na Dashboard Atomicon GIS">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="#" class="brand-wrapper">
+      <span class="brand-logo-icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+          <polyline points="2 17 12 22 22 17"/>
+          <polyline points="2 12 12 17 22 12"/>
+        </svg>
+      </span>
+      <div class="brand-title">
+        <strong>Info o obci</strong>
+      </div>
+    </a>
+  </div>
+
+  <div class="header-actions">
+    <button id="theme-toggle" class="header-btn header-btn--icon-only" title="Přepnout tmavý / světlý režim" aria-label="Přepnout motiv vzhledu">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+  </div>
+</header>
+
+<nav class="breadcrumb-bar" aria-label="Drobečková navigace">
+  <div class="breadcrumb-path">
+    <a class="crumb-link" href="../index.html" title="Zpět na rozcestník">Dashboard</a>
+    <span class="crumb-separator">›</span>
+    <span class="crumb-current">Info o obci</span>
+  </div>
+  <div>
+    <span class="crumb-tag">RÚIAN • ARES • RIS</span>
+  </div>
+</nav>
+
+<div class="split-layout">
+  <!-- Levá polovina – oranžová – hledání podle názvu -->
+  <section class="split-pane pane-left">
+    <div class="pane-header pane-header--primary">
+      <svg class="pane-icon"><use href="#icon-search"/></svg>
+      <span>Podle názvu</span>
+    </div>
+    <div class="pane-body">
+      <div class="search-box">
+        <div class="input-wrapper">
+          <svg class="input-icon"><use href="#icon-search"/></svg>
+          <input type="text" id="nameInput" placeholder="Začněte psát název obce…" autocomplete="off">
+          <button type="button" class="clear-btn" id="clearSearchBtn" style="display:none;" title="Vymazat hledání">
+            <svg class="clear-icon"><use href="#icon-x"/></svg>
+          </button>
+        </div>
+        <div class="suggestions" id="suggestList"></div>
+      </div>
+      <details class="clean-toggle-box" style="margin-top: 14px;">
+        <summary>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <span>Datové zdroje a nápověda</span>
+        </summary>
+        <div class="clean-toggle-content">
+          <p style="margin: 0 0 8px; font-size: 0.76rem; color: var(--text-muted);">
+            Našeptávač vyhledává přes RÚIAN (ČÚZK) včetně obcí se shodným názvem a okresním rozlišením.
+          </p>
+          <ul class="api-sources-list">
+            <li>
+              <strong>RÚIAN (ČÚZK):</strong> Vyhledávání, hierarchie, hranice
+              <a href="https://geoportal.cuzk.cz/" target="_blank" rel="noopener" class="source-link" title="Přejít na zdroj"><svg><use href="#icon-external"/></svg></a>
+            </li>
+            <li>
+              <strong>ARES (MFČR):</strong> Údaje o úřadu obce a IČO
+              <a href="https://ares.gov.cz/" target="_blank" rel="noopener" class="source-link" title="Přejít na zdroj"><svg><use href="#icon-external"/></svg></a>
+            </li>
+            <li>
+              <strong>RISY (ÚÚR):</strong> Webové stránky obce
+              <a href="https://www.risy.cz/" target="_blank" rel="noopener" class="source-link" title="Přejít na zdroj"><svg><use href="#icon-external"/></svg></a>
+            </li>
+            <li>
+              <strong>Wikipedie / Wikidata:</strong> Znak obce a starosta
+              <a href="https://www.wikidata.org/" target="_blank" rel="noopener" class="source-link" title="Přejít na zdroj"><svg><use href="#icon-external"/></svg></a>
+            </li>
+            <li>
+              <strong>ČÚZK & OSM:</strong> Ortofoto a podkladová mapa
+            </li>
+          </ul>
+        </div>
+      </details>
+      <div class="status" id="nameStatus"></div>
+    </div>
+  </section>
+
+  <!-- Pravá polovina – modrá – mapa -->
+  <section class="split-pane pane-right">
+    <div class="pane-header pane-header--secondary">
+      <svg class="pane-icon"><use href="#icon-map-pin"/></svg>
+      <span>Na mapě</span>
+    </div>
+    <div class="pane-body">
+      <div id="map"></div>
+      <div class="map-controls">
+        <span class="hint" style="margin:0;">Klikněte do mapy na obec, kterou hledáte.</span>
+      </div>
+      <div class="status" id="mapStatus"></div>
+    </div>
+  </section>
+</div>
+
+<!-- Výsledkový panel pod oběma polovinami -->
+<div class="result-wrapper">
+  <div class="panel" id="resultPanel" style="display:none;"></div>
+</div>
+
+<!-- Aplikační moduly -->
+<script src="js/config.js"></script>
+<script src="js/helpers.js"></script>
+<script src="js/search.js"></script>
+<script src="js/map.js"></script>
+<script src="js/ares.js"></script>
+<script src="js/contacts.js"></script>
+<script src="js/render.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,805 @@
+/* ==========================================================================
+   Atomicon GIS – Centrální Technický Design Systém
+   Dle metodiky: DESIGN_SYSTEM.md
+   Sjednocené proměnné, aplikační rámec, komponenty a typografie pro všechny podprojekty
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. BAREVNÉ TOKENY A PROMĚNNÉ (Světlý a tmavý režim)
+   -------------------------------------------------------------------------- */
+:root {
+  /* 1.1 Základní barvy identity */
+  --brand-primary: #ea521f;          /* Fixní hlavička, primární akcenty, aktivní linky */
+  --brand-primary-hover: #d24414;
+  --brand-primary-dark: #b8380e;
+  --brand-primary-subtle: #fef3ee;
+
+  --brand-secondary: #26292b;        /* Antracit: hlavní nadpisy, štítky */
+  --brand-secondary-hover: #1b1d1e;
+
+  --brand-tertiary: #4483fc;         /* Technická modrá: CAD prvky, data, odkazy */
+  --brand-tertiary-hover: #2b6fe8;
+  --brand-tertiary-subtle: #edf4ff;
+
+  /* 1.2 Pevný rámec (Chrome) */
+  --chrome-header-bg: #ea521f;
+  --chrome-header-text: #ffffff;
+  --chrome-header-border: #d24414;
+
+  --chrome-crumb-bg: #eceef0;        /* Klidná neutrální světle šedá */
+  --chrome-crumb-border: #dbe0e6;
+  --chrome-crumb-text: #4b5257;
+
+  --chrome-sidebar-bg: #eceef0;      /* Podklad postranního stromu a lišt */
+  --chrome-sidebar-border: #dbe0e6;
+  --chrome-sidebar-hover: #e2e6eb;
+  --chrome-sidebar-active-bg: #ffffff;
+  --chrome-sidebar-active-text: #ea521f;
+  --tree-line-color: #8c96a0;        /* Vodicí čárkované linie stromu */
+
+  /* 1.3 Plocha obsahu (Content Workspace) */
+  --content-bg: #ffffff;            /* Bílé tělo karet a hlavního obsahu */
+  --content-app-bg: #f4f6f8;        /* Subtilní šedý podklad pod kartami a tabulkami */
+  --panel-bg: #ffffff;
+  --card-bg: #ffffff;
+  --card-border: #e2e8f0;
+  --card-hover-border: #cbd5e1;
+
+  /* 1.4 Typografie a kontrast */
+  --text-primary: #26292b;          /* Hlavní nadpisy a důležité texty */
+  --text-secondary: #4b5257;        /* Běžné tělo textu */
+  --text-muted: #6f777e;            /* Metadata, popisky, sekundární štítky */
+  --text-faint: #9ea7ae;            /* Doplňková vodítka */
+
+  /* 1.5 Kódy a štítky */
+  --code-bg: #eef1f4;
+  --code-border: #dbe0e6;
+  --code-text: #26292b;
+
+  /* 1.6 Callouty */
+  --callout-tip-border: #16a34a;
+  --callout-tip-bg: #f0fdf4;
+  --callout-tip-text: #166534;
+  --callout-recommendation-border: #2563eb;
+  --callout-recommendation-bg: #eff6ff;
+  --callout-recommendation-text: #1e40af;
+  --callout-alert-border: #dc2626;
+  --callout-alert-bg: #fef2f2;
+  --callout-alert-text: #991b1b;
+  --callout-schema-border: #ea521f;
+  --callout-schema-bg: #fff7ed;
+  --callout-schema-text: #9a3412;
+  --callout-code-border: #7c3aed;
+  --callout-code-bg: #f5f3ff;
+  --callout-code-text: #5b21b6;
+  --callout-info-border: #475569;
+  --callout-info-bg: #f8fafc;
+  --callout-info-text: #334155;
+
+  /* 1.7 Dimenze a zaoblení */
+  --header-height: 48px;
+  --crumb-height: 36px;
+  --sidebar-width: 360px;
+  --rail-width: 270px;
+
+  --radius-xs: 3px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+}
+
+/* --------------------------------------------------------------------------
+   Tmavý režim (Dark Theme) - data-theme="dark"
+   -------------------------------------------------------------------------- */
+[data-theme="dark"] {
+  --chrome-header-bg: #141618;
+  --chrome-header-text: #f1f3f5;
+  --chrome-header-border: #26292b;
+
+  --chrome-crumb-bg: #17191b;
+  --chrome-crumb-border: #2a2e33;
+  --chrome-crumb-text: #a0aec0;
+
+  --chrome-sidebar-bg: #17191b;
+  --chrome-sidebar-border: #2a2e33;
+  --chrome-sidebar-hover: #23272b;
+  --chrome-sidebar-active-bg: #26292b;
+  --chrome-sidebar-active-text: #f06435;
+  --tree-line-color: #4b5257;
+
+  --content-bg: #1c1f22;
+  --content-app-bg: #141618;
+  --panel-bg: #1c1f22;
+  --card-bg: #1c1f22;
+  --card-border: #2e3338;
+  --card-hover-border: #424a52;
+
+  --text-primary: #f1f3f5;
+  --text-secondary: #c1c7cd;
+  --text-muted: #878f97;
+  --text-faint: #565e65;
+
+  --code-bg: #23272b;
+  --code-border: #343a40;
+  --code-text: #e9ecef;
+
+  --callout-tip-border: #22c55e;
+  --callout-tip-bg: #14241b;
+  --callout-tip-text: #86efac;
+  --callout-recommendation-border: #3b82f6;
+  --callout-recommendation-bg: #172338;
+  --callout-recommendation-text: #93c5fd;
+  --callout-alert-border: #ef4444;
+  --callout-alert-bg: #2d1617;
+  --callout-alert-text: #fca5a5;
+  --callout-schema-border: #f97316;
+  --callout-schema-bg: #2d1b14;
+  --callout-schema-text: #fdba74;
+  --callout-code-border: #8b5cf6;
+  --callout-code-bg: #221c33;
+  --callout-code-text: #d8b4fe;
+  --callout-info-border: #64748b;
+  --callout-info-bg: #1e242d;
+  --callout-info-text: #cbd5e1;
+}
+
+/* --------------------------------------------------------------------------
+   2. ZÁKLADNÍ RESET A TYPOGRAFIE
+   -------------------------------------------------------------------------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans);
+  background-color: var(--content-app-bg);
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  margin-top: 0;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+code, kbd, samp, pre {
+  font-family: var(--font-mono);
+}
+
+a {
+  color: var(--brand-tertiary);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+a:hover {
+  color: var(--brand-tertiary-hover);
+}
+
+/* Scrollbary */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--chrome-sidebar-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--tree-line-color);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   3. PEVNÝ APLIKAČNÍ RÁMEC (Chrome Layout) - Clean & Unified
+   -------------------------------------------------------------------------- */
+.app-header {
+  height: var(--header-height);
+  background-color: var(--chrome-header-bg);
+  color: var(--chrome-header-text);
+  border-bottom: 1px solid var(--chrome-header-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  gap: 12px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+.brand-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #ffffff;
+  text-decoration: none !important;
+  min-width: 0;
+}
+
+.brand-logo-icon {
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+
+.brand-logo-icon svg {
+  width: 17px;
+  height: 17px;
+}
+
+.brand-wrapper:hover .brand-logo-icon {
+  background: rgba(255, 255, 255, 0.26);
+}
+
+.brand-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.brand-title strong {
+  font-size: 13.5px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.brand-title span {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.82);
+  font-weight: 400;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.brand-badge {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 2px 6px;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: var(--radius-xs);
+  color: #ffffff;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* Tlačítko návratu na Dashboard - JEDNOTNÝ VZHLED PRO VŠECHNY WEBY */
+.btn-back-dashboard {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 10px;
+  background: rgba(0, 0, 0, 0.22);
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-sm);
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none !important;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.btn-back-dashboard:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: #ffffff;
+  color: #ffffff !important;
+  transform: translateY(-0.5px);
+}
+
+.btn-back-dashboard svg {
+  width: 13px;
+  height: 13px;
+  stroke-width: 2.2;
+}
+
+/* Header vyhledávání */
+.header-search {
+  flex: 1;
+  max-width: 440px;
+  min-width: 0;
+  margin: 0 8px;
+}
+
+.search-input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.search-input-group svg {
+  position: absolute;
+  left: 9px;
+  width: 13px;
+  height: 13px;
+  color: rgba(255, 255, 255, 0.75);
+  pointer-events: none;
+}
+
+.search-input-group input {
+  width: 100%;
+  height: 28px;
+  background: rgba(0, 0, 0, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 0 50px 0 28px;
+  font-size: 11.5px;
+  color: #ffffff;
+  outline: none;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.search-input-group input::placeholder {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.search-input-group input:focus {
+  background: #ffffff;
+  color: #26292b;
+  border-color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);
+}
+
+.search-input-group input:focus + .search-shortcut {
+  background: #eceef0;
+  color: #26292b;
+  border-color: #dbe0e6;
+}
+
+.search-input-group input:focus ~ svg {
+  color: var(--brand-primary);
+}
+
+.search-shortcut {
+  position: absolute;
+  right: 5px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: var(--radius-xs);
+  padding: 1px 4px;
+  color: #ffffff;
+  pointer-events: none;
+}
+
+/* Header akce vpravo */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.header-btn {
+  height: 28px;
+  padding: 0 9px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: var(--radius-sm);
+  color: #ffffff !important;
+  font-size: 11.5px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  white-space: nowrap;
+  font-family: inherit;
+  text-decoration: none !important;
+}
+
+.header-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #ffffff !important;
+}
+
+.header-btn--icon-only {
+  width: 28px;
+  padding: 0;
+  justify-content: center;
+}
+
+/* Responzivní prevence překrývání textů v headeru */
+@media (max-width: 1080px) {
+  .brand-title span, .brand-badge {
+    display: none !important;
+  }
+  .header-search {
+    max-width: 320px;
+  }
+}
+
+@media (max-width: 768px) {
+  .btn-back-dashboard span {
+    display: none;
+  }
+  .btn-back-dashboard {
+    padding: 0 7px;
+  }
+  .header-search {
+    margin: 0 4px;
+  }
+  .search-shortcut {
+    display: none;
+  }
+  .search-input-group input {
+    padding-right: 8px;
+  }
+}
+
+/* Rozbalovací nápověda a zdroje (Clean Collapsible) */
+.clean-toggle-box {
+  border: 1px solid var(--card-border);
+  background: var(--content-bg);
+  border-radius: var(--radius-sm);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.clean-toggle-box summary {
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--content-app-bg);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.clean-toggle-box summary:hover {
+  color: var(--brand-primary);
+  background: var(--content-bg);
+}
+
+.clean-toggle-box[open] summary {
+  border-bottom: 1px solid var(--card-border);
+}
+
+.clean-toggle-content {
+  padding: 10px 12px;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+/* Drobečková lišta */
+.breadcrumb-bar, .app-breadcrumbs-bar {
+  height: var(--crumb-height);
+  background-color: var(--chrome-crumb-bg);
+  border-bottom: 1px solid var(--chrome-crumb-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  font-size: 12px;
+  color: var(--chrome-crumb-text);
+  position: sticky;
+  top: var(--header-height);
+  z-index: 990;
+}
+
+.breadcrumb-path {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.crumb-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.12s ease;
+}
+
+.crumb-link:hover {
+  color: var(--brand-primary);
+}
+
+.crumb-separator {
+  color: var(--tree-line-color);
+  user-select: none;
+}
+
+.crumb-current {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.crumb-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  background: var(--code-bg);
+  color: var(--code-text);
+  border: 1px solid var(--code-border);
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  letter-spacing: 0.02em;
+}
+
+/* --------------------------------------------------------------------------
+   4. GISADMIN KOMPAKTNÍ ZÁLOŽKY (Dle sekce 5.1)
+   -------------------------------------------------------------------------- */
+.topic-module-nav {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  border-bottom: 1px solid var(--brand-primary);
+  margin-bottom: 20px;
+  padding: 0 4px;
+  position: relative;
+  overflow: visible;
+}
+
+.module-tab-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom: none;
+  padding: 6px 14px 7px 14px;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: #555e68;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px 4px 0 0;
+  position: relative;
+  bottom: -1px;
+  margin: 0;
+  transition: color 0.12s ease;
+  white-space: nowrap;
+  font-family: inherit;
+  line-height: 1.35;
+}
+
+.module-tab-btn:hover {
+  color: var(--brand-primary);
+  background: transparent;
+}
+
+.module-tab-btn.active {
+  background: var(--content-bg);
+  border: 1px solid var(--brand-primary);
+  border-bottom: 2px solid var(--content-bg);
+  color: var(--brand-primary);
+  font-weight: 600;
+  z-index: 2;
+  bottom: -1px;
+  padding-bottom: 6px;
+}
+
+/* --------------------------------------------------------------------------
+   5. SPOJOVNÍKOVÝ NAVIGAČNÍ STROM (Dle sekce 5.2)
+   -------------------------------------------------------------------------- */
+.tree-branch {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 16px;
+  position: relative;
+}
+
+.tree-branch::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 8px;
+  width: 0;
+  border-left: 1px dashed var(--tree-line-color);
+  pointer-events: none;
+}
+
+.tree-child-node {
+  position: relative;
+  margin-bottom: 2px;
+  padding-left: 12px;
+}
+
+.tree-child-node::before {
+  content: "";
+  position: absolute;
+  top: 14px;
+  left: -8px;
+  width: 14px;
+  height: 0;
+  border-top: 1px dashed var(--tree-line-color);
+  pointer-events: none;
+}
+
+.tree-child-node:last-child::after {
+  content: "";
+  position: absolute;
+  top: 15px;
+  left: -9px;
+  bottom: 0;
+  width: 3px;
+  background: var(--chrome-sidebar-bg);
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   6. CALLOUTY (Dle sekce 5.3)
+   -------------------------------------------------------------------------- */
+.callout {
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  background: var(--content-bg);
+  border: 1px solid var(--card-border);
+  border-left-width: 3.5px;
+}
+
+.callout-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--text-primary);
+}
+
+.callout-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.callout-icon svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2.2;
+}
+
+.callout-title-extra {
+  font-weight: 400;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.callout-body {
+  color: var(--text-secondary);
+}
+
+.callout-body > :last-child {
+  margin-bottom: 0;
+}
+
+.callout--tip {
+  border-left-color: var(--callout-tip-border);
+  background-color: var(--callout-tip-bg);
+}
+.callout--tip .callout-head { color: var(--callout-tip-text); }
+.callout--tip .callout-icon { color: var(--callout-tip-border); }
+
+.callout--recommendation {
+  border-left-color: var(--callout-recommendation-border);
+  background-color: var(--callout-recommendation-bg);
+}
+.callout--recommendation .callout-head { color: var(--callout-recommendation-text); }
+.callout--recommendation .callout-icon { color: var(--callout-recommendation-border); }
+
+.callout--alert {
+  border-left-color: var(--callout-alert-border);
+  background-color: var(--callout-alert-bg);
+}
+.callout--alert .callout-head { color: var(--callout-alert-text); }
+.callout--alert .callout-icon { color: var(--callout-alert-border); }
+
+.callout--schema {
+  border-left-color: var(--callout-schema-border);
+  background-color: var(--callout-schema-bg);
+}
+.callout--schema .callout-head { color: var(--callout-schema-text); }
+.callout--schema .callout-icon { color: var(--callout-schema-border); }
+
+.callout--code {
+  border-left-color: var(--callout-code-border);
+  background-color: var(--callout-code-bg);
+}
+.callout--code .callout-head { color: var(--callout-code-text); }
+.callout--code .callout-icon { color: var(--callout-code-border); }
+
+.callout--info {
+  border-left-color: var(--callout-info-border);
+  background-color: var(--callout-info-bg);
+}
+.callout--info .callout-head { color: var(--callout-info-text); }
+.callout--info .callout-icon { color: var(--callout-info-border); }
+
+/* --------------------------------------------------------------------------
+   7. BADGES A KÓDY
+   -------------------------------------------------------------------------- */
+.badge-topic-code {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+  background: var(--code-bg);
+  color: var(--code-text);
+  border: 1px solid var(--code-border);
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.2;
+}
+
+/* --------------------------------------------------------------------------
+   8. KARTY A OBSAHOVÉ PRVKY
+   -------------------------------------------------------------------------- */
+.tech-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.tech-card:hover {
+  border-color: var(--brand-primary);
+  box-shadow: var(--shadow-md);
+}
