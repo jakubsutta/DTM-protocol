@@ -506,6 +506,12 @@ body.dark-theme .theme-toggle .icon-moon {
     border: 1px solid rgba(16, 55, 120, 0.25);
 }
 
+.tag-katastr-map {
+    background: rgba(16, 55, 120, 0.12);
+    color: #103778;
+    border: 1px solid rgba(16, 55, 120, 0.25);
+}
+
 /* ---- Vysouvací vyhledávací pole z tlačítka směrem doleva s blurem ---- */
 .search-drawer {
     position: relative;
@@ -1493,6 +1499,27 @@ body.dark-theme .theme-toggle .icon-moon { display: none; }
     stroke: #ffffff;
 }
 
+.panel-katastr-icon {
+    width: 13.5px;
+    height: 13.5px;
+    color: #c55353;
+    stroke: currentColor;
+    flex-shrink: 0;
+}
+
+.panel-tool-icon-box.katastr-icon-box {
+    background: linear-gradient(135deg, #b84c4c 0%, #cb6363 100%);
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(184, 76, 76, 0.28);
+}
+
+.panel-tool-icon-box.katastr-icon-box .panel-tool-katastr-svg {
+    width: 14px;
+    height: 14px;
+    color: #ffffff;
+    stroke: #ffffff;
+}
+
 .panel-tools-author {
     font-size: 9.5px;
     font-weight: 600;
@@ -2358,6 +2385,27 @@ body.dark-theme .panel-tool-icon-box.dtm-icon-box .panel-tool-dtm-svg {
 }
 
 body.dark-theme .tag-dtm-map {
+    background: rgba(59, 130, 246, 0.18);
+    color: #93c5fd;
+    border-color: rgba(59, 130, 246, 0.35);
+}
+
+body.dark-theme .panel-katastr-icon {
+    color: #e07a7a;
+}
+
+body.dark-theme .panel-tool-icon-box.katastr-icon-box {
+    background: linear-gradient(135deg, #8a3434 0%, #b84c4c 100%);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(184, 76, 76, 0.35);
+}
+
+body.dark-theme .panel-tool-icon-box.katastr-icon-box .panel-tool-katastr-svg {
+    color: #ffffff;
+    stroke: #ffffff;
+}
+
+body.dark-theme .tag-katastr-map {
     background: rgba(59, 130, 246, 0.18);
     color: #93c5fd;
     border-color: rgba(59, 130, 246, 0.35);

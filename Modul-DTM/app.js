@@ -76,13 +76,16 @@
     baseLayers: {},
     overlayLayers: {},
     activeSublayers: {
-      dtm_di: new Set(DI_SUBLAYERS),
-      dtm_ti: new Set(TI_SUBLAYERS)
+      dtm_di: new Set(),
+      dtm_ti: new Set()
     },
     groupOpacity: {
       dtm_di: 0.9,
       dtm_ti: 0.9
-    }
+    },
+    activeSingleLayers: new Set(),
+    legendFilter: "active",
+    currentTab: "layers"
   };
 
   // Inicializace mapy
@@ -125,6 +128,12 @@
     // Tlačítko vyhledávání v RÚIAN (Adresa, Parcela, Kat. území) pod nadmořskou výškou
     initSearchControl();
 
+    // Tlačítko měření (vzdálenost / linie, plocha) pod vyhledáváním
+    initMeasureControl();
+
+    // Tlačítko legendy na mapě pod měřením
+    initLegendControl();
+
     // Inicializace překryvných vrstev DTM a KN
     initOverlayLayers();
 
@@ -133,6 +142,9 @@
 
     // Nastavení UI ovládacích prvků v pevném panelu vrstev
     setupUIControls();
+
+    // Inicializace systému legendy a značkového klíče DTM
+    initLegendSystem();
   }
 
   // Definice podkladových map (Ověřené ČÚZK WMS a OSM)
@@ -249,6 +261,14 @@
         if (isOpen && typeof toggleSearchFlyout === "function") {
           toggleSearchFlyout(false);
         }
+        if (isOpen) {
+          var measurePopover = document.getElementById("measure-popover");
+          var btnMeasure = document.getElementById("btn-measure-toggle");
+          if (measurePopover) measurePopover.classList.remove("is-open");
+          if (btnMeasure && typeof measureState !== "undefined" && !measureState.mode) {
+            btnMeasure.classList.remove("is-active");
+          }
+        }
       });
 
       if (btnClose) {
@@ -346,7 +366,7 @@
       if (statusDot) statusDot.className = "status-dot elevation-active";
       if (statusText) statusText.textContent = "Režim měření výšky (DMR 5G) aktivní – klikněte kamkoliv do mapy";
 
-      // Zavřít případný popover podkladových map a vyhledávání
+      // Zavřít případný popover podkladových map, vyhledávání a měření
       var popover = document.getElementById("basemap-popover");
       var btnBasemap = document.getElementById("btn-basemap-toggle");
       if (popover) popover.classList.remove("is-open");
@@ -354,6 +374,13 @@
       if (typeof toggleSearchFlyout === "function") {
         toggleSearchFlyout(false);
       }
+      if (typeof setMeasureMode === "function" && measureState.mode) {
+        setMeasureMode(null);
+      }
+      var measurePopover = document.getElementById("measure-popover");
+      var btnMeasure = document.getElementById("btn-measure-toggle");
+      if (measurePopover) measurePopover.classList.remove("is-open");
+      if (btnMeasure && !measureState.mode) btnMeasure.classList.remove("is-active");
     } else {
       if (btn) btn.classList.remove("is-active");
       if (mapEl) mapEl.classList.remove("elevation-mode-active");
@@ -530,6 +557,14 @@
       // Vypnout elevation režim, pokud běží
       if (state.elevationMode) {
         toggleElevationMode(false);
+      }
+
+      // Zavřít měření popover
+      var measurePopover = document.getElementById("measure-popover");
+      var btnMeasure = document.getElementById("btn-measure-toggle");
+      if (measurePopover) measurePopover.classList.remove("is-open");
+      if (btnMeasure && typeof measureState !== "undefined" && !measureState.mode) {
+        btnMeasure.classList.remove("is-active");
       }
 
       focusActiveSearchInput();
@@ -1307,6 +1342,636 @@
     }
   }
 
+  // --------------------------------------------------------------------------
+  // Nástroje měření: Měření vzdálenosti (linie) a plochy (polygon)
+  // - Živé zobrazení vzdálenosti na segmentu během pohybu myši
+  // - Vzdálenosti na jednotlivých segmentech
+  // - Zvýrazněné uzlové body (vrcholy)
+  // - Celková délka a celková plocha + obvod
+  // --------------------------------------------------------------------------
+
+  var measureState = {
+    mode: null, // "line" | "area" | null
+    points: [], // L.LatLng[]
+    markers: [], // L.Marker[]
+    segmentTooltips: [], // L.Tooltip[]
+    rubberline: null, // L.Polyline pro živý segment od posledního bodu k myši
+    rubberpolygon: null, // L.Polygon pro živý polygon
+    liveTooltip: null, // L.Tooltip pro živou vzdálenost
+    activeLayer: null // L.Polyline nebo L.Polygon pro pevnou geometrii
+  };
+
+  function initMeasureControl() {
+    var MeasureControl = L.Control.extend({
+      options: {
+        position: "topleft"
+      },
+      onAdd: function () {
+        var container = L.DomUtil.create("div", "leaflet-bar leaflet-control measure-control");
+
+        container.innerHTML =
+          '<button type="button" id="btn-measure-toggle" class="measure-toggle-btn" title="Měření (linie, vzdálenost, plocha)" aria-label="Měření">' +
+            '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
+              '<path d="M21.3 8.7 8.7 21.3c-1 1-2.6 1-3.6 0l-1.4-1.4c-1-1-1-2.6 0-3.6L16.3 3.7c1-1 2.6-1 3.6 0l1.4 1.4c1 1 1 2.6 0 3.6z"></path>' +
+              '<path d="m7.5 10.5 2 2"></path>' +
+              '<path d="m10.5 7.5 2 2"></path>' +
+              '<path d="m13.5 4.5 2 2"></path>' +
+              '<path d="m4.5 13.5 2 2"></path>' +
+            '</svg>' +
+          '</button>' +
+          '<div id="measure-popover" class="measure-popover">' +
+            '<div class="measure-popover-header">' +
+              '<span>Měření v mapě</span>' +
+              '<button type="button" id="btn-close-measure" class="btn-close-popover" title="Zavřít">✕</button>' +
+            '</div>' +
+            '<div class="measure-options">' +
+              '<button type="button" class="measure-mode-btn" data-measure="line">' +
+                '<div class="measure-mode-icon">' +
+                  '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">' +
+                    '<polyline points="4 19 10 7 15 15 20 5"></polyline>' +
+                    '<circle cx="4" cy="19" r="2" fill="currentColor"></circle>' +
+                    '<circle cx="10" cy="7" r="2" fill="currentColor"></circle>' +
+                    '<circle cx="15" cy="15" r="2" fill="currentColor"></circle>' +
+                    '<circle cx="20" cy="5" r="2" fill="currentColor"></circle>' +
+                  '</svg>' +
+                '</div>' +
+                '<div class="measure-mode-info">' +
+                  '<span class="measure-mode-title">Měření délky / linie</span>' +
+                  '<span class="measure-mode-desc">Vzdálenosti segmentů a celková délka trasy</span>' +
+                '</div>' +
+              '</button>' +
+              '<button type="button" class="measure-mode-btn" data-measure="area">' +
+                '<div class="measure-mode-icon">' +
+                  '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">' +
+                    '<polygon points="12 2 22 8.5 18 21 6 21 2 8.5 12 2" stroke-dasharray="2 2"></polygon>' +
+                    '<circle cx="12" cy="2" r="2" fill="currentColor"></circle>' +
+                    '<circle cx="22" cy="8.5" r="2" fill="currentColor"></circle>' +
+                    '<circle cx="18" cy="21" r="2" fill="currentColor"></circle>' +
+                    '<circle cx="6" cy="21" r="2" fill="currentColor"></circle>' +
+                    '<circle cx="2" cy="8.5" r="2" fill="currentColor"></circle>' +
+                  '</svg>' +
+                '</div>' +
+                '<div class="measure-mode-info">' +
+                  '<span class="measure-mode-title">Měření plochy</span>' +
+                  '<span class="measure-mode-desc">Výměra mnohoúhelníku (m², ha) a obvod</span>' +
+                '</div>' +
+              '</button>' +
+            '</div>' +
+            '<div class="measure-popover-footer">' +
+              '<button type="button" id="btn-measure-clear" class="btn-measure-clear" title="Smazat nakreslené měření">' +
+                '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>' +
+                '<span>Vymazat měření</span>' +
+              '</button>' +
+              '<div class="measure-hint">' +
+                '💡 <b>Kliknutím</b> vkládáte uzlové body. <b>Dvojklikem</b> nebo kliknutím na výchozí bod měření dokončíte. <b>Esc</b> zruší rozpracované měření.' +
+              '</div>' +
+            '</div>' +
+          '</div>';
+
+        L.DomEvent.disableClickPropagation(container);
+        L.DomEvent.disableScrollPropagation(container);
+
+        return container;
+      }
+    });
+
+    state.map.addControl(new MeasureControl());
+
+    var btnToggle = document.getElementById("btn-measure-toggle");
+    var popover = document.getElementById("measure-popover");
+    var btnClose = document.getElementById("btn-close-measure");
+    var btnClear = document.getElementById("btn-measure-clear");
+
+    if (btnToggle && popover) {
+      btnToggle.addEventListener("click", function (e) {
+        e.stopPropagation();
+        var isOpen = popover.classList.toggle("is-open");
+        btnToggle.classList.toggle("is-active", isOpen || !!measureState.mode);
+
+        if (isOpen) {
+          // Zavřít basemap a vyhledávání
+          var basePopover = document.getElementById("basemap-popover");
+          var baseBtn = document.getElementById("btn-basemap-toggle");
+          if (basePopover) basePopover.classList.remove("is-open");
+          if (baseBtn) baseBtn.classList.remove("is-active");
+
+          if (typeof toggleSearchFlyout === "function") {
+            toggleSearchFlyout(false);
+          }
+          if (state.elevationMode) {
+            toggleElevationMode(false);
+          }
+        }
+      });
+
+      if (btnClose) {
+        btnClose.addEventListener("click", function (e) {
+          e.stopPropagation();
+          popover.classList.remove("is-open");
+          if (!measureState.mode) {
+            btnToggle.classList.remove("is-active");
+          }
+        });
+      }
+
+      // Zavření kliknutím mimo
+      document.addEventListener("click", function (e) {
+        if (!popover.contains(e.target) && !btnToggle.contains(e.target)) {
+          popover.classList.remove("is-open");
+          if (!measureState.mode) {
+            btnToggle.classList.remove("is-active");
+          }
+        }
+      });
+
+      // Klávesa Escape
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+          if (popover.classList.contains("is-open")) {
+            popover.classList.remove("is-open");
+          }
+          if (measureState.mode) {
+            setMeasureMode(null);
+          }
+        }
+      });
+    }
+
+    // Výběr režimu měření (linie / plocha)
+    document.querySelectorAll(".measure-mode-btn").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        var targetMode = this.getAttribute("data-measure");
+        if (measureState.mode === targetMode) {
+          setMeasureMode(null);
+        } else {
+          setMeasureMode(targetMode);
+        }
+        if (popover) popover.classList.remove("is-open");
+      });
+    });
+
+    if (btnClear) {
+      btnClear.addEventListener("click", function (e) {
+        e.stopPropagation();
+        clearMeasureDrawings();
+        if (popover) popover.classList.remove("is-open");
+        var statusText = document.getElementById("map-status-text");
+        if (statusText && measureState.mode) {
+          statusText.textContent = measureState.mode === "line"
+            ? "Měření vzdálenosti: kliknutím vložte první bod"
+            : "Měření plochy: kliknutím vložte první vrchol";
+        }
+      });
+    }
+
+    // Posluchače mapy pro živé kreslení a dvojklik
+    state.map.on("mousemove", onMeasureMouseMove);
+    state.map.on("dblclick", onMeasureMapDblClick);
+  }
+
+  // Zapnutí / vypnutí režimu měření
+  function setMeasureMode(mode) {
+    measureState.mode = mode;
+    clearMeasureDrawings();
+
+    var btnToggle = document.getElementById("btn-measure-toggle");
+    var mapEl = document.getElementById("map");
+    var statusDot = document.getElementById("status-dot");
+    var statusText = document.getElementById("map-status-text");
+
+    document.querySelectorAll(".measure-mode-btn").forEach(function (btn) {
+      btn.classList.toggle("active", btn.getAttribute("data-measure") === mode);
+    });
+
+    if (mode) {
+      if (btnToggle) btnToggle.classList.add("is-active");
+      if (mapEl) mapEl.classList.add("measuring-active");
+      if (statusDot) statusDot.className = "status-dot measure-active";
+      if (statusText) {
+        statusText.textContent = mode === "line"
+          ? "Režim měření vzdálenosti aktivní – kliknutím vložte první bod do mapy"
+          : "Režim měření plochy aktivní – kliknutím vložte první vrchol mnohoúhelníku";
+      }
+
+      // Vypnout elevation režim, pokud byl zapnutý
+      if (state.elevationMode) {
+        toggleElevationMode(false);
+      }
+      // Zavřít vyhledávání
+      if (typeof toggleSearchFlyout === "function") {
+        toggleSearchFlyout(false);
+      }
+      // Zakázat doubleClickZoom mapy, aby dvojklik dokončoval kreslení a nezoomoval
+      state.map.doubleClickZoom.disable();
+    } else {
+      if (btnToggle) btnToggle.classList.remove("is-active");
+      if (mapEl) mapEl.classList.remove("measuring-active");
+      state.map.doubleClickZoom.enable();
+
+      var z = state.map.getZoom();
+      if (statusDot && statusText) {
+        if (z >= 14) {
+          statusDot.className = "status-dot";
+          statusText.textContent = "Aktivní data DTM – klikněte na prvek pro atributy";
+        } else {
+          statusDot.className = "status-dot inactive";
+          statusText.textContent = "DTM neaktivní (přibližte na zoom 14+ pro dotazování)";
+        }
+      }
+    }
+  }
+
+  // Kliknutí do mapy při měření – přidání uzlového bodu
+  function onMeasureMapClick(e) {
+    if (!measureState.mode) return;
+    var latlng = e.latlng;
+    var pts = measureState.points;
+    var len = pts.length;
+
+    // Pokud uživatel klikl velmi blízko k prvnímu bodu a máme alespoň 3 body u plochy, dokončit
+    if (len >= 3 && measureState.mode === "area") {
+      var distToFirst = latlng.distanceTo(pts[0]);
+      var pxDist = state.map.latLngToContainerPoint(latlng).distanceTo(state.map.latLngToContainerPoint(pts[0]));
+      if (distToFirst < 10 || pxDist < 18) {
+        finishMeasure();
+        return;
+      }
+    }
+
+    pts.push(latlng);
+    var newIdx = pts.length - 1;
+
+    // Vytvořit uzel (marker)
+    var isFirst = newIdx === 0;
+    var nodeIcon = L.divIcon({
+      className: "measure-node-wrapper",
+      html: '<div class="measure-node-marker' + (isFirst ? ' first-node' : '') + '"></div>',
+      iconSize: [12, 12],
+      iconAnchor: [6, 6]
+    });
+
+    var marker = L.marker(latlng, { icon: nodeIcon, interactive: true }).addTo(state.map);
+    measureState.markers.push(marker);
+
+    // Kliknutí na první bod u plochy ji uzavře
+    if (isFirst && measureState.mode === "area") {
+      marker.on("click", function (me) {
+        L.DomEvent.stopPropagation(me);
+        if (measureState.points.length >= 3) {
+          finishMeasure();
+        }
+      });
+    }
+
+    // Pokud máme předchozí bod, vytvořit popisek vzdálenosti na segmentu
+    if (newIdx > 0) {
+      var prevPt = pts[newIdx - 1];
+      var segDist = prevPt.distanceTo(latlng);
+      var midLat = (prevPt.lat + latlng.lat) / 2;
+      var midLng = (prevPt.lng + latlng.lng) / 2;
+
+      var segTooltip = L.tooltip({
+        permanent: true,
+        direction: "center",
+        className: "measure-segment-tooltip",
+        offset: [0, 0],
+        interactive: false
+      })
+      .setLatLng([midLat, midLng])
+      .setContent(formatMeasureDistance(segDist))
+      .addTo(state.map);
+
+      measureState.segmentTooltips.push(segTooltip);
+    }
+
+    // Aktualizace pevné geometrie
+    updateFixedMeasureLayer();
+
+    // Aktualizace status baru
+    var statusText = document.getElementById("map-status-text");
+    if (statusText) {
+      if (measureState.mode === "line") {
+        var totalDist = calculateLineDistance(pts);
+        statusText.textContent = "Délka linie: " + formatMeasureDistance(totalDist) + " (" + pts.length + " uzlů) – dvojklik dokončí";
+      } else {
+        var totalArea = pts.length >= 3 ? calculatePolygonArea(pts) : 0;
+        var perim = calculateLineDistance(pts) + (pts.length >= 3 ? pts[pts.length - 1].distanceTo(pts[0]) : 0);
+        statusText.textContent = pts.length >= 3
+          ? "Plocha: " + formatMeasureArea(totalArea) + " (obvod: " + formatMeasureDistance(perim) + ") – dvojklik dokončí"
+          : "Měření plochy: vložte alespoň 3 body (" + pts.length + "/3)";
+      }
+    }
+  }
+
+  // Pohyb myši po mapě – živá gumová čára a zobrazení vzdálenosti/plochy
+  function onMeasureMouseMove(e) {
+    if (!measureState.mode || measureState.points.length === 0) return;
+    var cursorPt = e.latlng;
+    var pts = measureState.points;
+    var lastPt = pts[pts.length - 1];
+
+    var segDist = lastPt.distanceTo(cursorPt);
+
+    if (measureState.mode === "line") {
+      var previewPts = pts.concat([cursorPt]);
+      var totalDist = calculateLineDistance(previewPts);
+
+      // Živá gumová čára
+      if (!measureState.rubberline) {
+        measureState.rubberline = L.polyline([lastPt, cursorPt], {
+          color: "#0d9488",
+          weight: 3,
+          dashArray: "6, 6",
+          opacity: 0.85
+        }).addTo(state.map);
+      } else {
+        measureState.rubberline.setLatLngs([lastPt, cursorPt]);
+      }
+
+      // Živý tooltip u kurzoru s délkou segmentu i celkovou délkou
+      var tooltipContent = pts.length === 1
+        ? formatMeasureDistance(segDist)
+        : '<span style="color:#5eead4;">+ ' + formatMeasureDistance(segDist) + '</span> | Celkem: <b>' + formatMeasureDistance(totalDist) + '</b>';
+
+      if (!measureState.liveTooltip) {
+        measureState.liveTooltip = L.tooltip({
+          permanent: true,
+          direction: "right",
+          className: "measure-total-tooltip",
+          offset: [14, 0]
+        })
+        .setLatLng(cursorPt)
+        .setContent(tooltipContent)
+        .addTo(state.map);
+      } else {
+        measureState.liveTooltip.setLatLng(cursorPt).setContent(tooltipContent);
+      }
+    } else if (measureState.mode === "area") {
+      var previewAreaPts = pts.concat([cursorPt]);
+
+      if (!measureState.rubberpolygon) {
+        measureState.rubberpolygon = L.polygon(previewAreaPts, {
+          color: "#0d9488",
+          weight: 2,
+          dashArray: "5, 5",
+          fillColor: "#0d9488",
+          fillOpacity: 0.15
+        }).addTo(state.map);
+      } else {
+        measureState.rubberpolygon.setLatLngs(previewAreaPts);
+      }
+
+      var tooltipAreaContent;
+      if (pts.length < 2) {
+        tooltipAreaContent = formatMeasureDistance(segDist);
+      } else {
+        var currentArea = calculatePolygonArea(previewAreaPts);
+        var currentPerim = calculateLineDistance(previewAreaPts) + cursorPt.distanceTo(pts[0]);
+        tooltipAreaContent = '<b>' + formatMeasureArea(currentArea) + '</b><br><span style="font-size:10px; font-weight:normal; opacity:0.9;">obvod ' + formatMeasureDistance(currentPerim) + '</span>';
+      }
+
+      if (!measureState.liveTooltip) {
+        measureState.liveTooltip = L.tooltip({
+          permanent: true,
+          direction: "right",
+          className: "measure-total-tooltip",
+          offset: [14, 0]
+        })
+        .setLatLng(cursorPt)
+        .setContent(tooltipAreaContent)
+        .addTo(state.map);
+      } else {
+        measureState.liveTooltip.setLatLng(cursorPt).setContent(tooltipAreaContent);
+      }
+    }
+  }
+
+  // Dvojklik – dokončení měření
+  function onMeasureMapDblClick(e) {
+    if (!measureState.mode || measureState.points.length === 0) return;
+    L.DomEvent.stopPropagation(e);
+    finishMeasure();
+  }
+
+  // Dokončení kreslení linie nebo plochy
+  function finishMeasure() {
+    var pts = measureState.points;
+    if (pts.length === 0) return;
+
+    // Odstranit živé prvky
+    if (measureState.rubberline) {
+      state.map.removeLayer(measureState.rubberline);
+      measureState.rubberline = null;
+    }
+    if (measureState.rubberpolygon) {
+      state.map.removeLayer(measureState.rubberpolygon);
+      measureState.rubberpolygon = null;
+    }
+    if (measureState.liveTooltip) {
+      state.map.removeLayer(measureState.liveTooltip);
+      measureState.liveTooltip = null;
+    }
+
+    if (measureState.mode === "line") {
+      if (pts.length >= 2) {
+        var totalDist = calculateLineDistance(pts);
+        var endPt = pts[pts.length - 1];
+
+        // Zvýrazněný finální tooltip na konci linie
+        var totalTooltip = L.tooltip({
+          permanent: true,
+          direction: "top",
+          className: "measure-total-tooltip",
+          offset: [0, -10]
+        })
+        .setLatLng(endPt)
+        .setContent('Celková délka: <b>' + formatMeasureDistance(totalDist) + '</b>')
+        .addTo(state.map);
+
+        measureState.segmentTooltips.push(totalTooltip);
+
+        var statusText = document.getElementById("map-status-text");
+        if (statusText) {
+          statusText.textContent = "Dokončeno měření linie: " + formatMeasureDistance(totalDist) + " (" + pts.length + " uzlů)";
+        }
+      }
+    } else if (measureState.mode === "area") {
+      if (pts.length >= 3) {
+        var area = calculatePolygonArea(pts);
+        var perim = calculateLineDistance(pts) + pts[pts.length - 1].distanceTo(pts[0]);
+
+        // Popisek na závěrečném segmentu mezi posledním a prvním bodem
+        var lastPt = pts[pts.length - 1];
+        var firstPt = pts[0];
+        var closingDist = lastPt.distanceTo(firstPt);
+        var midLat = (lastPt.lat + firstPt.lat) / 2;
+        var midLng = (lastPt.lng + firstPt.lng) / 2;
+
+        var closingTooltip = L.tooltip({
+          permanent: true,
+          direction: "center",
+          className: "measure-segment-tooltip",
+          offset: [0, 0]
+        })
+        .setLatLng([midLat, midLng])
+        .setContent(formatMeasureDistance(closingDist))
+        .addTo(state.map);
+
+        measureState.segmentTooltips.push(closingTooltip);
+
+        // Vypočítat centroid mnohoúhelníku pro hlavní štítek plochy
+        var centerLat = 0;
+        var centerLng = 0;
+        pts.forEach(function (p) {
+          centerLat += p.lat;
+          centerLng += p.lng;
+        });
+        centerLat /= pts.length;
+        centerLng /= pts.length;
+
+        var areaTooltip = L.tooltip({
+          permanent: true,
+          direction: "center",
+          className: "measure-area-label",
+          offset: [0, 0]
+        })
+        .setLatLng([centerLat, centerLng])
+        .setContent('<div>' + formatMeasureArea(area) + '</div><div class="sub-perimeter">obvod ' + formatMeasureDistance(perim) + '</div>')
+        .addTo(state.map);
+
+        measureState.segmentTooltips.push(areaTooltip);
+
+        var statusText2 = document.getElementById("map-status-text");
+        if (statusText2) {
+          statusText2.textContent = "Dokončeno měření plochy: " + formatMeasureArea(area) + " (obvod: " + formatMeasureDistance(perim) + ")";
+        }
+      }
+    }
+
+    updateFixedMeasureLayer(true);
+    // Ukončit aktivní režim zadávání, ponechat nakreslený výsledek
+    measureState.mode = null;
+    var mapEl = document.getElementById("map");
+    if (mapEl) mapEl.classList.remove("measuring-active");
+    state.map.doubleClickZoom.enable();
+
+    document.querySelectorAll(".measure-mode-btn").forEach(function (btn) {
+      btn.classList.remove("active");
+    });
+  }
+
+  // Vykreslení pevné vrstvy (linie nebo polygon)
+  function updateFixedMeasureLayer(isFinished) {
+    var pts = measureState.points;
+    if (pts.length < 2) return;
+
+    if (measureState.activeLayer) {
+      state.map.removeLayer(measureState.activeLayer);
+      measureState.activeLayer = null;
+    }
+
+    if (measureState.mode === "line" || (!measureState.mode && measureState.activeLayerType === "line")) {
+      measureState.activeLayerType = "line";
+      measureState.activeLayer = L.polyline(pts, {
+        color: "#0d9488",
+        weight: 3.5,
+        opacity: 0.95
+      }).addTo(state.map);
+    } else {
+      measureState.activeLayerType = "area";
+      measureState.activeLayer = L.polygon(pts, {
+        color: "#0d9488",
+        weight: 3,
+        fillColor: "#0d9488",
+        fillOpacity: 0.22,
+        dashArray: isFinished ? null : "4, 4"
+      }).addTo(state.map);
+    }
+  }
+
+  // Vymazání nakresleného měření
+  function clearMeasureDrawings() {
+    measureState.points = [];
+
+    measureState.markers.forEach(function (m) {
+      if (state.map.hasLayer(m)) state.map.removeLayer(m);
+    });
+    measureState.markers = [];
+
+    measureState.segmentTooltips.forEach(function (t) {
+      if (state.map.hasLayer(t)) state.map.removeLayer(t);
+    });
+    measureState.segmentTooltips = [];
+
+    if (measureState.rubberline && state.map.hasLayer(measureState.rubberline)) {
+      state.map.removeLayer(measureState.rubberline);
+      measureState.rubberline = null;
+    }
+    if (measureState.rubberpolygon && state.map.hasLayer(measureState.rubberpolygon)) {
+      state.map.removeLayer(measureState.rubberpolygon);
+      measureState.rubberpolygon = null;
+    }
+    if (measureState.liveTooltip && state.map.hasLayer(measureState.liveTooltip)) {
+      state.map.removeLayer(measureState.liveTooltip);
+      measureState.liveTooltip = null;
+    }
+    if (measureState.activeLayer && state.map.hasLayer(measureState.activeLayer)) {
+      state.map.removeLayer(measureState.activeLayer);
+      measureState.activeLayer = null;
+    }
+  }
+
+  // Výpočet celkové délky lomené čáry
+  function calculateLineDistance(pts) {
+    var total = 0;
+    for (var i = 0; i < pts.length - 1; i++) {
+      total += pts[i].distanceTo(pts[i + 1]);
+    }
+    return total;
+  }
+
+  // Výpočet plochy sférického mnohoúhelníku (Geodesic / Spherical Polygon Area)
+  function calculatePolygonArea(latlngs) {
+    if (latlngs.length < 3) return 0;
+    var RADIUS = 6378137; // WGS84 poloměr Země v metrech
+    var total = 0;
+    var len = latlngs.length;
+
+    for (var i = 0; i < len; i++) {
+      var p1 = latlngs[i];
+      var p2 = latlngs[(i + 1) % len];
+
+      var radLat1 = (p1.lat * Math.PI) / 180;
+      var radLat2 = (p2.lat * Math.PI) / 180;
+      var dLng = ((p2.lng - p1.lng) * Math.PI) / 180;
+
+      total += dLng * (2 + Math.sin(radLat1) + Math.sin(radLat2));
+    }
+
+    var area = Math.abs((total * RADIUS * RADIUS) / 2.0);
+    return area;
+  }
+
+  // Formátování vzdálenosti (metry / kilometry)
+  function formatMeasureDistance(d) {
+    if (d === undefined || isNaN(d)) return "0 m";
+    if (d < 1000) {
+      return d < 10 ? d.toFixed(2) + " m" : d.toFixed(1) + " m";
+    }
+    return (d / 1000).toFixed(3) + " km";
+  }
+
+  // Formátování plochy (m² / ha)
+  function formatMeasureArea(a) {
+    if (a === undefined || isNaN(a)) return "0 m²";
+    if (a < 10000) {
+      return a < 100 ? a.toFixed(1) + " m²" : Math.round(a).toLocaleString("cs-CZ") + " m²";
+    }
+    var ha = a / 10000;
+    return ha.toFixed(3) + " ha (" + Math.round(a).toLocaleString("cs-CZ") + " m²)";
+  }
+
   // Společná pomocná funkce pro ČÚZK WMS vrstvy
   function createDtmWms(serviceUrl, layersParam, opacity, attribution) {
     return L.tileLayer.wms(serviceUrl, {
@@ -1374,10 +2039,9 @@
       }
     );
 
-    // Výchozí aktivní stav: celá DI, celá TI a ZPS linie
+    // Výchozí stav: všechny vrstvy vypnuté
     updateGroupLayer("dtm_di");
     updateGroupLayer("dtm_ti");
-    activateLayer("dtm_zps_lb", true);
   }
 
   // Správa vrstvy skupiny (DI nebo TI)
@@ -1424,6 +2088,9 @@
     if (countBadge) {
       countBadge.textContent = activeList.length + "/" + allSublayers.length;
     }
+
+    if (typeof updateLegendBadge === "function") updateLegendBadge();
+    if (typeof refreshActiveLegendsIfVisible === "function") refreshActiveLegendsIfVisible();
   }
 
   // Zapnutí / vypnutí samostatné překryvné vrstvy (Přípojky, ZPS, KN)
@@ -1435,18 +2102,23 @@
     if (!layer) return;
 
     if (enable) {
+      state.activeSingleLayers.add(layerKey);
       if (!state.map.hasLayer(layer)) {
         layer.addTo(state.map);
       }
       if (card) card.classList.add("is-active");
       if (input) input.checked = true;
     } else {
+      state.activeSingleLayers.delete(layerKey);
       if (state.map.hasLayer(layer)) {
         state.map.removeLayer(layer);
       }
       if (card) card.classList.remove("is-active");
       if (input) input.checked = false;
     }
+
+    if (typeof updateLegendBadge === "function") updateLegendBadge();
+    if (typeof refreshActiveLegendsIfVisible === "function") refreshActiveLegendsIfVisible();
   }
 
   // Přepnutí podkladové mapy
@@ -1481,7 +2153,12 @@
       }
 
       if (statusDot && statusText && !statusDot.classList.contains("busy")) {
-        if (state.elevationMode) {
+        if (typeof measureState !== "undefined" && measureState.mode) {
+          statusDot.className = "status-dot measure-active";
+          statusText.textContent = measureState.mode === "line"
+            ? "Měření vzdálenosti: kliknutím vkládejte body linie (dvojklik dokončí)"
+            : "Měření plochy: kliknutím vkládejte vrcholy mnohoúhelníku (dvojklik dokončí)";
+        } else if (state.elevationMode) {
           statusDot.className = "status-dot elevation-active";
           statusText.textContent = "Režim měření výšky (DMR 5G) aktivní – klikněte kamkoliv do mapy";
         } else if (z >= 14) {
@@ -1797,6 +2474,14 @@
     if (queryState.polygonLayer) {
       state.map.removeLayer(queryState.polygonLayer);
       queryState.polygonLayer = null;
+    }
+
+    // Pokud je aktivní režim měření (linie nebo plocha)
+    if (typeof measureState !== "undefined" && measureState.mode) {
+      if (typeof onMeasureMapClick === "function") {
+        onMeasureMapClick(e);
+      }
+      return;
     }
 
     // Pokud je aktivní režim měření nadmořské výšky (DMR 5G ČÚZK)
@@ -2731,30 +3416,28 @@
       });
     });
 
-    // 4. Reset vrstev (výchozí doporučené zobrazení)
+    // 4. Reset vrstev (výchozí stav – všechny vrstvy vypnuté)
     var btnReset = document.getElementById("btn-reset-layers");
     if (btnReset) {
       btnReset.addEventListener("click", function () {
         // Vypnout samostatné vrstvy
         activateLayer("dtm_pripojky", false);
+        activateLayer("dtm_zps_lb", false);
         activateLayer("dtm_zps_pl_bar", false);
         activateLayer("dtm_zps_pl_seda", false);
         activateLayer("kn", false);
 
-        // Zapnout výchozí ZPS linie
-        activateLayer("dtm_zps_lb", true);
-
-        // Zapnout všechny podskupiny DI
-        state.activeSublayers.dtm_di = new Set(DI_SUBLAYERS);
+        // Vypnout všechny podskupiny DI
+        state.activeSublayers.dtm_di.clear();
         document.querySelectorAll('.layer-group-card[data-group="dtm_di"] .sublayer-checkbox').forEach(function (cb) {
-          cb.checked = true;
+          cb.checked = false;
         });
         updateGroupLayer("dtm_di");
 
-        // Zapnout všechny podskupiny TI
-        state.activeSublayers.dtm_ti = new Set(TI_SUBLAYERS);
+        // Vypnout všechny podskupiny TI
+        state.activeSublayers.dtm_ti.clear();
         document.querySelectorAll('.layer-group-card[data-group="dtm_ti"] .sublayer-checkbox').forEach(function (cb) {
-          cb.checked = true;
+          cb.checked = false;
         });
         updateGroupLayer("dtm_ti");
 
@@ -2788,6 +3471,645 @@
         activateLayer("kn", true);
       });
     }
+  }
+
+  // ==========================================================================
+  // SUBSYSTÉM: LEGENDA A ZNAČKOVÝ KLÍČ DTM (ČÚZK IS DMVS, DI, TI, ZPS, KN)
+  // Používá výhradně oficiální grafické značkové klíče ze serveru ČÚZK IS DMVS
+  // ==========================================================================
+
+  var DTM_LEGEND_DATA = {
+    // 1. Skupina Dopravní infrastruktura
+    dtm_di: {
+      title: "Dopravní infrastruktura (DI)",
+      provider: "ČÚZK • IS DMVS",
+      category: "Dopravní infrastruktura",
+      color: "#ea521f",
+      desc: "Kompletní dopravní sítě a objekty v souladu s vyhláškou č. 393/2020 Sb. a datovým modelem JVF DTM.",
+      docUrl: "https://www.cuzk.cz/Katastr-nemovitosti/Digitalni-technicka-mapa.aspx",
+      docTitle: "ČÚZK – Digitální technická mapa ČR",
+      wmsLegendUrl: "https://dmvs.cuzk.gov.cz/api/wms/dtm_di_ver?SERVICE=WMS&REQUEST=GetLegendGraphic&VERSION=1.3.0&FORMAT=image/png&LAYER=dtm_di_ver"
+    },
+
+    pozemni_komunikace: {
+      title: "Pozemní komunikace",
+      provider: "ČÚZK • IS DMVS",
+      category: "Dopravní infrastruktura",
+      color: "#ea521f",
+      desc: "Dálnice, silnice I.–III. třídy, místní a účelové komunikace, chodníky, cyklostezky a parkoviště.",
+      docUrl: "https://www.cuzk.cz/Katastr-nemovitosti/Digitalni-technicka-mapa.aspx",
+      docTitle: "ČÚZK – DTM ČR",
+      wmsLegendUrl: "https://dmvs.cuzk.gov.cz/api/wms/dtm_di_ver?SERVICE=WMS&REQUEST=GetLegendGraphic&VERSION=1.3.0&FORMAT=image/png&LAYER=siln_dopr"
+    },
+
+    draha: {
+      title: "Drážní doprava",
+      provider: "ČÚZK • IS DMVS",
+      category: "Dopravní infrastruktura",
+      color: "#7c3aed",
+      desc: "Celostátní a regionální železniční tratě, vlečky, tramvajové a trolejbusové trasy, lanové dráhy a metro.",
+      docUrl: "https://www.cuzk.cz/Katastr-nemovitosti/Digitalni-technicka-mapa.aspx",
+      docTitle: "ČÚZK – DTM ČR",
+      wmsLegendUrl: "https://dmvs.cuzk.gov.cz/api/wms/dtm_di_ver?SERVICE=WMS&REQUEST=GetLegendGraphic&VERSION=1.3.0&FORMAT=image/png&LAYER=dr_dopr"
+    },
+
+    letiste: {
+      title: "Letecká a vodní doprava",
+      provider: "ČÚZK • IS DMVS",
+      category: "Dopravní infrastruktura",
+      color: "#0284c7",
+      desc: "Vzletové a přistávací dráhy, pojezdové dráhy letišť, plavební toky, plavební komory a přístavy.",
+      docUrl: "https://www.cuzk.cz/Katastr-nemovitosti/Digitalni-technicka-mapa.aspx",
+      docTitle: "ČÚZK – DTM ČR",
+      wmsLegendUrl: "https://dmvs.cuzk.gov.cz/api/wms/dtm_di_ver?SERVICE=WMS&REQUEST=GetLegendGraphic&VERSION=1.3.0&FORMAT=image/png&LAYER=let_dopr"
+    },
+
+    // 2. Skupina Technická infrastruktura
+    dtm_ti: {
+      title: "Technická infrastruktura (TI)",
+      provider: "ČÚZK • IS DMVS",
+      category: "Technická infrastruktura",
+      color: "#2563eb",
+      desc: "Všechny inženýrské sítě a technologie dle vyhlášky č. 393/2020 Sb. a datového modelu JVF DTM.",
+      docUrl: "https://www.cuzk.cz/Katastr-nemovitosti/Digitalni-technicka-mapa.aspx",
+      docTitle: "ČÚZK – DTM ČR",
+      wmsLegendUrl: "https://dmvs.cuzk.gov.cz/api/wms/dtm_ti_ver?SERVICE=WMS&REQUEST=GetLegendGraphic&VERSION=1.3.0&FORMAT=image/png&LAYER=dtm_ti_ver"
+    },
+
+    vodovod: {
+      title: "Vodovod",
+      provider: "ČÚZK • IS DMVS",
+      category: "Technická infrastruktura",
+      color: "#0284c7",
+      desc: "Dálkové vodovodní řady, rozvodné sítě pitné a užitkové vody, šoupata, hydranty, vodojemy a úpravny vody.",
+      docUrl: "https://www.cuzk.cz/Katastr-nemovitosti/Digitalni-technicka-mapa.aspx",
+      docTitle: "ČÚZK – DTM ČR",
+      wmsLegendUrl: "https://dmvs.cuzk.gov.cz/api/wms/dtm_ti_ver?SERVICE=WMS&REQUEST=GetLegendGraphic&VERSION=1.3.0&FORMAT=image/png&LAYER=voda"
+    },
+
+    kanalizace: {
+      title: "Kanalizace",
+      provider: "ČÚZK • IS DMVS",
+      category: "Technická infrastruktura",
+      color: "#78350f",
+      desc: "Splašková, dešťová a jednotná kanalizace, gravitační a tlakové stoky, revizní šachty, uliční vpusti a ČOV.",
+      docUrl: "https://www.cuzk.cz/Katastr-nemovitosti/Digitalni-technicka-mapa.aspx",
+      docTitle: "ČÚZK – DTM ČR",
+      wmsLegendUrl: "https://dmvs.cuzk.gov.cz/api/wms/dtm_ti_ver?SERVICE=WMS&REQUEST=GetLegendGraphic&VERSION=1.3.0&FORMAT=image/png&LAYER=kan"
+    },
+
+    elektro: {
+      title: "Elektroenergetika",
+      provider: "ČÚZK • IS DMVS",
+      category: "Technická infrastruktura",
+      color: "#dc2626",
+      desc: "Vedení VVN, VN a NN, kabelové trasy v zemi, venkovní vedení, stožáry, trafostanice a distribuční skříně.",
+      docUrl: "https://www.cuzk.cz/Katastr-nemovitosti/Digitalni-technicka-mapa.aspx",
+      docTitle: "ČÚZK – DTM ČR",
+      wmsLegendUrl: "https://dmvs.cuzk.gov.cz/api/wms/dtm_ti_ver?SERVICE=WMS&REQUEST=GetLegendGraphic&VERSION=1.3.0&FORMAT=image/png&LAYER=el_ved"
+    },
+
+    plynovod: {
+      title: "Plynárenství",
+      provider: "ČÚZK • IS DMVS",
+      category: "Technická infrastruktura",
+      color: "#ca8a04",
+      desc: "Vysokotlaké (VTL), středotlaké (STL) a nízkotlaké (NTL) plynovody, uzávěry, HUP a regulační stanice plynu.",
+      docUrl: "https://www.cuzk.cz/Katastr-nemovitosti/Digitalni-technicka-mapa.aspx",
+      docTitle: "ČÚZK – DTM ČR",
+      wmsLegendUrl: "https://dmvs.cuzk.gov.cz/api/wms/dtm_ti_ver?SERVICE=WMS&REQUEST=GetLegendGraphic&VERSION=1.3.0&FORMAT=image/png&LAYER=plyn"
+    },
+
+    teplovod: {
+      title: "Teplárenství",
+      provider: "ČÚZK • IS DMVS",
+      category: "Technická infrastruktura",
+      color: "#ea580c",
+      desc: "Parovody, horkovody a teplovody (napájecí i vratná větev), šachty, armaturní komory a výměníkové stanice.",
+      docUrl: "https://www.cuzk.cz/Katastr-nemovitosti/Digitalni-technicka-mapa.aspx",
+      docTitle: "ČÚZK – DTM ČR",
+      wmsLegendUrl: "https://dmvs.cuzk.gov.cz/api/wms/dtm_ti_ver?SERVICE=WMS&REQUEST=GetLegendGraphic&VERSION=1.3.0&FORMAT=image/png&LAYER=teplo"
+    },
+
+    elektronicke_komunikace: {
+      title: "Elektronické komunikace",
+      provider: "ČÚZK • IS DMVS",
+      category: "Technická infrastruktura",
+      color: "#16a34a",
+      desc: "Optické a metalické kabely, kabelovody, chráničky HDPE, kabelové komory, rozvaděče a vysílače.",
+      docUrl: "https://www.cuzk.cz/Katastr-nemovitosti/Digitalni-technicka-mapa.aspx",
+      docTitle: "ČÚZK – DTM ČR",
+      wmsLegendUrl: "https://dmvs.cuzk.gov.cz/api/wms/dtm_ti_ver?SERVICE=WMS&REQUEST=GetLegendGraphic&VERSION=1.3.0&FORMAT=image/png&LAYER=el_kom"
+    },
+
+    produktovod: {
+      title: "Produktovody",
+      provider: "ČÚZK • IS DMVS",
+      category: "Technická infrastruktura",
+      color: "#9333ea",
+      desc: "Ropovody, produktovody pohonných hmot, technické plyny, bioplynovody a potrubní pošta.",
+      docUrl: "https://www.cuzk.cz/Katastr-nemovitosti/Digitalni-technicka-mapa.aspx",
+      docTitle: "ČÚZK – DTM ČR",
+      wmsLegendUrl: "https://dmvs.cuzk.gov.cz/api/wms/dtm_ti_ver?SERVICE=WMS&REQUEST=GetLegendGraphic&VERSION=1.3.0&FORMAT=image/png&LAYER=produkt"
+    },
+
+    // 3. Přípojky TI
+    dtm_pripojky: {
+      title: "Přípojky TI",
+      provider: "ČÚZK • IS DMVS",
+      category: "Přípojky technické infrastruktury",
+      color: "#9333ea",
+      desc: "Domovní a areálové přípojky inženýrských sítí (voda, kanalizace, elektro, plyn, teplo a telekomunikace).",
+      docUrl: "https://www.cuzk.cz/Katastr-nemovitosti/Digitalni-technicka-mapa.aspx",
+      docTitle: "ČÚZK – DTM ČR",
+      wmsLegendUrl: "https://dmvs.cuzk.gov.cz/api/wms/dtm_pripojky?SERVICE=WMS&REQUEST=GetLegendGraphic&VERSION=1.3.0&FORMAT=image/png&LAYER=dtm_pripojky"
+    },
+
+    // 4. Základní prostorová složka (ZPS)
+    dtm_zps_lb: {
+      title: "ZPS – Linie a body",
+      provider: "ČÚZK • IS DMVS",
+      category: "Základní prostorová složka",
+      color: "#475569",
+      desc: "Polohopisné hrany, obrubníky, oplocení, opěrné zdi, terénní stupně a podrobné body ZPS s geodetickým ověřením.",
+      docUrl: "https://www.cuzk.cz/Katastr-nemovitosti/Digitalni-technicka-mapa.aspx",
+      docTitle: "ČÚZK – DTM ČR",
+      wmsLegendUrl: "https://dmvs.cuzk.gov.cz/api/wms/dtm_zps_linie_body?SERVICE=WMS&REQUEST=GetLegendGraphic&VERSION=1.3.0&FORMAT=image/png&LAYER=dtm_zps_linie_body"
+    },
+
+    dtm_zps_pl_bar: {
+      title: "ZPS – Plochy (barevné)",
+      provider: "ČÚZK • IS DMVS",
+      category: "Základní prostorová složka",
+      color: "#16a34a",
+      desc: "Polygony využití a povrchů dle JVF DTM (budovy, komunikace, chodníky, trávníky, zeleň, vodní toky).",
+      docUrl: "https://www.cuzk.cz/Katastr-nemovitosti/Digitalni-technicka-mapa.aspx",
+      docTitle: "ČÚZK – DTM ČR",
+      wmsLegendUrl: "https://dmvs.cuzk.gov.cz/api/wms/dtm_zps_plochy_bar?SERVICE=WMS&REQUEST=GetLegendGraphic&VERSION=1.3.0&FORMAT=image/png&LAYER=dtm_zps_plochy_bar"
+    },
+
+    dtm_zps_pl_seda: {
+      title: "ZPS – Plochy (šedé)",
+      provider: "ČÚZK • IS DMVS",
+      category: "Základní prostorová složka",
+      color: "#64748b",
+      desc: "Kartograficky optimalizovaný šedotónový podklad polohopisu pro maximální kontrast inženýrských sítí TI a DI.",
+      docUrl: "https://www.cuzk.cz/Katastr-nemovitosti/Digitalni-technicka-mapa.aspx",
+      docTitle: "ČÚZK – DTM ČR",
+      wmsLegendUrl: "https://dmvs.cuzk.gov.cz/api/wms/dtm_zps_plochy_seda?SERVICE=WMS&REQUEST=GetLegendGraphic&VERSION=1.3.0&FORMAT=image/png&LAYER=dtm_zps_plochy_seda"
+    },
+
+    // 5. Katastr nemovitostí
+    kn: {
+      title: "Katastrální mapa (ČÚZK)",
+      provider: "ČÚZK • KN",
+      category: "Katastr nemovitostí",
+      color: "#c51f1f",
+      desc: "Katastrální mapa zobrazuje hranice katastrálních území, parcelní hranice a parcelní čísla. Oficiální značkový klíč je stanoven přílohou vyhlášky č. 357/2013 Sb. o katastru nemovitostí (katastrální vyhláška).",
+      docUrl: "https://services.cuzk.cz/doc/znackovy-klic.pdf",
+      docTitle: "Oficiální značkový klíč ČÚZK (PDF)"
+    }
+  };
+
+  // Sestavení HTML pro jednu kartu legendy
+  function renderLegendCardHtml(key, def, isInline) {
+    if (!def) return "";
+
+    var html = "";
+    if (!isInline) {
+      html += '<div class="legend-card" data-legend-key="' + key + '">';
+    }
+
+    html += '<div class="legend-card-header">';
+    html += '  <div class="legend-card-title-group">';
+    html += '    <span class="legend-card-dot" style="background-color: ' + def.color + ';"></span>';
+    html += '    <div class="legend-card-title">' + def.title + '</div>';
+    html += '  </div>';
+    html += '  <span class="legend-card-provider">' + def.provider + '</span>';
+    html += '</div>';
+
+    if (def.desc) {
+      html += '<div class="legend-card-desc">' + def.desc + '</div>';
+    }
+
+    // Oficiální WMS grafika přímo ze serveru ČÚZK IS DMVS
+    if (def.wmsLegendUrl) {
+      html += '<div class="legend-wms-graphic-wrap">';
+      html += '  <span class="legend-wms-label">Oficiální značkový klíč ČÚZK IS DMVS</span>';
+      html += '  <img src="' + def.wmsLegendUrl + '" alt="Oficiální WMS legenda ' + def.title + '" class="legend-wms-graphic-img" loading="lazy" />';
+      html += '</div>';
+    }
+
+    if (def.docUrl) {
+      html += '<div class="legend-card-footer">';
+      html += '  <a href="' + def.docUrl + '" target="_blank" rel="noopener noreferrer" class="legend-doc-link">';
+      html += '    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">';
+      html += '      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>';
+      html += '      <polyline points="15 3 21 3 21 9"></polyline>';
+      html += '      <line x1="10" y1="14" x2="21" y2="3"></line>';
+      html += '    </svg>';
+      html += '    <span>' + (def.docTitle || "Oficiální značkový klíč ČÚZK") + '</span>';
+      html += '  </a>';
+      html += '</div>';
+    }
+
+    if (!isInline) {
+      html += '</div>';
+    }
+
+    return html;
+  }
+
+  // Získání klíčů aktuálně aktivních vrstev a podvrstev
+  function getActiveLegendKeys() {
+    var keys = [];
+
+    // Podvrstvy DI
+    if (state.activeSublayers.dtm_di && state.activeSublayers.dtm_di.size > 0) {
+      state.activeSublayers.dtm_di.forEach(function (k) {
+        if (DTM_LEGEND_DATA[k] && keys.indexOf(k) === -1) {
+          keys.push(k);
+        }
+      });
+    }
+
+    // Podvrstvy TI
+    if (state.activeSublayers.dtm_ti && state.activeSublayers.dtm_ti.size > 0) {
+      state.activeSublayers.dtm_ti.forEach(function (k) {
+        if (DTM_LEGEND_DATA[k] && keys.indexOf(k) === -1) {
+          keys.push(k);
+        }
+      });
+    }
+
+    // Samostatné vrstvy (Přípojky, ZPS, KN)
+    if (state.activeSingleLayers) {
+      state.activeSingleLayers.forEach(function (k) {
+        if (DTM_LEGEND_DATA[k] && keys.indexOf(k) === -1) {
+          keys.push(k);
+        }
+      });
+    }
+
+    return keys;
+  }
+
+  // Prázdný stav při vypnutých vrstvách
+  function renderLegendEmptyState() {
+    var html = '<div class="legend-empty-state">';
+    html += '  <div class="legend-empty-icon">';
+    html += '    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">';
+    html += '      <rect x="3" y="3" width="18" height="18" rx="2"></rect>';
+    html += '      <line x1="8" y1="7" x2="16" y2="7"></line>';
+    html += '      <line x1="8" y1="12" x2="16" y2="12"></line>';
+    html += '      <line x1="8" y1="17" x2="12" y2="17"></line>';
+    html += '    </svg>';
+    html += '  </div>';
+    html += '  <div class="legend-empty-title">Žádná vrstva není zapnutá</div>';
+    html += '  <div class="legend-empty-text">Zapněte požadované sítě a vrstvy v záložce Vrstvy nebo si prohlédněte celý značkový klíč.</div>';
+    html += '  <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">';
+    html += '    <button type="button" class="btn-legend-switch-tab" id="btn-empty-switch-layers">';
+    html += '      <span>Vybrat vrstvy</span>';
+    html += '    </button>';
+    html += '    <button type="button" class="btn-legend-switch-tab" id="btn-empty-show-all" style="background: rgba(16, 55, 120, 0.1); color: var(--brand-primary);">';
+    html += '      <span>Zobrazit vše</span>';
+    html += '    </button>';
+    html += '  </div>';
+    html += '</div>';
+    return html;
+  }
+
+  // Vykreslení všech karet do záložky Legenda
+  function renderAllLegends(filterMode) {
+    var container = document.getElementById("legend-list-container");
+    if (!container) return;
+
+    var mode = filterMode || state.legendFilter || "active";
+    state.legendFilter = mode;
+
+    var keys = [];
+    if (mode === "active") {
+      keys = getActiveLegendKeys();
+    } else {
+      keys = Object.keys(DTM_LEGEND_DATA);
+    }
+
+    if (mode === "active" && keys.length === 0) {
+      container.innerHTML = renderLegendEmptyState();
+      var btnSwitch = document.getElementById("btn-empty-switch-layers");
+      if (btnSwitch) {
+        btnSwitch.addEventListener("click", function () {
+          switchToSidebarTab("layers");
+        });
+      }
+      var btnShowAll = document.getElementById("btn-empty-show-all");
+      if (btnShowAll) {
+        btnShowAll.addEventListener("click", function () {
+          var btnAll = document.getElementById("btn-legend-filter-all");
+          var btnAct = document.getElementById("btn-legend-filter-active");
+          if (btnAll) btnAll.classList.add("active");
+          if (btnAct) btnAct.classList.remove("active");
+          renderAllLegends("all");
+        });
+      }
+      return;
+    }
+
+    var html = "";
+    keys.forEach(function (k) {
+      var def = DTM_LEGEND_DATA[k];
+      if (def) {
+        html += renderLegendCardHtml(k, def, false);
+      }
+    });
+
+    container.innerHTML = html;
+  }
+
+  // Aktualizace počítadla aktivních vrstev v záložce Legenda
+  function updateLegendBadge() {
+    var badge = document.getElementById("legend-active-count");
+    var btnActiveFilter = document.getElementById("btn-legend-filter-active");
+    var diCount = state.activeSublayers.dtm_di ? state.activeSublayers.dtm_di.size : 0;
+    var tiCount = state.activeSublayers.dtm_ti ? state.activeSublayers.dtm_ti.size : 0;
+    var singleCount = state.activeSingleLayers ? state.activeSingleLayers.size : 0;
+    var totalCount = diCount + tiCount + singleCount;
+
+    if (badge) {
+      badge.textContent = totalCount;
+      if (totalCount > 0) {
+        badge.style.display = "inline-flex";
+      } else {
+        badge.style.display = "none";
+      }
+    }
+
+    if (btnActiveFilter) {
+      btnActiveFilter.textContent = totalCount > 0 ? "Aktivní (" + totalCount + ")" : "Aktivní";
+    }
+  }
+
+  // Reaktivní překreslení aktivní legendy, pokud je zrovna otevřená
+  function refreshActiveLegendsIfVisible() {
+    if (state.currentTab === "legend" && state.legendFilter === "active") {
+      renderAllLegends("active");
+    }
+  }
+
+  // Přepínání mezi záložkami panelu: Vrstvy / Legenda
+  function switchToSidebarTab(tabName) {
+    state.currentTab = tabName;
+
+    var btnLayers = document.getElementById("tab-btn-layers");
+    var btnLegend = document.getElementById("tab-btn-legend");
+    var paneLayers = document.getElementById("pane-layers");
+    var paneLegend = document.getElementById("pane-legend");
+    var actionsLayers = document.getElementById("sidebar-actions-layers");
+    var actionsLegend = document.getElementById("sidebar-actions-legend");
+    var mapLegendBtn = document.getElementById("btn-legend-map-toggle");
+
+    if (tabName === "legend") {
+      if (btnLayers) {
+        btnLayers.classList.remove("active");
+        btnLayers.setAttribute("aria-selected", "false");
+      }
+      if (btnLegend) {
+        btnLegend.classList.add("active");
+        btnLegend.setAttribute("aria-selected", "true");
+      }
+      if (paneLayers) paneLayers.style.display = "none";
+      if (paneLegend) paneLegend.style.display = "block";
+      if (actionsLayers) actionsLayers.style.display = "none";
+      if (actionsLegend) actionsLegend.style.display = "flex";
+      if (mapLegendBtn) mapLegendBtn.classList.add("is-active");
+
+      renderAllLegends(state.legendFilter || "active");
+    } else {
+      if (btnLayers) {
+        btnLayers.classList.add("active");
+        btnLayers.setAttribute("aria-selected", "true");
+      }
+      if (btnLegend) {
+        btnLegend.classList.remove("active");
+        btnLegend.setAttribute("aria-selected", "false");
+      }
+      if (paneLayers) paneLayers.style.display = "block";
+      if (paneLegend) paneLegend.style.display = "none";
+      if (actionsLayers) actionsLayers.style.display = "flex";
+      if (actionsLegend) actionsLegend.style.display = "none";
+      if (mapLegendBtn) mapLegendBtn.classList.remove("is-active");
+    }
+  }
+
+  // Inicializace tlačítek a inline legendy u každé vrstvy a podvrstvy
+  function initLegendSystem() {
+    var legendSvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>' +
+      '<path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>' +
+    '</svg>';
+
+    // 1. Injektování inline legendy do samostatných karet vrstev (.layer-card)
+    document.querySelectorAll(".layer-card").forEach(function (card) {
+      var layerKey = card.getAttribute("data-layer");
+      var def = DTM_LEGEND_DATA[layerKey];
+      if (!def) return;
+
+      var cardMain = card.querySelector(".layer-card-main");
+      if (cardMain && !cardMain.querySelector(".btn-layer-legend")) {
+        var switchCtrl = cardMain.querySelector(".switch-control");
+
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "btn-layer-legend";
+        btn.title = "Zobrazit značkový klíč a legendu pro " + def.title;
+        btn.innerHTML = legendSvg;
+
+        if (switchCtrl) {
+          cardMain.insertBefore(btn, switchCtrl);
+        } else {
+          cardMain.appendChild(btn);
+        }
+
+        var inlineContainer = document.createElement("div");
+        inlineContainer.className = "layer-inline-legend";
+        inlineContainer.style.display = "none";
+        card.appendChild(inlineContainer);
+
+        btn.addEventListener("click", function (e) {
+          e.stopPropagation();
+          var isOpen = inlineContainer.style.display === "block";
+          if (isOpen) {
+            inlineContainer.style.display = "none";
+            btn.classList.remove("is-open");
+          } else {
+            if (!inlineContainer.innerHTML) {
+              inlineContainer.innerHTML = renderLegendCardHtml(layerKey, def, true);
+            }
+            inlineContainer.style.display = "block";
+            btn.classList.add("is-open");
+          }
+        });
+      }
+    });
+
+    // 2. Injektování tlačítka legendy do skupinových karet DI a TI (.layer-group-card)
+    document.querySelectorAll(".layer-group-card").forEach(function (card) {
+      var groupKey = card.getAttribute("data-group");
+      var def = DTM_LEGEND_DATA[groupKey];
+      if (!def) return;
+
+      var groupHeaderRight = card.querySelector(".group-header-right");
+      if (groupHeaderRight && !groupHeaderRight.querySelector(".btn-layer-legend")) {
+        var switchCtrl = groupHeaderRight.querySelector(".switch-control");
+
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "btn-layer-legend";
+        btn.title = "Zobrazit oficiální legendu skupiny " + def.title;
+        btn.innerHTML = legendSvg;
+
+        if (switchCtrl) {
+          groupHeaderRight.insertBefore(btn, switchCtrl);
+        } else {
+          groupHeaderRight.appendChild(btn);
+        }
+
+        var inlineContainer = document.createElement("div");
+        inlineContainer.className = "layer-inline-legend";
+        inlineContainer.style.display = "none";
+        inlineContainer.style.margin = "8px 12px";
+        card.appendChild(inlineContainer);
+
+        btn.addEventListener("click", function (e) {
+          e.stopPropagation();
+          var isOpen = inlineContainer.style.display === "block";
+          if (isOpen) {
+            inlineContainer.style.display = "none";
+            btn.classList.remove("is-open");
+          } else {
+            if (!inlineContainer.innerHTML) {
+              inlineContainer.innerHTML = renderLegendCardHtml(groupKey, def, true);
+            }
+            inlineContainer.style.display = "block";
+            btn.classList.add("is-open");
+          }
+        });
+      }
+    });
+
+    // 3. Injektování tlačítek inline legendy do podvrstev (.sublayer-item)
+    document.querySelectorAll(".sublayer-item").forEach(function (item) {
+      var sublayerKey = item.getAttribute("data-sublayer");
+      var def = DTM_LEGEND_DATA[sublayerKey];
+      if (!def) return;
+
+      if (!item.querySelector(".btn-sublayer-legend")) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "btn-sublayer-legend";
+        btn.title = "Zobrazit značkový klíč pro " + def.title;
+        btn.innerHTML = legendSvg;
+
+        item.appendChild(btn);
+
+        var inlineContainer = document.createElement("div");
+        inlineContainer.className = "sublayer-inline-legend";
+        inlineContainer.style.display = "none";
+        item.parentNode.insertBefore(inlineContainer, item.nextSibling);
+
+        btn.addEventListener("click", function (e) {
+          e.stopPropagation();
+          var isOpen = inlineContainer.style.display === "block";
+          if (isOpen) {
+            inlineContainer.style.display = "none";
+            btn.classList.remove("is-open");
+          } else {
+            if (!inlineContainer.innerHTML) {
+              inlineContainer.innerHTML = renderLegendCardHtml(sublayerKey, def, true);
+            }
+            inlineContainer.style.display = "block";
+            btn.classList.add("is-open");
+          }
+        });
+      }
+    });
+
+    // 4. Záložky hlavičky panelu
+    var tabBtnLayers = document.getElementById("tab-btn-layers");
+    var tabBtnLegend = document.getElementById("tab-btn-legend");
+
+    if (tabBtnLayers) {
+      tabBtnLayers.addEventListener("click", function () {
+        switchToSidebarTab("layers");
+      });
+    }
+
+    if (tabBtnLegend) {
+      tabBtnLegend.addEventListener("click", function () {
+        switchToSidebarTab("legend");
+      });
+    }
+
+    // 5. Filtry v hlavičce záložky Legenda (Aktivní / Všechny)
+    var btnFilterActive = document.getElementById("btn-legend-filter-active");
+    var btnFilterAll = document.getElementById("btn-legend-filter-all");
+
+    if (btnFilterActive) {
+      btnFilterActive.addEventListener("click", function () {
+        btnFilterActive.classList.add("active");
+        if (btnFilterAll) btnFilterAll.classList.remove("active");
+        renderAllLegends("active");
+      });
+    }
+
+    if (btnFilterAll) {
+      btnFilterAll.addEventListener("click", function () {
+        btnFilterAll.classList.add("active");
+        if (btnFilterActive) btnFilterActive.classList.remove("active");
+        renderAllLegends("all");
+      });
+    }
+
+    // Inicializace odznáčku aktivních vrstev
+    updateLegendBadge();
+  }
+
+  // Tlačítko legendy na Leaflet mapě (vlevo pod měřením)
+  function initLegendControl() {
+    if (!state.map) return;
+
+    var LegendControl = L.Control.extend({
+      options: { position: "topleft" },
+      onAdd: function () {
+        var container = L.DomUtil.create("div", "leaflet-bar legend-control");
+        var btn = L.DomUtil.create("button", "legend-toggle-btn", container);
+        btn.id = "btn-legend-map-toggle";
+        btn.type = "button";
+        btn.title = "Zobrazit legendu vrstev a značkový klíč DTM";
+        btn.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
+          '<rect x="3" y="3" width="18" height="18" rx="2"></rect>' +
+          '<line x1="8" y1="7" x2="16" y2="7"></line>' +
+          '<line x1="8" y1="12" x2="16" y2="12"></line>' +
+          '<line x1="8" y1="17" x2="12" y2="17"></line>' +
+        '</svg>';
+
+        L.DomEvent.disableClickPropagation(container);
+        L.DomEvent.disableScrollPropagation(container);
+
+        L.DomEvent.on(btn, "click", function (e) {
+          L.DomEvent.preventDefault(e);
+          if (state.currentTab === "legend") {
+            switchToSidebarTab("layers");
+          } else {
+            switchToSidebarTab("legend");
+          }
+        });
+
+        return container;
+      }
+    });
+
+    state.map.addControl(new LegendControl());
   }
 
   // Spuštění po načtení DOMu
