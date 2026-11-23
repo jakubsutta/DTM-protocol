@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dohledání parcel pod komunikacemi</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%2300838f%22 stroke-width=%221.6%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M3.5 9L9 4L19.5 6L19 19.5L13.5 20L5 19Z%22/><path d=%22M9 4L11 12.5%22/><path d=%22M19.5 6L11 12.5%22/><path d=%22M13.5 20L11 12.5%22/><path d=%22M3.5 9L11 12.5%22/><path d=%22M9 4V2%22/><path d=%22M19.5 6L22 5.5%22/><path d=%22M13.5 20L14 22%22/><path d=%22M3.5 9L1.5 9%22/><circle cx=%2211%22 cy=%2212.5%22 r=%221.5%22 fill=%22%2300838f%22/></svg>">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/proj4@2/dist/proj4.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/shpjs@4.0.4/dist/shp.min.js"></script>
+<style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f0f2f5; color: #1a1a1a; margin: 0; padding: 24px; }
+    .wrap { max-width: 1000px; margin: 0 auto; }
+    h1 { font-size: 20px; margin-bottom: 4px; }
+    .lead { color: #607d8b; font-size: 13px; margin-bottom: 20px; }
+    .panel { background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .panel h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: #78909c; margin-bottom: 14px; border-bottom: 1px solid #eceff1; padding-bottom: 8px; }
+    .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+    input[type=file] { font-size: 13px; }
+    label.chk { font-size: 12.5px; color: #546e7a; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+    button { background: #00838f; color: #fff; border: none; padding: 9px 18px; border-radius: 5px; font-weight: 600; cursor: pointer; font-size: 12.5px; }
+    button:hover:not(:disabled) { background: #006064; }
+    button:disabled { background: #cfd8dc; cursor: not-allowed; }
+    button.secondary { background: #2c2f4a; }
+    button.secondary:hover:not(:disabled) { background: #3a3e63; }
+    #map { height: 320px; border-radius: 6px; margin-top: 12px; background: #e8eaed; }
+    table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 10px; }
+    th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid #eceff1; vertical-align: top; }
+    th { color: #78909c; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .status { font-size: 12px; color: #78909c; margin-top: 10px; min-height: 18px; }
+    .status.err { color: #c62828; }
+    .progress-bar { height: 6px; background: #eceff1; border-radius: 4px; overflow: hidden; margin-top: 8px; }
+    .progress-bar > div { height: 100%; background: #00838f; width: 0%; transition: width 0.2s; }
+    .pill { display: inline-block; background: #eceff1; color: #546e7a; font-size: 10px; padding: 2px 7px; border-radius: 10px; margin-left: 6px; }
+    .note { background: #e0f7fa; border: 1px solid #80deea; border-radius: 6px; padding: 10px 14px; font-size: 11.5px; color: #006064; margin-bottom: 16px; }
+    .hidden { display: none; }
+
+    /* Vzhled tabulky výsledků dle Table_Export.html */
+    .table-data {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11px;
+        margin-top: 14px;
+        background: #fff;
+        border: 1px solid #e0e0e0;
+    }
+    .table-data thead tr.tr-cols th {
+        background: #f5f7fa;
+        font-weight: 700;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        text-align: center;
+        padding: 8px 6px;
+        line-height: 1.3;
+        color: #546e7a;
+        border: 1px solid #e0e0e0;
+    }
+    .table-data thead tr.tr-cols th.sortable {
+        cursor: pointer;
+        user-select: none;
+        transition: background-color 0.15s ease, color 0.15s ease;
+    }
+    .table-data thead tr.tr-cols th.sortable:hover {
+        background-color: #e8ecf1;
+        color: #0277bd;
+    }
+    .table-data thead tr.tr-cols th.sort-active {
+        color: #0277bd !important;
+        background-color: #edf4f8 !important;
+    }
+    .sort-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        vertical-align: middle;
+        margin-left: 5px;
+        color: #b0bec5;
+    }
+    .sort-icon svg {
+        display: block;
+    }
+    .sort-icon .arrow-up, .sort-icon .arrow-down {
+        transition: stroke 0.15s ease, stroke-width 0.15s ease, opacity 0.15s ease;
+    }
+    th.sort-active.sort-asc .arrow-up {
+        stroke: #0277bd !important;
+        stroke-width: 2.4 !important;
+    }
+    th.sort-active.sort-asc .arrow-down {
+        stroke: #cfd8dc !important;
+        opacity: 0.35;
+    }
+    th.sort-active.sort-desc .arrow-down {
+        stroke: #0277bd !important;
+        stroke-width: 2.4 !important;
+    }
+    th.sort-active.sort-desc .arrow-up {
+        stroke: #cfd8dc !important;
+        opacity: 0.35;
+    }
+    .table-data tbody tr:nth-child(even) {
+        background-color: #f8fafc;
+    }
+    .table-data tbody tr:nth-child(odd) {
+        background-color: #ffffff;
+    }
+    .table-data tbody td {
+        padding: 6.5px 10px;
+        line-height: 1.35;
+        vertical-align: middle;
+        font-size: 10.5px;
+        border: 1px solid #e0e0e0;
+        color: #1a1a1a;
+    }
+    /* První sloupec: označení komunikace dle vzoru Table_Export */
+    .table-data tbody td:first-child {
+        color: #0277bd;
+        font-weight: 700;
+        background-color: #fafbfc;
+        text-align: center;
+        font-size: 11px;
+    }
+    .table-data tbody td:nth-child(2) {
+        color: #37474f;
+        font-weight: 500;
+    }
+    .table-data tbody td:nth-child(3) {
+        color: #1a1a1a;
+        word-break: break-word;
+    }
+
+    /* Fixní patička shodná s Table_Export.html */
+    .table-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 10px;
+        border-top: 1px solid #e0e0e0;
+        margin-top: 16px;
+    }
+    .footer-logo-box img {
+        height: 25px;
+        max-height: 28px;
+        object-fit: contain;
+    }
+    .footer-company-text {
+        text-align: right;
+        color: #ea521f;
+        font-size: 10.5px;
+        font-weight: 600;
+        line-height: 1.35;
+    }
+
+    .print-header { display: none; }
+
+    @media print {
+        * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        @page {
+            size: A4 portrait;
+            margin: 12mm 15mm 12mm 15mm;
+        }
+        html, body {
+            background: #fff !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            color: #000 !important;
+        }
+        .wrap {
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        .no-print {
+            display: none !important;
+        }
+        .panel {
+            box-shadow: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border: none !important;
+            background: transparent !important;
+        }
+        #resultsPanel {
+            display: block !important;
+        }
+        .print-header {
+            display: flex !important;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #ea521f;
+        }
+        .print-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+        .print-sub {
+            font-size: 10.5px;
+            color: #546e7a;
+            margin-top: 3px;
+        }
+        .table-data {
+            margin-top: 0 !important;
+            page-break-inside: auto;
+        }
+        .table-data thead {
+            display: table-header-group !important;
+        }
+        .table-data tr {
+            page-break-inside: avoid !important;
+        }
+        .table-data th {
+            background-color: #f5f7fa !important;
+            color: #546e7a !important;
+            border: 1px solid #e0e0e0 !important;
+        }
+        .table-data thead tr.tr-cols th.sortable {
+            cursor: default !important;
+        }
+        .table-data thead tr.tr-cols th.sort-active {
+            background-color: #f5f7fa !important;
+            color: #546e7a !important;
+        }
+        .sort-icon {
+            display: none !important;
+        }
+        .table-data tbody tr:nth-child(even) {
+            background-color: #f8fafc !important;
+        }
+        .table-data tbody tr:nth-child(odd) {
+            background-color: #ffffff !important;
+        }
+        .table-data td {
+            border: 1px solid #e0e0e0 !important;
+        }
+        .table-data tbody td:first-child {
+            background-color: #fafbfc !important;
+            color: #0277bd !important;
+        }
+        .table-footer {
+            margin-top: 14px !important;
+            padding-top: 8px !important;
+            border-top: 1px solid #e0e0e0 !important;
+            page-break-inside: avoid !important;
+        }
+        .footer-company-text {
+            color: #ea521f !important;
+        }
+    }
+</style>
+</head>
+<body>
+<div class="wrap">
+    <div class="no-print">
+        <h1>Dohledání parcel pod komunikacemi</h1>
+        <p class="lead">Nahraj SHP (zip) s atributy <code>number</code> a <code>city_code</code> v S-JTSK (EPSG:5514). Pro každou komunikaci vyhledá dotčené katastrální parcely přes WFS ČÚZK.</p>
+
+        <div class="note">Data nahrávej s S-JTSK a v .zip. Po načtení si v mapě zkontroluj, zda jsou správně.</div>
+    </div>
+
+    <div class="panel no-print">
+        <h2>1. Nahrání dat</h2>
+        <div class="row">
+            <input type="file" id="shpFile" accept=".zip">
+            <label class="chk"><input type="checkbox" id="swapXY" onchange="if(document.getElementById('shpFile').files[0]) loadShp()"> prohodit pořadí X/Y (pokud se linie na mapě zobrazí špatně)</label>
+        </div>
+        <div class="row">
+            <button onclick="loadShp()">Načíst a zobrazit náhled</button>
+        </div>
+        <div class="status" id="loadStatus"></div>
+        <div id="map"></div>
+        <table id="previewTable" style="display:none">
+            <thead><tr><th>number</th><th>city_code</th><th>typ geometrie</th></tr></thead>
+            <tbody id="previewBody"></tbody>
+        </table>
+    </div>
+
+    <div class="panel no-print">
+        <h2>2. Dohledání parcel</h2>
+        <div class="row">
+            <button id="runBtn" onclick="processAll()" disabled>Spustit dohledání parcel</button>
+            <button id="stopBtn" class="secondary" onclick="stopRequested=true" disabled>Zastavit</button>
+        </div>
+        <div class="progress-bar"><div id="progressFill"></div></div>
+        <div class="status" id="runStatus"></div>
+    </div>
+
+    <div class="panel" id="resultsPanel" style="display:none">
+        <div class="print-header">
+            <div>
+                <div class="print-title">Dohledání dotčených parcel</div>
+                <div class="print-sub" id="printSubInfo"></div>
+            </div>
+            <div class="footer-logo-box">
+                <img src="../../assets/img/logo3.png" alt="Logo" onerror="this.onerror=null; this.src='../../assets/img/logo3.png';">
+            </div>
+        </div>
+
+        <h2 class="no-print">3. Výsledky <span class="pill" id="resultCount"></span></h2>
+        <div class="row no-print" style="justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px;">
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <button onclick="exportCsv()">⬇ Export do CSV</button>
+                <button class="secondary" onclick="exportPdf()">📄 Export do PDF (Tisk)</button>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center; margin-left: auto; flex-wrap: wrap;">
+                <label for="sortSelect" style="font-size: 11.5px; color: #546e7a; font-weight: 600;">Seřadit dle:</label>
+                <select id="sortSelect" onchange="onSortSelectChange(this.value)" style="font-size: 11.5px; padding: 6px 10px; border-radius: 5px; border: 1px solid #cfd8dc; background: #fff; color: #37474f; outline: none; cursor: pointer;">
+                    <option value="number-asc">Označení (vzestupně A-Z / 1-9)</option>
+                    <option value="number-desc">Označení (sestupně Z-A / 9-1)</option>
+                    <option value="obec-asc">Obec (A-Z)</option>
+                    <option value="obec-desc">Obec (Z-A)</option>
+                    <option value="parcely-asc">Parcely (A-Z)</option>
+                    <option value="parcely-desc">Parcely (Z-A)</option>
+                    <option value="original-asc">Původní pořadí ze SHP</option>
+                </select>
+            </div>
+        </div>
+        <table class="table-data" id="resultsTable">
+            <thead>
+                <tr class="tr-cols">
+                    <th id="th-number" class="sortable" style="width:120px" onclick="handleSort('number')" title="Kliknutím seřadíte dle označení">
+                        OZNAČENÍ
+                        <span class="sort-icon" id="sort-icon-number">
+                            <svg viewBox="0 0 10 14" width="8" height="11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path class="arrow-up" d="M2 5L5 2L8 5"/>
+                                <path class="arrow-down" d="M2 9L5 12L8 9"/>
+                            </svg>
+                        </span>
+                    </th>
+                    <th id="th-obec" class="sortable" style="width:220px" onclick="handleSort('obec')" title="Kliknutím seřadíte dle obce">
+                        OBEC
+                        <span class="sort-icon" id="sort-icon-obec">
+                            <svg viewBox="0 0 10 14" width="8" height="11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path class="arrow-up" d="M2 5L5 2L8 5"/>
+                                <path class="arrow-down" d="M2 9L5 12L8 9"/>
+                            </svg>
+                        </span>
+                    </th>
+                    <th id="th-parcely" class="sortable" onclick="handleSort('parcely')" title="Kliknutím seřadíte dle parcel">
+                        PARCELY
+                        <span class="sort-icon" id="sort-icon-parcely">
+                            <svg viewBox="0 0 10 14" width="8" height="11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path class="arrow-up" d="M2 5L5 2L8 5"/>
+                                <path class="arrow-down" d="M2 9L5 12L8 9"/>
+                            </svg>
+                        </span>
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="resultsBody"></tbody>
+        </table>
+
+        <div class="table-footer">
+            <div class="footer-logo-box">
+                <img src="../../assets/img/logo3.png" alt="Logo" onerror="this.onerror=null; this.src='../../assets/img/logo3.png';">
+            </div>
+            <div class="footer-company-text">
+                <div><strong>ATOMICON s. r. o. Stupkova 952/18, Olomouc 779 00</strong></div>
+                <div>tel. +420 778 481 700</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+proj4.defs('EPSG:5514', '+proj=krovak +lat_0=49.5 +lon_0=24.83333333333333 +alpha=30.28813972222222 +k=0.9999 +x_0=0 +y_0=0 +ellps=bessel +towgs84=570.8,85.7,462.8,4.998,1.587,5.261,3.56 +units=m +no_defs');
+
+let mapInstance = null;
+let mapLayerGroup = null;
+let groups = new Map(); // number -> { city_code, lines: [ [ [x,y],... ], ... ] }
+let obecCache = new Map(); // city_code -> nazev
+let results = [];
+let stopRequested = false;
+let currentSort = { col: 'number', dir: 'asc' };
+const collator = new Intl.Collator('cs', { numeric: true, sensitivity: 'base' });
+
+function initMapOnce() {
+    if (mapInstance) return;
+    mapInstance = L.map('map', { maxZoom: 20 }).setView([49.8, 15.47], 7);
+    L.tileLayer('https://ags.cuzk.cz/arcgis1/rest/services/ORTOFOTO_WM/MapServer/tile/{z}/{y}/{x}', {
+        attribution: '&copy; <a href="https://cuzk.gov.cz" target="_blank">ČÚZK</a>',
+        maxZoom: 20
+    }).addTo(mapInstance);
+    mapLayerGroup = L.layerGroup().addTo(mapInstance);
+}
+
+// Normalizace bodu: detekce, zda shpjs již provedl převod do WGS84,
+// a příprava jak pro Leaflet [lat, lng], tak pro ČÚZK WFS S-JTSK [-Y, -X].
+function parsePoint(pt, swap) {
+    let x = swap ? pt[1] : pt[0];
+    let y = swap ? pt[0] : pt[1];
+
+    // Je bod již ve WGS84 [lon, lat]?
+    // (V ČR je zeměpisná délka cca 12°–19° a šířka 48°–51°).
+    // shpjs při nalezení .prj souboru automaticky data sám přeprojektuje do WGS84.
+    const isWgs84 = Math.abs(x) <= 180 && Math.abs(y) <= 90;
+
+    let lon, lat, sjtskY, sjtskX;
+
+    if (isWgs84) {
+        // shpjs už data přeprojektoval do WGS84 [lon, lat] - nesmí se znovu volat 5514->4326!
+        lon = x;
+        lat = y;
+        // Přepočet do S-JTSK (EPSG:5514) pro WFS ČÚZK
+        const sjtsk = proj4('EPSG:4326', 'EPSG:5514', [lon, lat]);
+        sjtskY = sjtsk[0];
+        sjtskX = sjtsk[1];
+    } else {
+        // Soubor neměl .prj, souřadnice zůstaly v původním S-JTSK (v metrech).
+        // V ČR jsou souřadnice pro ČÚZK i proj4 záporné (-Y, -X).
+        sjtskY = x > 0 ? -x : x;
+        sjtskX = y > 0 ? -y : y;
+        // Přepočet do WGS84 pro Leaflet mapu
+        const wgs = proj4('EPSG:5514', 'EPSG:4326', [sjtskY, sjtskX]);
+        lon = wgs[0];
+        lat = wgs[1];
+    }
+
+    return {
+        latlng: [lat, lon],       // pro Leaflet [lat, lng]
+        sjtsk: [sjtskY, sjtskX]   // pro ČÚZK WFS [-Y, -X]
+    };
+}
+
+async function loadShp() {
+    const fileInput = document.getElementById('shpFile');
+    const statusEl = document.getElementById('loadStatus');
+    const file = fileInput.files[0];
+    if (!file) { statusEl.textContent = 'Vyber prosím soubor .zip.'; statusEl.className = 'status err'; return; }
+
+    statusEl.className = 'status'; statusEl.textContent = 'Načítám a parsuji SHP…';
+    groups = new Map();
+
+    try {
+        const buffer = await file.arrayBuffer();
+        let collections = [];
+
+        if (window.JSZip) {
+            const zip = await JSZip.loadAsync(buffer);
+            const shpFiles = Object.keys(zip.files).filter(k => k.toLowerCase().endsWith('.shp') && !k.includes('__MACOSX'));
+            for (const shpFile of shpFiles) {
+                const base = shpFile.slice(0, -4);
+                const shpBuf = await zip.files[shpFile].async('arraybuffer');
+                const dbfKey = Object.keys(zip.files).find(k => k.toLowerCase() === (base + '.dbf').toLowerCase());
+                const dbfBuf = dbfKey ? await zip.files[dbfKey].async('arraybuffer') : null;
+                const cpgKey = Object.keys(zip.files).find(k => k.toLowerCase() === (base + '.cpg').toLowerCase());
+                const cpg = cpgKey ? await zip.files[cpgKey].async('text') : undefined;
+
+                // parseShp voláme BEZ prj parametru: získáme původní přesná data v S-JTSK přímo ze souboru.
+                // Vyhneme se tak nepřesnému internímu převodu v shpjs (který v .prj postrádá 7prvkovou Helmertovu transformaci).
+                const geoms = shp.parseShp(shpBuf);
+                const props = dbfBuf ? shp.parseDbf(dbfBuf, cpg) : [];
+                const geojson = shp.combine([geoms, props]);
+                collections.push(geojson);
+            }
+        }
+
+        if (collections.length === 0) {
+            const geojson = await shp(buffer);
+            collections = Array.isArray(geojson) ? geojson : [geojson];
+        }
+
+        const swap = document.getElementById('swapXY').checked;
+
+        initMapOnce();
+        mapLayerGroup.clearLayers();
+        const previewBody = document.getElementById('previewBody');
+        previewBody.innerHTML = '';
+
+        const allLatLngs = [];
+        let featureCount = 0;
+
+        for (const col of collections) {
+            for (const feat of (col.features || [])) {
+                featureCount++;
+                const props = feat.properties || {};
+                const number = String(props.number ?? props.NUMBER ?? '(bez čísla)');
+                const cityCode = String(props.city_code ?? props.CITY_CODE ?? '');
+                const geom = feat.geometry;
+                if (!geom) continue;
+
+                let lines = [];
+                if (geom.type === 'LineString') lines = [geom.coordinates];
+                else if (geom.type === 'MultiLineString') lines = geom.coordinates;
+                else if (geom.type === 'Polygon') lines = geom.coordinates;
+                else if (geom.type === 'MultiPolygon') lines = geom.coordinates.flat();
+
+                if (!groups.has(number)) groups.set(number, { cityCode, lines: [], originalIndex: groups.size });
+                for (const line of lines) {
+                    const parsedLine = line.map(pt => parsePoint(pt, swap));
+                    const latlngs = parsedLine.map(p => p.latlng);
+                    const sjtskCoords = parsedLine.map(p => p.sjtsk);
+
+                    groups.get(number).lines.push(sjtskCoords);
+                    allLatLngs.push(...latlngs);
+                    mapLayerGroup.addLayer(L.polyline(latlngs, { color: '#ea521f', weight: 3 }));
+                }
+
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${number}</td><td>${cityCode}</td><td>${geom.type}</td>`;
+                previewBody.appendChild(row);
+            }
+        }
+
+        if (allLatLngs.length) {
+            const bounds = L.latLngBounds(allLatLngs);
+            mapInstance.fitBounds(bounds, { padding: [20, 20] });
+        }
+
+        document.getElementById('previewTable').style.display = 'table';
+        statusEl.textContent = `Načteno ${featureCount} prvků, ${groups.size} unikátních komunikací (number). Zkontroluj polohu na mapě.`;
+        document.getElementById('runBtn').disabled = groups.size === 0;
+    } catch (e) {
+        statusEl.className = 'status err';
+        statusEl.textContent = 'Chyba při načítání SHP: ' + e.message;
+    }
+}
+
+async function lookupObec(cityCode) {
+    if (!cityCode) return '—';
+    if (obecCache.has(cityCode)) return obecCache.get(cityCode);
+    try {
+        const url = 'https://ags.cuzk.cz/arcgis/rest/services/RUIAN/MapServer/12/query?where=' + encodeURIComponent('kod=' + cityCode) + '&outFields=nazev,kod&f=json';
+        const resp = await fetch(url);
+        const data = await resp.json();
+        const nazev = data.features && data.features[0] ? data.features[0].attributes.nazev : null;
+        const label = nazev ? `${nazev} (${cityCode})` : `neznámý kód (${cityCode})`;
+        obecCache.set(cityCode, label);
+        return label;
+    } catch (e) {
+        return `chyba RUIAN (${cityCode})`;
+    }
+}
+
+function chunkCoords(coords, maxPerChunk) {
+    const chunks = [];
+    for (let i = 0; i < coords.length - 1; i += (maxPerChunk - 1)) {
+        const chunk = coords.slice(i, i + maxPerChunk);
+        if (chunk.length >= 2) chunks.push(chunk);
+        if (i + maxPerChunk - 1 >= coords.length - 1) break;
+    }
+    if (chunks.length === 0 && coords.length >= 2) chunks.push(coords);
+    return chunks;
+}
+
+function buildPolygonParam(coordsChunk) {
+    // ČÚZK WFS GetFeatureByPolygon:
+    // Podporuje seznam souřadnic oddělený mezerami.
+    // U otevřené linie (neuzavřený polygon) provádí ČÚZK prostorový průnik s linií.
+    return coordsChunk.map(pt => `${pt[0].toFixed(2)} ${pt[1].toFixed(2)}`).join(' ');
+}
+
+function extractParcelLabels(xmlText) {
+    const labels = new Set();
+    try {
+        const doc = new DOMParser().parseFromString(xmlText, 'text/xml');
+        if (doc.getElementsByTagName('parsererror').length) return { labels: [], error: 'Neplatná XML odpověď.' };
+        const exception = doc.getElementsByTagNameNS('*', 'ExceptionReport');
+        if (exception.length) {
+            const msg = doc.getElementsByTagNameNS('*', 'ExceptionText')[0];
+            return { labels: [], error: 'WFS chyba: ' + (msg ? msg.textContent : 'neznámá') };
+        }
+        const parcels = doc.getElementsByTagNameNS('*', 'CadastralParcel');
+        for (const parcel of parcels) {
+            let label = null;
+            const tryTags = ['label', 'nationalCadastralReference'];
+            for (const tag of tryTags) {
+                const el = parcel.getElementsByTagNameNS('*', tag)[0];
+                if (el && el.textContent.trim()) { label = el.textContent.trim(); break; }
+            }
+            if (!label) {
+                const localId = parcel.getElementsByTagNameNS('*', 'localId')[0];
+                label = localId ? localId.textContent.trim() : (parcel.getAttribute('gml:id') || parcel.id || '(bez čísla)');
+            }
+            labels.add(label);
+        }
+        return { labels: Array.from(labels), error: null };
+    } catch (e) {
+        return { labels: [], error: 'Chyba parsování: ' + e.message };
+    }
+}
+
+async function queryParcelsForChunk(coordsChunk) {
+    const polygon = buildPolygonParam(coordsChunk);
+    const url = 'https://services.cuzk.cz/wfs/inspire-CP-wfs.asp?service=wfs&version=2.0.0&request=getFeature&storedQuery_id=GetFeatureByPolygon&POLYGON='
+        + encodeURIComponent(polygon) + '&FEATURE_TYPE=CadastralParcel&srsName=' + encodeURIComponent('http://www.opengis.net/def/crs/EPSG/0/5514');
+    const resp = await fetch(url);
+    const text = await resp.text();
+    return extractParcelLabels(text);
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function processAll() {
+    stopRequested = false;
+    results = [];
+    const runStatus = document.getElementById('runStatus');
+    const progressFill = document.getElementById('progressFill');
+    document.getElementById('runBtn').disabled = true;
+    document.getElementById('stopBtn').disabled = false;
+    document.getElementById('resultsPanel').style.display = 'none';
+
+    const numbers = Array.from(groups.keys()).sort((a, b) => collator.compare(a, b));
+    let done = 0;
+
+    for (const number of numbers) {
+        if (stopRequested) { runStatus.textContent = 'Zastaveno uživatelem.'; break; }
+        const group = groups.get(number);
+        const parcelSet = new Set();
+        let errorMsg = null;
+
+        for (const line of group.lines) {
+            const chunks = chunkCoords(line, 35);
+            for (const chunk of chunks) {
+                if (stopRequested) break;
+                runStatus.textContent = `Zpracovávám komunikaci "${number}" (${done + 1}/${numbers.length})…`;
+                try {
+                    const { labels, error } = await queryParcelsForChunk(chunk);
+                    labels.forEach(l => parcelSet.add(l));
+                    if (error) errorMsg = error;
+                } catch (e) {
+                    errorMsg = 'Síťová chyba: ' + e.message;
+                }
+                await sleep(200);
+            }
+        }
+
+        const obecLabel = await lookupObec(group.cityCode);
+        results.push({
+            _originalIndex: group.originalIndex,
+            number,
+            obec: obecLabel,
+            parcely: errorMsg ? `⚠️ ${errorMsg}` : (parcelSet.size ? Array.from(parcelSet).sort((a, b) => collator.compare(a, b)).join(', ') : '— žádné nenalezeny —')
+        });
+
+        done++;
+        progressFill.style.width = Math.round((done / numbers.length) * 100) + '%';
+    }
+
+    renderResults();
+    runStatus.textContent = stopRequested ? `Zastaveno — hotovo ${done}/${numbers.length}.` : `Hotovo — zpracováno ${done}/${numbers.length} komunikací.`;
+    document.getElementById('runBtn').disabled = false;
+    document.getElementById('stopBtn').disabled = true;
+}
+
+function handleSort(col) {
+    if (currentSort.col === col) {
+        currentSort.dir = currentSort.dir === 'asc' ? 'desc' : 'asc';
+    } else {
+        currentSort.col = col;
+        currentSort.dir = 'asc';
+    }
+    updateSortUi();
+    renderResults();
+}
+
+function onSortSelectChange(val) {
+    const [col, dir] = val.split('-');
+    currentSort.col = col;
+    currentSort.dir = dir || 'asc';
+    updateSortUi();
+    renderResults();
+}
+
+function updateSortUi() {
+    const select = document.getElementById('sortSelect');
+    if (select) {
+        select.value = `${currentSort.col}-${currentSort.dir}`;
+    }
+
+    ['number', 'obec', 'parcely'].forEach(col => {
+        const th = document.getElementById(`th-${col}`);
+        if (!th) return;
+        if (currentSort.col === col) {
+            th.classList.add('sort-active');
+            th.classList.toggle('sort-asc', currentSort.dir === 'asc');
+            th.classList.toggle('sort-desc', currentSort.dir === 'desc');
+            th.setAttribute('aria-sort', currentSort.dir === 'asc' ? 'ascending' : 'descending');
+        } else {
+            th.classList.remove('sort-active', 'sort-asc', 'sort-desc');
+            th.removeAttribute('aria-sort');
+        }
+    });
+}
+
+function compareResults(a, b, col, dir) {
+    if (col === 'original') {
+        const diff = (a._originalIndex ?? 0) - (b._originalIndex ?? 0);
+        return dir === 'desc' ? -diff : diff;
+    }
+
+    const valA = a[col] != null ? String(a[col]).trim() : '';
+    const valB = b[col] != null ? String(b[col]).trim() : '';
+
+    if (!valA && !valB) return 0;
+    if (!valA) return 1;
+    if (!valB) return -1;
+
+    if (valA === valB) {
+        if (col !== 'number') {
+            return collator.compare(String(a.number ?? ''), String(b.number ?? ''));
+        }
+        return (a._originalIndex ?? 0) - (b._originalIndex ?? 0);
+    }
+
+    const cmp = collator.compare(valA, valB);
+    return dir === 'desc' ? -cmp : cmp;
+}
+
+function getSortedResults() {
+    return [...results].sort((a, b) => compareResults(a, b, currentSort.col, currentSort.dir));
+}
+
+function renderResults() {
+    const body = document.getElementById('resultsBody');
+    body.innerHTML = '';
+    const sorted = getSortedResults();
+    for (const r of sorted) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${escapeHtml(r.number)}</td><td>${escapeHtml(r.obec)}</td><td>${escapeHtml(r.parcely)}</td>`;
+        body.appendChild(tr);
+    }
+    document.getElementById('resultCount').textContent = results.length + ' řádků';
+    const printSub = document.getElementById('printSubInfo');
+    if (printSub) {
+        const today = new Date().toLocaleDateString('cs-CZ');
+        printSub.textContent = `Vygenerováno: ${today} | Celkem komunikací: ${results.length}`;
+    }
+    updateSortUi();
+    document.getElementById('resultsPanel').style.display = 'block';
+}
+
+function exportPdf() {
+    window.print();
+}
+
+function escapeHtml(str) {
+    if (str == null) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+function exportCsv() {
+    const delim = ';';
+    const sorted = getSortedResults();
+    const rows = [['označení', 'obec', 'parcely'], ...sorted.map(r => [r.number, r.obec, r.parcely])];
+    const csv = rows.map(row => row.map(cell => '"' + String(cell).replace(/"/g, '""') + '"').join(delim)).join('\r\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'parcely-komunikace.csv';
+    link.click();
+}
+
+initMapOnce();
+</script>
+</body>
+</html>

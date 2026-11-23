@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DTM ČR – Technický a metodický portál pro DI a TI</title>
+  <meta name="description" content="Kompletní metodika a pravidla Digitální technické mapy ČR pro Dopravní (DI) a Technickou (TI) infrastrukturu. Oficiální stanoviska ČÚZK, schémata, třídy přesnosti.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="../../assets/css/design-system.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="../../assets/js/atomicon-core.js"></script>
+</head>
+<body>
+
+  <!-- ========================================================================
+       PEVNÝ RÁMEC: 1. HLAVNÍ HEADER (Kompaktní modrá lišta)
+       ======================================================================== -->
+  <header class="app-header">
+    <div class="header-left">
+      <a href="../../index.html" class="btn-back-dashboard" title="Zpět na Dashboard Atomicon GIS">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        <span>Dashboard</span>
+      </a>
+
+      <button id="sidebar-toggle" class="menu-burger-btn" title="Otevřít navigaci" aria-label="Menu">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+
+      <a href="#overview" class="brand-wrapper">
+        <span class="brand-logo-icon" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+            <polyline points="2 17 12 22 22 17"/>
+            <polyline points="2 12 12 17 22 12"/>
+          </svg>
+        </span>
+        <div class="brand-title">
+          <strong>Metodika DTM ČR</strong>
+        </div>
+      </a>
+    </div>
+
+    <div class="header-search">
+      <div class="search-input-group">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="global-search" placeholder="Hledat v pravidlech DI / TI (OPK, křižovatka, most, třída 9)..." autocomplete="off">
+        <span class="search-shortcut">Ctrl+K</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button id="view-mode-toggle" class="header-btn" title="Přepnout míru detailu pravidel">
+        <span id="view-mode-icon" class="header-btn-icon" aria-hidden="true">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </span>
+        <span id="view-mode-text">Stručně</span>
+      </button>
+      <button id="theme-toggle" class="header-btn" title="Světlý / Tmavý režim" aria-label="Přepnout motiv vzhledu">
+        <span id="theme-icon" class="header-btn-icon" aria-hidden="true">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </span>
+      </button>
+      <a href="https://dtmwiki.cuzk.gov.cz/start" target="_blank" rel="noopener noreferrer" class="header-btn" title="Oficiální portál DTMwiki">
+        <span>DTMwiki ČÚZK</span>
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+      </a>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       PEVNÝ RÁMEC: 2. DROBEČKOVÁ NAVIGACE (Kompaktní lišta cesty)
+       ======================================================================== -->
+  <div class="breadcrumb-bar">
+    <nav class="breadcrumb-path" id="breadcrumbs-nav" aria-label="Cesta dokumentem">
+      <a class="crumb-link" data-route="overview">DTM Metodika</a>
+      <span class="crumb-separator">›</span>
+      <span class="crumb-current" id="current-crumb">Katalog témat</span>
+    </nav>
+    <div>
+      <span class="crumb-tag" id="current-code-tag">PORTAL-ROOT</span>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       HLAVNÍ KONTEJNER: SIDEBAR (SPOJOVNÍKOVÝ STROM) + OBSAH + PRAVÝ PANEL
+       ======================================================================== -->
+  <div class="app-container">
+
+    <!-- LEVÝ PANEL: Hierarchický navigační strom s linkami dle předlohy -->
+    <aside class="app-sidebar" id="app-sidebar">
+      <nav class="tree-root" aria-label="Navigační strom kapitol DTM">
+        <ul class="tree-branch tree-root-branch">
+          
+          <!-- 0. Rozcestník -->
+          <li class="tree-node tree-root-node">
+            <div class="tree-node-row">
+              <a class="sidebar-link active tree-link-root" data-route="overview">
+                <span class="tree-item-icon">
+                  <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2.5 7L8 2.5 13.5 7V13.5H10V9.5H6V13.5H2.5V7z"/></svg>
+                </span>
+                <span class="tree-label">Rozcestník všech kapitol</span>
+                <span class="link-code">ALL</span>
+              </a>
+            </div>
+          </li>
+
+          <!-- 1. Dopravní infrastruktura -->
+          <li class="tree-node tree-root-node is-expanded" id="group-di">
+            <div class="tree-group-header">
+              <button class="tree-expander" type="button" aria-label="Sbalit / Rozbalit sekci DI" data-toggle="group-di">
+                <svg class="tree-expander-arrow" viewBox="0 0 10 10" width="8" height="8"><path d="M2 3l3 4 3-4" fill="currentColor"/></svg>
+              </button>
+              <div class="tree-group-title" data-cat-filter="DI" title="Zobrazit v katalogu">
+                <span class="tree-folder-icon">
+                  <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M2 6.5h12"/></svg>
+                </span>
+                <span class="tree-label">1. Dopravní infrastruktura</span>
+                <span class="link-code link-code-di">DI</span>
+              </div>
+            </div>
+            <ul class="tree-branch tree-children" id="tree-list-di">
+              <!-- Dynamicky generováno přes app.js -->
+            </ul>
+          </li>
+
+          <!-- 2. Technická infrastruktura -->
+          <li class="tree-node tree-root-node is-expanded" id="group-ti">
+            <div class="tree-group-header">
+              <button class="tree-expander" type="button" aria-label="Sbalit / Rozbalit sekci TI" data-toggle="group-ti">
+                <svg class="tree-expander-arrow" viewBox="0 0 10 10" width="8" height="8"><path d="M2 3l3 4 3-4" fill="currentColor"/></svg>
+              </button>
+              <div class="tree-group-title" data-cat-filter="TI" title="Zobrazit v katalogu">
+                <span class="tree-folder-icon">
+                  <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M2 6.5h12"/></svg>
+                </span>
+                <span class="tree-label">2. Technická infrastruktura</span>
+                <span class="link-code link-code-ti">TI</span>
+              </div>
+            </div>
+            <ul class="tree-branch tree-children" id="tree-list-ti">
+              <!-- Dynamicky generováno přes app.js -->
+            </ul>
+          </li>
+
+          <!-- 3. Společná metodika a standardy JVF -->
+          <li class="tree-node tree-root-node is-expanded" id="group-meta">
+            <div class="tree-group-header">
+              <button class="tree-expander" type="button" aria-label="Sbalit / Rozbalit sekci Společná metodika" data-toggle="group-meta">
+                <svg class="tree-expander-arrow" viewBox="0 0 10 10" width="8" height="8"><path d="M2 3l3 4 3-4" fill="currentColor"/></svg>
+              </button>
+              <div class="tree-group-title" data-cat-filter="META" title="Zobrazit v katalogu">
+                <span class="tree-folder-icon">
+                  <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M2 6.5h12"/></svg>
+                </span>
+                <span class="tree-label">3. Společná metodika & JVF</span>
+                <span class="link-code link-code-meta">STD</span>
+              </div>
+            </div>
+            <ul class="tree-branch tree-children" id="tree-list-meta">
+              <!-- Dynamicky generováno přes app.js -->
+            </ul>
+          </li>
+
+          <!-- 4. Nástroje a reference -->
+          <li class="tree-node tree-root-node is-expanded" id="group-tools">
+            <div class="tree-group-header">
+              <button class="tree-expander" type="button" aria-label="Sbalit / Rozbalit Nástroje" data-toggle="group-tools">
+                <svg class="tree-expander-arrow" viewBox="0 0 10 10" width="8" height="8"><path d="M2 3l3 4 3-4" fill="currentColor"/></svg>
+              </button>
+              <div class="tree-group-title" title="Nástroje a technické reference">
+                <span class="tree-folder-icon">
+                  <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M2 6.5h12"/></svg>
+                </span>
+                <span class="tree-label">4. Nástroje & Reference</span>
+                <span class="link-code">REF</span>
+              </div>
+            </div>
+            <ul class="tree-branch tree-children" id="tree-list-tools">
+              <li class="tree-child-node">
+                <a class="sidebar-link" data-route="tool-diagrams">
+                  <span class="tree-item-icon">
+                    <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.4"><polygon points="7 1.5 12.5 4.5 7 7.5 1.5 4.5"/><polygon points="7 6.5 12.5 9.5 7 12.5 1.5 9.5"/></svg>
+                  </span>
+                  <span class="tree-label">Technická CAD schémata</span>
+                  <span class="link-code">SVG</span>
+                </a>
+              </li>
+              <li class="tree-child-node">
+                <a class="sidebar-link" data-route="tool-cheatsheet">
+                  <span class="tree-item-icon">
+                    <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.4"><polygon points="7 1.5 12.5 4.5 7 7.5 1.5 4.5"/><polygon points="7 6.5 12.5 9.5 7 12.5 1.5 9.5"/></svg>
+                  </span>
+                  <span class="tree-label">Třídy přesnosti (1–9) & Slovník</span>
+                  <span class="link-code">TAB</span>
+                </a>
+              </li>
+              <li class="tree-child-node">
+                <a class="sidebar-link" data-route="tool-mistakes">
+                  <span class="tree-item-icon">
+                    <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.4"><polygon points="7 1.5 12.5 4.5 7 7.5 1.5 4.5"/><polygon points="7 6.5 12.5 9.5 7 12.5 1.5 9.5"/></svg>
+                  </span>
+                  <span class="tree-label">Katalog častých chyb</span>
+                  <span class="link-code">ERR</span>
+                </a>
+              </li>
+              <li class="tree-child-node">
+                <a class="sidebar-link" data-route="tool-decision">
+                  <span class="tree-item-icon">
+                    <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.4"><polygon points="7 1.5 12.5 4.5 7 7.5 1.5 4.5"/><polygon points="7 6.5 12.5 9.5 7 12.5 1.5 9.5"/></svg>
+                  </span>
+                  <span class="tree-label">Rádce: Co dělat když...</span>
+                  <span class="link-code">HOW</span>
+                </a>
+              </li>
+              <li class="tree-child-node">
+                <a class="sidebar-link" data-route="tool-quiz">
+                  <span class="tree-item-icon">
+                    <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.4"><polygon points="7 1.5 12.5 4.5 7 7.5 1.5 4.5"/><polygon points="7 6.5 12.5 9.5 7 12.5 1.5 9.5"/></svg>
+                  </span>
+                  <span class="tree-label">Znalostní test DTM</span>
+                  <span class="link-code">TEST</span>
+                </a>
+              </li>
+            </ul>
+          </li>
+
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- STŘEDNÍ KOMPAKTNÍ OBSAHOVÁ PLOCHA -->
+    <main class="app-content" id="app-content">
+      <!-- Vkládáno dynamicky přes app.js -->
+    </main>
+
+    <!-- PRAVÝ PANEL (Na velkých monitorech) -->
+    <aside class="app-rail">
+      <div class="rail-box">
+        <div class="rail-heading">Členění kapitoly</div>
+        <ul class="rail-nav-list" id="rail-toc">
+          <li>
+            <a href="#mod-plain" class="rail-nav-link">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4.95 11.95A3 3 0 0 1 9 16h6a3 3 0 0 1 1.95-2.05A7 7 0 0 0 12 2z"/></svg>
+              <span>Praktický výklad</span>
+            </a>
+          </li>
+          <li>
+            <a href="#mod-rules" class="rail-nav-link">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M9 12l2 2 4-4"/></svg>
+              <span>Technická pravidla</span>
+            </a>
+          </li>
+          <li>
+            <a href="#mod-schema" class="rail-nav-link">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 21 21 21 3 3 3 21"/><circle cx="8" cy="16" r="1.5"/></svg>
+              <span>Vektorové CAD schéma</span>
+            </a>
+          </li>
+          <li>
+            <a href="#mod-legal" class="rail-nav-link">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="3" x2="12" y2="21"/><polyline points="2 7 12 3 22 7"/><path d="M6 16l-4-9 8 0-4 9a3 3 0 0 1-6 0z"/><path d="M18 16l-4-9 8 0-4 9a3 3 0 0 1-6 0z"/><path d="M5 21h14"/></svg>
+              <span>Právní rámec a vyhláška</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="rail-box">
+        <div class="rail-heading">Parametry DTM</div>
+        <div class="meta-spec-card">
+          <div class="meta-spec-row">
+            <span class="meta-spec-label">Datový formát:</span>
+            <span class="meta-spec-val">JVF DTM v1.5</span>
+          </div>
+          <div class="meta-spec-row">
+            <span class="meta-spec-label">Poloha (X,Y):</span>
+            <span class="meta-spec-val">S-JTSK (EPSG:5514)</span>
+          </div>
+          <div class="meta-spec-row">
+            <span class="meta-spec-label">Výška (Z):</span>
+            <span class="meta-spec-val">Bpv (Balt)</span>
+          </div>
+          <div class="meta-spec-row">
+            <span class="meta-spec-label">Předpis:</span>
+            <span class="meta-spec-val">Vyhl. 393/2020 Sb.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="rail-box">
+        <div class="rail-heading">Oficiální zdroje</div>
+        <ul class="rail-nav-list">
+          <li><a href="https://dtmwiki.cuzk.gov.cz/03_di_metodika" target="_blank" rel="noopener" class="rail-nav-link">DI Metodika (03_di) ↗</a></li>
+          <li><a href="https://dtmwiki.cuzk.gov.cz/ti" target="_blank" rel="noopener" class="rail-nav-link">TI Metodika rozcestník ↗</a></li>
+          <li><a href="https://www.cuzk.cz/DMVS/O-IS-DMVS.aspx" target="_blank" rel="noopener" class="rail-nav-link">Portál IS DMVS ↗</a></li>
+          <li><a href="https://app.iprpraha.cz/apl/app/slovnik-dtm/" target="_blank" rel="noopener" class="rail-nav-link">Slovník datového modelu DTM ↗</a></li>
+        </ul>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- Skripty -->
+  <script src="dtm-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

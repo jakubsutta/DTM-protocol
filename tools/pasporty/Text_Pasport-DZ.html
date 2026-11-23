@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generátor textu – Pasport DZ</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+<style>
+    /* ---- Tisk / PDF ---- */
+    @media print {
+        * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        body { background: #fff !important; }
+        .app { display: block !important; }
+        .form-panel { display: none !important; }
+        .preview-panel { display: block !important; padding: 0 !important; box-shadow: none !important; margin: 0 !important; }
+        .page { box-shadow: none !important; margin: 0 !important; page-break-after: always; }
+        .page:last-child { page-break-after: auto; }
+        .leaflet-control-zoom { display: none !important; }
+        .leaflet-control-attribution { display: block !important; font-size: 7px !important; background: rgba(255,255,255,0.7) !important; transform: scale(0.85); transform-origin: bottom right; }
+        .map-box-big { border-radius: 0 !important; box-shadow: none !important; }
+        .cost-table img { max-height: 28px !important; }
+        .logo-obec-box { border: none !important; background: transparent !important; }
+        .logo-firma-box { border: none !important; }
+        .logo-placeholder { display: none !important; }
+        @page { size: A4; margin: 0; }
+    }
+
+    /* ---- Základní reset ---- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; background: #f0f2f5; color: #1a1a1a; min-height: 100vh; }
+    .app { display: grid; grid-template-columns: 400px 1fr; min-height: 100vh; }
+
+    /* ---- Formulářový panel ---- */
+    .form-panel { background: #fff5f5; color: #000; padding: 24px 22px 60px; display: flex; flex-direction: column; gap: 0; overflow-y: auto; max-height: 100vh; position: sticky; top: 0; }
+    .form-panel h2 { font-size: 13px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: #d32f2f; margin-bottom: 8px; }
+    .form-panel .sub { font-size: 10.5px; color: #78909c; margin-bottom: 18px; }
+    .page-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #fff; background: #1a1a2e; padding: 6px 10px; border-radius: 4px; margin: 22px 0 12px; }
+    .page-label:first-of-type { margin-top: 4px; }
+    .section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #020000; margin: 14px 0 8px; padding-bottom: 5px; border-bottom: 1px solid #d32f2f; }
+    .field { margin-bottom: 10px; }
+    .field label { display: block; font-size: 11px; color: #000; margin-bottom: 4px; font-weight: 600; }
+    .field input, .field select, .field textarea { width: 100%; background: #fff; border: 1px solid #d32f2f; border-radius: 4px; color: #1a1a1a; font-size: 12px; font-family: inherit; padding: 7px 10px; outline: none; transition: border-color 0.15s; }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: #4fc3f7; }
+    .field textarea { resize: vertical; min-height: 90px; line-height: 1.4; }
+    .field textarea.short { min-height: 60px; }
+    .field-note { font-size: 10px; color: #78909c; margin-top: 3px; line-height: 1.4; }
+    .result-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .result-row5 { display: grid; grid-template-columns: repeat(5,1fr); gap: 5px; }
+
+    .btn-row { display: flex; flex-direction: column; gap: 8px; margin: 20px 0; position: sticky; bottom: 0; background: #fff5f5; padding-top: 8px; z-index: 10; }
+    .btn { display: flex; align-items: center; justify-content: center; gap: 7px; padding: 10px 16px; border-radius: 5px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; font-family: inherit; transition: background 0.15s; }
+    .btn-primary { background: #d32f2f; color: #fff; } .btn-primary:hover { background: #b71c1c; }
+    .btn-secondary { background: #ffebee; color: #b71c1c; } .btn-secondary:hover { background: #ffcdd2; color: #8a1212; }
+
+    .file-field { border: 1px dashed #d32f2f; border-radius: 4px; padding: 8px 10px; font-size: 11px; color: #d32f2f; cursor: pointer; text-align: center; background: #fff; }
+    .file-field:hover { border-color: #b71c1c; color: #b71c1c; }
+
+    .table-editor input { width: 100%; background: #fff; border: 1px solid #d32f2f; border-radius: 4px; color: #1a1a1a; font-size: 11px; padding: 5px 6px; outline: none; transition: border-color 0.15s; margin-bottom: 2px; }
+    .table-editor input:focus { border-color: #4fc3f7; }
+    .btn-del-row { background: #ffebee; color: #d32f2f; border: 1px solid #ffcdd2; border-radius: 4px; width: 100%; height: 26px; cursor: pointer; font-weight: bold; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+    .btn-del-row:hover { background: #d32f2f; color: #fff; }
+
+    /* ---- Preview panel ---- */
+    .preview-panel { padding: 30px 10px 60px; display: flex; flex-direction: column; align-items: center; gap: 26px; overflow-y: auto; }
+    .page { background: #fff; width: 210mm; min-height: 297mm; padding: 18mm 20mm 16mm; box-shadow: 0 4px 32px rgba(0,0,0,0.18); position: relative; color: #1a1a1a; display: flex; flex-direction: column; }
+
+    .page-footer { margin-top: auto; padding-top: 10px; border-top: 1px solid #eceff1; display: flex; justify-content: space-between; font-size: 9px; color: #b0bec5; }
+    .sec-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #78909c; padding-bottom: 4px; border-bottom: 2px solid #ea521f; margin: 14px 0 8px; }
+    .sec-title:first-child { margin-top: 0; }
+    .ptext { font-size: 11.5px; line-height: 1.48; color: #1a1a1a; }
+    .cost-caption { font-size: 11px; text-align: left; margin-bottom: 4px; }
+    
+    /* Quill JS styling */
+    .ql-toolbar.ql-snow { border: 1px solid rgba(0,0,0,0.15); border-bottom: none; background: #fafbfc; border-radius: 4px 4px 0 0; padding: 4px 8px; font-family: inherit; }
+    .ql-container.ql-snow { border: 1px solid rgba(0,0,0,0.15); border-radius: 0 0 4px 4px; background: #fff; height: auto !important; }
+    .ql-editor { font-family: inherit; font-size: 13px; color: #1a1a2e; line-height: 1.5; min-height: 120px; height: auto !important; padding: 10px; overflow-y: auto; }
+    .ql-editor p { margin-bottom: 6px; }
+    .ql-editor p:last-child { margin-bottom: 0; }
+    .ql-snow .ql-toolbar button:hover .ql-stroke, .ql-snow .ql-toolbar button.ql-active .ql-stroke { stroke: #d32f2f; }
+    .ql-snow .ql-toolbar button:hover .ql-fill, .ql-snow .ql-toolbar button.ql-active .ql-fill { fill: #d32f2f; }
+
+    .ptext p { margin-bottom: 6px; }
+    .ptext p:last-child { margin-bottom: 0; }
+    .ptext p.ph { color: #b0bec5; font-style: italic; }
+    .ptext .ql-align-center, .ql-align-center { text-align: center; }
+    .ptext .ql-align-right, .ql-align-right { text-align: right; }
+    .ptext .ql-align-justify, .ql-align-justify { text-align: justify; }
+    .ptext .ql-align-left, .ql-align-left { text-align: left; }
+
+    /* ---- Titulní strana ---- */
+    .p1 { align-items: center; text-align: center; justify-content: flex-start; }
+    .p1-title { font-size: 24px; font-weight: 800; color: #1a1a2e; letter-spacing: 0.02em; line-height: 1.35; text-transform: uppercase; margin-top: 20px; max-width: 140mm; border-bottom: 2px solid #ea521f; padding-bottom: 8px; margin-bottom: 12px; }
+    .p1-obec { font-size: 17px; font-weight: 700; color: #ea521f; text-transform: uppercase; margin-top: 14px; letter-spacing: 0.05em; }
+    .logo-obec-box { width: 60mm; height: 60mm; border: 2px dashed #cfd8dc; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 46px auto; overflow: hidden; background: #fafbfc; flex-shrink: 0; }
+    .logo-obec-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .logo-placeholder { font-size: 11px; color: #b0bec5; }
+    .p1-footer { margin-top: auto; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-top: 20px; gap: 12px; }
+    .p1-footer .lbl { font-size: 14px; font-weight: 700; color: #1a1a2e; text-transform: none; letter-spacing: normal; margin-bottom: 0; }
+    .logo-firma-box { width: 70mm; height: 35mm; border: 1px solid #cfd8dc; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #fff; }
+    .logo-firma-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .p1-address { font-size: 12px; color: #1a1a2e; text-align: center; line-height: 1.4; font-weight: 600; }
+    .p1-year { font-size: 24px; font-weight: 800; color: #1a1a2e; margin-top: 8px; }
+
+    /* ---- Tabulka základních údajů ---- */
+    .info-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .info-table td { padding: 6px 8px; vertical-align: top; border-bottom: 1px solid #f5f5f5; }
+    .info-table td:first-child { color: #78909c; width: 42%; font-size: 11px; padding-right: 12px; }
+    .info-table td:last-child { font-weight: 500; }
+
+    /* ---- Mapa ---- */
+    .autocomplete-wrap { position: relative; flex: 1; }
+    .autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #d32f2f; border-top: none; border-radius: 0 0 4px 4px; max-height: 180px; overflow-y: auto; z-index: 100; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+    .autocomplete-list.visible { display: block; }
+    .autocomplete-item { padding: 6px 10px; font-size: 12px; cursor: pointer; border-bottom: 1px solid #f5f5f5; color: #1a1a1a; }
+    .autocomplete-item:last-child { border-bottom: none; }
+    .autocomplete-item:hover, .autocomplete-item.active { background: #ffebee; color: #d32f2f; }
+    .autocomplete-item small { color: #90a4ae; font-size: 10px; margin-left: 6px; }
+    .map-box-big { background: #eef2f5; border: 1px solid #cfd8dc; border-radius: 5px; overflow: hidden; width: 100%; height: 118mm; z-index: 1; margin-top: auto; }
+
+    /* ---- Tabulka značení ---- */
+    .cost-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 10px; }
+    .cost-table th { background: #f5f7fa; padding: 4px 6px; text-align: center; font-size: 9.5px; font-weight: 700; color: #78909c; border: 1px solid #e0e0e0; }
+    .cost-table td { padding: 3px 6px; text-align: center; border: 1px solid #e0e0e0; vertical-align: middle; }
+    .cost-table td:first-child { color: #78909c; font-weight: 600; text-align: center; background: #fafbfc; }
+
+    /* ---- Tabulka seznam značení – přetečení + nová stránka ---- */
+    .seznam-znaceni-wrap { width: 100%; }
+    .seznam-znaceni-wrap.new-page { page-break-before: always; break-before: page; }
+    @media print {
+        .seznam-znaceni-wrap.new-page { page-break-before: always; break-before: page; }
+        .cost-table { page-break-inside: auto; break-inside: auto; }
+        .cost-table thead { display: table-header-group; }
+        .cost-table tr { page-break-inside: avoid; break-inside: avoid; }
+    }
+
+    /* ---- Podpis ---- */
+    .sign-row { display: flex; gap: 40px; margin-top: 10px; align-items: flex-end; }
+    .stamp-box { width: 48mm; height: 22mm; border: 1.5px dashed #cfd8dc; border-radius: 6px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #fafbfc; margin-bottom: 4px; }
+    .stamp-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .sign-block { text-align: center; }
+    .sign-line { width: 160px; border-top: 1px solid #b0bec5; margin: 4px auto 4px; }
+    .sign-label { font-size: 10px; color: #78909c; }
+    .sign-sub { font-size: 10px; color: #b0bec5; }
+    .sign-date { font-size: 11px; color: #78909c; line-height: 1.7; }
+
+    /* ---- Zvýraznění při editaci (Live preview highlight) ---- */
+    .preview-highlight {
+        outline: 2px dashed #d32f2f !important;
+        outline-offset: 3px !important;
+        box-shadow: 0 0 10px rgba(211, 47, 47, 0.25) !important;
+        border-radius: 4px !important;
+        transition: outline 0.15s ease, box-shadow 0.15s ease !important;
+        position: relative;
+        z-index: 10;
+    }
+
+    .preview-highlight-hover {
+        outline: 1.5px dashed rgba(211, 47, 47, 0.5) !important;
+        outline-offset: 3px !important;
+        box-shadow: 0 0 6px rgba(211, 47, 47, 0.15) !important;
+        border-radius: 4px !important;
+    }
+
+    /* Zvýraznění řádků v tabulce údajů */
+    tr.preview-highlight {
+        outline: 2px dashed #d32f2f !important;
+        outline-offset: -1px !important;
+    }
+    tr.preview-highlight td {
+        background-color: rgba(211, 47, 47, 0.05) !important;
+    }
+    tr.preview-highlight-hover td {
+        background-color: rgba(211, 47, 47, 0.02) !important;
+    }
+
+    /* Klikatelné prvky v náhledu */
+    .preview-clickable {
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+    }
+    .preview-clickable:hover {
+        background-color: rgba(211, 47, 47, 0.03);
+    }
+
+    /* Vypnutí při tisku a v PDF exportu */
+    @media print {
+        .preview-highlight, .preview-highlight-hover {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        tr.preview-highlight {
+            outline: none !important;
+        }
+        tr.preview-highlight td, tr.preview-highlight-hover td {
+            background-color: transparent !important;
+        }
+    }
+
+</style>
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23ff0400%22 stroke-width=%221.6%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M9 4H15L18.5 7.5V13.5L15 17H9L5.5 13.5V7.5Z%22/><path d=%22M12 17v4%22/><path d=%22M9.5 21h5%22/></svg>">
+</head>
+<body>
+
+<div class="app">
+    <!-- ===== FORMULÁŘ ===== -->
+    <div class="form-panel" id="form-panel">
+        <h2>Generátor textu – Pasport DZ</h2>
+        <div class="sub">Vyplňte pole vlevo, náhled dokumentu se aktualizuje vpravo.</div>
+
+        <div class="page-label">Strana 1 — Titulní strana</div>
+        <div class="field"><label>Nadpis</label><input type="text" id="nadpis" value="PASPORT SVISLÉHO DOPRAVNÍHO ZNAČENÍ"></div>
+        <div class="field"><label>Název obce</label>
+            <div style="display:flex; gap:6px;">
+                <select id="typObce" style="width: 100px;">
+                    <option value="Obec ">Obec</option>
+                    <option value="Městys ">Městys</option>
+                    <option value="Město ">Město</option>
+                    <option value="Část obce ">Část obce</option>
+                    <option value="Firma ">Firma</option>
+                    <option value="">(nic)</option>
+                </select>
+                <input type="text" id="nazevObce" placeholder="např. Tovačov">
+            </div>
+        </div>
+        <div class="field"><label>Logo obce</label><div class="file-field" data-preview-target="p-logoObec" onclick="document.getElementById('logoObecInput').click()">+ Vybrat obrázek loga obce</div>
+            <input type="file" id="logoObecInput" accept="image/*" style="display:none" onchange="handleUpload(this,'p-logoObec')"></div>
+        <div class="field"><label>Vypracoval (Adresa)</label>
+            <textarea id="vypracoval" style="min-height: 45px;">ATOMICON s. r. o., Stupkova 952/18, Olomouc 779 00
+tel. +420 778 481 700</textarea>
+        </div>
+        <div class="field"><label>Logo firmy</label><div class="file-field" data-preview-target="p-logoFirma" onclick="document.getElementById('logoFirmaInput').click()">+ Vybrat logo firmy</div>
+            <input type="file" id="logoFirmaInput" accept="image/*" style="display:none" onchange="handleUpload(this,'p-logoFirma')"></div>
+        <div class="field"><label>Rok</label><input type="text" id="rok" value="2025"></div>
+
+        <div class="page-label">Strana 2 — Základní údaje a mapa</div>
+        <div class="section-label">Základní údaje o obci</div>
+        <div class="field"><label>Objednatel</label><input type="text" id="objednatel" placeholder="Obec [Název obce]"></div>
+        <div class="field"><label>Adresa</label><input type="text" id="adresa" placeholder="Ulice/č.p., PSČ Obec"></div>
+        <div class="field"><label>IČO/DIČ</label><input type="text" id="icoDic" placeholder="00000000/CZ00000000"></div>
+        <div class="field"><label>E-mail</label><input type="text" id="email" placeholder="obec@obec.cz"></div>
+        <div class="field"><label>Telefon</label><input type="text" id="telefon" placeholder="+420 000 000 000"></div>
+        <div class="field"><label>Místo řešení</label><input type="text" id="mistoReseni" placeholder="obec [Název obce]"></div>
+        <div class="field"><label>Obec s pověřeným úřadem</label><input type="text" id="povereny"></div>
+        <div class="field"><label>Obec s rozšířenou působností</label><input type="text" id="rozsirena"></div>
+        <div class="field"><label>Okres</label><input type="text" id="okres"></div>
+        <div class="field"><label>Kraj</label><input type="text" id="kraj"></div>
+
+        <div class="section-label">Mapa — vyhledat obec</div>
+        <div class="field">
+            <div style="display:flex; gap:6px;">
+                <div class="autocomplete-wrap">
+                    <input type="text" id="mapObec" placeholder="např. Tovačov" oninput="onObecInput()" onkeydown="onObecKeydown(event)" autocomplete="off">
+                    <div class="autocomplete-list" id="obecSuggestions"></div>
+                </div>
+                <button type="button" class="btn btn-primary" style="padding: 0 14px;" id="locateCityBtn" data-preview-target="map-container" onclick="locateCity()">Najít</button>
+            </div>
+            <div class="field-note">Nalezená obec se propíše do názvu obce, objednatele a místa řešení.</div>
+        </div>
+
+        <div class="page-label">Strana 3 — Pasport dopravního značení</div>
+        <div class="field"><label>Úvod a legislativa</label>
+            <textarea id="dzUvod">Dokument evidence dopravního značení v katastru obce [Název obce] je proveden v plném rozsahu dle zákona č. 361/2000 Sb., o pozemních komunikacích ve znění pozdějších změn a Vyhlášky Ministerstva dopravy č. 294/2015 Sb., kterou se provádí zákon o dopravním značení, v platném znění. Součástí pasportu je svislé dopravní značení v majetku obce vymezené katastrem obce. Evidenční číslování je vedeno v souladu s obecně platnými pravidly evidence dopravního značení na území České republiky.</textarea>
+        </div>
+        <div class="field"><label>Metodika a GIS</label>
+            <textarea id="dzMetodika">Dopravní značení bylo fyzicky zaměřeno technologií GNSS s přesností +/- 2 cm, během tvorby původního pasportu v roce 2019. V roce [rok] byl pasport doplněn o nové dopravní značení a byly aktualizovány informace stávajících dopravních značek. Byla pořízena fotodokumentace a zapsány informace o stavu objektů (stav nosiče a stav značky). Dále je pasport vyhotoven v systému GIS a vytvořen dle pravidel a metodik platných v oblasti geografických informačních systémů a kartografie. Obsahuje vektorové vrstvy v přenositelném datovém formátu ESRI Shapefile v souřadnicových systémech S-JTSK a WGS-84. Kromě grafické podoby obsahuje tabulkové informace ve formě databázových tabulek přímo provázaných s jednotlivými entitami.</textarea>
+        </div>
+        <div class="field"><label>Systém GISAdmin</label>
+            <textarea id="dzGisAdmin">Digitální verze pasportu je zaštiťována webově orientovaným systémem GISAdmin, který zajišťuje on-line přístup k datům a umožňuje včasnou aktualizaci. Tento systém je pro obce k dispozici na vyžádání a je zpoplatněn měsíčním paušálním poplatkem (obec [Název obce] není uživatelem systému GISAdmin).</textarea>
+        </div>
+
+        <div class="section-label">Shrnutí stavu značení</div>
+        <div class="field"><label>Závěrečný odstavec</label>
+            <textarea id="dzZaver">Výstupní pasport popisuje aktuální stav svislého dopravního značení ve vlastnictví obce, platný k lednu [rok]. Obsahuje textovou část, tabulkové výstupy, technické karty objektů a grafické přílohy – soubor tematických map.</textarea>
+        </div>
+        <div class="field"><label>Souhrn stavu značení</label>
+            <textarea id="dzShrnuti">Celkově je v evidenci [počet] objektů svislého dopravního značení. Většina značení je nově osazena, dopravní zrcadlo a značení č. 01 jsou ve vyhovujícím stavu, v havarijním stavu je č. 03. Podrobný stav jednotlivého značení je uveden v tabulkové části pasportu. Materiál, ze kterého jsou tyto dopravní značky vytvořeny, je plech (dopravní zrcadlo je z plastu). Většina dopravního značení má reflexní povrch, který speciálně odráží viditelné záření. Podrobnější informace lze nalézt v tabulkové části pasportu.</textarea>
+        </div>
+
+        <div class="section-label">Seznam značení (tabulka)</div>
+        <div class="field">
+            <label style="display:flex; align-items:center; gap:7px; cursor:pointer; font-weight:600; font-size:11px; margin-bottom:8px;">
+                <input type="checkbox" id="seznamNewPage" style="width:auto; accent-color:#d32f2f;" onchange="toggleSeznamNewPage()">
+                Začít na nové stránce
+            </label>
+            <div class="table-editor" id="edit-seznamZnaceni"></div>
+            <button type="button" class="btn btn-secondary" style="margin-top:6px; padding:6px; font-size:11px;" onclick="addRow('seznamZnaceni')">+ Přidat značku</button>
+            <div class="field-note">Symbol se automaticky vygeneruje podle kódu DZ (např. P 4, B 20a, IP 6, IZ 4a apod.). Při zadání kódu se automaticky předvyplní oficiální název.</div>
+        </div>
+
+        <div class="section-label">Podpis / razítko</div>
+        <div class="field"><label>Obrázek podpisu / razítka</label><div class="file-field" data-preview-target="p-stamp" onclick="document.getElementById('stampInput').click()">+ Vybrat obrázek</div>
+            <input type="file" id="stampInput" accept="image/*" style="display:none" onchange="handleUpload(this,'p-stamp')"></div>
+        <div class="field"><label>Datum</label><input type="date" id="signDate"></div>
+
+        <div class="btn-row">
+            <button class="btn btn-primary" onclick="window.print()">⬇ Uložit jako PDF (Ctrl+P)</button>
+            <button class="btn btn-secondary" onclick="resetForm()">Vymazat formulář</button>
+        </div>
+    </div>
+
+    <!-- ===== NÁHLED ===== -->
+    <div class="preview-panel">
+
+        <!-- STRANA 1 -->
+        <div class="page p1">
+            <div class="p1-title preview-clickable" id="p-nadpis">PASPORT SVISLÉHO DOPRAVNÍHO ZNAČENÍ</div>
+            <div class="p1-obec preview-clickable" id="p-nazevObec">OBEC —</div>
+            <div class="logo-obec-box preview-clickable" id="p-logoObec"><span class="logo-placeholder">logo obce</span></div>
+            <div class="p1-footer">
+                <div class="lbl">Vypracoval</div>
+                <div class="logo-firma-box preview-clickable" id="p-logoFirma"><img src="../../assets/img/logo3.png" alt="logo firmy"></div>
+                <div class="p1-address preview-clickable" id="p-vypracoval">ATOMICON s. r. o., Stupkova 952/18, Olomouc 779 00<br>tel. +420 778 481 700</div>
+                <div class="p1-year preview-clickable" id="p-rok">2025</div>
+            </div>
+        </div>
+
+        <!-- STRANA 2 -->
+        <div class="page">
+            <div class="sec-title">Základní údaje o obci</div>
+            <table class="info-table">
+                <tr><td>Objednatel:</td><td id="p-objednatel">—</td></tr>
+                <tr><td>Adresa:</td><td id="p-adresa">—</td></tr>
+                <tr><td>IČO/DIČ:</td><td id="p-icoDic">—</td></tr>
+                <tr><td>E-mail:</td><td id="p-email">—</td></tr>
+                <tr><td>Telefon:</td><td id="p-telefon">—</td></tr>
+                <tr><td>Místo řešení:</td><td id="p-mistoReseni">—</td></tr>
+                <tr><td>Obec s pověřeným úřadem:</td><td id="p-povereny">—</td></tr>
+                <tr><td>Obec s rozšířenou působností:</td><td id="p-rozsirena">—</td></tr>
+                <tr><td>Okres:</td><td id="p-okres">—</td></tr>
+                <tr><td>Kraj:</td><td id="p-kraj">—</td></tr>
+            </table>
+            <div class="sec-title">Mapa zájmového území</div>
+            <div class="map-box-big preview-clickable" id="map-container"></div>
+            <div class="page-footer"><div>Pasport dopravního značení</div><div>2</div></div>
+        </div>
+
+        <!-- STRANA 3 -->
+        <div class="page" id="page-3">
+            <div class="sec-title" style="font-size:13px; text-transform:none; letter-spacing:0; color:#1a1a2e; border-bottom:2px solid #ea521f; padding-bottom:6px; margin-bottom:10px;">Pasport dopravního značení</div>
+            <div class="ptext" id="p-dzUvod"></div>
+            <div class="ptext" id="p-dzMetodika"></div>
+            <div class="ptext" id="p-dzGisAdmin"></div>
+
+            <div class="sec-title" style="font-size:11.5px; text-transform:none; letter-spacing:0; color:#1a1a2e; border-bottom:2px solid #ea521f; padding-bottom:4px; margin: 12px 0 6px;">Shrnutí stavu značení</div>
+            <div class="ptext" id="p-dzZaver"></div>
+            <div class="ptext" id="p-dzShrnuti"></div>
+            
+            <div class="seznam-znaceni-wrap" id="seznam-znaceni-wrap">
+            <div class="sec-title" style="font-size:10.5px; text-transform:uppercase; letter-spacing:0.08em; color:#78909c; border-bottom:2px solid #d32f2f; padding-bottom:4px; margin: 10px 0 6px;">Seznam značení</div>
+            <table class="cost-table" id="p-tab-seznamZnaceni">
+                <thead>
+                    <tr>
+                        <th style="width: 45px;">Číslo</th>
+                        <th style="width: 75px;">Kód DZ</th>
+                        <th>Název DZ</th>
+                        <th style="width: 55px;">Počet</th>
+                        <th style="width: 65px;">Symbol</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            </div>
+            
+            <div id="sign-section" style="margin-top: auto; width: 100%;">
+                <div class="sign-row" style="margin-top: 6px; margin-bottom: 12px;">
+                    <div class="sign-block">
+                        <div class="stamp-box preview-clickable" id="p-stamp"><span class="logo-placeholder">podpis / razítko</span></div>
+                        <div class="sign-line"></div>
+                        <div class="sign-label" id="p-signName">Atomicon, s.r.o.</div>
+                        <div class="sign-sub">podpis / razítko</div>
+                    </div>
+                    <div class="sign-date" id="p-signDateWrap">Datum:<br><span id="p-signDate">—</span></div>
+                </div>
+                <div class="page-footer" style="margin-top: 0;"><div>Pasport dopravního značení</div><div>3</div></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+// ==== NAHRÁVÁNÍ LOGA / RAZÍTKA ====
+function handleUpload(input, targetId) {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        document.getElementById(targetId).innerHTML = '<img src="' + e.target.result + '" alt="obrázek">';
+    };
+    reader.readAsDataURL(file);
+}
+
+// ==== LEAFLET MAPA (OpenStreetMap) ====
+let mapInstance;
+let markerLayer;
+
+function initMap() {
+    mapInstance = L.map('map-container').setView([49.8023, 15.4730], 7);
+    L.tileLayer('https://ags.cuzk.cz/arcgis1/rest/services/ZTM_WM/MapServer/tile/{z}/{y}/{x}', {
+        opacity: 0.7,
+        attribution: '&copy; ČÚZK'
+    }).addTo(mapInstance);
+    mapInstance.scrollWheelZoom.disable();
+}
+
+// ==== NAŠEPTÁVAČ OBCÍ (ČÚZK RUIAN) ====
+let obecDebounce = null;
+let obecActiveIdx = -1;
+let selectedObecKod = null;
+
+function onObecInput() {
+    clearTimeout(obecDebounce);
+    const q = document.getElementById('mapObec').value.trim();
+    if (q.length < 2) { hideObecSuggestions(); return; }
+    obecDebounce = setTimeout(() => fetchObecSuggestions(q), 300);
+}
+
+async function fetchObecSuggestions(q) {
+    try {
+        const url = `https://ags.cuzk.cz/arcgis/rest/services/RUIAN/MapServer/12/query`
+            + `?where=${encodeURIComponent("UPPER(nazev) LIKE UPPER('" + q.replace(/'/g, "''") + "%')")}`
+            + `&outFields=nazev,kod`
+            + `&returnGeometry=false`
+            + `&resultRecordCount=8`
+            + `&orderByFields=nazev`
+            + `&f=json`;
+        const resp = await fetch(url);
+        const data = await resp.json();
+        const list = document.getElementById('obecSuggestions');
+        if (!data.features || data.features.length === 0) { hideObecSuggestions(); return; }
+        obecActiveIdx = -1;
+        list.innerHTML = data.features.map((f, i) =>
+            `<div class="autocomplete-item" onmousedown="selectObec('${f.attributes.nazev.replace(/'/g, "\\'")}',${f.attributes.kod})"
+                 data-index="${i}" data-kod="${f.attributes.kod}">${f.attributes.nazev}<small>${f.attributes.kod}</small></div>`
+        ).join('');
+        list.classList.add('visible');
+    } catch (e) { hideObecSuggestions(); }
+}
+
+function selectObec(name, kod) {
+    document.getElementById('mapObec').value = name;
+    selectedObecKod = kod || null;
+    hideObecSuggestions();
+    locateCity();
+}
+
+function hideObecSuggestions() {
+    const list = document.getElementById('obecSuggestions');
+    list.classList.remove('visible');
+    list.innerHTML = '';
+    obecActiveIdx = -1;
+}
+
+function onObecKeydown(e) {
+    const list = document.getElementById('obecSuggestions');
+    const items = list.querySelectorAll('.autocomplete-item');
+    if (!list.classList.contains('visible') || items.length === 0) {
+        if (e.key === 'Enter') locateCity();
+        return;
+    }
+    if (e.key === 'ArrowDown') { e.preventDefault(); obecActiveIdx = Math.min(obecActiveIdx + 1, items.length - 1); updateObecActive(items); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); obecActiveIdx = Math.max(obecActiveIdx - 1, 0); updateObecActive(items); }
+    else if (e.key === 'Enter') { e.preventDefault(); if (obecActiveIdx >= 0 && items[obecActiveIdx]) items[obecActiveIdx].onmousedown(); else locateCity(); }
+    else if (e.key === 'Escape') { hideObecSuggestions(); }
+}
+
+function updateObecActive(items) {
+    items.forEach((it, i) => it.classList.toggle('active', i === obecActiveIdx));
+}
+
+document.addEventListener('click', (e) => { if (!e.target.closest('.autocomplete-wrap')) hideObecSuggestions(); });
+
+async function locateCity() {
+    hideObecSuggestions();
+    let query = document.getElementById("mapObec").value.trim();
+    if (!query) return;
+
+    let useKod = selectedObecKod;
+    selectedObecKod = null;
+
+    if (markerLayer) { mapInstance.removeLayer(markerLayer); markerLayer = null; }
+
+    let boundaryFound = false;
+    try {
+        let whereClause = useKod
+            ? `kod=${useKod}`
+            : `nazev='${query.replace(/'/g, "''")}'`;
+        let ruianUrl = `https://ags.cuzk.cz/arcgis/rest/services/RUIAN/MapServer/12/query`
+            + `?where=${encodeURIComponent(whereClause)}`
+            + `&outFields=nazev`
+            + `&outSR=4326`
+            + `&returnGeometry=true`
+            + `&f=json`;
+        let ruianResp = await fetch(ruianUrl);
+        let ruianData = await ruianResp.json();
+
+        if (ruianData.features && ruianData.features.length > 0) {
+            let nazev = ruianData.features[0].attributes.nazev;
+            let rings = ruianData.features[0].geometry.rings;
+            let latlngs = rings.map(ring => ring.map(pt => [pt[1], pt[0]]));
+            markerLayer = L.polygon(latlngs, {
+                color: "#4483fc",
+                weight: 3,
+                fillColor: "#4483fc",
+                fillOpacity: 0.15
+            }).addTo(mapInstance);
+            mapInstance.fitBounds(markerLayer.getBounds());
+            boundaryFound = true;
+            fillObecName(nazev);
+            
+            // Doplňující údaje z RÚIAN (POU, ORP, Okres, Kraj)
+            try {
+                let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+                rings.forEach(ring => ring.forEach(pt => {
+                    if(pt[0] < minX) minX = pt[0];
+                    if(pt[1] < minY) minY = pt[1];
+                    if(pt[0] > maxX) maxX = pt[0];
+                    if(pt[1] > maxY) maxY = pt[1];
+                }));
+                let ptX = (minX + maxX) / 2;
+                let ptY = (minY + maxY) / 2;
+                let geomParam = { x: ptX, y: ptY, spatialReference: { wkid: 4326 } };
+                let geomStr = JSON.stringify(geomParam);
+                
+                let fetchInfo = async (layerId) => {
+                    try {
+                        let formData = new URLSearchParams();
+                        formData.append('geometry', geomStr);
+                        formData.append('geometryType', 'esriGeometryPoint');
+                        formData.append('inSR', '4326');
+                        formData.append('spatialRel', 'esriSpatialRelIntersects');
+                        formData.append('outFields', 'nazev');
+                        formData.append('returnGeometry', 'false');
+                        formData.append('f', 'json');
+                        
+                        let url = `https://ags.cuzk.cz/arcgis/rest/services/RUIAN/MapServer/${layerId}/query`;
+                        let resp = await fetch(url, { method: 'POST', body: formData });
+                        let data = await resp.json();
+                        if (data.features && data.features.length > 0) {
+                            return data.features[0].attributes.nazev;
+                        }
+                    } catch (e) {}
+                    return '';
+                };
+
+                Promise.all([
+                    fetchInfo(13), // POU
+                    fetchInfo(14), // ORP
+                    fetchInfo(15), // Okres
+                    fetchInfo(17)  // Kraj (VÚSC)
+                ]).then(results => {
+                    const [pou, orp, okres, kraj] = results;
+                    if (pou) { const el = document.getElementById('povereny'); if (el) el.value = pou; }
+                    if (orp) { const el = document.getElementById('rozsirena'); if (el) el.value = orp; }
+                    if (okres) { const el = document.getElementById('okres'); if (el) el.value = okres; }
+                    if (kraj) { const el = document.getElementById('kraj'); if (el) el.value = kraj; }
+                    
+                    fillOkresKraj(okres, kraj);
+                    updatePreview();
+                });
+            } catch (err) {}
+        }
+    } catch (ruianErr) {
+        // ČÚZK nedostupný
+    }
+
+    if (!boundaryFound) {
+        try {
+            let response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}+Czechia`);
+            let data = await response.json();
+            if (data && data.length > 0) {
+                mapInstance.setView([parseFloat(data[0].lat), parseFloat(data[0].lon)], 12);
+                fillObecName(query);
+            } else {
+                alert("Obec nebyla nalezena.");
+            }
+        } catch (e) {
+            alert("Chyba při komunikaci se serverem map.");
+        }
+    }
+}
+
+let currentObecName = '[Název obce]';
+let currentOkresName = '[Okres]';
+let currentKrajName = '[Kraj]';
+
+// Propíše nalezenou obec do formuláře
+function fillObecName(nazev) {
+    if (!nazev) return;
+    
+    const inputs = document.querySelectorAll('.form-panel input[type="text"], .form-panel textarea');
+    inputs.forEach(el => {
+        if (el.id === 'nazevObce' || el.id === 'objednatel' || el.id === 'mistoReseni') return;
+        
+        if (currentObecName && el.value.includes(currentObecName)) {
+            el.value = el.value.split(currentObecName).join(nazev);
+            if (quillEditors[el.id]) quillEditors[el.id].root.innerHTML = el.value;
+        }
+    });
+    currentObecName = nazev;
+
+    const nazevEl = document.getElementById('nazevObce');
+    if (nazevEl) nazevEl.value = nazev;
+    
+    const typSelect = document.getElementById('typObce');
+    const typVal = typSelect ? typSelect.value : 'Obec ';
+    const typLower = typVal.toLowerCase();
+    
+    const objEl = document.getElementById('objednatel');
+    if (objEl) objEl.value = (typVal + nazev).trim();
+    const mistoEl = document.getElementById('mistoReseni');
+    if (mistoEl) mistoEl.value = (typLower + nazev).trim();
+    
+    updatePreview();
+}
+
+function fillOkresKraj(okres, kraj) {
+    const inputs = document.querySelectorAll('.form-panel input[type="text"], .form-panel textarea');
+    inputs.forEach(el => {
+        let changed = false;
+        if (okres && currentOkresName && el.value.includes(currentOkresName)) {
+            el.value = el.value.split(currentOkresName).join(okres);
+            changed = true;
+        }
+        if (kraj && currentKrajName && el.value.includes(currentKrajName)) {
+            el.value = el.value.split(currentKrajName).join(kraj);
+            changed = true;
+        }
+        if (changed && quillEditors[el.id]) {
+            quillEditors[el.id].root.innerHTML = el.value;
+        }
+    });
+    if (okres) currentOkresName = okres;
+    if (kraj) currentKrajName = kraj;
+}
+
+// ==== POMOCNÉ FUNKCE ====
+function escapeHtml(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function textToHtml(text) {
+    if (!text || !text.trim()) return '';
+    return text.split(/\n\s*\n/).map(p => '<p>' + escapeHtml(p.trim()).replace(/\n/g, '<br>') + '</p>').join('');
+}
+function val(id) { return (document.getElementById(id)?.value || '').trim(); }
+function setText(id, text) { const el = document.getElementById(id); if (el) el.textContent = text || '—'; }
+function setHtml(id, text) { 
+    const el = document.getElementById(id); 
+    if (el) {
+        if (!text || text === '<p><br></p>') {
+            el.innerHTML = '<p class="ph">— nevyplněno —</p>';
+        } else {
+            el.innerHTML = text;
+        }
+    }
+}
+
+// ==== KATALOG DOPRAVNÍHO ZNAČENÍ (Vyhláška 294/2015 Sb.) ====
+const dzCatalog = {
+    'P_1': 'Křižovatka s vedlejší pozemní komunikací',
+    'P_2': 'Hlavní pozemní komunikace',
+    'P_3': 'Konec hlavní pozemní komunikace',
+    'P_4': 'Dej přednost v jízdě!',
+    'P_5': 'Křižovatka s kruhovým objezdem',
+    'P_6': 'Stůj, dej přednost v jízdě!',
+    'P_7': 'Přednost protijedoucích vozidel',
+    'P_8': 'Přednost před protijedoucími vozidly',
+    
+    'B_1': 'Zákaz vjezdu všech vozidel v obou směrech',
+    'B_2': 'Zákaz vjezdu všech vozidel',
+    'B_3a': 'Zákaz vjezdu všech motorových vozidel',
+    'B_3b': 'Zákaz vjezdu pro osobní a nákladní automobily',
+    'B_4': 'Zákaz vjezdu nákladních automobilů',
+    'B_5': 'Zákaz vjezdu autobusů',
+    'B_6': 'Zákaz vjezdu traktorů',
+    'B_7': 'Zákaz vjezdu motocyklů',
+    'B_8': 'Zákaz vjezdu jízdních kol',
+    'B_9': 'Zákaz vjezdu potahových vozidel',
+    'B_10': 'Zákaz vjezdu ručních vozíků',
+    'B_11': 'Zákaz vjezdu všech motorových vozidel',
+    'B_20a': 'Nejvyšší dovolená rychlost',
+    'B_20b': 'Konec nejvyšší dovolené rychlosti',
+    'B_21a': 'Zákaz předjíždění',
+    'B_21b': 'Konec zákazu předjíždění',
+    'B_24a': 'Zákaz odbočování vpravo',
+    'B_24b': 'Zákaz odbočování vlevo',
+    'B_25': 'Zákaz otáčení',
+    'B_26': 'Konec všech zákazů',
+    'B_28': 'Zákaz zastavení',
+    'B_29': 'Zákaz stání',
+    'B_30': 'Zákaz vstupu chodců',
+
+    'A_1a': 'Zatáčka vpravo',
+    'A_1b': 'Zatáčka vlevo',
+    'A_2a': 'Dvojitá zatáčka, první vpravo',
+    'A_2b': 'Dvojitá zatáčka, první vlevo',
+    'A_3': 'Křižovatka',
+    'A_4': 'Pozor, kruhový objezd',
+    'A_5': 'Nebezpečné stoupání',
+    'A_6a': 'Zúžená vozovka z obou stran',
+    'A_6b': 'Zúžená vozovka z jedné strany',
+    'A_7a': 'Nerovnost vozovky',
+    'A_7b': 'Zpomalovací práh',
+    'A_8': 'Nebezpečí smyku',
+    'A_9': 'Provoz v obou směrech',
+    'A_10': 'Světelné signály',
+    'A_11': 'Pozor, přechod pro chodce',
+    'A_12': 'Děti',
+    'A_13': 'Zvířata',
+    'A_14': 'Zvěř',
+    'A_15': 'Práce na silnici',
+    'A_16': 'Boční vítr',
+    'A_17': 'Odlétávající štěrk',
+    'A_18': 'Padající kamení',
+    'A_19': 'Cyklisté',
+    'A_20': 'Letadla',
+    'A_21': 'Tunel',
+    'A_22': 'Jiné nebezpečí',
+    'A_23': 'Kolona',
+    'A_24': 'Náledí',
+    'A_25': 'Železniční přejezd se závorami',
+    'A_26': 'Železniční přejezd bez závor',
+    'A_30': 'Výstražný kříž pro železniční přejezd',
+
+    'C_1': 'Kruhový objezd',
+    'C_2a': 'Přikázaný směr jízdy vpravo',
+    'C_2b': 'Přikázaný směr jízdy vlevo',
+    'C_2c': 'Přikázaný směr jízdy přímo',
+    'C_3a': 'Přikázaný směr jízdy zde vpravo',
+    'C_3b': 'Přikázaný směr jízdy zde vlevo',
+    'C_4a': 'Přikázaný směr objíždění vpravo',
+    'C_4b': 'Přikázaný směr objíždění vlevo a vpravo',
+    'C_7a': 'Stezka pro chodce',
+    'C_8a': 'Stezka pro cyklisty',
+    'C_9a': 'Stezka pro chodce a cyklisty společná',
+    'C_10a': 'Stezka pro chodce a cyklisty oddělená',
+
+    'IP_1a': 'Okruh',
+    'IP_2': 'Zpomalovací práh',
+    'IP_4a': 'Slepá pozemní komunikace',
+    'IP_4b': 'Jednosměrná pozemní komunikace',
+    'IP_5': 'Doporučená rychlost',
+    'IP_6': 'Přechod pro chodce',
+    'IP_7': 'Přejezd pro cyklisty',
+    'IP_8a': 'Podchod nebo nadchod',
+    'IP_11a': 'Parkoviště',
+    'IP_11b': 'Parkoviště (kolmé nebo šikmé stání)',
+    'IP_11c': 'Parkoviště (podélné stání)',
+    'IP_11d': 'Parkoviště (stání na chodníku kolmé/šikmé)',
+    'IP_11e': 'Parkoviště (stání na chodníku podélné)',
+    'IP_12': 'Vyhrazené parkoviště',
+    'IP_13b': 'Parkoviště s parkovacím automatem',
+    'IP_13c': 'Parkoviště s parkovacím kotoučem',
+    'IP_14a': 'Dálnice',
+    'IP_15a': 'Silnice pro motorová vozidla',
+    'IP_25a': 'Zóna s dopravním omezením',
+    'IP_25b': 'Konec zóny s dopravním omezením',
+
+    'IZ_1a': 'Dálnice',
+    'IZ_4a': 'Obec',
+    'IZ_4b': 'Konec obce',
+    'IZ_8a': 'Obytná zóna',
+    'IZ_8b': 'Konec obytné zóny',
+    'IZ_9a': 'Pěší zóna',
+    'IZ_9b': 'Konec pěší zóny',
+
+    'E_1': 'Počet',
+    'E_2a': 'Tvar křižovatky',
+    'E_2b': 'Tvar křižovatky',
+    'E_3a': 'Vzdálenost',
+    'E_4': 'Délka úseku',
+    'E_8a': 'Začátek platnosti',
+    'E_8b': 'Průběh platnosti',
+    'E_8c': 'Konec platnosti',
+    'E_12': 'Text',
+    'E_13': 'Text'
+};
+
+// Mapování kódů DZ na přesné názvy souborů na Wikimedia Commons
+const dzWikiFiles = {"A_1A": "Czech Republic road sign A 1a.svg", "A_1B": "Czech Republic road sign A 1b.svg", "A_2A": "Czech Republic road sign A 2a.svg", "A_2B": "Czech Republic road sign A 2b.svg", "A_3": "Czech Republic road sign A 3.svg", "A_4": "Czech Republic road sign A 4.svg", "A_5A": "Czech Republic road sign A 5a.svg", "A_5B": "Czech Republic road sign A 5b.svg", "A_6A": "Czech Republic road sign A 6a.svg", "A_6B": "Czech Republic road sign A 6b (flipped).svg", "A_7A": "Czech Republic road sign A 7a.svg", "A_7B": "Czech Republic road sign A 7b.svg", "A_8": "Czech Republic road sign A 8.svg", "A_9": "Czech Republic road sign A 9.svg", "A_10": "Czech Republic road sign A 10.svg", "A_11": "Czech Republic road sign A 11.svg", "A_12A": "Czech Republic road sign A 12a.svg", "A_12B": "Czech Republic road sign A 12.svg", "A_12C": "Czech Republic road sign A 12c.svg", "A_13": "Czech Republic road sign A 13.svg", "A_14": "Czech Republic road sign A 14.svg", "A_15": "Czech Republic road sign A 15.svg", "A_16": "Czech Republic road sign A 16.svg", "A_17": "Czech Republic road sign A 17.svg", "A_18": "Czech Republic road sign A 18 (flipped).svg", "A_19": "Czech Republic road sign A 19.svg", "A_20": "Czech Republic road sign A 20.svg", "A_21": "Czech Republic road sign A 21.svg", "A_22": "Czech Republic road sign A 22.svg", "A_23": "Czech Republic road sign A 23.svg", "A_24": "Czech Republic road sign A 24.svg", "A_25": "Czech Republic road sign A 25.svg", "A_26": "Czech Republic road sign A 26.svg", "A_27": "Czech Republic road sign A 27.svg", "A_28": "Czech Republic road sign A 28.svg", "A_29": "Czech Republic road sign A 29.svg", "A_30": "Czech Republic road sign A 30.svg", "A_31A": "Czech road sign A31a.svg", "A_31B": "Czech road sign A31b.svg", "A_31C": "A31c.svg", "A_32A": "Czech Republic road sign A 32a.svg", "A_32B": "A32b CZ.svg", "A_33": "Czech Republic road sign A 33.svg", "A_34": "Czech Republic road sign A 34.svg", "P_1": "Czech Republic road sign P 1.svg", "P_2": "CZ-P02 Hlavní pozemní komunikace.svg", "P_3": "CZ-P03 Konec hlavní pozemní komunikace.svg", "P_4": "Czech Republic road sign P 4.svg", "P_5": "P05 CZ.svg", "P_6": "Czech Republic road sign P 6.svg", "P_7": "P07 CZ.svg", "P_8": "CZ road sign P-8.svg", "B_1": "CZ road sign B-1.svg", "B_2": "CZ road sign B-2.svg", "B_3": "CZ road sign B-3a.svg", "B_4": "CZ road sign B-4.svg", "B_5": "CZ road sign B-5.svg", "B_6": "CZ road sign B-6.svg", "B_7": "CZ road sign B-7.svg", "B_8": "CZ road sign B-8.svg", "B_9": "B09cr.jpg", "B_10": "B10cr.jpg", "B_11": "B11cr.jpg", "B_12": "B12cr.jpg", "B_13": "B13cr.jpg", "B_14": "B14cr.jpg", "B_15": "B15cr.jpg", "B_16": "B16cr.jpg", "B_17": "CZ-B17 Zákaz vjezdu vozidel nebo souprav, jejichž délka přesahuje vyznačenou mez (2016).jpg", "B_18": "B18cr.jpg", "B_19": "B19cr.jpg", "B_20A": "B20acr.jpg", "B_20B": "B20bcr.jpg", "B_21A": "CZ road sign B-21a.svg", "B_21B": "B21bcr.jpg", "B_22A": "CZ road sign B-22a.svg", "B_22B": "B22bcr.jpg", "B_23A": "B23acr.jpg", "B_23B": "B23bcr.jpg", "B_24A": "B24acz.jpg", "B_24B": "B24bcz.jpg", "B_25": "B25cr.jpg", "B_26": "CZ road sign B-26.svg", "B_27": "CZ road sign B-27.svg", "B_28": "CZ road sign B-28.svg", "B_29": "CZ road sign B-29.svg", "B_30": "B30cr.jpg", "B_30A": "CZ road sign B-30a.svg", "B_31": "B31cr.jpg", "B_32": "Průjezd Zakázán CZ.svg", "B_33": "B33cr.jpg", "B_34": "B34cr.jpg", "C_1": "CZ road sign C01.svg", "C_2A": "CZ road sign C02a.svg", "C_2B": "CZ road sign C02b.svg", "C_2C": "CZ road sign C02c.svg", "C_2D": "CZ road sign C02d.svg", "C_2E": "CZ road sign C02e.svg", "C_2F": "CZ road sign C02f.svg", "C_3A": "CZ road sign C03a.svg", "C_3B": "CZ road sign C03b.svg", "C_4A": "CZ road sign C04a.svg", "C_4B": "CZ road sign C04b.svg", "C_4C": "CZ road sign C04c.svg", "C_5A": "CZ road sign C05a.svg", "C_5B": "CZ road sign C05b.svg", "C_6A": "CZ road sign C06a.30.svg", "C_6B": "CZ road sign C06b.30.svg", "C_7A": "CZ road sign C07a.svg", "C_7B": "CZ road sign C07b.svg", "C_8A": "CZ road sign C08a.svg", "C_8B": "CZ road sign C08b.svg", "C_9A": "CZ road sign C09a.svg", "C_9B": "CZ road sign C09b.svg", "C_10A": "CZ road sign C10a.svg", "C_10B": "CZ-C10b Konec stezky pro chodce a cyklisty.svg", "C_11A": "CZ road sign C11a.svg", "C_11B": "CZ road sign C11b.svg", "C_12A": "CZ road sign C12a.svg", "C_12B": "CZ road sign C12b.svg", "C_13A": "CZ road sign C13a.svg", "C_13B": "CZ road sign C13b.svg", "C_14A": "CZ-C14a Jiný příkaz (přejdi na druhou stranu).jpg", "C_14B": "CZ road sign C14b.svg", "C_15A": "CZ road sign C-15a.svg", "C_15B": "CZ road sign C-15b.svg", "IZ_1A": "CZ traffic sign IZ1a.svg", "IZ_1B": "CZ traffic sign IZ1b.svg", "IZ_2A": "CZ traffic sign IZ2a.svg", "IZ_2B": "CZ traffic sign IZ2b.svg", "IZ_3A": "IP8a-INFZN.svg", "IZ_3B": "IP8b-INFZN.svg", "IZ_4A": "IS12acr.jpg", "IZ_4B": "IS12bcr.jpg", "IZ_4C": "CZ-IS12c Obec v jazyce národnostní menšiny (2009).jpg", "IZ_4D": "CZ-IS12d Konec obce v jazyce národnostní menšiny (2009).jpg", "IZ_5A": "IP26a.svg", "IZ_5B": "IP26b.svg", "IZ_6A": "IP27a.svg", "IZ_6B": "IP27b.svg", "IZ_7A": "IZ 07a Nízkoemisní zóna (2025).tiff", "IZ_7B": "IZ 07b Konec nízkoemisní zóny (2025).tiff", "IZ_8A": "IP25a - zóna.svg", "IZ_8B": "IP25b.svg", "IZ_9A": "CZ-IZ 9a Zóna pro cyklisty (2016).jpg", "IZ_9B": "CZ-IZ 9b Konec zóny pro cyklisty (2016).jpg", "IZ_10A": "IZ 10a Sdílená zóna (2024).jpg", "IZ_10B": "IZ 10b Konec sdílené zóny (2024).jpg", "IP_1": "CZ traffic sign IP1a.svg", "IP_2": "IP2-INFZN.svg", "IP_3": "CZ-IP03 Podchod nebo nadchod (nadchod) (2016).jpg", "IP_4A": "IP4a-INFZN.svg", "IP_4B": "CZ road sign IP-4b.svg", "IP_4C": "IP 04c Jednosměrný provoz s povoleným provozem cyklistů v protisměru (2025).tif", "IP_5": "CZ road sign IP-5 (70).svg", "IP_6": "CZ road sign IP-6.svg", "IP_7": "CZ road sign IP-7.svg", "IP_8A": "IP8a-INFZN.svg", "IP_8B": "IP8b-INFZN.svg", "IP_9": "SOS - nouzový pruh + telefon.svg", "IP_10A": "IP 10a Slepá pozemní komunikace (s výjimkou cyklistů).tif", "IP_10B": "IP 10b Návěst před slepou pozemní komunikací (s výjimkou cyklistů).tif", "IP_11A": "CZ-IP11a Parkoviště.svg", "IP_11B": "IP11bcr.jpg", "IP_11C": "IP11ccr.jpg", "IP_11D": "IP11dcr.jpg", "IP_11E": "IP11ecr.jpg", "IP_11F": "IP11fcr.jpg", "IP_11G": "IP11gcr.jpg", "IP_12": "IP12cr.jpg", "IP_13A": "IP13acr.jpg", "IP_13B": "IP13bcr.jpg", "IP_13C": "IP13ccr.jpg", "IP_13D": "IP13dcr.jpg", "IP_13E": "CZ-IP13e Parkoviště K + R.jpg", "IP_13F": "IP 13f Parkoviště P+D (2024).jpg", "IP_14A": "CZ traffic sign IZ1a.svg", "IP_14B": "CZ traffic sign IZ1b.svg", "IP_15A": "CZ traffic sign IZ2a.svg", "IP_15B": "CZ traffic sign IZ2b.svg", "IP_15C": "CZ-IP15c Mýtné - 2007.jpg", "IP_15D": "CZ-IP15d Konec mýtného - 2007.jpg", "IP_16": "IP16cr.jpg", "IP_17": "IP17cr.jpg", "IP_18A": "IP18acr.jpg", "IP_18B": "IP18bcr.jpg", "IP_18C": "IP18ccr.jpg", "IP_19": "IP19cr.jpg", "IP_20A": "IP20a.svg", "IP_20B": "IP20b.svg", "IP_21": "IP21a.svg", "IP_22": "IP22.svg", "IP_23A": "IP23a.svg", "IP_23B": "IP23b.svg", "IP_23C": "CZ-IP23c Sjíždění vozidel veřejné hromadné dopravy osob z tramvajového pásu (2016 - 2015-07-31).jpg", "IP_24": "Czech Republic road sign IP 24.svg", "IP_25A": "IP25a.svg", "IP_25B": "IP25b.svg", "IP_26A": "IP26a.svg", "IP_26B": "IP26b.svg", "IP_27A": "IP27a.svg", "IP_27B": "IP27b.svg", "IP_28A": "CZ-IP28a Zpoplatnění provozu (2016 - verze 2015-07-31).jpg", "IP_28B": "CZ-IP28b Nejvyšší dovolené rychlosti (2016 - verze 2015-07-31).jpg", "IP_29": "IP29.svg", "IP_30": "Czech-traffic-signs-eu-cz.svg", "IP_31A": "IP31a.svg", "IP_31B": "IP31b.svg", "IP_32": "IP 32 Bezpečný odstup (2024).jpg", "IS_1A": "IS1a-INFZN.svg", "IS_1B": "CZ-IS01b Směrová tabule pro příjezd k dálnici (vlevo) (2016 - verze 2015-07-31).jpg", "IS_1C": "IS1d-INFZN.svg", "IS_1D": "CZ-IS01d Směrová tabule před nájezdem na dálnici (přímo) (2016).jpg", "IS_1E": "IS1c-INFZN.svg", "IS_1F": "IS1f.svg", "IS_2A": "CZ-IS02a Směrová tabule pro příjezd k silnici pro motorová vozidla (přímo) (2016).jpg", "IS_2B": "CZ-IS02b Směrová tabule pro příjezd k silnici pro motorová vozidla (vlevo) (2016).jpg", "IS_2C": "CZ-IS02c Směrová tabule pro příjezd k silnici pro motorová vozidla (vpravo) (2016).jpg", "IS_2D": "CZ-IS02d Směrová tabule před nájezdem na silnici pro motorová vozidla (přímo) (2016).jpg", "IS_2E": "CZ-IS02e Směrová tabule před nájezdem na silnici pro motorová vozidla (vlevo) (2016).jpg", "IS_2F": "CZ-IS02f Směrová tabule před nájezdem na silnici pro motorová vozidla (vpravo) (2016).jpg", "IS_3A": "IS3a-INFZN.svg", "IS_3B": "IS3b-INFZN.svg", "IS_3C": "IS3c-INFZN.svg", "IS_3D": "IS3d-INFZN.svg", "IS_4A": "IS4a-INFZN.svg", "IS_4B": "IS4b-INFZN.svg", "IS_4C": "IS4c-INFZN.svg", "IS_4D": "IS4d-INFZN.svg", "IS_5": "IS5-INFZN.svg", "IS_6A": "CZ-IS06a Označení křižovatky (2016).jpg", "IS_6B": "CZ-IS06b Návěst před křižovatkou (2016).jpg", "IS_6C": "CZ-IS06c Návěst před křižovatkou.jpg", "IS_6D": "CZ-IS06d Návěst v křižovatce (2016).jpg", "IS_6E": "CZ-IS06e Návěst v křižovatce (2016).jpg", "IS_6F": "CZ-IS06f Návěst v křižovatce (2016).jpg", "IS_6G": "CZ-IS06g Návěst v křižovatce (2016).jpg", "IS_7A": "CZ-IS07a Návěst pro odbočení (2016).jpg", "IS_7B": "CZ-IS07b Výjezd (2016).jpg", "IS_8A": "CZ-IS08a Dálková návěst (s šipkou) (2016).jpg", "IS_8B": "CZ-IS08b Dálková návěst (se vzdálenostmi) (2016).jpg", "IS_9A": "CZ-IS09a Návěst před úrovňovou křižovatkou (2016).jpg", "IS_9B": "CZ-IS09b Návěst před okružní křižovatkou (2016 - verze 2015-07-31).jpg", "IS_9C": "CZ-IS09c Návěst před křižovatkou s omezením (2016).jpg", "IS_9D": "CZ-IS09d Návěst před křižovatkou s omezením (2016).jpg", "IS_9E": "CZ-IS09e Návěst před křižovatkou s omezením (2016 - verze 2015-07-31).jpg", "IS_10A": "IS10a.svg", "IS_10B": "IS10b.svg", "IS_10C": "CZ-IS10c Návěst změny směru jízdy (2016).jpg", "IS_10D": "IS10e.svg", "IS_10E": "CZ-IS10e Návěst doporučeného způsobu odbočení cyklistů vlevo.jpg", "IS_11A": "IS11a.svg", "IS_11B": "IS11bcr.jpg", "IS_11C": "CZ-IS11c Směrová tabule pro vyznačení objížďky (2016).jpg", "IS_11D": "CZ-IS11d Směrová tabule pro vyznačení objížďky (2016).jpg", "IS_12A": "IS 12a Směrová tabule pro náhradní trasu dálnice (přímo).tif", "IS_12B": "IS 12b Směrová tabule pro náhradní trasu dálnice (vlevo).tif", "IS_12C": "IS 12c Směrová tabule pro náhradní trasu dálnice (vpravo).tif", "IS_12D": "IS 12d Náhradní trasa.tif", "IS_13": "IS13cr.jpg", "IS_14": "CZ-IS14 Hranice územního celku (2016).jpg", "IS_15A": "IS15acr.jpg", "IS_15B": "IS15bcr.jpg", "IS_16A": "CZ traffic sign IS16a - D5.svg", "IS_16B": "SilniceI4.svg", "IS_16C": "SilniceI57.svg", "IS_16D": "SilniceII302.svg", "IS_17": "CZ traffic sign IS17 - E50.svg", "IS_18A": "CZ-IS18a Kilometrovník (2016).jpg", "IS_18B": "IS18bcr.jpg", "IS_19A": "CZ-IS19a Směrová tabule pro cyklisty (s jedním cílem).jpg", "IS_19B": "IS19bcr.jpg", "IS_19C": "IS19ccr.jpg", "IS_19D": "IS19dcr.jpg", "IS_21A": "IS 21a Směrová tabulka pro cyklisty (přímo).png", "IS_21B": "IS 21b Směrová tabulka pro cyklisty (vlevo).png", "IS_21C": "IS 21c Směrová tabulka pro cyklisty (vpravo).png", "IS_21D": "IS 21d Konec cyklistické trasy.png", "IS_22A": "CZ-IS22a Označení názvu ulice.jpg", "IS_22B": "CZ-IS22b Označení názvu ulice.jpg", "IS_22C": "CZ-IS22c Označení názvu ulice.jpg", "IS_22D": "CZ-IS22d Označení názvu ulice.jpg", "IS_22E": "CZ-IS22e Označení názvu ulice.jpg", "IS_22F": "CZ-IS22f Označení názvu ulice.jpg", "IS_23": "CZ-IS23 Kulturní nebo turistický cíl - návěst.svg", "IS_24A": "CZ-IS24a Kulturní nebo turistický cíl.svg", "IS_24B": "CZ-IS24b Kulturní nebo turistický cíl.svg", "IS_24C": "CZ-IS24c Komunální cíl.svg", "IJ_1": "IJ01cr.jpg", "IJ_2": "IJ02cr.jpg", "IJ_3": "CZ road sign IJ-3.svg", "IJ_4A": "CZ road sign IJ-4a.svg", "IJ_4B": "CZ road sign IJ-4b.svg", "IJ_4C": "CZ-IJ04c Zastávka autobusu (taxi).jpg", "IJ_4D": "IJ04dcr.jpg", "IJ_4E": "IJ04ecr.jpg", "IJ_5": "CZ road sign IJ-5.svg", "IJ_6": "IJ06cz.jpg", "IJ_7": "IJ07cr.jpg", "IJ_8": "IJ08cr.jpg", "IJ_9": "IJ09cr.jpg", "IJ_10": "IJ10cr.jpg", "IJ_11A": "IJ11acr.jpg", "IJ_11B": "IJ11bcr.jpg", "IJ_12": "IJ12cr.jpg", "IJ_13": "IJ13cr.jpg", "IJ_14A": "IJ14acr.jpg", "IJ_14B": "IJ14bcr.jpg", "IJ_14C": "IJ14ccr.jpg", "IJ_15": "IJ15cr.jpg", "IJ_16": "CZ road sign IJ-16.svg", "IJ_17A": "IJ17a-INFZN.svg", "IJ_17B": "IJ17b-INFZN.svg", "IJ_18A": "CZ-IJ18a Návěst před odpočívkou (2016).jpg", "IJ_18B": "CZ-IJ18b Návěst před odbočením na odpočívku (2016).jpg", "IJ_18C": "CZ-IJ18c Návěst pro odbočení na odpočívku (2016).jpg", "E_1": "E1 počet.svg", "E_2A": "Czech Republic road sign E 2a.svg", "E_2B": "CZ-E02b Tvar křižovatky.svg", "E_2C": "CZ-E02c Tvar křižovatky.jpg", "E_2D": "Czech Republic road sign E 2d.svg", "E_3A": "CZ-E03a Vzdálenost.jpg", "E_3B": "CZ-E03b Vzdálenost.jpg", "E_4": "CZ-E04 Délka úseku.jpg", "E_5": "CZ-E05 Celková hmotnost.jpg", "E_6": "CZ-E06 Za mokra.svg", "E_7A": "CZ-E07a Směrová šipka.jpg", "E_7B": "CZ-E07b Směrová šipka.jpg", "E_8A": "CZ-E08a Začátek úseku.svg", "E_8B": "CZ-E08b Průběh úseku.jpg", "E_8C": "CZ-E08c Konec úseku.svg", "E_8D": "CZ-E08d Úsek platnosti.jpg", "E_8E": "CZ-E08e Úsek platnosti.jpg", "E_9": "E9 nákladní vozidlo.svg", "E_10": "CZ-E10 Tvar křížení pozemní komunikace s dráhou.jpg", "E_11A": "CZ road sign E11a 2016.svg", "E_11B": "CZ road sign E11b 2016.svg", "E_11C": "CZ road sign E11c 2016.svg", "E_11D": "CZ road sign E11d 2016.svg", "E_11E": "CZ road sign E11e 2016.svg", "E_11F": "CZ road sign E11f 2016.svg", "E_12A": "CZ-E12a Jízda cyklistů v protisměru (2016 - verze 2015-07-31).jpg", "E_12B": "CZ-E12b Vjezd cyklistů v protisměru povolen (2016 - verze 2015-07-31).jpg", "E_12C": "CZ-E12c Povolený směr jízdy cyklistů.jpg", "E_13": "CZ-E12 Text.jpg", "E_14": "E14 Tranzit.svg", "E_15": "E15 Kategorie tunelu.svg", "E_16": "CZ-E16 Vzdálenost k příští čerpací stanici (2016).jpg", "E_17": "E 17 Nedostatečný průjezdní profil vozovky.svg", "V_1A": "CZ-V01a Podélná čára souvislá.jpg", "V_1B": "CZ-V01b Dvojitá podélná čára souvislá.jpg", "V_2A": "CZ-V02a Podélná čára přerušovaná.jpg", "V_2B": "CZ-V02b Podélná čára přerušovaná.jpg", "V_2C": "CZ-V02c Dvojitá podélná čára přerušovaná.jpg", "V_3": "CZ-V03 Podélná čára souvislá doplněná čárou přerušovanou.jpg", "V_4": "CZ-V04 Vodicí čára.jpg", "V_5": "CZ-V05 Příčná čára souvislá.jpg", "V_6A": "CZ-V06a Příčná čára souvislá se symbolem Dej přednost v jízdě.jpg", "V_6B": "CZ-V06b Příčná čára souvislá s nápisem STOP.jpg", "V_7A": "CZ-V07 Přechod pro chodce.jpg", "V_7B": "CZ-V07b Místo pro přecházení (2016).jpg", "DO_13": "CZ-V08 Přejezd pro cyklisty.jpg", "V_8B": "CZ-V 8b Přejezd pro cyklisty přimknutý k přechodu pro chodce (s určeným symbolem) (2016).jpg", "V_9A": "CZ-V09a Směrové šipky.jpg", "V_9B": "CZ-V09b Předběžné šipky.jpg", "V_9C": "CZ-V09c Předběžné šipky.jpg", "V_10A": "CZ-V10a Stání podélné.jpg", "V_10B": "CZ-V10b Stání kolmé.jpg", "V_10C": "CZ-V10c Stání šikmé.jpg", "V_10D": "CZ-V10d Parkovací pruh.jpg", "V_10E": "CZ-V10e Vyhrazené parkoviště.jpg", "V_10F": "CZ-V10f Vyhrazené parkoviště pro vozidlo přepravující osobu těžce postiženou.jpg", "V_10G": "CZ-V10g Časově omezené stání.jpg", "V_11A": "CZ-V11a Zastávka autobusu nebo trolejbusu (2016 - verze 2015-07-31).jpg", "V_11B": "CZ-V11b Zastávka tramvaje (2016 - verze 2015-07-31).jpg", "V_12A": "CZ-V12a Žlutá klikatá čára.jpg", "V_12B": "CZ-V12b Žluté zkřížené čáry.jpg", "V_12C": "CZ-V12c Zákaz zastavení.jpg", "V_12D": "CZ-V12d Zákaz stání.jpg", "V_12E": "CZ-V12e Bílá klikatá čára.jpg", "V_13": "CZ-V13a Šikmé rovnoběžné čáry.jpg", "V_13B": "CZ-V13b Křivky.jpg", "V_14": "CZ-V14 Jízdní pruh pro cyklisty.jpg", "V_15": "CZ-V15 Nápis na vozovce.jpg", "V_16": "CZ-V16 Bezpečný odstup.jpg", "V_17": "CZ-V17 Trojúhelníky.jpg", "V_18": "CZ-V18 Optická psychologická brzda.jpg", "V_19": "CZ-V19 Prostor pro cyklisty.jpg", "V_20": "CZ-V20 Piktogramový koridor pro cyklisty.jpg", "Z_1": "CZ-Z01 Dopravní kužel.jpg", "Z_2": "CZ-Z02 Zábrana pro označení uzavírky.jpg", "Z_3": "CZ-Z03 Vodicí tabule.jpg", "Z_4A": "CZ-Z04a Směrovací deska levá.jpg", "Z_4B": "CZ-Z04b Směrovací deska pravá.jpg", "Z_4C": "CZ-Z04c Směrovací deska středová.jpg", "Z_4D": "CZ-Z04d Směrovací deska levá.jpg", "Z_4E": "CZ-Z04e Směrovací deska pravá.jpg", "Z_5A": "CZ-Z05a Vodicí deska levá.jpg", "Z_5B": "CZ-Z05b Vodicí deska pravá.jpg", "Z_5C": "CZ-Z05c Vodicí deska středová.jpg", "Z_5D": "CZ-Z05d Vodicí deska středová - 2006.jpg", "Z_6A": "CZ-Z06a Velká zvýrazňující deska.jpg", "Z_6B": "CZ-Z06b Malá zvýrazňující deska.jpg", "Z_7": "CZ-Z07 Pojízdná uzavírková tabule.jpg", "Z_8A": "CZ-Z08a Zastavovací terč (pro policisty).svg", "Z_8B": "CZ-Z08b Zastavovací terč (pro jiné osoby).svg", "Z_8C": "CZ-Z08c Směrovka.jpg", "Z_8D": "Z 8d Zastavovací terč pro střídavý provoz (2024).jpg", "Z_9": "CZ-Z09 Žluté a černé pruhy.jpg", "Z_10": "CZ-Z10 Dopravní knoflíky (2016).jpg", "Z_11A": "CZ-Z11a Směrový sloupek.jpg", "Z_11B": "CZ-Z11b Směrový sloupek.jpg", "Z_11C": "CZ-Z11c Směrový sloupek.jpg", "Z_11D": "CZ-Z11d Směrový sloupek.jpg", "Z_11E": "CZ-Z11e Směrovací sloupek.jpg", "Z_11F": "CZ-Z11f Směrovací sloupek.jpg", "Z_11G": "CZ-Z11g Směrovací sloupek.jpg", "Z_11H": "CZ-Z11h Směrový sloupek (zelený kulatý) - baliseta (2016).jpg", "Z_12": "CZ-Z12 Krátký příčný práh.jpg", "Z_13": "Z 13 Výstražný práh.tif", "ZPI_1": "CZ-I01 Nápisy.jpg", "ZPI_2": "CZ-I02 Obsaditelnost parkoviště.jpg", "ZPI_3": "CZ-I03 Teploměr.jpg"};
+
+// Normalizuje kód DZ (např. 'P04' nebo 'P 4' -> 'P_4', 'B20a' -> 'B_20a')
+function normalizeDzKod(kod) {
+    if (!kod) return '';
+    let k = kod.trim().toUpperCase();
+    const m = k.match(/^([A-Z]+)\s*[-_]?\s*0*([1-9][0-9]*)\s*([A-Z]*)$/i);
+    if (m) {
+        return `${m[1].toUpperCase()}_${m[2]}${m[3].toLowerCase()}`;
+    }
+    const mZero = k.match(/^([A-Z]+)\s*[-_]?\s*0+([A-Z]*)$/i);
+    if (mZero) {
+        return `${mZero[1].toUpperCase()}_0${mZero[2].toLowerCase()}`;
+    }
+    return k.replace(/\s+/g, '_');
+}
+
+// Vrátí URL pro symbol dopravní značky (primárně lokální soubor ze složky img/dz/, se zálohou na Wikimedia)
+function getDzSymbolUrl(kod) {
+    if (!kod) return '';
+    const trimmed = kod.trim();
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:')) {
+        return trimmed;
+    }
+    const norm = normalizeDzKod(trimmed);
+    if (!norm) return '';
+    return `../../assets/img/dz/${norm}.svg`;
+}
+
+function handleDzImgError(img, kod) {
+    const norm = normalizeDzKod(kod);
+    if (img.src.includes('/img/dz/')) {
+        const normUpper = norm.toUpperCase();
+        const wikiName = dzWikiFiles[normUpper] || dzWikiFiles[norm];
+        if (wikiName) {
+            img.src = `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(wikiName)}`;
+            return;
+        } else {
+            img.src = `https://commons.wikimedia.org/wiki/Special:FilePath/Czech_Republic_road_sign_${norm}.svg`;
+            return;
+        }
+    }
+    img.style.display = 'none';
+    if (img.nextElementSibling) img.nextElementSibling.style.display = 'inline';
+}
+
+
+// ==== TABULKA SEZNAM ZNAČENÍ ====
+const tableConfig = {
+    seznamZnaceni: {
+        cols: ['Číslo', 'Kód DZ', 'Název DZ', 'Počet'],
+        data: [
+            ['1', 'P 4', 'Dej přednost v jízdě!', '2'],
+            ['2', 'P 2', 'Hlavní pozemní komunikace', '4'],
+            ['3', 'B 20a', 'Nejvyšší dovolená rychlost (30 km/h)', '2'],
+            ['4', 'IP 6', 'Přechod pro chodce', '2']
+        ]
+    }
+};
+
+window.renderTableEditors = function() {
+    for (const [key, conf] of Object.entries(tableConfig)) {
+        const container = document.getElementById(`edit-${key}`);
+        if (!container) continue;
+        
+        let html = `<div style="display:grid; grid-template-columns: 45px 75px 1fr 50px 28px; gap:5px; margin-bottom:4px;">`;
+        conf.cols.forEach(c => html += `<div style="font-size:10px; color:#78909c; font-weight:700;">${c}</div>`);
+        html += `<div></div></div>`;
+        
+        conf.data.forEach((row, rIdx) => {
+            html += `<div style="display:grid; grid-template-columns: 45px 75px 1fr 50px 28px; gap:5px; margin-bottom:4px; align-items:center;">`;
+            html += `<input type="text" placeholder="1" value="${escapeHtml(row[0])}" oninput="updateTableData('${key}', ${rIdx}, 0, this.value)">`;
+            html += `<input type="text" placeholder="P 4" value="${escapeHtml(row[1])}" oninput="updateTableData('${key}', ${rIdx}, 1, this.value)">`;
+            html += `<input type="text" id="input-nazev-${rIdx}" placeholder="Název značky" value="${escapeHtml(row[2])}" oninput="updateTableData('${key}', ${rIdx}, 2, this.value)">`;
+            html += `<input type="text" placeholder="1" value="${escapeHtml(row[3])}" oninput="updateTableData('${key}', ${rIdx}, 3, this.value)">`;
+            html += `<button type="button" class="btn-del-row" title="Smazat řádek" onclick="removeRow('${key}', ${rIdx})">×</button>`;
+            html += `</div>`;
+        });
+        container.innerHTML = html;
+        renderTablePreview(key);
+    }
+};
+
+window.updateTableData = function(key, rIdx, cIdx, val) {
+    tableConfig[key].data[rIdx][cIdx] = val;
+    
+    // Inteligentní autovyplnění názvu DZ při zadání kódu
+    if (key === 'seznamZnaceni' && cIdx === 1) {
+        const norm = normalizeDzKod(val);
+        if (dzCatalog[norm]) {
+            const currentNazev = tableConfig[key].data[rIdx][2];
+            if (!currentNazev || Object.values(dzCatalog).includes(currentNazev)) {
+                tableConfig[key].data[rIdx][2] = dzCatalog[norm];
+                const nazevInput = document.getElementById(`input-nazev-${rIdx}`);
+                if (nazevInput) nazevInput.value = dzCatalog[norm];
+            }
+        }
+    }
+    renderTablePreview(key);
+};
+
+window.addRow = function(key) {
+    const nextNum = (tableConfig[key].data.length + 1).toString();
+    const emptyRow = [nextNum, '', '', '1'];
+    tableConfig[key].data.push(emptyRow);
+    renderTableEditors();
+};
+
+window.removeRow = function(key, rIdx) {
+    if (tableConfig[key].data.length <= 1) {
+        tableConfig[key].data[0] = ['1', '', '', ''];
+    } else {
+        tableConfig[key].data.splice(rIdx, 1);
+    }
+    renderTableEditors();
+};
+
+function renderTablePreview(key) {
+    const tbody = document.querySelector(`#p-tab-${key} tbody`);
+    if (!tbody) return;
+    let html = '';
+    const data = tableConfig[key].data;
+    const activeRows = data.filter(row => row.some(cell => (cell || '').trim() !== ''));
+    if (activeRows.length === 0) {
+        html = `<tr><td colspan="5" style="text-align:center; color:#b0bec5; font-style:italic;">Žádné dopravní značení</td></tr>`;
+    } else {
+        activeRows.forEach(row => {
+            const cislo = row[0] || '—';
+            const kod = row[1] || '—';
+            const nazev = row[2] || '—';
+            const pocet = row[3] || '—';
+            
+            const imgUrl = getDzSymbolUrl(kod);
+            let symbolHtml = '<span style="font-size:10px; color:#b0bec5; font-style:italic;">—</span>';
+            if (imgUrl) {
+                symbolHtml = `<img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(kod)}" 
+                    style="height: 26px; max-width: 40px; object-fit: contain; vertical-align: middle; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.18));" 
+                    loading="lazy"
+                    onerror="handleDzImgError(this, '${escapeHtml(kod)}')" />
+                    <span style="display:none; font-size:10px; color:#b0bec5; font-style:italic;">—</span>`;
+            }
+
+            html += `<tr>
+                <td style="text-align:center; font-weight:600; color:#78909c;">${escapeHtml(cislo)}</td>
+                <td style="text-align:center; font-weight:700; color:#1a1a2e; background:#fafbfc;">${escapeHtml(kod)}</td>
+                <td style="text-align:left; font-weight:500;">${escapeHtml(nazev)}</td>
+                <td style="text-align:center; font-weight:600;">${escapeHtml(pocet)}</td>
+                <td style="text-align:center; vertical-align:middle; padding:3px 6px;">${symbolHtml}</td>
+            </tr>`;
+        });
+    }
+    tbody.innerHTML = html;
+}
+
+// ==== SEZNAM ZNAČENÍ – nová stránka ====
+window.toggleSeznamNewPage = function() {
+    const cb = document.getElementById('seznamNewPage');
+    const wrap = document.getElementById('seznam-znaceni-wrap');
+    const signSection = document.getElementById('sign-section');
+    const page3 = document.getElementById('page-3');
+    if (!wrap || !signSection || !page3) return;
+
+    if (cb && cb.checked) {
+        // Vytvoř novou stránku za stranou 3
+        let newPage = document.getElementById('page-seznam');
+        if (!newPage) {
+            newPage = document.createElement('div');
+            newPage.className = 'page';
+            newPage.id = 'page-seznam';
+            page3.parentNode.insertBefore(newPage, page3.nextSibling);
+        }
+        // Přesuň tabulku a podpis do nové stránky
+        newPage.appendChild(wrap);
+        newPage.appendChild(signSection);
+    } else {
+        // Přesuň zpět do strany 3
+        page3.appendChild(wrap);
+        page3.appendChild(signSection);
+        // Odstraň prázdnou stránku
+        const newPage = document.getElementById('page-seznam');
+        if (newPage) newPage.remove();
+    }
+};
+
+// ==== HLAVNÍ AKTUALIZACE NÁHLEDU ====
+function updatePreview() {
+    setText('p-nadpis', val('nadpis') || 'PASPORT SVISLÉHO DOPRAVNÍHO ZNAČENÍ');
+    
+    const typSelect = document.getElementById('typObce');
+    const typVal = typSelect ? typSelect.value : 'Obec ';
+    const n = val('nazevObce') ? val('nazevObce') : '—';
+    setText('p-nazevObec', (typVal + n).toUpperCase());
+    
+    const vyprac = val('vypracoval') || 'ATOMICON s. r. o.';
+    document.getElementById('p-vypracoval').innerHTML = vyprac.replace(/\n/g, '<br>');
+    setText('p-signName', vyprac.split(',')[0]);
+    setText('p-rok', val('rok') || '—');
+
+    setText('p-objednatel', val('objednatel'));
+    setText('p-adresa', val('adresa'));
+    setText('p-icoDic', val('icoDic'));
+    setText('p-email', val('email'));
+    setText('p-telefon', val('telefon'));
+    setText('p-mistoReseni', val('mistoReseni'));
+    setText('p-povereny', val('povereny'));
+    setText('p-rozsirena', val('rozsirena'));
+    setText('p-okres', val('okres'));
+    setText('p-kraj', val('kraj'));
+
+    setHtml('p-dzUvod', val('dzUvod'));
+    setHtml('p-dzMetodika', val('dzMetodika'));
+    setHtml('p-dzGisAdmin', val('dzGisAdmin'));
+    setHtml('p-dzZaver', val('dzZaver'));
+    setHtml('p-dzShrnuti', val('dzShrnuti'));
+
+    const d = val('signDate');
+    setText('p-signDate', d ? new Date(d + 'T12:00:00').toLocaleDateString('cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' }) : '—');
+}
+
+function resetForm() {
+    if (!confirm('Vymazat a obnovit formulář do výchozího stavu?')) return;
+    location.reload();
+}
+
+
+// ==== LIVE PREVIEW ZVÝRAZNĚNÍ PŘI EDITACI ====
+let currentFocusedTarget = null;
+let currentHoveredTarget = null;
+let activeHighlightedEl = null;
+
+function getPreviewTarget(formEl) {
+    if (!formEl) return null;
+
+    // 1. Přímý data atribut
+    const directTarget = formEl.getAttribute('data-preview-target') ||
+        formEl.closest('[data-preview-target]')?.getAttribute('data-preview-target');
+    if (directTarget) {
+        return document.getElementById(directTarget) || document.querySelector(directTarget);
+    }
+
+    // 2. Quill editor
+    const qlEditor = formEl.closest('.ql-editor') || (formEl.classList.contains('ql-editor') ? formEl : null);
+    if (qlEditor) {
+        const qlContainer = qlEditor.closest('.ql-container');
+        if (qlContainer && qlContainer.nextElementSibling && qlContainer.nextElementSibling.tagName === 'TEXTAREA') {
+            const taId = qlContainer.nextElementSibling.id;
+            return document.getElementById('p-' + taId);
+        }
+    }
+
+    // 3. Základní údaje o obci (tabulka)
+    const infoFieldIds = ['objednatel', 'adresa', 'icoDic', 'email', 'telefon', 'mistoReseni', 'povereny', 'rozsirena', 'okres', 'kraj'];
+    if (infoFieldIds.includes(formEl.id)) {
+        const pCell = document.getElementById('p-' + formEl.id);
+        return pCell ? (pCell.closest('tr') || pCell) : null;
+    }
+
+    // 4. Mapa
+    if (formEl.id === 'mapObec' || formEl.closest('.autocomplete-wrap') || formEl.id === 'locateCityBtn') {
+        return document.getElementById('map-container');
+    }
+
+    // 5. Datum podpisu a razítko
+    if (formEl.id === 'signDate') {
+        return document.getElementById('p-signDateWrap') || document.getElementById('p-signDate');
+    }
+    if (formEl.id === 'stampInput') {
+        return document.getElementById('p-stamp');
+    }
+    if (formEl.id === 'logoObecInput') {
+        return document.getElementById('p-logoObec');
+    }
+    if (formEl.id === 'logoFirmaInput') {
+        return document.getElementById('p-logoFirma');
+    }
+
+    // 6. Název obce a nadpis
+    if (formEl.id === 'typObce' || formEl.id === 'nazevObce') {
+        return document.getElementById('p-nazevObec');
+    }
+    if (formEl.id === 'nadpis') {
+        return document.getElementById('p-nadpis');
+    }
+    if (formEl.id === 'rok') {
+        return document.getElementById('p-rok');
+    }
+    if (formEl.id === 'vypracoval') {
+        return document.getElementById('p-vypracoval');
+    }
+
+    // 7. Zelené pasporty: align dropdowns nebo pole
+    if (formEl.id && formEl.id.startsWith('align-')) {
+        const baseId = formEl.id.replace('align-', '');
+        return document.getElementById('p-' + baseId);
+    }
+
+    // 8. Tabulky nákladů a přehledů:
+    // Tabulky v KOM (rok1..5, naklad1..5)
+    if (/^(rok|naklad)\d+$/.test(formEl.id) || formEl.id === 'nakladCelkem' || formEl.id === 'tab1Caption' || formEl.id === 'nakladyText') {
+        return document.getElementById('p-tab1Wrap') || document.getElementById('p-nakladCelkem')?.closest('table') || document.getElementById('p-tab1Caption');
+    }
+    if (/^z(Rok|Naklad)\d+$/.test(formEl.id) || formEl.id === 'zNakladCelkem' || formEl.id === 'tab2Caption' || formEl.id === 'zimniText') {
+        return document.getElementById('p-tab2Wrap') || document.getElementById('p-zNakladCelkem')?.closest('table') || document.getElementById('p-tab2Caption');
+    }
+
+    // Tabulky v KAN (t1r1c1..t1r4c4)
+    if (/^t\d+r\d+c\d+$/.test(formEl.id)) {
+        const pCell = document.getElementById('p-' + formEl.id);
+        return pCell ? (pCell.closest('tr') || pCell.closest('table') || pCell) : null;
+    }
+
+    // Tabulka v DZ / NDZ
+    if (formEl.closest('#tableContainer') || formEl.id === 'seznamNewPage' || formEl.name === 'input-nazev') {
+        return document.getElementById('p-tab-seznamZnaceni') || document.getElementById('p-tab-navrhZnaceni');
+    }
+
+    // Tabulka ve VOD (vodovod)
+    if (formEl.closest('#vodTableRows') || formEl.id === 'xlsxInput') {
+        return document.getElementById('p-vodTableWrap') || document.getElementById('p-vodTableBody')?.closest('table');
+    }
+
+    // Tabulka v OR (rozhlas)
+    if (formEl.closest('#orTableRows') || formEl.id === 'xlsxInput') {
+        return document.getElementById('p-orTableWrap') || document.getElementById('p-orTableBody')?.closest('table');
+    }
+
+    // GIS fotky v HRB
+    if (formEl.id === 'file-gis1') return document.getElementById('p-gis1-box');
+    if (formEl.id === 'file-gis2') return document.getElementById('p-gis2-box');
+
+    // 9. Přímý standardní match podle id: p-[id]
+    if (formEl.id && document.getElementById('p-' + formEl.id)) {
+        return document.getElementById('p-' + formEl.id);
+    }
+
+    return null;
+}
+
+function scrollToPreviewElement(el) {
+    if (!el) return;
+
+    // Zjistíme viditelnost vůči reálnému viewportu okna prohlížeče
+    const rect = el.getBoundingClientRect();
+    const vh = window.innerHeight || document.documentElement.clientHeight;
+
+    // Je prvek již pohodlně viditelný na obrazovce?
+    const isVisible = (rect.top >= 70 && rect.bottom <= vh - 70);
+
+    if (!isVisible) {
+        // 1. Nativní plynulý scroll
+        try {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } catch (e) {}
+
+        // 2. Přímé hladké doscrolování okna (pro 100% spolehlivost u všech prohlížečů)
+        const windowScrollY = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+        const targetScrollY = windowScrollY + rect.top - (vh / 2) + (rect.height / 2);
+        window.scrollTo({
+            top: Math.max(0, targetScrollY),
+            behavior: 'smooth'
+        });
+
+        // 3. Pro případ, že má preview-panel vnitřní scrollbar
+        const previewPanel = document.querySelector('.preview-panel');
+        if (previewPanel && previewPanel.scrollHeight > previewPanel.clientHeight + 20) {
+            const pRect = previewPanel.getBoundingClientRect();
+            const panelTarget = previewPanel.scrollTop + (rect.top - pRect.top) - (previewPanel.clientHeight / 2) + (rect.height / 2);
+            previewPanel.scrollTo({
+                top: Math.max(0, panelTarget),
+                behavior: 'smooth'
+            });
+        }
+    }
+}
+
+function scrollToFormElement(el) {
+    if (!el) return;
+    const formPanel = document.getElementById('form-panel');
+    if (!formPanel) return;
+
+    const pRect = formPanel.getBoundingClientRect();
+    const eRect = el.getBoundingClientRect();
+
+    const isVisible = (
+        eRect.top >= pRect.top + 40 &&
+        eRect.bottom <= pRect.bottom - 40
+    );
+
+    if (!isVisible) {
+        const targetScroll = formPanel.scrollTop + (eRect.top - pRect.top) - (formPanel.clientHeight / 2) + (eRect.height / 2);
+        formPanel.scrollTo({
+            top: Math.max(0, targetScroll),
+            behavior: 'smooth'
+        });
+    }
+}
+
+function updateHighlight() {
+    const target = currentFocusedTarget || currentHoveredTarget;
+    if (target === activeHighlightedEl) {
+        if (target) {
+            if (currentFocusedTarget) {
+                target.classList.add('preview-highlight');
+                target.classList.remove('preview-highlight-hover');
+            } else {
+                target.classList.remove('preview-highlight');
+                target.classList.add('preview-highlight-hover');
+            }
+        }
+        return;
+    }
+
+    if (activeHighlightedEl) {
+        activeHighlightedEl.classList.remove('preview-highlight');
+        activeHighlightedEl.classList.remove('preview-highlight-hover');
+        activeHighlightedEl = null;
+    }
+
+    if (target) {
+        activeHighlightedEl = target;
+        if (currentFocusedTarget) {
+            target.classList.add('preview-highlight');
+        } else {
+            target.classList.add('preview-highlight-hover');
+        }
+    }
+}
+
+function highlightPreviewElement(target, shouldScroll = true) {
+    currentFocusedTarget = target;
+    updateHighlight();
+    if (shouldScroll && target) {
+        scrollToPreviewElement(target);
+    }
+}
+
+function reapplyActiveHighlight() {
+    if (!currentFocusedTarget) return;
+    const activeEl = document.activeElement;
+    if (activeEl && document.getElementById('form-panel')?.contains(activeEl)) {
+        const target = getPreviewTarget(activeEl);
+        if (target) {
+            currentFocusedTarget = target;
+            updateHighlight();
+        }
+    }
+}
+
+function initLiveHighlight() {
+    const formPanel = document.getElementById('form-panel');
+    if (!formPanel) return;
+
+    // Focusin / Focusout
+    formPanel.addEventListener('focusin', function(e) {
+        const target = getPreviewTarget(e.target);
+        if (target) {
+            highlightPreviewElement(target, true);
+        }
+    });
+
+    formPanel.addEventListener('focusout', function() {
+        setTimeout(() => {
+            const active = document.activeElement;
+            if (!formPanel.contains(active)) {
+                currentFocusedTarget = null;
+                updateHighlight();
+            }
+        }, 80);
+    });
+
+    // Mousedown na klikací tlačítka a nahrávací pole
+    formPanel.addEventListener('mousedown', function(e) {
+        const trigger = e.target.closest('.file-field, .btn, .autocomplete-item');
+        if (trigger) {
+            const target = getPreviewTarget(trigger);
+            if (target) {
+                highlightPreviewElement(target, true);
+            }
+        }
+    });
+
+    // Hover (jemné pomocné zvýraznění)
+    formPanel.addEventListener('mouseover', function(e) {
+        const field = e.target.closest('.field, .file-field, .rvo-card, .btn');
+        if (!field) return;
+        const input = field.querySelector('input, textarea, select') || field;
+        const target = getPreviewTarget(input);
+        if (target && target !== currentHoveredTarget) {
+            currentHoveredTarget = target;
+            updateHighlight();
+        }
+    });
+
+    formPanel.addEventListener('mouseout', function(e) {
+        const field = e.target.closest('.field, .file-field, .rvo-card, .btn');
+        if (!field) return;
+        if (!field.contains(e.relatedTarget)) {
+            currentHoveredTarget = null;
+            updateHighlight();
+        }
+    });
+
+    initPreviewClickNavigation();
+}
+
+function initPreviewClickNavigation() {
+    const previewPanel = document.querySelector('.preview-panel');
+    if (!previewPanel) return;
+
+    previewPanel.addEventListener('click', function(e) {
+        // Pokud uživatel označoval text myší, neskákat
+        if (window.getSelection().toString().trim().length > 0) return;
+
+        const target = e.target.closest(
+            '#p-nadpis, #p-nazevObec, #p-logoObec, #p-logoFirma, #p-vypracoval, #p-rok, ' +
+            '.info-table tr, #map-container, [id^="p-"], #p-stamp, #p-signDateWrap'
+        );
+        if (!target) return;
+
+        let formEl = null;
+        if (target.id === 'p-nadpis') formEl = document.getElementById('nadpis');
+        else if (target.id === 'p-nazevObec') formEl = document.getElementById('nazevObce');
+        else if (target.id === 'p-logoObec') formEl = document.getElementById('logoObecInput');
+        else if (target.id === 'p-logoFirma') formEl = document.getElementById('logoFirmaInput');
+        else if (target.id === 'p-vypracoval') formEl = document.getElementById('vypracoval');
+        else if (target.id === 'p-rok') formEl = document.getElementById('rok');
+        else if (target.closest('.info-table tr')) {
+            const tr = target.closest('.info-table tr');
+            const td = tr.querySelector('td[id^="p-"]');
+            if (td) {
+                const fieldId = td.id.replace('p-', '');
+                formEl = document.getElementById(fieldId);
+            }
+        }
+        else if (target.id === 'map-container') formEl = document.getElementById('mapObec');
+        else if (target.id === 'p-stamp') formEl = document.getElementById('stampInput');
+        else if (target.id === 'p-signDateWrap' || target.closest('.sign-date')) formEl = document.getElementById('signDate');
+        else if (target.id && target.id.startsWith('p-')) {
+            const baseId = target.id.replace('p-', '');
+            formEl = (typeof quillEditors !== 'undefined' && quillEditors[baseId]?.root) ||
+                     document.getElementById(baseId) ||
+                     document.getElementById('align-' + baseId);
+        }
+
+        if (formEl) {
+            scrollToFormElement(formEl);
+            if (typeof formEl.focus === 'function' && formEl.type !== 'file') {
+                formEl.focus();
+            }
+        }
+    });
+}
+
+
+// ==== INIT ====
+let quillEditors = {};
+
+window.onload = function() {
+    initMap();
+    document.getElementById('signDate').value = new Date().toISOString().slice(0, 10);
+    document.getElementById('rok').value = new Date().getFullYear();
+    renderTableEditors();
+    
+    // Inicializace Quill editorů pro hlavní textová pole
+    const richTextIds = ['dzUvod', 'dzMetodika', 'dzGisAdmin', 'dzZaver', 'dzShrnuti'];
+    richTextIds.forEach(id => {
+        const textarea = document.getElementById(id);
+        if (textarea) {
+            const container = document.createElement('div');
+            textarea.parentNode.insertBefore(container, textarea);
+            textarea.style.display = 'none';
+            
+            const quill = new Quill(container, {
+                theme: 'snow',
+                modules: { toolbar: [ ['bold', 'italic', 'underline'], [{ 'list': 'bullet' }], [{ 'align': [] }] ] }
+            });
+            quill.clipboard.dangerouslyPasteHTML(textToHtml(textarea.value));
+            textarea.value = quill.root.innerHTML;
+            
+            quill.on('text-change', function() {
+                textarea.value = quill.root.innerHTML;
+                updatePreview();
+            });
+            quillEditors[id] = quill;
+            container.setAttribute('data-preview-target', 'p-' + id);
+            quill.root.setAttribute('data-preview-target', 'p-' + id);
+        }
+    });
+
+    document.querySelectorAll('.form-panel input, .form-panel textarea, .form-panel select').forEach(el => {
+        if (el.style.display !== 'none') {
+            el.addEventListener('input', updatePreview);
+            el.addEventListener('change', updatePreview);
+        }
+    });
+    updatePreview();
+    initLiveHighlight();
+};
+</script>
+</body>
+</html>
