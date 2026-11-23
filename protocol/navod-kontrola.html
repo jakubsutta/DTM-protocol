@@ -52,7 +52,7 @@ function arrow(it,n,b,f,selected){
   x.beginPath();x.moveTo(x2,y2);
   x.lineTo(x2-h*Math.cos(a-.4),y2-h*Math.sin(a-.4));
   x.lineTo(x2-h*Math.cos(a+.4),y2-h*Math.sin(a+.4));x.closePath();x.fill();
-  const t=it.text?n+'. '+it.text:String(n);
+  const t=it.text?it.text:String(n);
   x.font=FONT(f);x.textBaseline='middle';x.textAlign='left';
   const w=x.measureText(t).width+f,hh=f*1.7;
   it.box={x:x1-w/2,y:y1-hh/2-b,w:w,h:hh};
