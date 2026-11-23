@@ -28,13 +28,15 @@ function parseRec(r, blk, idx, line) {
   (function walk(e) { if (/^Geometrie/.test(ln(e))) return; const c = kids(e);
     if (!c.length) { const t = e.textContent.trim(); if (t) rec.attrs[ln(e)] = t; } else c.forEach(walk); })(r);
   rec.id = rec.attrs.ID || ''; rec.popis = rec.attrs.PopisObjektu || '';
-  [['bod', 'Point', 'pos'], ['linie', 'LineString', 'posList'], ['plocha', 'Polygon', 'posList']].some(([kind, tag, pos]) => {
+  [['bod', 'Point', 'pos'], ['plocha', 'Polygon', 'posList'], ['linie', 'LineString', 'posList']].some(([kind, tag, pos]) => {
     const g = byName(r, tag)[0]; if (!g) return false;
     const dim = parseInt(g.getAttribute('srsDimension') || '3', 10) || 3;
     rec.geom = { kind, dim, gid: g.getAttribute('gml:id') || g.getAttributeNS(GML, 'id') || '', srs: g.getAttribute('srsName') || '',
       rings: byName(g, pos).map(p => { const raw = p.textContent.trim().split(/\s+/).filter(Boolean), pts = [];
         for (let i = 0; i + dim <= raw.length; i += dim) pts.push([+raw[i], +raw[i + 1], dim > 2 ? +raw[i + 2] : null]);
         return { raw, pts }; }) };
+    let a = g.parentNode, wd = 0; while (a && a !== r && a.nodeType === 1) { const w = /^(?:Bod|Linie|Plocha|Obvod)([23])D$/.exec(ln(a)); if (w) { wd = +w[1]; break; } a = a.parentNode; }
+    rec.geom.wdim = wd;
     return true; });
   return rec;
 }
@@ -80,7 +82,7 @@ function checkFormat(m, o, add) {
     b.recs.forEach(r => { const g = r.geom; if (!g) { add('INFO', 'F06', 'Záznam bez geometrie', r); return; }
       const xy = fp(r), E = (c, t) => { add('ERR', c, t, r, xy); if (/^G0[24789]$/.test(c)) r.bad = true; };
       if (g.srs !== 'EPSG:5514') E('G01', 'srsName „' + g.srs + '“, očekáváno EPSG:5514' + (/5514/.test(g.srs) ? ' (pravděpodobný překlep)' : ''));
-      if (g.dim !== 3) add('WARN', 'G02', 'srsDimension=' + g.dim + ' (očekáváno 3, souřadnice včetně výšky)', r, xy);
+      const dx = g.wdim || b.dimExp || 3; if (g.dim !== dx) add('WARN', 'G02', 'srsDimension=' + g.dim + ' (očekáváno ' + dx + (dx === 3 ? ', souřadnice včetně výšky' : ', objekt je 2D') + ')', r, xy);
       const code = { bod: '01', linie: '02', plocha: '03' }[g.kind], mm = /^ID[0-9A-Za-z]+_(\d\d)$/.exec(g.gid);
       if (!mm) E('G05', 'gml:id „' + g.gid + '“ nemá tvar ID…_kód'); else if (mm[1] !== code) E('G05', 'gml:id „' + g.gid + '“ má kód ' + mm[1] + ', očekáváno ' + code);
       if (g.gid) { if (ids.has(g.gid)) E('G06', 'gml:id „' + g.gid + '“ se opakuje (první výskyt řádek ' + ids.get(g.gid) + ')'); else ids.set(g.gid, r.line); }
@@ -113,7 +115,7 @@ function checkTopo(m, o, add) {
 
 /* ---------- Z: výšky ---------- */
 function checkZ(m, o, add) {
-  m.blocks.forEach(b => b.recs.forEach(r => { const g = r.geom; if (!g || r.bad || g.dim < 3) return;
+  m.blocks.forEach(b => b.recs.forEach(r => { const g = r.geom; if (!g || r.bad || g.dim < 3 || g.wdim === 2 || b.dimExp === 2) return;
     const pts = [].concat(...g.rings.map(x => x.pts)), nz = pts.filter(p => p[2] !== 0), xy = fp(r);
     if (!nz.length) { add('WARN', 'Z01', 'Všechny výšky jsou 0.00 (výška nebyla zapsána?)', r, xy); return; }
     if (nz.length < pts.length) add('WARN', 'Z03', 'Část vrcholů má výšku 0.00 (' + (pts.length - nz.length) + ' z ' + pts.length + ')', r, xy);

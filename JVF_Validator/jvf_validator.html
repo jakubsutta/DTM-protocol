@@ -10,6 +10,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsts@2.11.2/dist/jsts.min.js"></script>
 <script src="jvf_model_143.js"></script>
+<script src="jvf_model_1502.js"></script>
 <script src="jvf_syntax.js"></script>
 <script src="jvf_checks.js"></script>
 <style>
@@ -47,6 +48,27 @@ aside{width:400px;flex:none;background:var(--card);border-left:1px solid var(--l
 #set label{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:5px 0;font-size:13px}#set label.c{justify-content:flex-start}#set input[type=number]{width:80px}#set input[type=text]{width:100%}
 #set p{color:var(--mut);font-size:12px;margin-top:10px}
 .leg{background:#fff;padding:8px 10px;border-radius:8px;box-shadow:0 1px 6px rgba(0,0,0,.2);font-size:12px;line-height:1.7}.leg i{display:inline-block;width:11px;height:11px;border-radius:50%;border:1px solid #000;margin-right:6px;vertical-align:-1px}
+.leaflet-popup-content-wrapper{border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.18)}
+.leaflet-popup-content{margin:12px 14px!important;line-height:1.4}
+.pop-box{font-size:12px;line-height:1.4;max-width:380px;min-width:270px}
+.pop-head{margin-bottom:6px;border-bottom:1px solid var(--line);padding-bottom:5px}
+.pop-title{font-weight:700;font-size:13.5px;color:var(--acc);display:flex;align-items:center;justify-content:space-between;gap:6px}
+.pop-cast{background:#f4e6e6;color:var(--acc);padding:1px 6px;border-radius:4px;font-size:10.5px;font-weight:700;letter-spacing:.03em;flex:none}
+.pop-sub{font-size:11px;color:var(--mut);margin-top:1px}
+.pop-meta{font-size:11.5px;color:var(--tx);margin-top:3px}
+.pop-geom{font-size:11px;color:var(--mut);margin-top:2px}
+.pop-ok{color:var(--ok);font-size:11px;font-weight:600;margin:4px 0}
+.pop-issues{margin:6px 0;padding:6px 8px;background:#fde8e8;border-left:3px solid var(--err);border-radius:4px;font-size:11px;max-height:85px;overflow-y:auto}
+.pop-sec-title{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);font-weight:700;margin:6px 0 3px}
+.pop-wrap{max-height:220px;overflow-y:auto;border:1px solid var(--line);border-radius:6px;background:#fff}
+.pop-tbl{width:100%;border-collapse:collapse;font-size:11.5px}
+.pop-tbl tr:nth-child(even){background:#faf8f8}
+.pop-tbl td{padding:3px 6px;vertical-align:top;border-bottom:1px solid #f0e8e8}
+.pop-tbl tr:last-child td{border-bottom:none}
+.pop-k{font-weight:600;color:#4b5563;white-space:nowrap;width:38%;font-size:11px}
+.pop-v{color:var(--tx);word-break:break-word}
+.pop-enum{color:#1d4ed8;font-size:10.5px}
+.pop-nil{color:var(--mut);font-style:italic}
 </style>
 </head>
 <body>
@@ -124,15 +146,140 @@ function run(){ if(!raw)return; $('fn').textContent=fname+' – kontroluji…'; 
   ['bCsv','bGeo','bApply','bPro'].forEach(i=>$(i).disabled=false);
  }catch(ex){ $('fn').textContent='Chyba kontroly: '+ex.message; console.error(ex); } },30); }
 
-/* ---------- vykreslení dat ---------- */
+/* ---------- vykreslení dat & popup detailu ---------- */
+const popOpts={maxWidth:390,minWidth:270,autoPanPadding:[20,20]};
+function getRecAttrs(r){
+  const list=[];
+  if(r.el){
+    const walk=(node)=>{
+      if(!node||node.nodeType!==1)return;
+      const ln=node.localName||node.nodeName.split(':').pop();
+      if(/^Geometrie/i.test(ln))return;
+      const ch=Array.from(node.childNodes).filter(n=>n.nodeType===1);
+      if(!ch.length){
+        const isNil=node.getAttribute('xsi:nil')==='true'||(node.getAttributeNS&&node.getAttributeNS('http://www.w3.org/2001/XMLSchema-instance','nil')==='true');
+        const val=node.textContent.trim();
+        list.push({name:ln,val,isNil});
+      }else{
+        ch.forEach(walk);
+      }
+    };
+    walk(r.el);
+  }else if(r.attrs){
+    Object.keys(r.attrs).forEach(k=>list.push({name:k,val:r.attrs[k],isNil:false}));
+  }
+  return list;
+}
+function getBlockMeta(b){
+  let kat='',skup='';
+  if(b.el){
+    Array.from(b.el.childNodes).forEach(c=>{
+      if(c.nodeType!==1)return;
+      const ln=c.localName||c.nodeName.split(':').pop();
+      if(ln==='KategorieObjektu')kat=c.textContent.trim();
+      else if(ln==='SkupinaObjektu')skup=c.textContent.trim();
+    });
+  }
+  return {kat,skup};
+}
+function makeRecPopup(b,r,iss){
+  const ver=(LASTO&&LASTO.version&&LASTO.version!=='auto')?LASTO.version:(res&&res.model&&res.model.version);
+  const M=(window.JVF_MODELS||{})[ver]||(window.JVF_MODELS||{})['1.5.0.2']||(window.JVF_MODELS||{})['1.4.3'];
+  const meta=getBlockMeta(b);
+  const rawAttrs=getRecAttrs(r);
+  const g=r.geom;
+
+  let geomText='';
+  if(g&&g.rings&&g.rings.length){
+    const ptsCount=g.rings.reduce((sum,rg)=>sum+rg.pts.length,0);
+    const kindLabel={bod:'Bod',linie:'Linie',plocha:'Plocha'}[g.kind]||g.kind;
+    const dimLabel=(g.dim||3)+'D';
+    let zInfo='';
+    if(g.dim>=3){
+      let zMin=Infinity,zMax=-Infinity;
+      g.rings.forEach(rg=>rg.pts.forEach(p=>{
+        if(p[2]!=null&&!isNaN(p[2])){
+          if(p[2]<zMin)zMin=p[2];
+          if(p[2]>zMax)zMax=p[2];
+        }
+      }));
+      if(zMin!==Infinity&&zMax!==-Infinity){
+        zInfo=(Math.abs(zMin-zMax)<0.001)?` · Z: ${zMin.toFixed(2)} m`:` · Z: ${zMin.toFixed(2)} – ${zMax.toFixed(2)} m`;
+      }
+    }
+    const ptsLabel=g.kind==='bod'?'':` (${ptsCount} ${g.kind==='linie'?'bodů':'vrcholů'})`;
+    geomText=`${kindLabel} ${dimLabel}${ptsLabel}${zInfo}`;
+  }
+
+  let issuesHtml='';
+  if(iss&&iss.length){
+    issuesHtml=`<div class="pop-issues">`+
+      iss.slice(0,8).map(i=>`<div style="margin:2px 0"><span style="color:${SEV[i.sev]};font-weight:700">${i.code}</span> ${esc(i.msg)}</div>`).join('')+
+      (iss.length>8?`<div style="color:var(--mut);font-size:10px">… a dalších ${iss.length-8} nálezů</div>`:'')+
+      `</div>`;
+  }else{
+    issuesHtml=`<div class="pop-ok">✓ Bez zjištěných vad</div>`;
+  }
+
+  let attrsHtml='';
+  if(rawAttrs.length){
+    const rows=rawAttrs.map(a=>{
+      let valHtml='';
+      if(a.isNil){
+        valHtml=`<span class="pop-nil">null (nil)</span>`;
+      }else if(!a.val){
+        valHtml=`<span class="pop-nil">(prázdné)</span>`;
+      }else{
+        let enumDesc='';
+        if(M){
+          const d=(M.atr&&M.atr[a.name])||(M.obj&&M.obj[b.nazev]&&M.obj[b.nazev].l&&M.obj[b.nazev].l[a.name]);
+          if(d&&d.en&&d.en[a.val]!=null)enumDesc=d.en[a.val];
+        }
+        valHtml=esc(a.val);
+        if(enumDesc)valHtml+=` <span class="pop-enum">(${esc(enumDesc)})</span>`;
+      }
+      return `<tr><td class="pop-k" title="${esc(a.name)}">${esc(a.name)}</td><td class="pop-v">${valHtml}</td></tr>`;
+    }).join('');
+
+    attrsHtml=`
+      <div class="pop-sec-title">Atributy (${rawAttrs.length})</div>
+      <div class="pop-wrap">
+        <table class="pop-tbl">
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  }else{
+    attrsHtml=`<div class="pop-sec-title">Atributy</div><div style="color:var(--mut);font-size:11px;padding:3px 0">Žádné atributy nenalezeny</div>`;
+  }
+
+  return `
+    <div class="pop-box">
+      <div class="pop-head">
+        <div class="pop-title">
+          <span>${esc(b.nazev)}</span>
+          ${b.cast?`<span class="pop-cast">${esc(b.cast)}</span>`:''}
+        </div>
+        ${(meta.kat||meta.skup)?`<div class="pop-sub">${esc([meta.kat,meta.skup].filter(Boolean).join(' · '))}</div>`:''}
+        <div class="pop-meta">
+          řádek <b>${r.line}</b>
+          ${r.id?` · ID: <b>${esc(r.id)}</b>`:''}
+          ${r.popis?` · ${esc(r.popis)}`:''}
+        </div>
+        ${geomText?`<div class="pop-geom">${esc(geomText)}</div>`:''}
+      </div>
+      ${issuesHtml}
+      ${attrsHtml}
+    </div>`;
+}
+
 function draw(){ dataG.clearLayers(); recIss=new Map(); res.issues.forEach(i=>{ if(i.r){(recIss.get(i.r)||recIss.set(i.r,[]).get(i.r)).push(i)} });
   const P=[],Ln=[],Pt=[]; let nv=0;
   res.model.blocks.forEach(b=>b.recs.forEach(r=>{ const g=r.geom; if(!g||r.bad||!g.rings.length)return; nv+=g.rings[0].pts.length;
-    const iss=recIss.get(r)||[], er=iss.some(i=>i.sev==='ERR'), col=er?RED:GREEN, pop=()=>`<b>${esc(b.nazev)}</b><br>řádek ${r.line}${r.popis?' · '+esc(r.popis):''}`+iss.slice(0,5).map(i=>`<br><span style="color:${SEV[i.sev]}">${i.code}</span> ${esc(i.msg)}`).join('');
+    const iss=recIss.get(r)||[], er=iss.some(i=>i.sev==='ERR'), col=er?RED:GREEN, pop=()=>makeRecPopup(b,r,iss);
     if(nv>600000)return; const rg=g.rings.map(x=>x.pts.map(p=>ll(p[0],p[1])));
-    if(g.kind==='plocha')P.push(L.polygon(rg,{renderer:cv,color:'#000',weight:1,fillColor:col,fillOpacity:.35}).bindPopup(pop));
-    else if(g.kind==='linie')Ln.push(L.polyline(rg[0],{renderer:cv,color:col,weight:er?3:2.5,opacity:.95}).bindPopup(pop));
-    else Pt.push(L.circleMarker(rg[0][0],{renderer:cv,radius:4,color:'#000',weight:1,fillColor:col,fillOpacity:1}).bindPopup(pop)); }));
+    if(g.kind==='plocha')P.push(L.polygon(rg,{renderer:cv,color:'#000',weight:1,fillColor:col,fillOpacity:.35}).bindPopup(pop,popOpts));
+    else if(g.kind==='linie')Ln.push(L.polyline(rg[0],{renderer:cv,color:col,weight:er?3:2.5,opacity:.95}).bindPopup(pop,popOpts));
+    else Pt.push(L.circleMarker(rg[0][0],{renderer:cv,radius:4,color:'#000',weight:1,fillColor:col,fillOpacity:1}).bindPopup(pop,popOpts)); }));
   [...P,...Ln,...Pt].forEach(l=>l.addTo(dataG));
   const bb=L.featureGroup([...P,...Ln,...Pt]).getBounds(); if(bb.isValid())map.fitBounds(bb,{padding:[40,40],maxZoom:19}); markersDraw(); }
 
@@ -154,8 +301,9 @@ function markersDraw(){ errG.clearLayers(); markers=[]; if(!res)return;
 function pick(k,zoom){ const i=shown[k]; if(!i)return; document.querySelectorAll('.it.sel').forEach(t=>t.classList.remove('sel'));
   const it=document.querySelector(`.it[data-k="${k}"]`); if(it){it.classList.add('sel'); if(!zoom)it.scrollIntoView({block:'nearest'});}
   hlG.clearLayers(); const g=i.r&&i.r.geom&&!i.r.bad&&i.r.geom;
-  if(g){ const rg=g.rings.map(x=>x.pts.map(p=>ll(p[0],p[1]))), draw=(o)=>{ if(g.kind==='bod')L.circleMarker(rg[0][0],{radius:10,fill:false,...o}).addTo(hlG); else if(g.kind==='linie')L.polyline(rg[0],o).addTo(hlG); else L.polygon(rg,{fill:false,...o}).addTo(hlG); };
-    draw({color:'#fff',weight:8}); draw({color:SEV[i.sev],weight:4}); }
+  if(g){ const rg=g.rings.map(x=>x.pts.map(p=>ll(p[0],p[1]))), draw=(o)=>{ if(g.kind==='bod')return L.circleMarker(rg[0][0],{radius:10,fill:false,...o}).addTo(hlG); else if(g.kind==='linie')return L.polyline(rg[0],o).addTo(hlG); else return L.polygon(rg,{fill:false,...o}).addTo(hlG); };
+    draw({color:'#fff',weight:8}); const topL=draw({color:SEV[i.sev],weight:4});
+    if(topL&&i.r)topL.bindPopup(()=>makeRecPopup(i.r.blk,i.r,recIss.get(i.r)||[]),popOpts); }
   if(i.x!=null){ const p=ll(i.x,i.y); if(inCR(p)&&zoom)map.setView(p,Math.max(map.getZoom(),19)); if(markers[k]&&zoom)L.popup().setLatLng(p).setContent(`<b>${i.code}</b> ${esc(i.msg)}`).openOn(map); } }
 $('list').addEventListener('click',e=>{const it=e.target.closest('.it'); if(it)pick(+it.dataset.k,true)});
 $('sum').addEventListener('click',e=>{const c=e.target.closest('.chip'); if(c){fs=fs===c.dataset.s?'':c.dataset.s; list();}});

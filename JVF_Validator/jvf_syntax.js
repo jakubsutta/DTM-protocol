@@ -27,6 +27,60 @@ function bad(d, v) {
   return '';
 }
 
+/* ---------- JVF DTM 1.5.0.2: kontextové záznamy (ZaznamObjektuIns/Upd/Del/Ref…) ---------- */
+const XSI = 'http://www.w3.org/2001/XMLSchema-instance';
+function val15(c, n, M, r, add) { const d = M.atr[n];
+  if (!d) { add('WARN', 'S08', 'Atribut ' + n + ' nemá v modelu definici', r); return; }
+  const nil = c.getAttributeNS(XSI, 'nil') === 'true' || c.getAttribute('xsi:nil') === 'true';
+  if (nil) { if (!d.nl) add('ERR', 'S08', 'Atribut ' + n + ' nesmí mít xsi:nil, hodnota je povinná', r); return; }
+  if (kids(c).length) { add('ERR', 'S08', 'Atribut ' + n + ' má obsahovat pouze hodnotu', r); return; }
+  const v = c.textContent; if (v.trim() === '' && d.b !== 'str') { add('ERR', 'S08', 'Atribut ' + n + ' je prázdný', r); return; }
+  const e = bad(d, v); if (e) add('ERR', 'S08', 'Atribut ' + n + ' = „' + v.trim().slice(0, 40) + '“ ' + e, r); }
+function mem15(el, entries, objNs, what, r, add, onItem) { const E = new Map(entries.map(x => [x[0], x])), seen = new Set();
+  kids(el).forEach(c => { const n = ln(c), e = E.get(n);
+    if (!e) { add('ERR', 'S07', 'Nepovolený element „' + n + '“ v ' + what, r); return; }
+    const want = e.length > 2 ? objNs : NS.atr;
+    if (nsu(c) !== want) add('ERR', 'S03', 'Element „' + n + '“ je v namespace „' + nsu(c) + '“, očekáváno „' + want + '“', r);
+    if (seen.has(n)) add('ERR', 'S07', 'Element „' + n + '“ se v ' + what + ' opakuje', r); seen.add(n); onItem(c, n, e); });
+  E.forEach((e, n) => { if (e[1] && !seen.has(n)) add('ERR', 'S06', 'Chybí povinný atribut „' + n + '“ v ' + what, r); }); }
+function geom15(go, spec, r, add) { const ch = kids(go);
+  spec.forEach((w, i) => { const c = ch[i];
+    if (!c) { if (w[2]) add('ERR', 'S09', 'V GeometrieObjektu chybí cmn:' + w[0], r); return; }
+    if (ln(c) !== w[0] || nsu(c) !== NS.cmn) { add('ERR', 'S09', 'GeometrieObjektu má obsahovat cmn:' + w[0] + ', nalezeno „' + ln(c) + '“', r); return; }
+    const inn = kids(c); if (inn.length !== w[1].length || w[1].some((nm, j) => !inn[j] || ln(inn[j]) !== nm || nsu(inn[j]) !== NS.gml)) add('ERR', 'S09', 'cmn:' + w[0] + ' má obsahovat gml:' + w[1].join(', gml:'), r); });
+  if (ch.length > spec.length) add('ERR', 'S09', 'GeometrieObjektu obsahuje nadbytečné elementy', r); }
+function rec15(r, def, M, add) { const nm = ln(r.el), ctx = nm.slice(13), si = def.rc[ctx];
+  if (nsu(r.el) !== def.ns) add('ERR', 'S03', 'Záznam ' + nm + ' je v namespace „' + nsu(r.el) + '“, očekáváno „' + def.ns + '“', r);
+  if (si === undefined) { add('ERR', 'S02', 'Kontext „' + nm + '“ není pro tento objekt povolen (povoleno: ' + Object.keys(def.rc).map(k => 'ZaznamObjektu' + k).join(', ') + ')', r); return; }
+  const sh = M.sh[si], ch = kids(r.el); let last = -1;
+  ch.forEach(c => { const n = ln(c), i = ['AtributyObjektu', 'GeometrieObjektu'].indexOf(n);
+    if (i < 0) { add('ERR', 'S02', 'Neznámý element „' + n + '“ v záznamu ' + nm, r); return; }
+    if (nsu(c) !== def.ns) add('ERR', 'S03', 'Element ' + n + ' je v namespace „' + nsu(c) + '“, očekáváno „' + def.ns + '“', r);
+    if (i < last) add('ERR', 'S02', 'Element ' + n + ' je v záznamu ve špatném pořadí', r); last = Math.max(last, i); });
+  const ao = ch.find(c => ln(c) === 'AtributyObjektu'), go = ch.find(c => ln(c) === 'GeometrieObjektu');
+  if (!ao) add('ERR', 'S02', 'V záznamu chybí AtributyObjektu', r);
+  else mem15(ao, sh[0], def.ns, 'AtributyObjektu', r, add, (c, n, e) => { if (e.length > 2) mem15(c, M.gt[e[2]], def.ns, n, r, add, (x, xn) => val15(x, xn, M, r, add)); else val15(c, n, M, r, add); });
+  if (!go && sh[2]) add('ERR', 'S09', 'V záznamu chybí povinná GeometrieObjektu', r);
+  if (go) { if (!sh[1]) add('ERR', 'S09', 'GeometrieObjektu není v kontextu ' + nm + ' povolena', r); else geom15(go, M.geo[sh[1]], r, add); } }
+function blocks15(m, o, add, M) { const low = {}; Object.keys(M.obj).forEach(k => low[k.toLowerCase()] = k);
+  m.blocks.forEach(b => { const el = b.el, name = ln(el), rec0 = b.recs[0], def = M.obj[name];
+    if (nsu(el) !== NS.objtyp) add('ERR', 'S03', 'Blok „' + name + '“ je v namespace „' + nsu(el) + '“, očekáváno „objtyp“', rec0);
+    if (!def) { const ci = low[name.toLowerCase()];
+      add('ERR', 'S10', ci ? 'Element „' + name + '“ ve schématu 1.5.0.2 neexistuje, správný název je „' + ci + '“ (velikost písmen)' : 'Neznámý objektový typ „' + name + '“ ve verzi 1.5.0.2', rec0); return; }
+    if (o.casts && def.cast in o.casts && !o.casts[def.cast]) add('ERR', 'S12', 'Objekt „' + b.nazev + '“ patří do části ' + def.cast + ', která není ve zvoleném rozsahu editace (přejímka kraje ho odmítne)', rec0);
+    b.dimExp = def.dim ? +def.dim : 0;
+    const bs = ['ObjektovyTypNazev', 'KategorieObjektu', 'SkupinaObjektu', 'ObsahovaCast', 'ZaznamyObjektu'], fx = { ObjektovyTypNazev: def.nm, KategorieObjektu: def.kat, SkupinaObjektu: def.sk, ObsahovaCast: def.cast }; let lb = -1;
+    kids(el).forEach(c => { const n = ln(c), i = bs.indexOf(n);
+      if (i < 0) { add('ERR', 'S02', 'Neznámý element „' + n + '“ v bloku ' + name, rec0); return; }
+      if (nsu(c) !== def.ns) add('ERR', 'S03', 'Element ' + n + ' v bloku ' + name + ' je v namespace „' + nsu(c) + '“, očekáváno „' + def.ns + '“', rec0);
+      if (i < lb) add('ERR', 'S02', 'Element ' + n + ' v bloku ' + name + ' je ve špatném pořadí', rec0); lb = Math.max(lb, i);
+      if (fx[n] != null && c.textContent.trim() !== fx[n]) add('ERR', 'S05', n + ' = „' + c.textContent.trim() + '“, očekáváno „' + fx[n] + '“ (' + name + ')', rec0);
+      if (n === 'ObjektovyTypNazev') { if (def.cb && c.getAttribute('code_base') !== def.cb) add('ERR', 'S05', 'code_base = „' + c.getAttribute('code_base') + '“, očekáváno „' + def.cb + '“ (' + name + ')', rec0);
+        if (def.cs && c.getAttribute('code_suffix') !== def.cs) add('ERR', 'S05', 'code_suffix = „' + c.getAttribute('code_suffix') + '“, očekáváno „' + def.cs + '“ (' + name + ')', rec0);
+        ['dim', 'gia'].forEach(a => { if (c.hasAttribute(a)) add('ERR', 'S05', 'Atribut ' + a + ' elementu ObjektovyTypNazev je v instanci zakázán (' + name + ')', rec0); }); } });
+    bs.forEach(n => { if (!kids(el).some(c => ln(c) === n)) add('ERR', 'S02', 'V bloku ' + name + ' chybí element ' + n, rec0); });
+    b.recs.forEach(r => rec15(r, def, M, add)); }); }
+
 function check(doc, m, o, add0, ver) {
   const M = (root.JVF_MODELS || {})[ver];
   if (!M) { add0('INFO', 'S00', 'Model JVF DTM ' + ver + ' (XSD / datový model) není načten, syntaktická kontrola přeskočena'); return; }
@@ -41,14 +95,18 @@ function check(doc, m, o, add0, ver) {
   if (!dj) { add('ERR', 'S01', 'Chybí element DataJVFDTM'); return; }
   if (nsu(dj) !== NS.objtyp) add('ERR', 'S03', 'DataJVFDTM je v namespace „' + nsu(dj) + '“, očekáváno „objtyp“');
   const seq = [['VerzeJVFDTM', NS.cmn], ['DatumZapisu', NS.cmn], ['TypZapisu', NS.cmn], ['Data', NS.objtyp], ['DoprovodneInformace', NS.dopinf]]; let last = -1;
-  kids(dj).forEach(e => { const i = seq.findIndex(s => s[0] === ln(e));
+  kids(dj).forEach(e => { const i = seq.findIndex(s => s[0] === ln(e) || (s[0] === 'DoprovodneInformace' && ln(e).indexOf(s[0]) === 0));
     if (i < 0) { add('ERR', 'S02', 'Neznámý element „' + ln(e) + '“ v DataJVFDTM'); return; }
     if (nsu(e) !== seq[i][1]) add('ERR', 'S03', 'Element ' + ln(e) + ' je v namespace „' + nsu(e) + '“, očekáváno „' + seq[i][1] + '“');
     if (i < last) add('ERR', 'S02', 'Element ' + ln(e) + ' je ve špatném pořadí'); last = Math.max(last, i);
+    if (ln(e) === 'VerzeJVFDTM' && e.textContent.trim() !== ver) add('ERR', 'S08', 'VerzeJVFDTM „' + e.textContent.trim() + '“, model ' + ver + ' povoluje jen hodnotu ' + ver);
+    if (ln(e) === 'TypZapisu' && M.sh && ['kompletní zápis', 'změnové věty'].indexOf(e.textContent.trim()) < 0) add('ERR', 'S08', 'TypZapisu „' + e.textContent.trim() + '“ není povolen (kompletní zápis / změnové věty)');
     if (ln(e) === 'DatumZapisu' && bad({ b: 'dt' }, e.textContent.trim())) add('ERR', 'S08', 'DatumZapisu „' + e.textContent.trim() + '“ ' + bad({ b: 'dt' }, e.textContent.trim()));
-    if (ln(e) === 'DoprovodneInformace') Array.from(e.getElementsByTagNameNS('*', '*')).forEach(x => { const u = nsu(x);
-      if (u !== NS.dopinf && u !== NS.gml && !(u === NS.atr && ln(x) === 'PopisObjektu')) add('ERR', 'S03', 'Element „' + ln(x) + '“ v DoprovodneInformace je v namespace „' + u + '“, očekáváno „dopinf“'); }); });
+    if (ln(e).indexOf('DoprovodneInformace') === 0) Array.from(e.getElementsByTagNameNS('*', '*')).forEach(x => { const u = nsu(x);
+      if (u !== NS.dopinf && u !== NS.gml && !(u === NS.atr && (M.sh || ln(x) === 'PopisObjektu'))) add('ERR', 'S03', 'Element „' + ln(x) + '“ v DoprovodneInformace je v namespace „' + u + '“, očekáváno „dopinf“'); }); });
   ['VerzeJVFDTM', 'DatumZapisu', 'TypZapisu', 'Data'].forEach(n => { if (!kids(dj).some(e => ln(e) === n)) add('ERR', 'S02', 'Chybí povinný element ' + n); });
+
+  if (M.sh) { blocks15(m, o, add, M); cnt.forEach((c, k) => { if (c > 25) add0('INFO', 'S99', 'Nález „' + k.split('|')[1].slice(0, 90) + '“ se opakuje celkem ' + c + '×, zobrazeno prvních 25', null, null); }); return; }
 
   /* mapování názvů objektů */
   const byName = {}, byLow = {}; Object.keys(M.obj).forEach(k => { const n = OBJTYP[k] || k; byName[n] = M.obj[k]; byLow[n.toLowerCase()] = n; });
@@ -70,7 +128,7 @@ function check(doc, m, o, add0, ver) {
     if (nsu(el) !== NS.objtyp) add('ERR', 'S03', 'Blok „' + name + '“ je v namespace „' + nsu(el) + '“, očekáváno „objtyp“', rec0);
     if (!def) { const ci = byLow[name.toLowerCase()];
       add('ERR', 'S10', ci ? 'Element „' + name + '“ ve schématu ' + ver + ' neexistuje, správný název je „' + ci + '“ (velikost písmen)' : 'Neznámý objektový typ „' + name + '“ ve verzi ' + ver, rec0); return; }
-    if (o.casts && def.cast && !o.casts[def.cast]) add('ERR', 'S12', 'Objekt „' + b.nazev + '“ patří do části ' + def.cast + ', která není ve zvoleném rozsahu editace (přejímka kraje ho odmítne)', rec0);
+    if (o.casts && def.cast in o.casts && !o.casts[def.cast]) add('ERR', 'S12', 'Objekt „' + b.nazev + '“ patří do části ' + def.cast + ', která není ve zvoleném rozsahu editace (přejímka kraje ho odmítne)', rec0);
     const bs = ['ObjektovyTypNazev', 'KategorieObjektu', 'SkupinaObjektu', 'ObsahovaCast', 'ZaznamyObjektu'], fx = { ObjektovyTypNazev: def.nm, KategorieObjektu: def.kat, SkupinaObjektu: def.sk, ObsahovaCast: def.cast }; let lb = -1;
     kids(el).forEach(c => { const n = ln(c), i = bs.indexOf(n);
       if (i < 0) { add('ERR', 'S02', 'Neznámý element „' + n + '“ v bloku ' + name, rec0); return; }

@@ -1088,7 +1088,7 @@
 
             <!-- 2. sekce panelu: Novinky (jednotný nadpis s ikonou) -->
             <section class="panel-section panel-changelog-section">
-                <div class="panel-section-header">
+                <div class="panel-section-header panel-section-header-clickable" id="changelog-header-open" title="Kliknutím otevřete celou historii verzí a změn">
                     <span class="panel-section-title">
                         <svg class="panel-section-icon panel-changelog-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="10"></circle>
@@ -1096,16 +1096,20 @@
                         </svg>
                         Novinky
                     </span>
-                    <span class="changelog-date">20. 11. 2026</span>
+                    <span class="changelog-date" title="Zobrazit historii změn">23. 11. 2026</span>
                 </div>
                 <ul class="changelog-list">
-                    <li><span class="changelog-arrow">→</span><span class="changelog-text">v panelu nový „Modul Katastr“ (KN &amp; RÚIAN)</span></li>
-                    <li><span class="changelog-arrow">→</span><span class="changelog-text">v panelu nový „Modul DTM“ (WMTS DI, TI, ZPS)</span></li>
-                    <li><span class="changelog-arrow">→</span><span class="changelog-text">sekce „Databáze, Pomůcky“ (Seznam DZ, Info o obci, Metodika DTM)</span></li>
-                    <li><span class="changelog-arrow">→</span><span class="changelog-text">sekce „Experimentální nástroje“</span></li>
-                    <li><span class="changelog-arrow">→</span><span class="changelog-text">nástroje 3D, Návod, GA banner</span></li>
-                    <li><span class="changelog-arrow">→</span><span class="changelog-text">nový pravý panel &amp; oblíbené</span></li>
+                    <li><span class="changelog-arrow">→</span><span class="changelog-text">JVF Validátor: podpora nového modelu JVF 1.5.0.2</span></li>
+                    <li><span class="changelog-arrow">→</span><span class="changelog-text">JVF Validátor: popup s tabulkou atributů a číselníky</span></li>
+                    <li><span class="changelog-arrow">→</span><span class="changelog-text">pasporty: zvýraznění sekce v náhledu + autoscroll</span></li>
+                    <li><span class="changelog-arrow">→</span><span class="changelog-text">Modul DTM: výšky DMR 5G &amp; hledání RÚIAN</span></li>
                 </ul>
+                <button type="button" class="changelog-more-btn" id="changelog-open-modal" aria-label="Zobrazit starší novinky a historii změn">
+                    <span>Zobrazit celou historii (6 verzí)</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
             </section>
 
             <!-- 3. sekce panelu: Dashboard Google Tabulka (jednotný nadpis s ikonou) -->
@@ -1678,8 +1682,157 @@
                     localStorage.setItem('dtm_theme', isDark ? 'dark' : 'light');
                 });
             }
+
+            // =========================================================================
+            // Modal okno historie změn (Changelog)
+            // =========================================================================
+            const changelogModal = document.getElementById('changelog-modal');
+            const changelogOpenBtn = document.getElementById('changelog-open-modal');
+            const changelogHeaderOpen = document.getElementById('changelog-header-open');
+            const changelogCloseBtn = document.getElementById('changelog-close-modal');
+
+            function openChangelogModal() {
+                if (!changelogModal) return;
+                changelogModal.classList.add('open');
+                changelogModal.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeChangelogModal() {
+                if (!changelogModal) return;
+                changelogModal.classList.remove('open');
+                changelogModal.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+            }
+
+            if (changelogOpenBtn) changelogOpenBtn.addEventListener('click', openChangelogModal);
+            if (changelogHeaderOpen) changelogHeaderOpen.addEventListener('click', openChangelogModal);
+            if (changelogCloseBtn) changelogCloseBtn.addEventListener('click', closeChangelogModal);
+
+            if (changelogModal) {
+                changelogModal.addEventListener('click', function (e) {
+                    if (e.target === changelogModal) {
+                        closeChangelogModal();
+                    }
+                });
+            }
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && changelogModal && changelogModal.classList.contains('open')) {
+                    closeChangelogModal();
+                }
+            });
         });
     </script>
+
+    <!-- Modal: Historie novinek a změn -->
+    <div class="changelog-modal-overlay" id="changelog-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="changelog-modal-title">
+        <div class="changelog-modal-container">
+            <div class="changelog-modal-header">
+                <div class="changelog-modal-title-box">
+                    <svg class="changelog-modal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    <div>
+                        <h2 id="changelog-modal-title" class="changelog-modal-title">Historie novinek a změn</h2>
+                        <span class="changelog-modal-subtitle">Kompletní přehled aktualizací rozcestníku a nástrojů</span>
+                    </div>
+                </div>
+                <button type="button" class="changelog-modal-close" id="changelog-close-modal" aria-label="Zavřít okno">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="changelog-modal-body">
+                <!-- 23. 11. 2026 -->
+                <div class="changelog-timeline-item is-current">
+                    <div class="changelog-timeline-header">
+                        <span class="changelog-timeline-date">23. 11. 2026</span>
+                        <span class="changelog-timeline-tag">Aktuální verze</span>
+                    </div>
+                    <ul class="changelog-timeline-list">
+                        <li><span class="tl-arrow">→</span><strong>JVF Validátor:</strong> Plná podpora nového datového modelu JVF DTM <strong>1.5.0.2</strong> (z oficiálních XSD schémat ČÚZK) s volbou verze 1.4.3 / 1.5.0.2.</li>
+                        <li><span class="tl-arrow">→</span><strong>JVF Validátor:</strong> Nové kontrolní jádro syntaktické kontroly (kontextové záznamy Ins/Upd/Del, obaly geometrie, ověření jmenných prostorů).</li>
+                        <li><span class="tl-arrow">→</span><strong>JVF Validátor:</strong> Detailní popup po kliknutí na prvek v mapě – kompletní tabulka atributů, automatický překlad kódů číselníků do textu a výpočet výškového rozsahu Z u 3D prvků.</li>
+                        <li><span class="tl-arrow">→</span><strong>Generátory pasportů:</strong> Vizuální zvýraznění (čárkovaný rámeček) právě editované sekce v živém náhledu s plynulým doscrollováním (všech 10 textových pasportů VO, KOM, DZ, NDZ, KAN, VOD, OR, HRB, ZEL, AKT).</li>
+                        <li><span class="tl-arrow">→</span><strong>Modul DTM:</strong> Měření nadmořské výšky z výškopisného modelu DMR 5G (souřadnice S-JTSK / WGS84 + kopírování výšky).</li>
+                        <li><span class="tl-arrow">→</span><strong>Modul DTM:</strong> Vyhledávání v mapě přes služby RÚIAN (záložky Adresy, Parcely a Katastrální území).</li>
+                        <li><span class="tl-arrow">→</span><strong>Návod kontroly:</strong> Odstraněno automatické číslování z informačních bublin (ponechán čistý vlastní text).</li>
+                    </ul>
+                </div>
+
+                <!-- 21. 11. 2026 -->
+                <div class="changelog-timeline-item">
+                    <div class="changelog-timeline-header">
+                        <span class="changelog-timeline-date">21. 11. 2026</span>
+                        <span class="changelog-timeline-tag tag-past">Verze</span>
+                    </div>
+                    <ul class="changelog-timeline-list">
+                        <li><span class="tl-arrow">→</span><strong>Modul Katastr:</strong> Nový mapový modul Katastru nemovitostí (KN &amp; RÚIAN) propojený s přehledem parcel, budov a katastrálních území.</li>
+                        <li><span class="tl-arrow">→</span><strong>Pravý panel:</strong> Přidán přímý odkaz na Modul Katastr do postranního panelu rozcestníku.</li>
+                    </ul>
+                </div>
+
+                <!-- 20. 11. 2026 -->
+                <div class="changelog-timeline-item">
+                    <div class="changelog-timeline-header">
+                        <span class="changelog-timeline-date">20. 11. 2026</span>
+                        <span class="changelog-timeline-tag tag-past">Verze</span>
+                    </div>
+                    <ul class="changelog-timeline-list">
+                        <li><span class="tl-arrow">→</span><strong>Modul DTM:</strong> Nový mapový prohlížeč DTM pro zobrazení služeb WMTS/WMS (DI, TI, ZPS a ortofoto ČÚZK).</li>
+                        <li><span class="tl-arrow">→</span><strong>Nová sekce „Databáze, Pomůcky“:</strong> Přidány nástroje Seznam DZ, Informace o obci a Metodika DTM.</li>
+                        <li><span class="tl-arrow">→</span><strong>Nová sekce „Experimentální nástroje“:</strong> Přidány 3D prohlížeč JVF, Geoportál, Náhledy a interaktivní Návod kontroly.</li>
+                        <li><span class="tl-arrow">→</span><strong>Oblíbené položky:</strong> Nový postranní panel s možností označování karet oblíbených nástrojů (ukládání do paměti prohlížeče).</li>
+                        <li><span class="tl-arrow">→</span><strong>Google Analytics:</strong> Přidán volitelný banner měření návštěvnosti.</li>
+                    </ul>
+                </div>
+
+                <!-- 19. 11. 2026 -->
+                <div class="changelog-timeline-item">
+                    <div class="changelog-timeline-header">
+                        <span class="changelog-timeline-date">19. 11. 2026</span>
+                        <span class="changelog-timeline-tag tag-past">Verze</span>
+                    </div>
+                    <ul class="changelog-timeline-list">
+                        <li><span class="tl-arrow">→</span><strong>Rychlé vyhledávání:</strong> Zpřesněno fulltextové vyhledávání v kartách nástrojů.</li>
+                        <li><span class="tl-arrow">→</span><strong>Kompaktní režim:</strong> Optimalizace rozvržení na širokoúhlých i menších monitorech.</li>
+                        <li><span class="tl-arrow">→</span><strong>Responzivní úpravy:</strong> Zlepšeno chování záhlaví a karet na mobilních zařízeních a tabletech.</li>
+                    </ul>
+                </div>
+
+                <!-- 18. 11. 2026 -->
+                <div class="changelog-timeline-item">
+                    <div class="changelog-timeline-header">
+                        <span class="changelog-timeline-date">18. 11. 2026</span>
+                        <span class="changelog-timeline-tag tag-past">Verze</span>
+                    </div>
+                    <ul class="changelog-timeline-list">
+                        <li><span class="tl-arrow">→</span><strong>Dashboard požadavků:</strong> Přidána karta s odkazem na sdílenou Google Tabulku pro sběr námětů, požadavků a hlášení chyb.</li>
+                        <li><span class="tl-arrow">→</span><strong>JVF Validátor:</strong> První verze webového validátoru JVF DTM pro kontrolu geometrie, topologie a syntaxe.</li>
+                        <li><span class="tl-arrow">→</span><strong>Snímek webu / Mockup:</strong> Nástroj pro generování prezentací a mockupů webových stránek v rámu prohlížeče.</li>
+                    </ul>
+                </div>
+
+                <!-- 15. 11. 2026 -->
+                <div class="changelog-timeline-item">
+                    <div class="changelog-timeline-header">
+                        <span class="changelog-timeline-date">15. 11. 2026</span>
+                        <span class="changelog-timeline-tag tag-past">Základní verze</span>
+                    </div>
+                    <ul class="changelog-timeline-list">
+                        <li><span class="tl-arrow">→</span><strong>Kompletní redesign rozcestníku:</strong> Nové moderní rozhraní s kartami nástrojů a ikonami.</li>
+                        <li><span class="tl-arrow">→</span><strong>Tmavý / Světlý režim:</strong> Možnost přepínání Dark/Light motivu s ukládáním do paměti prohlížeče.</li>
+                        <li><span class="tl-arrow">→</span><strong>Sbalitelné sekce:</strong> Možnost sbalit a rozbalit jednotlivé sloupce a zapamatování jejich stavu.</li>
+                        <li><span class="tl-arrow">→</span><strong>Kategorizace nástrojů:</strong> Rozdělení nástrojů do logických sloupců podle agendy.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </body>
 

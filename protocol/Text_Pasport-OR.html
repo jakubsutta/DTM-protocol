@@ -131,6 +131,60 @@
     .sign-label { font-size: 10px; color: #78909c; }
     .sign-sub { font-size: 10px; color: #b0bec5; }
     .sign-date { font-size: 11px; color: #78909c; line-height: 1.7; }
+
+    /* ---- Zvýraznění při editaci (Live preview highlight) ---- */
+    .preview-highlight {
+        outline: 2px dashed #d32f2f !important;
+        outline-offset: 3px !important;
+        box-shadow: 0 0 10px rgba(211, 47, 47, 0.25) !important;
+        border-radius: 4px !important;
+        transition: outline 0.15s ease, box-shadow 0.15s ease !important;
+        position: relative;
+        z-index: 10;
+    }
+
+    .preview-highlight-hover {
+        outline: 1.5px dashed rgba(211, 47, 47, 0.5) !important;
+        outline-offset: 3px !important;
+        box-shadow: 0 0 6px rgba(211, 47, 47, 0.15) !important;
+        border-radius: 4px !important;
+    }
+
+    /* Zvýraznění řádků v tabulce údajů */
+    tr.preview-highlight {
+        outline: 2px dashed #d32f2f !important;
+        outline-offset: -1px !important;
+    }
+    tr.preview-highlight td {
+        background-color: rgba(211, 47, 47, 0.05) !important;
+    }
+    tr.preview-highlight-hover td {
+        background-color: rgba(211, 47, 47, 0.02) !important;
+    }
+
+    /* Klikatelné prvky v náhledu */
+    .preview-clickable {
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+    }
+    .preview-clickable:hover {
+        background-color: rgba(211, 47, 47, 0.03);
+    }
+
+    /* Vypnutí při tisku a v PDF exportu */
+    @media print {
+        .preview-highlight, .preview-highlight-hover {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        tr.preview-highlight {
+            outline: none !important;
+        }
+        tr.preview-highlight td, tr.preview-highlight-hover td {
+            background-color: transparent !important;
+        }
+    }
+
 </style>
 
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23ff4186%22 stroke-width=%221.6%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M3 10.2v3.6l4-1.1v-1.4z%22/><path d=%22M7 8.9v6.2l7.5 2.9V6z%22/><path d=%22M17 9a3.6 3.6 0 0 1 0 6%22/><path d=%22M19 6.5a6.8 6.8 0 0 1 0 11%22/><path d=%22M8 15.6l0.9 3.4%22/></svg>">
@@ -158,13 +212,13 @@
                 <input type="text" id="nazevObce" placeholder="např. Tovačov" style="flex:1;">
             </div>
         </div>
-        <div class="field"><label>Logo obce</label><div class="file-field" onclick="document.getElementById('logoObecInput').click()">+ Vybrat obrázek loga obce</div>
+        <div class="field"><label>Logo obce</label><div class="file-field" data-preview-target="p-logoObec" onclick="document.getElementById('logoObecInput').click()">+ Vybrat obrázek loga obce</div>
             <input type="file" id="logoObecInput" accept="image/*" style="display:none" onchange="handleUpload(this,'p-logoObec')"></div>
         <div class="field"><label>Vypracoval (Adresa)</label>
             <textarea id="vypracoval" style="min-height: 45px;">ATOMICON s. r. o., Stupkova 952/18, Olomouc 779 00
 tel. +420 778 481 700</textarea>
         </div>
-        <div class="field"><label>Logo firmy</label><div class="file-field" onclick="document.getElementById('logoFirmaInput').click()">+ Vybrat logo firmy</div>
+        <div class="field"><label>Logo firmy</label><div class="file-field" data-preview-target="p-logoFirma" onclick="document.getElementById('logoFirmaInput').click()">+ Vybrat logo firmy</div>
             <input type="file" id="logoFirmaInput" accept="image/*" style="display:none" onchange="handleUpload(this,'p-logoFirma')"></div>
         <div class="field"><label>Rok</label><input type="text" id="rok" value=""></div>
 
@@ -188,7 +242,7 @@ tel. +420 778 481 700</textarea>
                     <input type="text" id="mapObec" placeholder="např. Tovačov" oninput="onObecInput()" onkeydown="onObecKeydown(event)" autocomplete="off">
                     <div class="autocomplete-list" id="obecSuggestions"></div>
                 </div>
-                <button type="button" class="btn btn-primary" style="padding: 0 14px;" onclick="locateCity()">Najít</button>
+                <button type="button" class="btn btn-primary" style="padding: 0 14px;" id="locateCityBtn" data-preview-target="map-container" onclick="locateCity()">Najít</button>
             </div>
             <div class="field-note">Nalezená obec se propíše do názvu obce, objednatele a místa řešení.</div>
         </div>
@@ -222,7 +276,7 @@ Reproduktory jsou instalovány ve výšce přibližně 3,0-8,0 m.</textarea>
         </div>
 
         <div class="section-label">Podpis / razítko</div>
-        <div class="field"><label>Obrázek podpisu / razítka</label><div class="file-field" onclick="document.getElementById('stampInput').click()">+ Vybrat obrázek</div>
+        <div class="field"><label>Obrázek podpisu / razítka</label><div class="file-field" data-preview-target="p-stamp" onclick="document.getElementById('stampInput').click()">+ Vybrat obrázek</div>
             <input type="file" id="stampInput" accept="image/*" style="display:none" onchange="handleUpload(this,'p-stamp')"></div>
         <div class="field"><label>Datum</label><input type="date" id="signDate"></div>
 
@@ -237,14 +291,14 @@ Reproduktory jsou instalovány ve výšce přibližně 3,0-8,0 m.</textarea>
 
         <!-- STRANA 1 -->
         <div class="page p1">
-            <div class="p1-title" id="p-nadpis">PASPORT VEŘEJNÉHO OSVĚTLENÍ</div>
-            <div class="p1-obec" id="p-nazevObec">OBEC —</div>
-            <div class="logo-obec-box" id="p-logoObec"><span class="logo-placeholder">logo obce</span></div>
+            <div class="p1-title preview-clickable" id="p-nadpis">PASPORT VEŘEJNÉHO OSVĚTLENÍ</div>
+            <div class="p1-obec preview-clickable" id="p-nazevObec">OBEC —</div>
+            <div class="logo-obec-box preview-clickable" id="p-logoObec"><span class="logo-placeholder">logo obce</span></div>
             <div class="p1-footer">
                 <div class="lbl">Vypracoval</div>
-                <div class="logo-firma-box" id="p-logoFirma"><img src="./img/logo3.png" alt="logo firmy"></div>
-                <div class="p1-address" id="p-vypracoval">ATOMICON s. r. o., Stupkova 952/18, Olomouc 779 00<br>tel. +420 778 481 700</div>
-                <div class="p1-year" id="p-rok">2025</div>
+                <div class="logo-firma-box preview-clickable" id="p-logoFirma"><img src="./img/logo3.png" alt="logo firmy"></div>
+                <div class="p1-address preview-clickable" id="p-vypracoval">ATOMICON s. r. o., Stupkova 952/18, Olomouc 779 00<br>tel. +420 778 481 700</div>
+                <div class="p1-year preview-clickable" id="p-rok">2025</div>
             </div>
         </div>
 
@@ -264,7 +318,7 @@ Reproduktory jsou instalovány ve výšce přibližně 3,0-8,0 m.</textarea>
                 <tr><td>Kraj:</td><td id="p-kraj">—</td></tr>
             </table>
             <div class="sec-title">Mapa zájmového území</div>
-            <div class="map-box-big" id="map-container"></div>
+            <div class="map-box-big preview-clickable" id="map-container"></div>
             <div class="page-footer"><div>Pasport místního rozhlasu</div><div>2</div></div>
         </div>
 
@@ -307,12 +361,12 @@ Reproduktory jsou instalovány ve výšce přibližně 3,0-8,0 m.</textarea>
             <div style="margin-top: auto; width: 100%;">
                 <div class="sign-row" style="margin-top: 0; margin-bottom: 25px;">
                     <div class="sign-block">
-                        <div class="stamp-box" id="p-stamp"><span class="logo-placeholder">podpis / razítko</span></div>
+                        <div class="stamp-box preview-clickable" id="p-stamp"><span class="logo-placeholder">podpis / razítko</span></div>
                         <div class="sign-line"></div>
                         <div class="sign-label" id="p-signName">Atomicon, s.r.o.</div>
                         <div class="sign-sub">podpis / razítko</div>
                     </div>
-                    <div class="sign-date">Datum:<br><span id="p-signDate">—</span></div>
+                    <div class="sign-date" id="p-signDateWrap">Datum:<br><span id="p-signDate">—</span></div>
                 </div>
                 <div class="page-footer" style="margin-top: 0;"><div>Pasport místního rozhlasu</div><div>5</div></div>
             </div>
@@ -690,6 +744,336 @@ function resetForm() {
     location.reload();
 }
 
+
+// ==== LIVE PREVIEW ZVÝRAZNĚNÍ PŘI EDITACI ====
+let currentFocusedTarget = null;
+let currentHoveredTarget = null;
+let activeHighlightedEl = null;
+
+function getPreviewTarget(formEl) {
+    if (!formEl) return null;
+
+    // 1. Přímý data atribut
+    const directTarget = formEl.getAttribute('data-preview-target') ||
+        formEl.closest('[data-preview-target]')?.getAttribute('data-preview-target');
+    if (directTarget) {
+        return document.getElementById(directTarget) || document.querySelector(directTarget);
+    }
+
+    // 2. Quill editor
+    const qlEditor = formEl.closest('.ql-editor') || (formEl.classList.contains('ql-editor') ? formEl : null);
+    if (qlEditor) {
+        const qlContainer = qlEditor.closest('.ql-container');
+        if (qlContainer && qlContainer.nextElementSibling && qlContainer.nextElementSibling.tagName === 'TEXTAREA') {
+            const taId = qlContainer.nextElementSibling.id;
+            return document.getElementById('p-' + taId);
+        }
+    }
+
+    // 3. Základní údaje o obci (tabulka)
+    const infoFieldIds = ['objednatel', 'adresa', 'icoDic', 'email', 'telefon', 'mistoReseni', 'povereny', 'rozsirena', 'okres', 'kraj'];
+    if (infoFieldIds.includes(formEl.id)) {
+        const pCell = document.getElementById('p-' + formEl.id);
+        return pCell ? (pCell.closest('tr') || pCell) : null;
+    }
+
+    // 4. Mapa
+    if (formEl.id === 'mapObec' || formEl.closest('.autocomplete-wrap') || formEl.id === 'locateCityBtn') {
+        return document.getElementById('map-container');
+    }
+
+    // 5. Datum podpisu a razítko
+    if (formEl.id === 'signDate') {
+        return document.getElementById('p-signDateWrap') || document.getElementById('p-signDate');
+    }
+    if (formEl.id === 'stampInput') {
+        return document.getElementById('p-stamp');
+    }
+    if (formEl.id === 'logoObecInput') {
+        return document.getElementById('p-logoObec');
+    }
+    if (formEl.id === 'logoFirmaInput') {
+        return document.getElementById('p-logoFirma');
+    }
+
+    // 6. Název obce a nadpis
+    if (formEl.id === 'typObce' || formEl.id === 'nazevObce') {
+        return document.getElementById('p-nazevObec');
+    }
+    if (formEl.id === 'nadpis') {
+        return document.getElementById('p-nadpis');
+    }
+    if (formEl.id === 'rok') {
+        return document.getElementById('p-rok');
+    }
+    if (formEl.id === 'vypracoval') {
+        return document.getElementById('p-vypracoval');
+    }
+
+    // 7. Zelené pasporty: align dropdowns nebo pole
+    if (formEl.id && formEl.id.startsWith('align-')) {
+        const baseId = formEl.id.replace('align-', '');
+        return document.getElementById('p-' + baseId);
+    }
+
+    // 8. Tabulky nákladů a přehledů:
+    // Tabulky v KOM (rok1..5, naklad1..5)
+    if (/^(rok|naklad)\d+$/.test(formEl.id) || formEl.id === 'nakladCelkem' || formEl.id === 'tab1Caption' || formEl.id === 'nakladyText') {
+        return document.getElementById('p-tab1Wrap') || document.getElementById('p-nakladCelkem')?.closest('table') || document.getElementById('p-tab1Caption');
+    }
+    if (/^z(Rok|Naklad)\d+$/.test(formEl.id) || formEl.id === 'zNakladCelkem' || formEl.id === 'tab2Caption' || formEl.id === 'zimniText') {
+        return document.getElementById('p-tab2Wrap') || document.getElementById('p-zNakladCelkem')?.closest('table') || document.getElementById('p-tab2Caption');
+    }
+
+    // Tabulky v KAN (t1r1c1..t1r4c4)
+    if (/^t\d+r\d+c\d+$/.test(formEl.id)) {
+        const pCell = document.getElementById('p-' + formEl.id);
+        return pCell ? (pCell.closest('tr') || pCell.closest('table') || pCell) : null;
+    }
+
+    // Tabulka v DZ / NDZ
+    if (formEl.closest('#tableContainer') || formEl.id === 'seznamNewPage' || formEl.name === 'input-nazev') {
+        return document.getElementById('p-tab-seznamZnaceni') || document.getElementById('p-tab-navrhZnaceni');
+    }
+
+    // Tabulka ve VOD (vodovod)
+    if (formEl.closest('#vodTableRows') || formEl.id === 'xlsxInput') {
+        return document.getElementById('p-vodTableWrap') || document.getElementById('p-vodTableBody')?.closest('table');
+    }
+
+    // Tabulka v OR (rozhlas)
+    if (formEl.closest('#orTableRows') || formEl.id === 'xlsxInput') {
+        return document.getElementById('p-orTableWrap') || document.getElementById('p-orTableBody')?.closest('table');
+    }
+
+    // GIS fotky v HRB
+    if (formEl.id === 'file-gis1') return document.getElementById('p-gis1-box');
+    if (formEl.id === 'file-gis2') return document.getElementById('p-gis2-box');
+
+    // 9. Přímý standardní match podle id: p-[id]
+    if (formEl.id && document.getElementById('p-' + formEl.id)) {
+        return document.getElementById('p-' + formEl.id);
+    }
+
+    return null;
+}
+
+function scrollToPreviewElement(el) {
+    if (!el) return;
+
+    // Zjistíme viditelnost vůči reálnému viewportu okna prohlížeče
+    const rect = el.getBoundingClientRect();
+    const vh = window.innerHeight || document.documentElement.clientHeight;
+
+    // Je prvek již pohodlně viditelný na obrazovce?
+    const isVisible = (rect.top >= 70 && rect.bottom <= vh - 70);
+
+    if (!isVisible) {
+        // 1. Nativní plynulý scroll
+        try {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } catch (e) {}
+
+        // 2. Přímé hladké doscrolování okna (pro 100% spolehlivost u všech prohlížečů)
+        const windowScrollY = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+        const targetScrollY = windowScrollY + rect.top - (vh / 2) + (rect.height / 2);
+        window.scrollTo({
+            top: Math.max(0, targetScrollY),
+            behavior: 'smooth'
+        });
+
+        // 3. Pro případ, že má preview-panel vnitřní scrollbar
+        const previewPanel = document.querySelector('.preview-panel');
+        if (previewPanel && previewPanel.scrollHeight > previewPanel.clientHeight + 20) {
+            const pRect = previewPanel.getBoundingClientRect();
+            const panelTarget = previewPanel.scrollTop + (rect.top - pRect.top) - (previewPanel.clientHeight / 2) + (rect.height / 2);
+            previewPanel.scrollTo({
+                top: Math.max(0, panelTarget),
+                behavior: 'smooth'
+            });
+        }
+    }
+}
+
+function scrollToFormElement(el) {
+    if (!el) return;
+    const formPanel = document.getElementById('form-panel');
+    if (!formPanel) return;
+
+    const pRect = formPanel.getBoundingClientRect();
+    const eRect = el.getBoundingClientRect();
+
+    const isVisible = (
+        eRect.top >= pRect.top + 40 &&
+        eRect.bottom <= pRect.bottom - 40
+    );
+
+    if (!isVisible) {
+        const targetScroll = formPanel.scrollTop + (eRect.top - pRect.top) - (formPanel.clientHeight / 2) + (eRect.height / 2);
+        formPanel.scrollTo({
+            top: Math.max(0, targetScroll),
+            behavior: 'smooth'
+        });
+    }
+}
+
+function updateHighlight() {
+    const target = currentFocusedTarget || currentHoveredTarget;
+    if (target === activeHighlightedEl) {
+        if (target) {
+            if (currentFocusedTarget) {
+                target.classList.add('preview-highlight');
+                target.classList.remove('preview-highlight-hover');
+            } else {
+                target.classList.remove('preview-highlight');
+                target.classList.add('preview-highlight-hover');
+            }
+        }
+        return;
+    }
+
+    if (activeHighlightedEl) {
+        activeHighlightedEl.classList.remove('preview-highlight');
+        activeHighlightedEl.classList.remove('preview-highlight-hover');
+        activeHighlightedEl = null;
+    }
+
+    if (target) {
+        activeHighlightedEl = target;
+        if (currentFocusedTarget) {
+            target.classList.add('preview-highlight');
+        } else {
+            target.classList.add('preview-highlight-hover');
+        }
+    }
+}
+
+function highlightPreviewElement(target, shouldScroll = true) {
+    currentFocusedTarget = target;
+    updateHighlight();
+    if (shouldScroll && target) {
+        scrollToPreviewElement(target);
+    }
+}
+
+function reapplyActiveHighlight() {
+    if (!currentFocusedTarget) return;
+    const activeEl = document.activeElement;
+    if (activeEl && document.getElementById('form-panel')?.contains(activeEl)) {
+        const target = getPreviewTarget(activeEl);
+        if (target) {
+            currentFocusedTarget = target;
+            updateHighlight();
+        }
+    }
+}
+
+function initLiveHighlight() {
+    const formPanel = document.getElementById('form-panel');
+    if (!formPanel) return;
+
+    // Focusin / Focusout
+    formPanel.addEventListener('focusin', function(e) {
+        const target = getPreviewTarget(e.target);
+        if (target) {
+            highlightPreviewElement(target, true);
+        }
+    });
+
+    formPanel.addEventListener('focusout', function() {
+        setTimeout(() => {
+            const active = document.activeElement;
+            if (!formPanel.contains(active)) {
+                currentFocusedTarget = null;
+                updateHighlight();
+            }
+        }, 80);
+    });
+
+    // Mousedown na klikací tlačítka a nahrávací pole
+    formPanel.addEventListener('mousedown', function(e) {
+        const trigger = e.target.closest('.file-field, .btn, .autocomplete-item');
+        if (trigger) {
+            const target = getPreviewTarget(trigger);
+            if (target) {
+                highlightPreviewElement(target, true);
+            }
+        }
+    });
+
+    // Hover (jemné pomocné zvýraznění)
+    formPanel.addEventListener('mouseover', function(e) {
+        const field = e.target.closest('.field, .file-field, .rvo-card, .btn');
+        if (!field) return;
+        const input = field.querySelector('input, textarea, select') || field;
+        const target = getPreviewTarget(input);
+        if (target && target !== currentHoveredTarget) {
+            currentHoveredTarget = target;
+            updateHighlight();
+        }
+    });
+
+    formPanel.addEventListener('mouseout', function(e) {
+        const field = e.target.closest('.field, .file-field, .rvo-card, .btn');
+        if (!field) return;
+        if (!field.contains(e.relatedTarget)) {
+            currentHoveredTarget = null;
+            updateHighlight();
+        }
+    });
+
+    initPreviewClickNavigation();
+}
+
+function initPreviewClickNavigation() {
+    const previewPanel = document.querySelector('.preview-panel');
+    if (!previewPanel) return;
+
+    previewPanel.addEventListener('click', function(e) {
+        // Pokud uživatel označoval text myší, neskákat
+        if (window.getSelection().toString().trim().length > 0) return;
+
+        const target = e.target.closest(
+            '#p-nadpis, #p-nazevObec, #p-logoObec, #p-logoFirma, #p-vypracoval, #p-rok, ' +
+            '.info-table tr, #map-container, [id^="p-"], #p-stamp, #p-signDateWrap'
+        );
+        if (!target) return;
+
+        let formEl = null;
+        if (target.id === 'p-nadpis') formEl = document.getElementById('nadpis');
+        else if (target.id === 'p-nazevObec') formEl = document.getElementById('nazevObce');
+        else if (target.id === 'p-logoObec') formEl = document.getElementById('logoObecInput');
+        else if (target.id === 'p-logoFirma') formEl = document.getElementById('logoFirmaInput');
+        else if (target.id === 'p-vypracoval') formEl = document.getElementById('vypracoval');
+        else if (target.id === 'p-rok') formEl = document.getElementById('rok');
+        else if (target.closest('.info-table tr')) {
+            const tr = target.closest('.info-table tr');
+            const td = tr.querySelector('td[id^="p-"]');
+            if (td) {
+                const fieldId = td.id.replace('p-', '');
+                formEl = document.getElementById(fieldId);
+            }
+        }
+        else if (target.id === 'map-container') formEl = document.getElementById('mapObec');
+        else if (target.id === 'p-stamp') formEl = document.getElementById('stampInput');
+        else if (target.id === 'p-signDateWrap' || target.closest('.sign-date')) formEl = document.getElementById('signDate');
+        else if (target.id && target.id.startsWith('p-')) {
+            const baseId = target.id.replace('p-', '');
+            formEl = (typeof quillEditors !== 'undefined' && quillEditors[baseId]?.root) ||
+                     document.getElementById(baseId) ||
+                     document.getElementById('align-' + baseId);
+        }
+
+        if (formEl) {
+            scrollToFormElement(formEl);
+            if (typeof formEl.focus === 'function' && formEl.type !== 'file') {
+                formEl.focus();
+            }
+        }
+    });
+}
+
+
 // ==== INIT ====
 let quillEditors = {};
 
@@ -720,7 +1104,9 @@ window.onload = function() {
                 textarea.value = quill.root.innerHTML;
                 updatePreview();
             });
-            quillEditors[id] = quill; } catch (qe) { console.error("Chyba Quill:", qe); textarea.style.display = "block"; container.style.display="none"; } }
+            quillEditors[id] = quill;
+            container.setAttribute('data-preview-target', 'p-' + id);
+            quill.root.setAttribute('data-preview-target', 'p-' + id); } catch (qe) { console.error("Chyba Quill:", qe); textarea.style.display = "block"; container.style.display="none"; } }
     });
 
     document.querySelectorAll('.form-panel input, .form-panel textarea, .form-panel select').forEach(el => {
@@ -730,6 +1116,7 @@ window.onload = function() {
         }
     });
     updatePreview();
+    initLiveHighlight();
 };
 </script>
 </body>
