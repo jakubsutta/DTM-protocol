@@ -51,7 +51,14 @@
     .result-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .result-row5 { display: grid; grid-template-columns: repeat(5,1fr); gap: 5px; }
 
-    .btn-row { display: flex; flex-direction: column; gap: 8px; margin: 20px 0; position: sticky; bottom: 0; background: #fff5f5; padding-top: 8px; z-index: 10; }
+    .preview-actions { position: fixed; top: 30px; left: min(calc(400px + (100vw - 400px) / 2 + 105mm + 14px), calc(100vw - 58px)); display: flex; flex-direction: column; align-items: flex-start; gap: 10px; z-index: 50; }
+    .preview-action { height: 44px; min-width: 44px; padding: 0 12px; display: flex; align-items: center; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 700; box-shadow: 0 2px 10px rgba(0,0,0,0.18); transition: background 0.15s, transform 0.1s; }
+    .preview-action:active { transform: scale(0.96); }
+    .preview-action svg { width: 20px; height: 20px; flex-shrink: 0; }
+    .preview-action-label { max-width: 0; opacity: 0; overflow: hidden; white-space: nowrap; transition: max-width 0.22s ease, opacity 0.18s ease, margin-left 0.22s ease; }
+    .preview-action:hover .preview-action-label, .preview-action:focus-visible .preview-action-label { max-width: 110px; opacity: 1; margin-left: 8px; }
+    .preview-action-danger { margin-top: 8px; }
+    @media print { .preview-actions { display: none !important; } }
     .btn { display: flex; align-items: center; justify-content: center; gap: 7px; padding: 10px 16px; border-radius: 5px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; font-family: inherit; transition: background 0.15s; }
     .btn-primary { background: #d32f2f; color: #fff; } .btn-primary:hover { background: #b71c1c; }
     .btn-secondary { background: #ffebee; color: #b71c1c; } .btn-secondary:hover { background: #ffcdd2; color: #8a1212; }
@@ -297,14 +304,33 @@ tel. +420 778 481 700</textarea>
             <input type="file" id="stampInput" accept="image/*" style="display:none" onchange="handleUpload(this,'p-stamp')"></div>
         <div class="field"><label>Datum</label><input type="date" id="signDate"></div>
 
-        <div class="btn-row">
-            <button class="btn btn-primary" onclick="window.print()">⬇ Uložit jako PDF (Ctrl+P)</button>
-            <button class="btn btn-secondary" onclick="resetForm()">Vymazat formulář</button>
-        </div>
     </div>
 
     <!-- ===== NÁHLED ===== -->
     <div class="preview-panel">
+        <div class="preview-actions">
+            <button type="button" class="preview-action btn-primary" onclick="PasportChecks.print()" title="Uložit jako PDF (Ctrl+P)" aria-label="Uložit jako PDF">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M12 12v6"/><path d="m9 15 3 3 3-3"/></svg>
+                <span class="preview-action-label">PDF</span>
+            </button>
+            <button type="button" class="preview-action btn-secondary" onclick="PasportDocx.export()" title="Stáhnout jako dokument Word (.docx)" aria-label="Export do Wordu">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="m8 12 1.5 6 2.5-4.5 2.5 4.5 1.5-6"/></svg>
+                <span class="preview-action-label">Word</span>
+            </button>
+            <button type="button" class="preview-action btn-secondary" onclick="PasportBackup.export()" title="Uložit zálohu formuláře do souboru" aria-label="Zálohovat formulář">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
+                <span class="preview-action-label">Zálohovat</span>
+            </button>
+            <button type="button" class="preview-action btn-secondary" onclick="PasportBackup.import()" title="Načíst formulář ze zálohy" aria-label="Načíst zálohu">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 17v-6"/><path d="m9 14 3-3 3 3"/></svg>
+                <span class="preview-action-label">Načíst</span>
+            </button>
+            <button type="button" class="preview-action btn-secondary preview-action-danger" onclick="resetForm()" title="Vymazat formulář" aria-label="Vymazat formulář">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                <span class="preview-action-label">Vymazat</span>
+            </button>
+        </div>
+
 
         <!-- STRANA 1 -->
         <div class="page p1">
@@ -640,7 +666,7 @@ function fillOkresKraj(okres, kraj) {
 }
 
 // ==== POMOCNÉ FUNKCE ====
-function escapeHtml(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function escapeHtml(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
 function textToHtml(text) {
     if (!text || !text.trim()) return '';
     return text.split(/\n\s*\n/).map(p => '<p>' + escapeHtml(p.trim()).replace(/\n/g, '<br>') + '</p>').join('');
@@ -1379,5 +1405,10 @@ window.onload = function() {
     initLiveHighlight();
 };
 </script>
+<script src="../../assets/js/pasport/core.js"></script>
+<script src="../../assets/js/pasport/backup.js"></script>
+<script src="../../assets/js/pasport/checks.js"></script>
+<script src="../../assets/js/pasport/ares.js"></script>
+<script src="../../assets/js/pasport/docx.js"></script>
 </body>
 </html>

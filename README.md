@@ -11,8 +11,14 @@ assets/
   css/hub.css               Styl rozcestníku
   css/design-system.css     Sdílený design systém (aplikace + Seznam DZ)
   js/atomicon-core.js       Sdílené JS jádro
+  js/pasport/               Společné funkce textových pasportů (tools/pasporty):
+                              core.js    dialogy, oznámení, barvy pasportu
+                              backup.js  záloha do souboru, automatické ukládání, ochrana dat
+                              checks.js  kontrola před PDF, hlídání přetečení A4, název PDF
+                              ares.js    doplnění IČO/DIČ a adresy z ARES
+                              docx.js    export do Wordu
   img/                      Logo, pozadí rozcestníku, dz/ = SVG dopravních značek
-  vendor/                   Knihovny třetích stran (Leaflet, Quill)
+  vendor/                   Knihovny třetích stran (Leaflet, Quill, docx)
 apps/                       Vícesouborové aplikace (vlastní složka, index.html)
   modul-dtm/                Mapový modul DTM
   modul-katastr/            Katastrální mapa

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <title>J.E.N.D.A. – Jednoduché Efektivní Nástroje Do Atomiconu</title>
-    <link rel="stylesheet" href="assets/css/hub.css?v=20261121b">
+    <link rel="stylesheet" href="assets/css/hub.css?v=20261123b">
 </head>
 
 <body>
@@ -1099,10 +1099,10 @@
                     <span class="changelog-date" title="Zobrazit historii změn">23. 11. 2026</span>
                 </div>
                 <ul class="changelog-list">
-                    <li><span class="changelog-arrow">→</span><span class="changelog-text">JVF Validátor: podpora nového modelu JVF 1.5.0.2</span></li>
-                    <li><span class="changelog-arrow">→</span><span class="changelog-text">JVF Validátor: popup s tabulkou atributů a číselníky</span></li>
-                    <li><span class="changelog-arrow">→</span><span class="changelog-text">pasporty: zvýraznění sekce v náhledu + autoscroll</span></li>
-                    <li><span class="changelog-arrow">→</span><span class="changelog-text">Modul DTM: výšky DMR 5G &amp; hledání RÚIAN</span></li>
+                    <li><span class="changelog-arrow">→</span><span class="changelog-text">pasporty: záloha formuláře &amp; automatické ukládání</span></li>
+                    <li><span class="changelog-arrow">→</span><span class="changelog-text">pasporty: export do Wordu (.docx)</span></li>
+                    <li><span class="changelog-arrow">→</span><span class="changelog-text">pasporty: kontrola před PDF &amp; údaje z ARES</span></li>
+                    <li><span class="changelog-arrow">→</span><span class="changelog-text">JVF Validátor: podpora modelu JVF 1.5.0.2</span></li>
                 </ul>
                 <button type="button" class="changelog-more-btn" id="changelog-open-modal" aria-label="Zobrazit starší novinky a historii změn">
                     <span>Zobrazit celou historii (6 verzí)</span>
@@ -1754,6 +1754,16 @@
                         <span class="changelog-timeline-tag">Aktuální verze</span>
                     </div>
                     <ul class="changelog-timeline-list">
+                        <li><span class="tl-arrow">→</span><strong>Generátory pasportů:</strong> Nový panel akcí vpravo vedle náhledu (PDF, Word, Zálohovat, Načíst, Vymazat) – ikony stále po ruce i při scrollování, popisek se zobrazí po najetí myší.</li>
+                        <li><span class="tl-arrow">→</span><strong>Generátory pasportů:</strong> Záloha rozpracovaného formuláře do souboru (.json) a jeho pozdější načtení – včetně textů, tabulek, nahraných log, razítka a hranice obce v mapě.</li>
+                        <li><span class="tl-arrow">→</span><strong>Generátory pasportů:</strong> Automatické průběžné ukládání do prohlížeče s nabídkou pokračování po znovuotevření, varování při zavření stránky s nezálohovanými změnami a možnost „Zálohovat a vymazat“.</li>
+                        <li><span class="tl-arrow">→</span><strong>Generátory pasportů:</strong> Export do Wordu (.docx) – titulní strana, tabulky, formátované texty, loga, symboly značek i mapa s hranicí obce, číslované stránky.</li>
+                        <li><span class="tl-arrow">→</span><strong>Generátory pasportů:</strong> Kontrola před uložením PDF (nevyplněné zástupné texty [..], prázdná pole, chybějící logo/razítko/obec v mapě) s proklikem na dané místo; PDF se ukládá s názvem „Pasport XX - Obec - rok“.</li>
+                        <li><span class="tl-arrow">→</span><strong>Generátory pasportů:</strong> Upozornění na stránku, jejíž obsah přesahuje formát A4 (červený rámeček a hranice konce stránky v náhledu).</li>
+                        <li><span class="tl-arrow">→</span><strong>Generátory pasportů:</strong> Tlačítko ARES u pole IČO/DIČ – doplní IČO, DIČ a adresu obecního úřadu podle IČO nebo názvu obce (u stejnojmenných obcí nabídne výběr).</li>
+                        <li><span class="tl-arrow">→</span><strong>Generátory pasportů – opravy:</strong> Uvozovky a znaky &lt; &gt; v tabulkách už nerozbijí formulář ani náhled; opraven text zápatí na 2. straně pasportů HRB, KAN a VOD.</li>
+                        <li><span class="tl-arrow">→</span><strong>Rozcestník:</strong> Barvy karet Osvětlení (VO) a Rozhlas (OR) sjednoceny s barvami nástrojů.</li>
+                        <li><span class="tl-arrow">→</span><strong>Rozcestník:</strong> Reorganizace projektu – nástroje mají nové adresy (složky apps/ a tools/); původní záložky na jednotlivé nástroje je potřeba aktualizovat.</li>
                         <li><span class="tl-arrow">→</span><strong>JVF Validátor:</strong> Plná podpora nového datového modelu JVF DTM <strong>1.5.0.2</strong> (z oficiálních XSD schémat ČÚZK) s volbou verze 1.4.3 / 1.5.0.2.</li>
                         <li><span class="tl-arrow">→</span><strong>JVF Validátor:</strong> Nové kontrolní jádro syntaktické kontroly (kontextové záznamy Ins/Upd/Del, obaly geometrie, ověření jmenných prostorů).</li>
                         <li><span class="tl-arrow">→</span><strong>JVF Validátor:</strong> Detailní popup po kliknutí na prvek v mapě – kompletní tabulka atributů, automatický překlad kódů číselníků do textu a výpočet výškového rozsahu Z u 3D prvků.</li>
