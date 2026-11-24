@@ -244,6 +244,11 @@ h1.brand-title .brand-dot {
     font-weight: 500;
 }
 
+/* Přepínač upozornění – jen na mobilu (viz media query níže) */
+.notice-toggle {
+    display: none;
+}
+
 /* ---- Akce v Headeru: Tlačítka, Vyhledávání a Nástroje ---- */
 .header-actions {
     display: flex;
@@ -985,7 +990,7 @@ body.dark-theme .theme-toggle .icon-moon {
     text-align: left;
     overflow: hidden;
     gap: 2px;
-    padding-right: 14px;
+    padding-right: 4px;
 }
 
 /* Tlačítko Oblíbené na kartě (hvězdička) */
@@ -1037,15 +1042,27 @@ body.dark-theme .theme-toggle .icon-moon {
     fill: #eab308;
 }
 
+/* Oblíbená karta má hvězdičku trvale → místo pro ni, aby nepřekrývala název */
+.card.is-favorite .card-body {
+    padding-right: 14px;
+}
+
 .card-title {
     font-size: 11px;
     font-weight: 700;
     color: #0f172a;
     line-height: 1.25;
     margin: 0;
-    white-space: nowrap;
+    /* název karty až na 2 řádky (s dělením slov), pak výpustka */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    white-space: normal;
     overflow: hidden;
-    text-overflow: ellipsis;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    -webkit-hyphens: auto;
     transition: color 0.16s ease;
 }
 
@@ -1839,6 +1856,9 @@ body.dark-theme .theme-toggle .icon-moon { display: none; }
 
 .dashboard-layout.view-compact-list .card-title {
     font-size: 11px;
+    display: block;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .dashboard-layout.view-compact-list .card-desc {
@@ -2930,4 +2950,223 @@ body.dark-theme .changelog-timeline-list li strong {
 
 body.dark-theme .changelog-timeline-list .tl-arrow {
     color: #60a5fa;
+}
+
+/* ==========================================================================
+   Mobil: upozornění v hlavičce jako sbalitelná lišta
+   ========================================================================== */
+@media (max-width: 640px) {
+    .header-notice {
+        flex-wrap: wrap;
+        gap: 6px;
+        background: rgba(234, 82, 31, 0.07);
+        border: 1px solid rgba(234, 82, 31, 0.18);
+        border-radius: 8px;
+        padding: 6px 10px;
+    }
+
+    .notice-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        border: none;
+        background: transparent;
+        padding: 0;
+        font: inherit;
+        font-size: 11px;
+        font-weight: 700;
+        color: #1e293b;
+        cursor: pointer;
+    }
+
+    .notice-toggle-chevron {
+        width: 13px;
+        height: 13px;
+        color: #ea521f;
+        transition: transform 0.2s ease;
+    }
+
+    .header-notice.is-open .notice-toggle-chevron {
+        transform: rotate(180deg);
+    }
+
+    .header-notice .notice-text {
+        display: none;
+        flex-basis: 100%;
+        flex-direction: column;
+        gap: 3px;
+        font-size: 11px;
+    }
+
+    .header-notice.is-open .notice-text {
+        display: flex;
+    }
+
+    .header-notice .notice-sep {
+        display: none;
+    }
+}
+
+@media (max-width: 640px) {
+    body.dark-theme .header-notice {
+        background: rgba(234, 82, 31, 0.10);
+        border-color: rgba(234, 82, 31, 0.28);
+    }
+
+    body.dark-theme .notice-toggle {
+        color: #e2e8f0;
+    }
+}
+
+/* ==========================================================================
+   Postranní panel – pevná hlavička a patička v barvách loga,
+   stíny při scrollování, výraznější posuvník, jednotné ikony sekcí
+   ========================================================================== */
+.panel-header,
+.panel-footer {
+    /* stejný podklad jako hlavní hlavička (nezávislý na přechodu pozadí panelu) */
+    background:
+        linear-gradient(180deg, rgba(234, 82, 31, 0.11), rgba(234, 82, 31, 0.07)),
+        #ffffff;
+    position: relative;
+    z-index: 2;
+    transition: box-shadow 0.2s ease;
+}
+
+.panel-header {
+    border-bottom: 1px solid rgba(234, 82, 31, 0.28);
+}
+
+.panel-footer {
+    border-top: 1px solid rgba(234, 82, 31, 0.28);
+}
+
+/* Stín pod hlavičkou, když je obsah odscrollovaný; nad patičkou, když je pod ní další obsah */
+.side-panel.is-scrolled .panel-header {
+    box-shadow: 0 8px 14px -8px rgba(15, 23, 42, 0.30);
+}
+
+.side-panel.has-more .panel-footer {
+    box-shadow: 0 -8px 14px -8px rgba(15, 23, 42, 0.30);
+}
+
+.panel-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.panel-body::-webkit-scrollbar-thumb {
+    background: rgba(234, 82, 31, 0.35);
+    border-radius: 6px;
+}
+
+.panel-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(234, 82, 31, 0.55);
+}
+
+.panel-body {
+    scrollbar-color: rgba(234, 82, 31, 0.45) transparent;
+    scrollbar-width: thin;
+}
+
+/* Hlavička panelu v jednom řádku – stejná výška jako hlavní hlavička (54 px) */
+.panel-header {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding: 11px 14px;
+    box-sizing: border-box;
+}
+
+.panel-header .panel-search-box {
+    flex: 1;
+    min-width: 0;
+    width: auto;
+}
+
+.panel-header .panel-header-controls {
+    order: 2;
+    flex-shrink: 0;
+}
+
+.panel-header .panel-search-count {
+    order: 3;
+    flex-basis: 100%;
+    margin: 0;
+}
+
+.panel-header .panel-btn {
+    flex: 0 0 32px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+}
+
+.panel-header .panel-btn svg {
+    width: 15px;
+    height: 15px;
+}
+
+.panel-header .panel-btn .btn-label {
+    display: none;
+}
+
+/* Jednotné ikony nadpisů sekcí – oranžová z loga */
+.panel-section-title > svg,
+.panel-section-title .panel-star-icon {
+    color: #ea521f;
+    stroke: #ea521f;
+}
+
+.panel-section-title .panel-star-icon {
+    fill: #ea521f;
+}
+
+/* Tmavý režim */
+body.dark-theme .panel-header,
+body.dark-theme .panel-footer {
+    background:
+        linear-gradient(180deg, rgba(234, 82, 31, 0.14), rgba(234, 82, 31, 0.08)),
+        #0f172a;
+}
+
+body.dark-theme .panel-header {
+    border-bottom-color: rgba(234, 82, 31, 0.30);
+}
+
+body.dark-theme .panel-footer {
+    border-top-color: rgba(234, 82, 31, 0.30);
+}
+
+body.dark-theme .side-panel.is-scrolled .panel-header {
+    box-shadow: 0 8px 14px -8px rgba(0, 0, 0, 0.65);
+}
+
+body.dark-theme .side-panel.has-more .panel-footer {
+    box-shadow: 0 -8px 14px -8px rgba(0, 0, 0, 0.65);
+}
+
+body.dark-theme .panel-section-title > svg,
+body.dark-theme .panel-section-title .panel-star-icon {
+    color: #f97316;
+    stroke: #f97316;
+}
+
+body.dark-theme .panel-section-title .panel-star-icon {
+    fill: #f97316;
+}
+
+/* Hlavní hlavička – stejný vzhled jako hlavička postranního panelu (nádech z loga + oranžová linka) */
+.main-header {
+    background:
+        linear-gradient(180deg, rgba(234, 82, 31, 0.11), rgba(234, 82, 31, 0.07)),
+        #ffffff;
+    border-bottom: 1px solid rgba(234, 82, 31, 0.28);
+}
+
+body.dark-theme .main-header {
+    background:
+        linear-gradient(180deg, rgba(234, 82, 31, 0.14), rgba(234, 82, 31, 0.08)),
+        #0f172a;
+    border-bottom-color: rgba(234, 82, 31, 0.30);
 }

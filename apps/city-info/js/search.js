@@ -77,7 +77,8 @@ CityInfo.Search = (function() {
     var item = e.target.closest(".suggestion-item");
     if (!item) return;
     var kod = item.dataset.kod;
-    nameInput.value = item.textContent.replace(/\s*—.*$/, "");
+    var nameEl = item.querySelector(".suggest-name") || item;
+    nameInput.value = nameEl.textContent.replace(/\s*—.*$/, "").trim();
     clearSuggestions();
     H.setStatus(nameStatus, "Načítám údaje o obci…");
     H.ruianQuery(LAYER.OBEC, { where: "kod=" + encodeURIComponent(kod), returnGeometry: true, outSR: 4326 })

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <title>J.E.N.D.A. – Jednoduché Efektivní Nástroje Do Atomiconu</title>
-    <link rel="stylesheet" href="assets/css/hub.css?v=20261123e">
+    <link rel="stylesheet" href="assets/css/hub.css?v=20261124i">
 </head>
 
 <body>
@@ -332,7 +332,11 @@
                         <svg class="notice-icon" aria-hidden="true">
                             <use href="#icon-notice-alert" xlink:href="#icon-notice-alert" />
                         </svg>
-                        <div class="notice-text">
+                        <button type="button" class="notice-toggle" id="notice-toggle" aria-expanded="false" aria-controls="notice-text">
+                            Kontrola PDF a el. podpis
+                            <svg class="notice-toggle-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </button>
+                        <div class="notice-text" id="notice-text">
                             <span class="notice-primary">Výsledné PDF předat pro kontrolu <a href="mailto:sutta@atomicon.cz"
                                     class="has-tooltip" data-tooltip="sutta@atomicon.cz">Kubovi</a> nebo <a
                                     href="mailto:vyroubal@atomicon.cz" class="has-tooltip tooltip-radek"
@@ -721,7 +725,7 @@
                 </div>
                 <div class="cards">
                     <a href="./tools/analyza/Find-parcel.html" target="_blank" rel="noopener noreferrer"
-                        class="card parcel" data-tool-id="parcel" title="Parcely pod komunikací">
+                        class="card parcel" data-tool-id="parcel" title="Dotčené parcely">
                         <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
                             title="Přidat do oblíbených" tabindex="-1">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -733,7 +737,7 @@
                                 <use href="#icon-parcel" xlink:href="#icon-parcel" />
                             </svg></div>
                         <div class="card-body">
-                            <div class="card-title">Parcely pod komunikací</div>
+                            <div class="card-title">Dotčené parcely</div>
                             <div class="card-desc">vyhledání dotčených z SHP</div>
                         </div>
                     </a>
@@ -1096,14 +1100,14 @@
                         </svg>
                         Novinky
                     </span>
-                    <span class="changelog-date" title="Zobrazit historii změn">23. 11. 2026</span>
+                    <span class="changelog-date" title="Zobrazit historii změn">24. 11. 2026</span>
                 </div>
                 <ul class="changelog-list">
-                    <li><span class="changelog-arrow">→</span><span class="changelog-text">pasporty: záloha formuláře &amp; automatické ukládání</span></li>
-                    <li><span class="changelog-arrow">→</span><span class="changelog-text">pasporty: export do Wordu (.docx)</span></li>
+                    <li><span class="changelog-arrow">→</span><span class="changelog-text">Dotčené parcely: podpora bodů a polygonů</span></li>
+                    <li><span class="changelog-arrow">→</span><span class="changelog-text">rozcestník: nový vzhled &amp; maskot J.E.N.D.A.</span></li>
                 </ul>
                 <button type="button" class="changelog-more-btn" id="changelog-open-modal" aria-label="Zobrazit starší novinky a historii změn">
-                    <span>Zobrazit celou historii (6 verzí)</span>
+                    <span>Zobrazit celou historii (7 verzí)</span>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
@@ -1343,6 +1347,32 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Postranní panel – stíny hlavičky/patičky podle polohy scrollu
+            const sidePanel = document.getElementById('side-panel');
+            const panelBody = sidePanel ? sidePanel.querySelector('.panel-body') : null;
+            if (panelBody) {
+                const updatePanelShadows = function () {
+                    sidePanel.classList.toggle('is-scrolled', panelBody.scrollTop > 2);
+                    sidePanel.classList.toggle('has-more', panelBody.scrollTop + panelBody.clientHeight < panelBody.scrollHeight - 2);
+                };
+                panelBody.addEventListener('scroll', updatePanelShadows, { passive: true });
+                window.addEventListener('resize', updatePanelShadows);
+                if (window.ResizeObserver) new ResizeObserver(updatePanelShadows).observe(panelBody);
+                // změna obsahu (oblíbené, rozbalení sekce) mění výšku → přepočítat
+                new MutationObserver(updatePanelShadows).observe(panelBody, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
+                updatePanelShadows();
+            }
+
+            // Upozornění v hlavičce – na mobilu sbalitelná lišta
+            const noticeToggle = document.getElementById('notice-toggle');
+            if (noticeToggle) {
+                noticeToggle.addEventListener('click', function () {
+                    const notice = noticeToggle.closest('.header-notice');
+                    const open = notice.classList.toggle('is-open');
+                    noticeToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+                });
+            }
+
             const dashboardLayout = document.getElementById('dashboard-layout');
             const searchInput = document.getElementById('generator-search');
             const clearBtn = document.getElementById('search-clear');
@@ -1787,11 +1817,27 @@
                 </button>
             </div>
             <div class="changelog-modal-body">
-                <!-- 23. 11. 2026 -->
+                <!-- 24. 11. 2026 -->
                 <div class="changelog-timeline-item is-current">
                     <div class="changelog-timeline-header">
-                        <span class="changelog-timeline-date">23. 11. 2026</span>
+                        <span class="changelog-timeline-date">24. 11. 2026</span>
                         <span class="changelog-timeline-tag">Aktuální verze</span>
+                    </div>
+                    <ul class="changelog-timeline-list">
+                        <li><span class="tl-arrow">→</span><strong>Dotčené parcely</strong> (dříve „Parcely pod komunikací“): Kromě linií nově zpracuje i body (parcela pod bodem) a polygony – hledá na celé ploše včetně parcel uvnitř, velké polygony se přesně rozdělí podle limitu služby ČÚZK.</li>
+                        <li><span class="tl-arrow">→</span><strong>Info o obci:</strong> Opraven občasný pád aplikace při načítání (moduly se spouští nezávisle, mapová knihovna se načítá lokálně) a vkládání kódu obce do pole hledání po výběru z našeptávače.</li>
+                        <li><span class="tl-arrow">→</span><strong>Rozcestník:</strong> Nový vzhled horní lišty a postranního panelu – jednotná hlavička v barvách loga, stíny při scrollování panelu, výraznější posuvník a jednotné ikony sekcí; hledání a přepínače v jednom řádku.</li>
+                        <li><span class="tl-arrow">→</span><strong>Rozcestník:</strong> Názvy karet se zalamují až na 2 řádky; na mobilu je upozornění v hlavičce sbalitelná lišta.</li>
+                        <li><span class="tl-arrow">→</span><strong>Rozcestník:</strong> Maskot J.E.N.D.A. vlevo dole – rozklikni ho a nech si poradit. 👋</li>
+                        <li><span class="tl-arrow">→</span><strong>Rozcestník:</strong> V patičce panelu přibyli co-autoři (Claude, Gemini, Copilot).</li>
+                    </ul>
+                </div>
+
+                <!-- 23. 11. 2026 -->
+                <div class="changelog-timeline-item">
+                    <div class="changelog-timeline-header">
+                        <span class="changelog-timeline-date">23. 11. 2026</span>
+                        <span class="changelog-timeline-tag tag-past">Verze</span>
                     </div>
                     <ul class="changelog-timeline-list">
                         <li><span class="tl-arrow">→</span><strong>Generátory pasportů:</strong> Nový panel akcí vpravo vedle náhledu (PDF, Word, Zálohovat, Načíst, Vymazat) – ikony stále po ruce i při scrollování, popisek se zobrazí po najetí myší.</li>
@@ -1884,6 +1930,7 @@
         </div>
     </div>
 
+    <script src="assets/js/jenda.js?v=20261124b"></script>
 </body>
 
 </html>
