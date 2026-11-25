@@ -1,0 +1,77 @@
+/* ==========================================================================
+   Plovoucí akční tlačítka vpravo vedle náhledu (stejný vzhled jako u pasportů)
+   Barvy si každý nástroj nastaví přes proměnné na .preview-actions:
+     --pa-primary-bg, --pa-primary-fg, --pa-primary-hover
+     --pa-secondary-bg, --pa-secondary-fg, --pa-secondary-hover
+   Umístění (vedle stránky náhledu) dopočítává assets/js/preview-actions.js
+   podle prvku v atributu data-anchor.
+   ========================================================================== */
+.preview-actions {
+    position: fixed;
+    top: 30px;
+    left: calc(100vw - 58px);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    z-index: 50;
+}
+
+.preview-actions .preview-action {
+    height: 44px;
+    min-width: 44px;
+    width: auto;
+    margin: 0;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    text-align: left;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+    transition: background 0.15s, color 0.15s, transform 0.1s;
+    background: var(--pa-secondary-bg, #eceff1);
+    color: var(--pa-secondary-fg, #37474f);
+}
+
+.preview-actions .preview-action:hover {
+    background: var(--pa-secondary-hover, var(--pa-secondary-bg, #e2e6ea));
+}
+
+.preview-actions .preview-action-primary {
+    background: var(--pa-primary-bg, #ea521f);
+    color: var(--pa-primary-fg, #fff);
+}
+
+.preview-actions .preview-action-primary:hover {
+    background: var(--pa-primary-hover, var(--pa-primary-bg, #bd3203));
+}
+
+.preview-actions .preview-action:active { transform: scale(0.96); }
+.preview-actions .preview-action svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+.preview-actions .preview-action-label {
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: max-width 0.22s ease, opacity 0.18s ease, margin-left 0.22s ease;
+}
+
+.preview-actions .preview-action:hover .preview-action-label,
+.preview-actions .preview-action:focus-visible .preview-action-label {
+    max-width: 110px;
+    opacity: 1;
+    margin-left: 8px;
+}
+
+.preview-actions .preview-action-danger { margin-top: 8px; }
+
+@media print {
+    .preview-actions { display: none !important; }
+}

@@ -53,6 +53,8 @@ body.frame .block { outline: .3mm dashed #999; }
   @page { size: A4; margin: 0; }
 }
 </style>
+<link rel="stylesheet" href="../../assets/css/preview-actions.css">
+<script src="../../assets/js/preview-actions.js" defer></script>
 </head>
 <body>
 <div class="app">
@@ -94,13 +96,19 @@ body.frame .block { outline: .3mm dashed #999; }
     </div>
 
     <div class="field" style="margin-top:14px"><label style="display:flex;gap:6px;align-items:center;font-size:12px"><input type="checkbox" id="frame"> Rámeček kolem bloků (pomůcka pro vystřižení)</label></div>
-    <div class="btn-row">
-      <button class="btn btn-primary" onclick="window.print()">⬇ Tisk / uložit jako PDF (Ctrl+P)</button>
-      <button class="btn btn-secondary" id="bReset">Vymazat adresáta</button>
-    </div>
   </div>
 
   <div class="preview-panel">
+    <div class="preview-actions" data-anchor="#page" style="--pa-primary-bg: #432b14; --pa-primary-fg: #ffe9d6; --pa-primary-hover: #5c2306; --pa-secondary-bg: #ffe9d6; --pa-secondary-fg: #5c2306; --pa-secondary-hover: #ffd9b3">
+            <button type="button" class="preview-action preview-action-primary" onclick="window.print()" title="Tisk / uložit jako PDF (Ctrl+P)" aria-label="PDF">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M12 12v6"/><path d="m9 15 3 3 3-3"/></svg>
+                <span class="preview-action-label">PDF</span>
+            </button>
+            <button type="button" class="preview-action preview-action-secondary preview-action-danger" id="bReset" title="Vymazat adresáta" aria-label="Vymazat">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                <span class="preview-action-label">Vymazat</span>
+            </button>
+    </div>
     <div class="page" id="page">
       <div class="block" id="sender">
         <h3>Odesílatel:</h3>

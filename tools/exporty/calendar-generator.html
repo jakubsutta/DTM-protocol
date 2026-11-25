@@ -97,6 +97,8 @@
         @page { margin: 0; }
     }
 </style>
+<link rel="stylesheet" href="../../assets/css/preview-actions.css">
+<script src="../../assets/js/preview-actions.js" defer></script>
 </head>
 <body>
 <div class="app">
@@ -134,11 +136,15 @@
         <div class="section-label">Zobrazení</div>
         <button id="btnOverview" onclick="toggleOverview()">📅 Přehled 3 měsíců</button>
 
-        <div class="section-label">Export</div>
-        <button class="secondary" onclick="window.print()">⬇ Export do PDF (Ctrl+P)</button>
     </div>
 
     <div class="canvas-area" id="canvasArea">
+        <div class="preview-actions" data-anchor="#page, #overviewPage" style="--pa-primary-bg: #7c4dcf; --pa-primary-hover: #613bb0">
+            <button type="button" class="preview-action preview-action-primary" onclick="window.print()" title="Export do PDF (Ctrl+P)" aria-label="PDF">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M12 12v6"/><path d="m9 15 3 3 3-3"/></svg>
+                <span class="preview-action-label">PDF</span>
+            </button>
+        </div>
         <div class="page" id="page">
             <div class="cal-header">
                 <span class="cal-month" id="calMonthTitle" contenteditable="true">LEDEN 2026</span>

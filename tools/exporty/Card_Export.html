@@ -793,6 +793,8 @@
         font-weight: 800;
     }
 </style>
+<link rel="stylesheet" href="../../assets/css/preview-actions.css">
+<script src="../../assets/js/preview-actions.js" defer></script>
 </head>
 <body>
 
@@ -1031,33 +1033,31 @@
             </div>
         </div>
 
-        <!-- 6. Zálohování dat -->
-        <div class="page-label" onclick="toggleSec('sec-backup-fields')">
-            <span>Záloha a projekt</span>
-            <span id="arr-sec-backup-fields">Rozbalit</span>
-        </div>
-        <div id="sec-backup-fields">
-            <div class="field-row">
-                <button type="button" class="btn btn-secondary" onclick="exportCardsToJson()">Export do JSON</button>
-                <button type="button" class="btn btn-secondary" onclick="document.getElementById('file-import-json').click()">Načíst z JSON</button>
-                <input type="file" id="file-import-json" accept=".json" style="display:none" onchange="importCardsFromJson(this)">
-            </div>
-            <button type="button" class="btn btn-danger" style="width:100%; margin-top:8px; font-size:11px;" onclick="resetAllToDefault()">Obnovit výchozí vzor Svésedlice</button>
-        </div>
-
-        <!-- Tlačítka dole -->
-        <div class="btn-sticky-box">
-            <button class="btn btn-primary" style="padding:11px 16px; font-size:13px; font-weight:700;" onclick="window.print()">
-                Uložit jako PDF / Tisk (Ctrl+P)
-            </button>
-        </div>
-
     </div>
 
     <!-- ======================================================================
          PRAVOSTRANNÝ NÁHLED A4 (BEZ BAREVNÉHO OHRANIČENÍ)
          ====================================================================== -->
     <div class="preview-panel" id="preview-panel"></div>
+    <div class="preview-actions" data-anchor="#preview-panel .page" style="--pa-primary-bg: #fcf55f; --pa-primary-fg: #1a1a1a; --pa-primary-hover: #f0e84b; --pa-secondary-bg: #ffffff; --pa-secondary-fg: #1a1a1a; --pa-secondary-hover: #fffee6">
+            <button type="button" class="preview-action preview-action-primary" onclick="window.print()" title="Uložit jako PDF / Tisk (Ctrl+P)" aria-label="PDF">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M12 12v6"/><path d="m9 15 3 3 3-3"/></svg>
+                <span class="preview-action-label">PDF</span>
+            </button>
+            <button type="button" class="preview-action preview-action-secondary" onclick="exportCardsToJson()" title="Uložit zálohu (export do JSON)" aria-label="Zálohovat">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
+                <span class="preview-action-label">Zálohovat</span>
+            </button>
+            <button type="button" class="preview-action preview-action-secondary" onclick="document.getElementById('file-import-json').click()" title="Načíst zálohu z JSON" aria-label="Načíst">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 17v-6"/><path d="m9 14 3-3 3 3"/></svg>
+                <span class="preview-action-label">Načíst</span>
+            </button>
+            <button type="button" class="preview-action preview-action-secondary preview-action-danger" onclick="resetAllToDefault()" title="Obnovit výchozí vzor Svésedlice" aria-label="Výchozí">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+                <span class="preview-action-label">Výchozí</span>
+            </button>
+        <input type="file" id="file-import-json" accept=".json" style="display:none" onchange="importCardsFromJson(this)">
+    </div>
 </div>
 
 <script>

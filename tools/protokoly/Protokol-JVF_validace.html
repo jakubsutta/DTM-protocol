@@ -28,7 +28,7 @@
     .app { display: grid; grid-template-columns: 380px 1fr; min-height: 100vh; }
 
     /* ---- Formulářový panel ---- */
-    .form-panel { background: #e2ecff; color: #4483fc; padding: 28px 24px; display: flex; flex-direction: column; gap: 0; overflow-y: auto; }
+    .form-panel { background: #e2ecff; color: #4483fc; padding: 28px 24px; display: flex; flex-direction: column; gap: 0; overflow-y: auto; max-height: 100vh; position: sticky; top: 0; }
     .form-panel h2 { font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #4483fc; margin-bottom: 22px; }
     .section-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #000; margin: 20px 0 10px; padding-bottom: 5px; border-bottom: 1px solid #0f3460; }
     .field { margin-bottom: 12px; }
@@ -100,6 +100,8 @@
 </style>
 
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%234483fc%22 stroke-width=%221.6%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><path d=%22M12 3l6.5 2.6v4.9c0 4.4-2.7 7.9-6.5 9.6-3.8-1.7-6.5-5.2-6.5-9.6V5.6L12 3z%22/><path d=%22M8.7 12.1l2.3 2.3 4.5-4.6%22/></svg>">
+<link rel="stylesheet" href="../../assets/css/preview-actions.css">
+<script src="../../assets/js/preview-actions.js" defer></script>
 </head>
 <body>
 
@@ -156,14 +158,20 @@
         <div id="files-container"></div>
         <button class="add-file-btn" onclick="addFile()">+ Přidat soubor</button>
 
-        <div class="btn-row">
-            <button class="btn btn-primary" onclick="window.print()">⬇ Uložit jako PDF (Ctrl+P)</button>
-            <button class="btn btn-secondary" onclick="resetForm()">Vymazat formulář</button>
-        </div>
     </div>
 
     <!-- ===== PROTOKOL (preview) ===== -->
     <div class="preview-panel">
+        <div class="preview-actions" data-anchor="#protokol" style="--pa-primary-bg: #4483fc; --pa-primary-hover: #1a58cc; --pa-secondary-bg: #f8cfcf; --pa-secondary-fg: #9b0a0a; --pa-secondary-hover: #f3b8b8">
+            <button type="button" class="preview-action preview-action-primary" onclick="window.print()" title="Uložit jako PDF (Ctrl+P)" aria-label="PDF">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M12 12v6"/><path d="m9 15 3 3 3-3"/></svg>
+                <span class="preview-action-label">PDF</span>
+            </button>
+            <button type="button" class="preview-action preview-action-secondary preview-action-danger" onclick="resetForm()" title="Vymazat formulář" aria-label="Vymazat">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                <span class="preview-action-label">Vymazat</span>
+            </button>
+        </div>
         <div class="protokol" id="protokol">
             <div class="prot-header">
                 <div class="prot-org"><strong id="p-zpracovatel">Atomicon, s.r.o.</strong><span id="p-ico"></span></div>

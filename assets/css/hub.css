@@ -138,23 +138,23 @@ body.dark-theme .main-header {
     width: 38px;
     height: 38px;
     border-radius: 9px;
-    background: rgba(234, 82, 31, 0.10);
-    color: #ea521f;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    transition: transform 0.2s ease, background-color 0.2s ease;
+    box-shadow: 0 2px 8px rgba(26, 26, 46, 0.22);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .header-brand:hover .header-icon-tile {
-    background: rgba(234, 82, 31, 0.16);
-    transform: scale(1.05);
+    transform: scale(1.05) rotate(-3deg);
+    box-shadow: 0 4px 12px rgba(234, 82, 31, 0.30);
 }
 
+/* Logo = favicon.svg (rozcestník s cedulemi), tmavá dlaždice je součástí obrázku */
 .header-icon {
-    width: 22px;
-    height: 22px;
+    width: 100%;
+    height: 100%;
     display: block;
 }
 
@@ -1081,33 +1081,34 @@ body.dark-theme .theme-toggle .icon-moon {
 }
 
 /* ---- Barvy a témata pro jednotlivé karty ---- */
-.card.vlozeni       { --c: #e04a14; --bg: rgba(224, 74, 20, 0.10); }
-.card.validace      { --c: #2563eb; --bg: rgba(37, 99, 235, 0.10); }
-.card.predani       { --c: #16a34a; --bg: rgba(22, 163, 74, 0.10); }
-.card.jvf-validator { --c: #b91c1c; --bg: rgba(185, 28, 28, 0.10); }
+/* Barvy odpovídají hlavní barvě (motivu) panelu v daném nástroji */
+.card.vlozeni       { --c: #ea521f; --bg: rgba(234, 82, 31, 0.10); }
+.card.validace      { --c: #4483fc; --bg: rgba(68, 131, 252, 0.10); }
+.card.predani       { --c: #43a047; --bg: rgba(67, 160, 71, 0.10); }
+.card.jvf-validator { --c: #8b0000; --bg: rgba(139, 0, 0, 0.10); }
 
-.card.export        { --c: #b45309; --bg: rgba(180, 83, 9, 0.11); }
-.card.tabulky       { --c: #475569; --bg: rgba(71, 85, 105, 0.10); }
-.card.parcel        { --c: #0891b2; --bg: rgba(8, 145, 178, 0.10); }
-.card.obecni        { --c: #334155; --bg: rgba(51, 65, 85, 0.10); }
-.card.mapa          { --c: #0284c7; --bg: rgba(2, 132, 199, 0.10); }
-.card.kalendar      { --c: #7c3aed; --bg: rgba(124, 58, 237, 0.10); }
-.card.svazitost     { --c: #059669; --bg: rgba(5, 150, 105, 0.10); }
-.card.propagace     { --c: #db2777; --bg: rgba(219, 39, 119, 0.10); }
+.card.export        { --c: #d4cc30; --bg: rgba(212, 204, 48, 0.16); }
+.card.tabulky       { --c: #334155; --bg: rgba(51, 65, 85, 0.10); }
+.card.parcel        { --c: #00838f; --bg: rgba(0, 131, 143, 0.10); }
+.card.obecni        { --c: #1a6fd4; --bg: rgba(26, 111, 212, 0.10); }
+.card.mapa          { --c: #0288d1; --bg: rgba(2, 136, 209, 0.10); }
+.card.kalendar      { --c: #7c4dcf; --bg: rgba(124, 77, 207, 0.10); }
+.card.svazitost     { --c: #00c853; --bg: rgba(0, 200, 83, 0.12); }
+.card.propagace     { --c: #f15a22; --bg: rgba(241, 90, 34, 0.10); }
 .card.obalka,
-.card.post-label    { --c: #ea580c; --bg: rgba(234, 88, 12, 0.10); }
-.card.mockup        { --c: #4f46e5; --bg: rgba(79, 70, 229, 0.10); }
+.card.post-label    { --c: #5c2306; --bg: rgba(92, 35, 6, 0.10); }
+.card.mockup        { --c: #0a6cff; --bg: rgba(10, 108, 255, 0.10); }
 
-.card.kom           { --c: #d97706; --bg: rgba(217, 119, 6, 0.10); }
-.card.dz            { --c: #dc2626; --bg: rgba(220, 38, 38, 0.10); }
-.card.ndz           { --c: #ea580c; --bg: rgba(234, 88, 12, 0.10); }
-.card.kan           { --c: #78350f; --bg: rgba(120, 53, 15, 0.10); }
-.card.vod           { --c: #0284c7; --bg: rgba(2, 132, 199, 0.10); }
+.card.kom           { --c: #ea521f; --bg: rgba(234, 82, 31, 0.10); }
+.card.dz            { --c: #d32f2f; --bg: rgba(211, 47, 47, 0.10); }
+.card.ndz           { --c: #8b0000; --bg: rgba(139, 0, 0, 0.10); }
+.card.kan           { --c: #795548; --bg: rgba(121, 85, 72, 0.10); }
+.card.vod           { --c: #1976d2; --bg: rgba(25, 118, 210, 0.10); }
 .card.vo            { --c: #9c27b0; --bg: rgba(156, 39, 176, 0.10); }
 .card.or            { --c: #e91e63; --bg: rgba(233, 30, 99, 0.10); }
-.card.hrb           { --c: #4b5563; --bg: rgba(75, 85, 99, 0.10); }
-.card.zel           { --c: #15803d; --bg: rgba(21, 128, 61, 0.10); }
-.card.akt           { --c: #a16207; --bg: rgba(161, 98, 7, 0.10); }
+.card.hrb           { --c: #424242; --bg: rgba(66, 66, 66, 0.10); }
+.card.zel           { --c: #2e7d32; --bg: rgba(46, 125, 50, 0.10); }
+.card.akt           { --c: #f9a825; --bg: rgba(249, 168, 37, 0.14); }
 .card.seznam-dz     { --c: #c51f1f; --bg: rgba(197, 31, 31, 0.10); }
 .card.info-obec     { --c: #ca8a04; --bg: rgba(202, 138, 4, 0.12); }
 .card.metodika-dtm  { --c: #103778; --bg: rgba(16, 55, 120, 0.12); }
@@ -1173,10 +1174,6 @@ body.dark-theme .theme-toggle .icon-moon {
         height: 34px;
     }
 
-    .header-icon {
-        width: 19px;
-        height: 19px;
-    }
 
     .notice-text {
         font-size: 10px;
