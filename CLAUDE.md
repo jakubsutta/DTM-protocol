@@ -86,6 +86,25 @@ bez npm, bez frameworku**. Struktura složek a základní konvence jsou v `READM
 - Každý nástroj má vlastní barevný motiv a favicon (SVG vedle souboru nebo inline data URI).
 - Text vkládaný do `innerHTML` z uživatelského vstupu escapuj.
 
+### Easter egg
+- Hlášky maskota obsahují odkazy `.jenda-egg-link` (`eggLink(klíč, text)`, seznam `EGGS`
+  v `assets/js/jenda.js`), které otevřou **modál s iframe** na izometrické diorama
+  z dat OpenStreetMap (data vložená přímo v souboru):
+  - „práci“ → `tools/easter-egg/stupkova-18.html` – sídlo GIS střediska (Stupkova 952/18),
+  - „stavbu“ → `tools/easter-egg/horni-namesti.html` – Horní náměstí s radniční věží
+    (75 m), Sloupem Nejsvětější Trojice a kašnami (ručně zjednodušené dominanty),
+  - „projít“ → `tools/easter-egg/pauza.html` – mini hra: J.E.N.D.A. chodí (šipky/WASD)
+    po zjednodušené mapě Olomouce (pohled shora, jen ulice a chodníky) přes kontrolní
+    body od Stupkovy k radniční věži. Volitelný „Závod na čas“ (pomalejší chůze, rekord
+    v `localStorage` `jenda-pauza-best`, volba `jenda-pauza-race`); bez něj se chodí rychle.
+    Na mobilu/dotyku jen hláška, že to nejde.
+- Iframe vzniká až po kliknutí a po zavření (×, klik vedle, Esc – i uvnitř iframe přes
+  `postMessage({type:'jenda-easter-close'})`) se odstraní. Diorama animuje auta/chodce/maskota
+  max. ~30 fps jen když je viditelné a není pozastavené (respektuje `prefers-reduced-motion`).
+- Stránka funguje i samostatně (Ctrl+klik = nová záložka); v iframe skryje odkaz „zpět“.
+- Nepřidávat ho do karet rozcestníku ani do vyhledávání – má zůstat skrytý.
+- Nepoužívat skill Pocket City (licence jen pro nekomerční použití).
+
 ### Changelog
 - Novinky jsou ručně v `index.html` (sekce „changelog“ v bočním panelu + modální
   historie). Upravuj jen na výslovné požádání.

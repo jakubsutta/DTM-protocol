@@ -23,14 +23,28 @@
         return href ? '<a href="' + href + '" target="_blank" rel="noopener noreferrer">' + text + '</a>' : text;
     }
 
+    // Easter eggy: izometrická diorámata (tools/easter-egg), otevírají se v modálu
+    var EGGS = {
+        prace: { url: './tools/easter-egg/stupkova-18.html', title: 'Kde J.E.N.D.A. pracuje – Stupkova 18' },
+        vez: { url: './tools/easter-egg/horni-namesti.html', title: 'Horní náměstí a radniční věž Olomouc' },
+        hra: { url: './tools/easter-egg/pauza.html', title: 'Pauza s J.E.N.D.A. – procházka Olomoucí' }
+    };
+    function eggLink(key, text) {
+        return '<a href="' + EGGS[key].url + '" class="jenda-egg-link" data-egg="' + key + '" target="_blank" rel="noopener">' + text + '</a>';
+    }
+
     var MESSAGES = [
         function () { return 'Ahoj! Dnes je ' + today() + '.'; },
         function () { return 'Tohle je rozcestník nástrojů pro ulehčení práce.'; },
         function () { return 'Pokud máš nějaký nápad nebo jsi našel chybu, napiš ji do ' + link(dashboardUrl, 'dashboardu') + '.'; },
-        function () { return 'Poznáš, co je to za stavbu na pozadí?'; },
+        // Easter egg: „stavbu“ otevře diorama Horního náměstí s radniční věží
+        function () { return 'Poznáš, co je to za ' + eggLink('vez', 'stavbu') + ' na pozadí?'; },
         function () { return 'Nezapomeň na upozornění nahoře!'; },
         function () { return 'Už jsi vyzkoušel nový ' + link('./apps/modul-dtm/index.html', 'Modul DTM') + ' / ' + link('./apps/modul-katastr/index.html', 'Katastr') + '?'; },
-        function () { return 'Nikam nešiř prosím tento web, jen mezi námi v práci.. :)'; }
+        // Easter egg: „projít“ spustí mini hru – procházku po zjednodušené mapě Olomouce
+        function () { return 'Mám pauzu, pojď se ' + eggLink('hra', 'projít') + '.'; },
+        // Easter egg: „práci“ otevře v modálu diorama sídla GIS střediska (Stupkova 18)
+        function () { return 'Nikam nešiř prosím tento web, jen mezi námi v ' + eggLink('prace', 'práci') + '.. :)'; }
     ];
     var ROTATE_MS = 6500;
 
@@ -168,6 +182,18 @@
         'body.dark-theme .jenda-bubble{background:#1e293b;color:#e2e8f0;border-color:rgba(234,82,31,.35);}',
         'body.dark-theme .jenda-figure{filter:drop-shadow(0 4px 6px rgba(0,0,0,.5));}',
 
+        /* easter egg – modál s dioramem sídla (obsah se načte až po otevření) */
+        '.jenda-egg{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:28px;',
+        '  background:rgba(15,23,42,.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);animation:jenda-egg-in .2s ease;}',
+        '.jenda-egg-box{position:relative;width:min(1280px,100%);height:min(820px,100%);border-radius:16px;overflow:hidden;',
+        '  background:#f4eee0;box-shadow:0 24px 60px rgba(15,23,42,.35);animation:jenda-pop .35s cubic-bezier(.34,1.56,.64,1);}',
+        '.jenda-egg-box iframe{display:block;width:100%;height:100%;border:0;}',
+        '.jenda-egg-x{position:absolute;top:14px;right:14px;z-index:1;width:36px;height:36px;border-radius:9px;border:1px solid #d9cfbb;',
+        '  background:#fffcf4;color:#2b2622;font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;}',
+        '.jenda-egg-x:hover{border-color:#ea521f;color:#ea521f;}',
+        '@keyframes jenda-egg-in{from{opacity:0;}}',
+        '@media (max-width:640px){.jenda-egg{padding:0;}.jenda-egg-box{border-radius:0;height:100%;}}',
+
         '@keyframes jenda-rise{0%{transform:translateY(105%);}70%{transform:translateY(-4%) scaleY(1.03);}85%{transform:translateY(1%) scaleY(.97);}100%{transform:none;}}',
         '@keyframes jenda-sink{to{transform:translateY(105%);}}',
         '@keyframes jenda-pop{0%{opacity:0;transform:scale(.15) rotate(-6deg);}60%{opacity:1;}100%{opacity:1;transform:none;}}',
@@ -270,7 +296,46 @@
         figure.classList.remove('is-hop');
     });
     figure.addEventListener('click', function () { restart(figure, 'is-hop'); show(idx + 1, true); schedule(); });
+    // ---------- EASTER EGG: modál s dioramem ----------
+    // Iframe vzniká až po kliknutí a po zavření se celý odstraní (zastaví se i animace uvnitř).
+    var egg = null, eggFocus = null;
+    function openEgg(key) {
+        if (egg) return;
+        eggFocus = document.activeElement;
+        egg = document.createElement('div');
+        egg.className = 'jenda-egg';
+        egg.setAttribute('role', 'dialog');
+        egg.setAttribute('aria-modal', 'true');
+        var cfg = EGGS[key] || EGGS.prace;
+        egg.setAttribute('aria-label', cfg.title);
+        egg.innerHTML = '<div class="jenda-egg-box"><button type="button" class="jenda-egg-x" aria-label="Zavřít">×</button>' +
+            '<iframe src="' + cfg.url + '" title="' + cfg.title + '"></iframe></div>';
+        egg.addEventListener('click', function (e) { if (e.target === egg) closeEgg(); });
+        egg.querySelector('.jenda-egg-x').addEventListener('click', closeEgg);
+        document.body.appendChild(egg);
+        document.documentElement.style.overflow = 'hidden';
+        var frame = egg.querySelector('iframe');
+        frame.addEventListener('load', function () { try { frame.contentWindow.focus(); } catch (err) { /* ignore */ } });
+    }
+    function closeEgg() {
+        if (!egg) return;
+        egg.remove();
+        egg = null;
+        document.documentElement.style.overflow = '';
+        if (eggFocus && eggFocus.focus) eggFocus.focus();
+    }
+    text.addEventListener('click', function (e) {
+        var a = e.target.closest('a.jenda-egg-link');
+        if (!a || e.ctrlKey || e.metaKey || e.shiftKey || e.button === 1) return; // Ctrl+klik = nová záložka
+        e.preventDefault();
+        openEgg(a.getAttribute('data-egg'));
+    });
+    window.addEventListener('message', function (e) {
+        if (e.origin === location.origin && e.data && e.data.type === 'jenda-easter-close') closeEgg();
+    });
+
     document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && egg) { closeEgg(); return; }
         if (e.key === 'Escape' && root.classList.contains('is-open')) close();
     });
 })();

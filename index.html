@@ -1089,11 +1089,12 @@
                         </svg>
                         Novinky
                     </span>
-                    <span class="changelog-date" title="Zobrazit historii změn">24. 11. 2026</span>
+                    <span class="changelog-date" title="Zobrazit historii změn">26. 11. 2026</span>
                 </div>
                 <ul class="changelog-list">
-                    <li><span class="changelog-arrow">→</span><span class="changelog-text">Dotčené parcely: podpora bodů a polygonů</span></li>
-                    <li><span class="changelog-arrow">→</span><span class="changelog-text">rozcestník: nový vzhled &amp; maskot J.E.N.D.A.</span></li>
+                    <li><span class="changelog-arrow">→</span><span class="changelog-text">Obecní parcely: nový vzhled</span></li>
+                    <li><span class="changelog-arrow">→</span><span class="changelog-text">panel akcí vpravo i u protokolů a exportů</span></li>
+                    <li><span class="changelog-arrow">→</span><span class="changelog-text">nové logo &amp; barvy karet podle nástrojů</span></li>
                 </ul>
                 <button type="button" class="changelog-more-btn" id="changelog-open-modal" aria-label="Zobrazit starší novinky a historii změn">
                     <span>Zobrazit celou historii (7 verzí)</span>
@@ -1806,11 +1807,28 @@
                 </button>
             </div>
             <div class="changelog-modal-body">
-                <!-- 24. 11. 2026 -->
+                <!-- 26. 11. 2026 -->
                 <div class="changelog-timeline-item is-current">
                     <div class="changelog-timeline-header">
-                        <span class="changelog-timeline-date">24. 11. 2026</span>
+                        <span class="changelog-timeline-date">26. 11. 2026</span>
                         <span class="changelog-timeline-tag">Aktuální verze</span>
+                    </div>
+                    <ul class="changelog-timeline-list">
+                        <li><span class="tl-arrow">→</span><strong>Obecní parcely:</strong> Nový vzhled – tři kroky (vložení výpisu LV, nalezené parcely, export) na širší obrazovce vedle sebe, přehled parcel podle katastrálních území se zvýrazněním parcel se stavbou, ukazatel průběhu stahování z ČÚZK a barevný výsledek exportu včetně seznamu parcel, které v RÚIAN chybí; podpora tmavého režimu.</li>
+                        <li><span class="tl-arrow">→</span><strong>Protokoly, Technické karty, Export tabulek, Generátor kalendáře, Adresa na obálku, Generátor letáku:</strong> Akce (PDF, záloha, načtení, vymazání / obnovení vzoru, PNG, tisk) přesunuty do panelu vpravo vedle náhledu – stejně jako u generátorů pasportů.</li>
+                        <li><span class="tl-arrow">→</span><strong>Technické karty, Export tabulek:</strong> Záloha a načtení projektu (JSON) a obnovení výchozího vzoru jsou nově v panelu akcí místo sekce „Záloha a projekt“.</li>
+                        <li><span class="tl-arrow">→</span><strong>Protokoly:</strong> Levý formulář se posouvá samostatně a zůstává na místě, náhled protokolu se posouvá zvlášť (jako u pasportů).</li>
+                        <li><span class="tl-arrow">→</span><strong>Rozcestník:</strong> Nové logo J.E.N.D.A. (rozcestník s oranžovou a modrou cedulí) – stejné v záložce prohlížeče i v hlavičce.</li>
+                        <li><span class="tl-arrow">→</span><strong>Rozcestník:</strong> Barvy ikon karet sjednoceny s barevným motivem jednotlivých nástrojů (např. žlutá karta = žlutý nástroj).</li>
+                        <li><span class="tl-arrow">→</span><strong>Maskot J.E.N.D.A.:</strong> Pár nových hlášek… a kdo čte pozorně, možná něco objeví. 😉</li>
+                    </ul>
+                </div>
+
+                <!-- 24. 11. 2026 -->
+                <div class="changelog-timeline-item">
+                    <div class="changelog-timeline-header">
+                        <span class="changelog-timeline-date">24. 11. 2026</span>
+                        <span class="changelog-timeline-tag tag-past">Verze</span>
                     </div>
                     <ul class="changelog-timeline-list">
                         <li><span class="tl-arrow">→</span><strong>Dotčené parcely</strong> (dříve „Parcely pod komunikací“): Kromě linií nově zpracuje i body (parcela pod bodem) a polygony – hledá na celé ploše včetně parcel uvnitř, velké polygony se přesně rozdělí podle limitu služby ČÚZK.</li>
@@ -1919,7 +1937,7 @@
         </div>
     </div>
 
-    <script src="assets/js/jenda.js?v=20261124b"></script>
+    <script src="assets/js/jenda.js?v=20261126d"></script>
 </body>
 
 </html>
