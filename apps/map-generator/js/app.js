@@ -1,205 +1,197 @@
 /**
- * Map Generator - Main Application Bootstrap & Event Listeners
+ * Generátor map – start aplikace, ukládání, šablony, tisk a klávesnice
  */
 
 window.MapApp = window.MapApp || {};
 
-MapApp.init = function () {
-    // 1. Initialize Page layout and margins
-    MapApp.ui.updatePageSize();
+MapApp.app = {
+    _saveTimer: null,
 
-    // 2. Initialize Leaflet Map
-    MapApp.mapService.initMap();
+    /* ---------- Načtení / uložení dokumentu ---------- */
+    loadDoc() {
+        let saved = null;
+        try {
+            saved = JSON.parse(localStorage.getItem(MapApp.CONFIG.STORAGE_KEY) || 'null');
+        } catch (e) { saved = null; }
+        return this.normalize(saved);
+    },
 
-    // 3. Initialize Interactive Handles
-    MapApp.ui.initInteractions();
-
-    // 4. Initialize Legend
-    MapApp.legend.renderManualInputs();
-    MapApp.ui.toggleSymbolMode();
-    MapApp.legend.toggleLegendMode();
-
-    // 5. Wire DOM Event Listeners
-    MapApp.wireEvents();
-
-    // 6. Fit canvas to viewport
-    setTimeout(() => {
-        MapApp.canvasZoom?.fitToView();
-    }, 200);
-};
-
-MapApp.wireEvents = function () {
-    const bind = (id, event, handler) => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener(event, handler);
-    };
-
-    // Tabs
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', function () {
-            const tabId = this.getAttribute('data-tab');
-            if (tabId) MapApp.ui.switchTab(tabId, this);
+    // Doplní chybějící klíče z výchozího dokumentu (starší uložení, ruční JSON)
+    normalize(d) {
+        if (!d || d.version !== 2 || !d.page) return MapApp.defaultDoc();
+        const def = MapApp.defaultDoc(d.page.format, d.page.orient);
+        const out = Object.assign({}, def, d);
+        ['page', 'guides', 'frame', 'map', 'style'].forEach(k => {
+            out[k] = Object.assign({}, def[k], d[k] || {});
         });
-    });
+        if (!Array.isArray(out.items)) out.items = def.items;
+        // Vestavěné prvky, které v uložení chybí, doplníme (skryté)
+        def.items.forEach(di => {
+            const ex = out.items.find(i => i.id === di.id);
+            if (!ex) out.items.push(Object.assign({}, di, { visible: false }));
+            else Object.keys(di).forEach(k => { if (ex[k] === undefined) ex[k] = di[k]; });
+        });
+        return out;
+    },
 
-    // Map & WMS
-    bind('chkOrto', 'change', () => MapApp.mapService.toggleWmsLayers());
-    bind('chkKnInverse', 'change', () => MapApp.mapService.toggleWmsLayers());
+    save() {
+        clearTimeout(this._saveTimer);
+        this._saveTimer = setTimeout(() => {
+            try {
+                localStorage.setItem(MapApp.CONFIG.STORAGE_KEY, JSON.stringify(MapApp.doc));
+            } catch (e) { /* plné úložiště / soukromé okno – nevadí */ }
+        }, 300);
+    },
 
-    // Page Settings
-    bind('pageFormat', 'change', () => {
-        MapApp.ui.updatePageSize();
-        MapApp.canvasZoom?.fitToView();
-    });
-    bind('pageOrient', 'change', () => {
-        MapApp.ui.updatePageSize();
-        MapApp.canvasZoom?.fitToView();
-    });
-    bind('mT', 'change', () => MapApp.ui.updatePageSize());
-    bind('mR', 'change', () => MapApp.ui.updatePageSize());
-    bind('mB', 'change', () => MapApp.ui.updatePageSize());
-    bind('mL', 'change', () => MapApp.ui.updatePageSize());
-    bind('lockFrameBtn', 'click', () => MapApp.ui.toggleLockFrame());
+    // Kompletní překreslení po načtení šablony / obnovení
+    applyDoc(doc) {
+        MapApp.doc = this.normalize(doc);
+        MapApp.state.selectedId = null;
+        MapApp.layout.renderPage();
+        MapApp.mapService.setView(MapApp.doc.map.center, MapApp.doc.map.scale);
+        MapApp.mapService.applyBasemap();
+        MapApp.panel.syncAll();
+        MapApp.canvasZoom.fitToView();
+        this.save();
+    },
 
-    // Scale
-    bind('scaleInput', 'change', () => MapApp.mapService.onManualScaleChange());
-    bind('scaleInput', 'input', () => MapApp.mapService.onManualScaleChange());
+    /* ---------- Šablona (JSON) ---------- */
+    exportTemplate() {
+        const doc = MapApp.doc;
+        const num = (doc.items.find(i => i.id === 'mapnum') || {}).text || 'mapa';
+        const name = 'sablona-' + num.toLowerCase()
+            .normalize('NFD').replace(/[̀-ͯ]/g, '')
+            .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '.json';
+        const blob = new Blob([JSON.stringify(doc, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+        this.toast('Šablona uložena (' + name + ').');
+    },
 
-    // Titles & Imprint
-    ['inpTitle', 'inpSubtitle', 'inpMapNum', 'impAuthor', 'impContributors', 'impDate', 'impSource', 'impNote'].forEach(id => {
-        bind(id, 'input', () => MapApp.ui.updateDecorations());
-    });
-
-    // Data / SHP
-    bind('btnLoadShp', 'click', () => MapApp.data.loadShp());
-    bind('categoryField', 'change', () => MapApp.data.onCategoryFieldChange());
-    bind('btnRandomizeColors', 'click', () => MapApp.data.randomizeCategoryColors());
-
-    // Symbology
-    bind('pointType', 'change', () => {
-        MapApp.ui.toggleSymbolMode();
-        MapApp.data.updateVectorStyle();
-    });
-
-    ['symFillColor', 'symStrokeColor', 'symShape', 'symSize', 'symStrokeWidth'].forEach(id => {
-        bind(id, 'change', () => MapApp.data.updateVectorStyle());
-    });
-
-    ['lineOutlineEnable', 'lineOutlineColor', 'lineOutlineWidth'].forEach(id => {
-        bind(id, 'change', () => MapApp.data.updateVectorStyle());
-    });
-
-    ['iconUrl', 'svgCodeText'].forEach(id => {
-        bind(id, 'input', () => MapApp.data.updateVectorStyle());
-    });
-
-    ['iconSize', 'iconAngle'].forEach(id => {
-        bind(id, 'change', () => MapApp.data.updateVectorStyle());
-    });
-
-    // Labels
-    bind('labelField', 'change', () => MapApp.data.updateVectorStyle());
-    bind('labelFontSize', 'input', () => MapApp.labels.updateLabelStyles());
-    bind('labelFontColor', 'input', () => MapApp.labels.updateLabelStyles());
-    bind('btnToggleLabelEdit', 'click', () => MapApp.labels.toggleLabelEditMode());
-
-    // Legend
-    bind('showLegend', 'change', () => MapApp.ui.updateDecorations());
-    bind('inpLegendTitle', 'input', () => MapApp.ui.updateDecorations());
-    bind('legendMode', 'change', () => {
-        MapApp.legend.toggleLegendMode();
-        MapApp.ui.updateDecorations();
-    });
-    bind('btnAddManualLegend', 'click', () => MapApp.legend.addItem());
-    bind('btnAddManualHeader', 'click', () => MapApp.legend.addHeader());
-
-    // Export PDF
-    bind('btnPrintPdf', 'click', () => window.print());
-
-    // Canvas Zoom
-    bind('btnZoomIn', 'click', () => MapApp.canvasZoom.zoomIn());
-    bind('btnZoomOut', 'click', () => MapApp.canvasZoom.zoomOut());
-    bind('btnZoomReset', 'click', () => MapApp.canvasZoom.fitToView());
-
-    // Ctrl + Scroll Wheel on canvas area
-    const canvasArea = document.getElementById('canvasArea');
-    if (canvasArea) {
-        canvasArea.addEventListener('wheel', (e) => {
-            if (e.ctrlKey) {
-                e.preventDefault();
-                if (e.deltaY < 0) MapApp.canvasZoom.zoomIn();
-                else MapApp.canvasZoom.zoomOut();
+    importTemplate(file) {
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            try {
+                const d = JSON.parse(reader.result);
+                if (!d || d.version !== 2) throw new Error('Neznámý formát šablony.');
+                this.applyDoc(d);
+                this.toast('Šablona načtena.');
+            } catch (e) {
+                this.toast('Šablonu nelze načíst: ' + e.message, true);
             }
-        }, { passive: false });
-    }
-};
+        };
+        reader.readAsText(file);
+    },
 
-// ---- Canvas Zoom Controller ----
-MapApp.canvasZoom = {
-    _scale: 1,
-    _STEP: 0.1,
-    _MIN: 0.3,
-    _MAX: 1.5,
+    resetAll() {
+        if (!confirm('Obnovit výchozí rozvržení? Všechny úpravy mapy (texty, legenda, polohy prvků) se ztratí.')) return;
+        const keepMap = MapApp.doc.map;
+        const d = MapApp.defaultDoc();
+        d.map.center = keepMap.center;
+        d.map.scale = keepMap.scale;
+        this.applyDoc(d);
+        this.toast('Rozvržení obnoveno.');
+    },
 
-    _apply() {
-        const scaler = document.getElementById('pageScaler');
-        const label = document.getElementById('zoomLevelLabel');
-        if (scaler) scaler.style.transform = `scale(${this._scale})`;
-        if (label) label.textContent = Math.round(this._scale * 100) + '%';
-        // After scale change, let Leaflet know the container size changed
-        if (MapApp.state.map) {
-            setTimeout(() => MapApp.state.map.invalidateSize(), 160);
+    /* ---------- Tisk / PDF ---------- */
+    async print() {
+        MapApp.layout.select(null);
+        if (MapApp.mapService.isLoading()) {
+            this.toast('Čekám na dočtení podkladové mapy…');
+            await MapApp.mapService.whenLoaded(20000);
         }
+        // Název souboru PDF = číslo mapy
+        const oldTitle = document.title;
+        const num = (MapApp.doc.items.find(i => i.id === 'mapnum') || {}).text;
+        if (num) document.title = num.replace(/\s+/g, '_');
+        window.print();
+        setTimeout(() => { document.title = oldTitle; }, 500);
     },
 
-    zoomIn() {
-        this._scale = Math.min(this._MAX, Math.round((this._scale + this._STEP) * 100) / 100);
-        this._apply();
+    /* ---------- Hláška ---------- */
+    toast(msg, isError) {
+        const el = document.getElementById('toast');
+        if (!el) return;
+        el.textContent = msg;
+        el.classList.toggle('error', !!isError);
+        el.classList.add('show');
+        clearTimeout(this._toastTimer);
+        this._toastTimer = setTimeout(() => el.classList.remove('show'), isError ? 5000 : 2600);
     },
 
-    zoomOut() {
-        this._scale = Math.max(this._MIN, Math.round((this._scale - this._STEP) * 100) / 100);
-        this._apply();
-    },
+    /* ---------- Události ---------- */
+    wireEvents() {
+        const bind = (id, ev, fn) => document.getElementById(id)?.addEventListener(ev, fn);
 
-    fitToView() {
-        const canvasArea = document.getElementById('canvasArea');
-        const page = document.getElementById('page');
-        if (!canvasArea || !page) { this._scale = 1; this._apply(); return; }
+        bind('btnPrintPdf', 'click', () => this.print());
+        bind('btnSaveTpl', 'click', () => this.exportTemplate());
+        bind('btnLoadTpl', 'click', () => document.getElementById('tplFile').click());
+        bind('tplFile', 'change', (e) => { this.importTemplate(e.target.files[0]); e.target.value = ''; });
+        bind('btnReset', 'click', () => this.resetAll());
+        bind('btnAddText', 'click', () => MapApp.panel.addCustomText());
 
-        // Temporarily reset scale to measure natural page size
-        const scaler = document.getElementById('pageScaler');
-        if (scaler) scaler.style.transform = 'scale(1)';
+        bind('btnZoomIn', 'click', () => MapApp.canvasZoom.zoomIn());
+        bind('btnZoomOut', 'click', () => MapApp.canvasZoom.zoomOut());
+        bind('btnZoomFit', 'click', () => MapApp.canvasZoom.fitToView());
 
-        requestAnimationFrame(() => {
-            const canvasRect = canvasArea.getBoundingClientRect();
-            const pageRect = page.getBoundingClientRect();
-            const availW = canvasRect.width - 60; // padding
-            const availH = canvasRect.height - 60;
-            const fitScale = Math.min(availW / pageRect.width, availH / pageRect.height, 1);
-            this._scale = Math.max(this._MIN, Math.round(fitScale * 100) / 100);
-            this._apply();
+        // Ctrl+kolečko = zvětšení náhledu stránky
+        bind('canvasArea', 'wheel', (e) => {
+            if (!e.ctrlKey) return;
+            e.preventDefault();
+            if (e.deltaY < 0) MapApp.canvasZoom.zoomIn(); else MapApp.canvasZoom.zoomOut();
+        });
+
+        // Klik mimo prvky = zrušit výběr
+        bind('canvasArea', 'pointerdown', (e) => {
+            if (!e.target.closest('.layout-item')) MapApp.layout.select(null);
+        });
+
+        // Ctrl+P → stejná cesta jako tlačítko (počká na podklad)
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') {
+                e.preventDefault();
+                this.print();
+                return;
+            }
+            const tag = (e.target.tagName || '').toLowerCase();
+            if (tag === 'input' || tag === 'textarea' || tag === 'select' || e.target.isContentEditable) return;
+            const step = e.shiftKey ? 5 : 0.5;
+            const moves = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] };
+            if (moves[e.key] && MapApp.layout.nudgeSelected(...moves[e.key])) e.preventDefault();
+            if (e.key === 'Escape') MapApp.layout.select(null);
+        });
+
+        let resizeTimer = null;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => MapApp.canvasZoom.fitToView(), 150);
         });
     }
 };
 
-// Global Bridge Functions for backwards-compatibility
-window.switchTab = (tabId, btn) => MapApp.ui.switchTab(tabId, btn);
-window.updatePageSize = () => MapApp.ui.updatePageSize();
-window.toggleWmsLayers = () => MapApp.mapService.toggleWmsLayers();
-window.toggleLockFrame = () => MapApp.ui.toggleLockFrame();
-window.onManualScaleChange = () => MapApp.mapService.onManualScaleChange();
-window.updateDecorations = () => MapApp.ui.updateDecorations();
-window.loadShp = () => MapApp.data.loadShp();
-window.updateVectorStyle = () => MapApp.data.updateVectorStyle();
-window.toggleSymbolMode = () => MapApp.ui.toggleSymbolMode();
-window.toggleLabelEditMode = () => MapApp.labels.toggleLabelEditMode();
-window.toggleLegendMode = () => MapApp.legend.toggleLegendMode();
-window.addManualLegendItem = () => MapApp.legend.addItem();
-window.addManualLegendHeader = () => MapApp.legend.addHeader();
-window.removeManualLegendItem = (index) => MapApp.legend.removeItem(index);
+MapApp.init = function () {
+    MapApp.doc = MapApp.app.loadDoc();
 
-// Auto-bootstrap on DOM ready
-document.addEventListener('DOMContentLoaded', () => {
-    MapApp.init();
-});
+    MapApp.layout.renderPage();
+    MapApp.mapService.initMap();
+    MapApp.panel.init();
+    MapApp.app.wireEvents();
+    MapApp.ui.toggleSymbolMode();
+    if (MapApp.data && MapApp.data.wireEvents) MapApp.data.wireEvents();
+
+    let tab = 'tab-stranka';
+    try { tab = localStorage.getItem('jenda-mapgen-tab') || tab; } catch (e) { /* nevadí */ }
+    if (document.getElementById(tab)) MapApp.panel.switchTab(tab);
+
+    requestAnimationFrame(() => {
+        MapApp.canvasZoom.fitToView();
+        MapApp.mapService.invalidate();
+    });
+};
+
+document.addEventListener('DOMContentLoaded', () => MapApp.init());

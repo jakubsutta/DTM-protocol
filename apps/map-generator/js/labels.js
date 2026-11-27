@@ -68,7 +68,7 @@ MapApp.labels = {
 
             const onMouseMove = (moveEvent) => {
                 L.DomEvent.stop(moveEvent);
-                const zoomScale = MapApp.canvasZoom ? (MapApp.canvasZoom._scale || 1) : 1;
+                const zoomScale = MapApp.canvasZoom ? (MapApp.canvasZoom.scale || 1) : 1;
 
                 if (isDragging) {
                     const currentPos = state.map.latLngToLayerPoint(labelMarker.getLatLng());

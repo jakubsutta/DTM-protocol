@@ -3,165 +3,664 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Návod ke kontrole – anotace screenshotu</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%2364748b%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><style>@media(prefers-color-scheme:dark){:root{stroke:%2394a3b8}}</style><rect x=%222.5%22 y=%223.5%22 width=%2219%22 height=%2213%22 rx=%222%22/><line x1=%222.5%22 y1=%227%22 x2=%2221.5%22 y2=%227%22/><circle cx=%227%22 cy=%2211.5%22 r=%221.5%22/><path d=%22M11 12h5%22/><path d=%22M13.5 9.5L16 12l-2.5 2.5%22/><path d=%22M8 20.5h8%22/><path d=%22M12 16.5v4%22/></svg>">
+<title>Generátor rychlé nápovědy</title>
 <link rel="icon" href="navod-favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/css/preview-actions.css">
+<script src="../../assets/js/preview-actions.js" defer></script>
 <style>
-:root{--bg:#eef1f4;--fg:#18222d;--card:#fff;--bd:#c9d0d8;--ac:#0b6e99}
-@media(prefers-color-scheme:dark){:root{--bg:#131a21;--fg:#e4eaf0;--card:#1e2730;--bd:#38444f}}
+/* ==========================================================================
+   Generátor rychlé nápovědy – anotace screenshotu (šipky, rámečky, značky)
+   Motiv: #0b6e99
+   ========================================================================== */
+:root{
+  --ac:#0b6e99;--ac-dark:#085a7d;--ac-light:#e3f2f8;--ac-soft:#b9dcea;
+  --bg:#e9edf1;--panel:#fff;--fg:#18222d;--muted:#64748b;--bd:#d6dde4;--input:#fff;--danger:#c62828;
+}
+@media (prefers-color-scheme:dark){
+  :root{--ac:#4fb3dd;--ac-dark:#7cc8e8;--ac-light:#10303f;--ac-soft:#1d4f66;
+    --bg:#0e1419;--panel:#161e26;--fg:#e4eaf0;--muted:#94a3b8;--bd:#2c3843;--input:#1d2731;--danger:#ef5350}
+}
 *{box-sizing:border-box}
-body{margin:0;font:15px/1.4 "Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--fg)}
-header{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 14px;background:var(--card);border-bottom:1px solid var(--bd)}
-button,input,label.btn{font:inherit;padding:6px 12px;border:1px solid var(--bd);border-radius:6px;background:var(--card);color:var(--fg);cursor:pointer}
-button:hover,label.btn:hover{border-color:var(--ac)}
-button:focus-visible,input:focus-visible,label.btn:focus-within{outline:2px solid var(--ac);outline-offset:2px}
-input[type=text]{cursor:text;min-width:260px;flex:1}
-input[type=color]{padding:2px;width:40px;height:34px}
-main{padding:14px}
-canvas{display:block;max-width:100%;height:auto;border:1px solid var(--bd);background:var(--card);touch-action:none}
-p.hint{margin:0 0 10px;opacity:.8}
+html,body{margin:0;height:100%}
+body{font:13px/1.4 "Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--fg)}
+.app{display:grid;grid-template-columns:360px 1fr;min-height:100vh}
+
+/* ---------- Panel ---------- */
+.form-panel{background:var(--panel);border-right:1px solid var(--bd);max-height:100vh;position:sticky;top:0;overflow-y:auto;padding:0 16px 24px}
+.panel-header{display:flex;align-items:center;gap:10px;padding:14px 0 10px}
+.back{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:6px;color:var(--muted);background:var(--ac-light);border:1px solid var(--ac-soft);text-decoration:none;flex-shrink:0;transition:transform .15s}
+.back:hover{color:var(--ac);transform:translateX(-2px)}
+.back svg{width:16px;height:16px}
+h1{font-size:14px;margin:0}
+.sub{font-size:11px;color:var(--muted)}
+.section-label{display:flex;justify-content:space-between;align-items:center;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ac);margin:16px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--ac-light)}
+.field{margin-bottom:9px}
+.field>label,.grid2 label{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:3px}
+input[type=text],input[type=number],textarea,select{width:100%;font:inherit;padding:5px 8px;border:1px solid var(--bd);border-radius:5px;background:var(--input);color:var(--fg);outline:none}
+textarea{resize:vertical}
+input:focus,textarea:focus,select:focus{border-color:var(--ac);box-shadow:0 0 0 2px var(--ac-light)}
+input[type=color]{width:100%;height:30px;padding:2px;border:1px solid var(--bd);border-radius:5px;background:var(--input);cursor:pointer}
+input[type=range]{width:100%;accent-color:var(--ac)}
+input[type=checkbox]{accent-color:var(--ac)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.check{display:flex;align-items:center;gap:7px;cursor:pointer;padding:2px 0}
+.hint{font-size:11px;line-height:1.45;color:var(--muted)}
+kbd{font:600 10px/1 "Segoe UI",sans-serif;padding:1px 4px;border:1px solid var(--bd);border-bottom-width:2px;border-radius:3px;background:var(--bg)}
+button{font:inherit;cursor:pointer}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:7px 10px;font-weight:600;color:var(--ac);background:var(--panel);border:1px solid var(--ac-soft);border-radius:6px}
+.btn:hover{background:var(--ac-light)}
+.btn.primary{background:var(--ac);color:#fff;border-color:var(--ac)}
+.btn.primary:hover{background:var(--ac-dark)}
+.btn svg{width:15px;height:15px}
+.btn-row{display:flex;gap:6px}
+.btn-row>*{flex:1}
+.link-btn{border:none;background:none;padding:0;font-size:11px;font-weight:600;color:var(--ac);text-transform:none;letter-spacing:0}
+.link-btn:hover{text-decoration:underline}
+.link-btn:disabled{opacity:.4;cursor:default;text-decoration:none}
+
+/* Nástroje */
+.tools{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:3px;background:var(--bg);border:1px solid var(--bd);border-radius:8px}
+.tool{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;border:1px solid transparent;border-radius:6px;background:none;color:var(--muted);font-size:11px;font-weight:600}
+.tool svg{width:18px;height:18px}
+.tool:hover{color:var(--fg)}
+.tool.active{background:var(--panel);color:var(--ac);border-color:var(--bd);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+
+/* Seznam kroků */
+.steps{display:flex;flex-direction:column;gap:5px}
+.step{display:grid;grid-template-columns:24px 1fr auto;gap:6px;align-items:start;padding:6px;border:1px solid var(--bd);border-radius:7px;background:var(--panel)}
+.step.sel{border-color:var(--ac);box-shadow:0 0 0 2px var(--ac-light)}
+.step-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:11px;cursor:pointer}
+.step textarea{min-height:30px;padding:4px 7px}
+.step-tools{display:flex;flex-direction:column;gap:3px}
+.step-tools .row{display:flex;gap:2px}
+.mini{width:22px;height:22px;padding:0;font-size:10px;line-height:1;color:var(--muted);background:var(--bg);border:1px solid var(--bd);border-radius:4px}
+.mini:hover:not(:disabled){color:var(--ac);border-color:var(--ac-soft)}
+.mini.danger:hover{color:var(--danger);border-color:var(--danger)}
+.mini:disabled{opacity:.35;cursor:default}
+.step input[type=color]{width:22px;height:22px;padding:1px}
+.step-type{font-size:10px;color:var(--muted);margin-top:2px}
+.empty{padding:12px;border:1px dashed var(--bd);border-radius:7px;color:var(--muted);text-align:center;font-size:12px}
+
+/* ---------- Náhled ---------- */
+.preview{position:relative;padding:28px 90px 40px 28px;min-width:0}
+.drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;min-height:calc(100vh - 68px);border:2px dashed var(--bd);border-radius:12px;color:var(--muted);text-align:center;padding:30px;background:var(--panel)}
+.drop svg{width:56px;height:56px;color:var(--ac-soft)}
+.drop strong{color:var(--fg);font-size:15px}
+.drop.over,.preview.over .stage{border-color:var(--ac);background:var(--ac-light)}
+.stage{display:inline-block;max-width:100%;line-height:0;box-shadow:0 4px 22px rgba(0,0,0,.18);background:#fff}
+canvas{display:block;max-width:100%;height:auto;touch-action:none}
+.hidden{display:none!important}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);padding:9px 16px;border-radius:8px;background:#263238;color:#fff;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:200}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast.err{background:var(--danger)}
+
+@media (max-width:860px){
+  .app{grid-template-columns:1fr}
+  .form-panel{position:static;max-height:none;border-right:none;border-bottom:1px solid var(--bd)}
+  .preview{padding:16px 70px 30px 16px}
+  .drop{min-height:50vh}
+}
+@media print{.form-panel,.preview-actions{display:none!important}.app{display:block}.preview{padding:0}.stage{box-shadow:none}}
 </style>
 </head>
 <body>
-<header>
-  <label class="btn">Vybrat screenshot<input id="file" type="file" accept="image/*" hidden></label>
-  <input id="title" type="text" placeholder="Nadpis (např. Kontrola dat – obec Příklad)">
-  <input id="col" type="color" value="#0b6e99" title="Barva nových šipek; při vybrané šipce změní její barvu">
-  <button id="edit">Upravit text</button>
-  <button id="del">Smazat vybranou</button>
-  <button id="undo">Zpět</button>
-  <button id="clear">Smazat vše</button>
-  <button id="copy">Kopírovat obrázek</button>
-  <button id="save">Uložit PNG</button>
-</header>
-<main>
-  <p class="hint">Nová šipka: tažení od popisku k cíli. Popisek přesunete tažením za něj, špičku šipky tažením za její hrot. Text upravíte dvojklikem na popisek, vybranou šipku smažete klávesou Delete.</p>
-  <canvas id="c" width="900" height="300"></canvas>
-</main>
+<div class="app">
+  <aside class="form-panel">
+    <header class="panel-header">
+      <a class="back" href="../../index.html" title="Zpět na rozcestník">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      </a>
+      <div><h1>Generátor rychlé nápovědy</h1><div class="sub">Screenshot se šipkami, rámečky a očíslovanými kroky</div></div>
+    </header>
+
+    <div class="section-label">Obrázek</div>
+    <div class="btn-row field">
+      <label class="btn primary" title="Vybrat obrázek ze souboru">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        Vybrat screenshot<input id="file" type="file" accept="image/*" hidden>
+      </label>
+    </div>
+    <div class="hint">Nebo vložte <kbd>Ctrl</kbd>+<kbd>V</kbd> (např. po <kbd>Win</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>) či přetáhněte soubor do náhledu.</div>
+
+    <div class="section-label">Nadpis</div>
+    <div class="field"><input id="title" type="text" placeholder="např. Kontrola dat v GISAdmin – obec Příklad"></div>
+    <div class="field"><input id="subtitle" type="text" placeholder="Podnadpis (nepovinné)"></div>
+
+    <div class="section-label">Kreslení</div>
+    <div class="tools field" role="radiogroup" aria-label="Nástroj">
+      <button type="button" class="tool active" data-tool="arrow" title="Šipka s popiskem – táhněte od popisku k cíli (A)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="15" width="9" height="6" rx="2"/><line x1="8" y1="15" x2="19" y2="5"/><polyline points="12 5 19 5 19 12"/></svg>Šipka</button>
+      <button type="button" class="tool" data-tool="rect" title="Rámeček – zvýraznění oblasti tažením (R)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><rect x="3" y="2" width="7" height="4" rx="1" fill="currentColor"/></svg>Rámeček</button>
+      <button type="button" class="tool" data-tool="badge" title="Číselná značka – klikněte na místo (Z)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M10.5 9l2-1.5V16"/></svg>Značka</button>
+    </div>
+    <div class="grid2 field">
+      <div><label for="col">Barva</label><input id="col" type="color" value="#e65100" title="Barva nových prvků; při vybraném prvku změní i jeho barvu"></div>
+      <div><label for="size">Velikost písma <span id="sizeVal"></span></label><input id="size" type="range" min="50" max="220" step="5" value="100"></div>
+    </div>
+    <label class="check"><input type="checkbox" id="numbered" checked> Číslovat kroky</label>
+    <label class="check"><input type="checkbox" id="listBelow"> Vypsat kroky pod obrázkem</label>
+    <div class="hint" style="margin-top:6px">Prvek přesunete tažením, šipku i za hrot, rámeček za pravý dolní roh.
+      <kbd>Delete</kbd> smaže vybraný, <kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd> zpět / znovu.</div>
+
+    <div class="section-label">Kroky
+      <span><button type="button" class="link-btn" id="undo" title="Zpět (Ctrl+Z)">Zpět</button> · <button type="button" class="link-btn" id="redo" title="Znovu (Ctrl+Y)">Znovu</button></span>
+    </div>
+    <div id="steps" class="steps"></div>
+  </aside>
+
+  <main class="preview" id="preview">
+    <label class="drop" id="drop">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3.5" width="19" height="13" rx="2"/><line x1="2.5" y1="7" x2="21.5" y2="7"/><path d="M11 12h5"/><path d="M13.5 9.5L16 12l-2.5 2.5"/><path d="M8 20.5h8"/><path d="M12 16.5v4"/></svg>
+      <strong>Vložte screenshot</strong>
+      <span><kbd>Ctrl</kbd>+<kbd>V</kbd>, přetažením souboru sem, nebo kliknutím</span>
+      <input id="file2" type="file" accept="image/*" hidden>
+    </label>
+    <div class="stage hidden" id="stage"><canvas id="c"></canvas></div>
+
+    <div class="preview-actions" data-anchor="#stage, #drop"
+         style="--pa-primary-bg:#0b6e99;--pa-primary-hover:#085a7d;--pa-secondary-bg:#e3f2f8;--pa-secondary-fg:#085a7d;--pa-secondary-hover:#b9dcea">
+      <button type="button" class="preview-action preview-action-primary" id="copy" title="Kopírovat obrázek do schránky (Ctrl+Shift+C)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        <span class="preview-action-label">Kopírovat</span>
+      </button>
+      <button type="button" class="preview-action" id="save" title="Uložit jako PNG">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span class="preview-action-label">Uložit PNG</span>
+      </button>
+      <button type="button" class="preview-action preview-action-danger" id="clear" title="Smazat všechny anotace">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        <span class="preview-action-label">Smazat vše</span>
+      </button>
+    </div>
+  </main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
 <script>
-const $=id=>document.getElementById(id),c=$('c'),x=c.getContext('2d');
-let img=null,items=[],sel=-1,act=null;
-const fs=()=>Math.max(16,Math.round((img?img.width:1000)/55));
-const band=()=>$('title').value.trim()?Math.round(fs()*2.4):0;
-const FONT=s=>'bold '+s+'px "Segoe UI",system-ui,sans-serif';
+'use strict';
+const $ = id => document.getElementById(id);
+const c = $('c'), x = c.getContext('2d');
+const FONT_FAMILY = '"Segoe UI", system-ui, sans-serif';
+const TYPE_NAMES = { arrow: 'šipka', rect: 'rámeček', badge: 'značka' };
 
-function arrow(it,n,b,f,selected){
-  const x1=it.x1,y1=it.y1+b,x2=it.x2,y2=it.y2+b,a=Math.atan2(y2-y1,x2-x1),h=f*1.1;
-  x.strokeStyle=x.fillStyle=it.col;x.lineWidth=Math.max(3,f/5);x.lineCap='round';
-  x.beginPath();x.moveTo(x1,y1);x.lineTo(x2,y2);x.stroke();
-  x.beginPath();x.moveTo(x2,y2);
-  x.lineTo(x2-h*Math.cos(a-.4),y2-h*Math.sin(a-.4));
-  x.lineTo(x2-h*Math.cos(a+.4),y2-h*Math.sin(a+.4));x.closePath();x.fill();
-  const t=it.text?it.text:String(n);
-  x.font=FONT(f);x.textBaseline='middle';x.textAlign='left';
-  const w=x.measureText(t).width+f,hh=f*1.7;
-  it.box={x:x1-w/2,y:y1-hh/2-b,w:w,h:hh};
-  x.fillStyle=it.col;x.beginPath();x.roundRect(x1-w/2,y1-hh/2,w,hh,hh/4);x.fill();
-  x.fillStyle='#fff';x.fillText(t,x1-w/2+f/2,y1);
-  if(selected){
-    x.save();x.setLineDash([7,5]);x.lineWidth=3;x.strokeStyle='#ff9800';
-    x.strokeRect(x1-w/2-5,y1-hh/2-5,w+10,hh+10);
-    x.beginPath();x.arc(x2,y2,f*.9,0,7);x.stroke();x.restore();
+let img = null;           // načtený screenshot
+let items = [];           // anotace v souřadnicích obrázku
+let sel = -1;             // index vybraného prvku
+let tool = 'arrow';
+let act = null;           // probíhající tažení
+let history = [], future = [];
+
+/* ---------- Rozměry podle velikosti obrázku ---------- */
+const fs = () => Math.max(14, Math.round((img ? img.width : 1000) / 60 * (+$('size').value / 100)));
+const font = (s, w) => `${w || 600} ${s}px ${FONT_FAMILY}`;
+
+function titleBand() {
+  const t = $('title').value.trim(), s = $('subtitle').value.trim();
+  if (!t && !s) return 0;
+  const f = fs();
+  return Math.round(f * (t ? 1.35 : 0) + f * (s ? 1.1 : 0) + f * 1.6);
+}
+
+// Zalomení textu na řádky do max. šířky
+function wrap(text, maxW) {
+  const out = [];
+  String(text).split('\n').forEach(par => {
+    const words = par.split(/\s+/).filter(Boolean);
+    if (!words.length) { out.push(''); return; }
+    let line = words[0];
+    for (let i = 1; i < words.length; i++) {
+      const t = line + ' ' + words[i];
+      if (x.measureText(t).width > maxW) { out.push(line); line = words[i]; } else line = t;
+    }
+    out.push(line);
+  });
+  return out;
+}
+
+// Výška bloku se seznamem kroků pod obrázkem
+function listLayout() {
+  if (!$('listBelow').checked || !items.length) return { h: 0, rows: [] };
+  const f = Math.round(fs() * 0.95), pad = f, lh = f * 1.35, numW = f * 1.9;
+  x.font = font(f, 400);
+  const rows = items.map((it, i) => ({ it, n: i + 1, lines: wrap(it.text || '(bez popisu)', img.width - pad * 2 - numW) }));
+  const h = pad * 1.4 + rows.reduce((s, r) => s + r.lines.length * lh + f * 0.45, 0) + pad * 0.4;
+  return { h: Math.round(h), rows, f, pad, lh, numW };
+}
+
+/* ---------- Kreslení ---------- */
+function pill(cx, cy, label, num, col, f, numbered) {
+  // Popisek: barevný štítek s bílým textem (a číslem kroku), zalomený
+  x.font = font(f);
+  const maxW = Math.max(f * 10, img.width * 0.38);
+  const lines = label ? wrap(label, maxW) : [];
+  const lh = f * 1.25;
+  const numD = numbered ? f * 1.25 : 0;
+  const textW = lines.reduce((m, l) => Math.max(m, x.measureText(l).width), 0);
+  const padX = f * 0.55, padY = f * 0.35;
+  const w = (lines.length ? textW + padX * 2 : padX * 0.9) + (numbered ? numD + (lines.length ? f * 0.1 : f * 0.15) : 0);
+  const h = Math.max(lines.length * lh, numD) + padY * 2;
+  const bx = cx - w / 2, by = cy - h / 2;
+
+  x.save();
+  x.shadowColor = 'rgba(0,0,0,.28)'; x.shadowBlur = f * 0.5; x.shadowOffsetY = f * 0.1;
+  x.fillStyle = col;
+  x.beginPath(); x.roundRect(bx, by, w, h, Math.min(h / 2, f * 0.6)); x.fill();
+  x.restore();
+
+  let tx = bx + padX;
+  if (numbered) {
+    const nx = bx + padX * 0.55 + numD / 2;
+    x.fillStyle = '#fff';
+    x.beginPath(); x.arc(nx, cy, numD / 2, 0, Math.PI * 2); x.fill();
+    x.fillStyle = col; x.font = font(Math.round(f * 0.8), 800);
+    x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.fillText(String(num), nx, cy + f * 0.03);
+    tx = nx + numD / 2 + f * 0.4;
+  }
+  x.fillStyle = '#fff'; x.font = font(f); x.textAlign = 'left'; x.textBaseline = 'middle';
+  lines.forEach((l, i) => x.fillText(l, tx, cy - (lines.length - 1) * lh / 2 + i * lh));
+  return { x: bx, y: by, w, h };
+}
+
+function drawItem(it, n, f, numbered, selected) {
+  const lw = Math.max(3, f / 4.5);
+  x.lineCap = 'round'; x.lineJoin = 'round';
+
+  if (it.type === 'arrow') {
+    const a = Math.atan2(it.y2 - it.y1, it.x2 - it.x1), hl = f * 1.15;
+    // bílý lem pro čitelnost na tmavém i světlém podkladu
+    [['rgba(255,255,255,.85)', lw + f * 0.25], [it.col, lw]].forEach(([s, w]) => {
+      x.strokeStyle = s; x.lineWidth = w;
+      x.beginPath(); x.moveTo(it.x1, it.y1); x.lineTo(it.x2 - Math.cos(a) * hl * 0.6, it.y2 - Math.sin(a) * hl * 0.6); x.stroke();
+    });
+    x.fillStyle = it.col; x.strokeStyle = 'rgba(255,255,255,.85)'; x.lineWidth = f * 0.12;
+    x.beginPath(); x.moveTo(it.x2, it.y2);
+    x.lineTo(it.x2 - hl * Math.cos(a - 0.42), it.y2 - hl * Math.sin(a - 0.42));
+    x.lineTo(it.x2 - hl * Math.cos(a + 0.42), it.y2 - hl * Math.sin(a + 0.42));
+    x.closePath(); x.stroke(); x.fill();
+    it.box = pill(it.x1, it.y1, it.text, n, it.col, f, numbered);
+  } else if (it.type === 'rect') {
+    const r = { x: Math.min(it.x1, it.x2), y: Math.min(it.y1, it.y2), w: Math.abs(it.x2 - it.x1), h: Math.abs(it.y2 - it.y1) };
+    x.strokeStyle = 'rgba(255,255,255,.85)'; x.lineWidth = lw + f * 0.25;
+    x.beginPath(); x.roundRect(r.x, r.y, r.w, r.h, f * 0.4); x.stroke();
+    x.strokeStyle = it.col; x.lineWidth = lw;
+    x.beginPath(); x.roundRect(r.x, r.y, r.w, r.h, f * 0.4); x.stroke();
+    x.fillStyle = it.col; x.globalAlpha = 0.08; x.fill(); x.globalAlpha = 1;
+    it.r = r;
+    if (it.text || numbered) {
+      // štítek nad levým horním rohem (uvnitř, když nahoře není místo)
+      x.font = font(f);
+      const tmp = pill(-9999, -9999, it.text, n, it.col, f, numbered);
+      const lx = r.x + tmp.w / 2;
+      const ly = r.y - tmp.h / 2 - f * 0.35 >= tmp.h / 2 ? r.y - tmp.h / 2 - f * 0.35 : r.y + tmp.h / 2 + f * 0.35;
+      it.box = pill(lx, ly, it.text, n, it.col, f, numbered);
+    } else it.box = null;
+  } else if (it.type === 'badge') {
+    const d = f * 2.1;
+    x.save();
+    x.shadowColor = 'rgba(0,0,0,.3)'; x.shadowBlur = f * 0.5;
+    x.fillStyle = it.col; x.beginPath(); x.arc(it.x1, it.y1, d / 2, 0, Math.PI * 2); x.fill();
+    x.restore();
+    x.strokeStyle = '#fff'; x.lineWidth = f * 0.16;
+    x.beginPath(); x.arc(it.x1, it.y1, d / 2, 0, Math.PI * 2); x.stroke();
+    x.fillStyle = '#fff'; x.font = font(Math.round(f * 1.05), 800); x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.fillText(numbered ? String(n) : '!', it.x1, it.y1 + f * 0.05);
+    it.box = { x: it.x1 - d / 2, y: it.y1 - d / 2, w: d, h: d };
+  }
+
+  if (selected) {
+    x.save(); x.setLineDash([f * 0.4, f * 0.3]); x.lineWidth = Math.max(2, f / 8); x.strokeStyle = '#ff9800';
+    const b = it.type === 'rect' ? it.r : it.box;
+    if (b) x.strokeRect(b.x - f * 0.3, b.y - f * 0.3, b.w + f * 0.6, b.h + f * 0.6);
+    x.setLineDash([]);
+    x.fillStyle = '#ff9800';
+    if (it.type === 'arrow') { x.beginPath(); x.arc(it.x2, it.y2, f * 0.35, 0, 7); x.fill(); }
+    if (it.type === 'rect') { const h = handleRect(it, f); x.fillRect(h.x, h.y, h.w, h.h); }
+    x.restore();
   }
 }
 
-function render(showSel=true){
-  if(!img){
-    c.width=900;c.height=300;x.fillStyle='#8a96a3';x.font='20px sans-serif';x.textBaseline='middle';
-    x.fillText('Zde se zobrazí screenshot (Ctrl+V, přetažení nebo tlačítko)',30,150);return;
+const handleRect = (it, f) => ({ x: it.r.x + it.r.w - f * 0.45, y: it.r.y + it.r.h - f * 0.45, w: f * 0.9, h: f * 0.9 });
+
+function render(showSel = true) {
+  if (!img) return;
+  const f = fs(), band = titleBand();
+  const list = listLayout();
+  const W = img.width, H = img.height + band + list.h;
+  if (c.width !== W || c.height !== H) { c.width = W; c.height = H; }
+
+  x.setTransform(1, 0, 0, 1, 0, 0);
+  x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
+
+  // Nadpis
+  if (band) {
+    x.fillStyle = '#1b2a38'; x.fillRect(0, 0, W, band);
+    x.fillStyle = getAccent(); x.fillRect(0, band - Math.max(3, f * 0.18), W, Math.max(3, f * 0.18));
+    const t = $('title').value.trim(), s = $('subtitle').value.trim();
+    x.textAlign = 'left'; x.textBaseline = 'alphabetic';
+    let y = f * 0.8;
+    if (t) { y += f * 1.25; x.fillStyle = '#fff'; x.font = font(Math.round(f * 1.25), 700); x.fillText(t, f, y); }
+    if (s) { y += f * 1.15; x.fillStyle = '#c4d2de'; x.font = font(Math.round(f * 0.9), 400); x.fillText(s, f, y); }
   }
-  const b=band(),f=fs();
-  c.width=img.width;c.height=img.height+b;
-  x.drawImage(img,0,b);
-  if(b){
-    x.fillStyle='#1b2a38';x.fillRect(0,0,c.width,b);
-    x.fillStyle='#fff';x.font=FONT(f*1.2);x.textBaseline='middle';x.textAlign='left';
-    x.fillText($('title').value,f,b/2);
+
+  // Obrázek + anotace (v souřadnicích obrázku)
+  x.drawImage(img, 0, band);
+  x.save(); x.translate(0, band);
+  const numbered = $('numbered').checked;
+  items.forEach((it, i) => drawItem(it, i + 1, f, numbered, showSel && i === sel));
+  x.restore();
+
+  // Seznam kroků pod obrázkem
+  if (list.h) {
+    const top = band + img.height;
+    x.fillStyle = '#f5f7f9'; x.fillRect(0, top, W, list.h);
+    x.fillStyle = '#d6dde4'; x.fillRect(0, top, W, Math.max(1, f * 0.08));
+    let y = top + list.pad * 1.2;
+    list.rows.forEach(r => {
+      const nx = list.pad + list.f * 0.7;
+      x.fillStyle = r.it.col; x.beginPath(); x.arc(nx, y + list.lh / 2, list.f * 0.7, 0, 7); x.fill();
+      x.fillStyle = '#fff'; x.font = font(Math.round(list.f * 0.75), 800); x.textAlign = 'center'; x.textBaseline = 'middle';
+      x.fillText(String(r.n), nx, y + list.lh / 2 + 1);
+      x.fillStyle = '#18222d'; x.font = font(list.f, 400); x.textAlign = 'left';
+      r.lines.forEach((l, i) => x.fillText(l, list.pad + list.numW, y + list.lh / 2 + i * list.lh));
+      y += r.lines.length * list.lh + list.f * 0.45;
+    });
   }
-  items.forEach((it,i)=>arrow(it,i+1,b,f,showSel&&i===sel));
 }
 
-function pos(e){
-  const r=c.getBoundingClientRect(),k=c.width/r.width;
-  return{x:(e.clientX-r.left)*k,y:(e.clientY-r.top)*k-band()};
+function getAccent() { return '#0b6e99'; }
+
+/* ---------- Seznam kroků v panelu ---------- */
+function renderSteps(focusIdx) {
+  const box = $('steps');
+  box.innerHTML = '';
+  $('undo').disabled = !history.length;
+  $('redo').disabled = !future.length;
+  if (!items.length) {
+    box.innerHTML = `<div class="empty">${img ? 'Zatím žádné kroky – nakreslete šipku, rámeček nebo značku v náhledu.' : 'Nejdřív vložte screenshot.'}</div>`;
+    return;
+  }
+  items.forEach((it, i) => {
+    const row = document.createElement('div');
+    row.className = 'step' + (i === sel ? ' sel' : '');
+
+    const num = document.createElement('div');
+    num.className = 'step-num';
+    num.style.background = it.col;
+    num.textContent = i + 1;
+    num.title = 'Vybrat v náhledu';
+    num.onclick = () => select(i);
+
+    const mid = document.createElement('div');
+    const ta = document.createElement('textarea');
+    ta.rows = 1;
+    ta.value = it.text;
+    ta.placeholder = it.type === 'badge' ? 'Popis kroku (zobrazí se v seznamu pod obrázkem)' : 'Popis kroku, např. „Zapnout vrstvu Vodovod“';
+    ta.onfocus = () => { if (sel !== i) { sel = i; render(); markSel(); } ta._before = JSON.stringify(items); };
+    ta.oninput = () => { it.text = ta.value; autoGrow(ta); render(); };
+    ta.onchange = () => { if (ta._before && ta._before !== JSON.stringify(items)) pushHistory(ta._before); };
+    ta.onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ta.blur(); } };
+    const type = document.createElement('div');
+    type.className = 'step-type';
+    type.textContent = TYPE_NAMES[it.type] + (it.type === 'badge' ? '' : ' · Shift+Enter = nový řádek');
+    mid.append(ta, type);
+
+    const tools = document.createElement('div');
+    tools.className = 'step-tools';
+    const r1 = document.createElement('div'); r1.className = 'row';
+    const r2 = document.createElement('div'); r2.className = 'row';
+    const mk = (label, title, dis, fn, cls) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'mini' + (cls ? ' ' + cls : ''); b.textContent = label; b.title = title; b.disabled = dis; b.onclick = fn; return b; };
+    r1.append(mk('▲', 'Posunout výš (dřívější krok)', i === 0, () => move(i, -1)), mk('▼', 'Posunout níž', i === items.length - 1, () => move(i, 1)));
+    const col = document.createElement('input');
+    col.type = 'color'; col.value = it.col; col.title = 'Barva';
+    col.onfocus = () => { col._before = JSON.stringify(items); };
+    col.oninput = () => { it.col = col.value; num.style.background = col.value; render(); };
+    col.onchange = () => { if (col._before) pushHistory(col._before); };
+    r2.append(col, mk('✕', 'Smazat', false, () => remove(i), 'danger'));
+    tools.append(r1, r2);
+
+    row.append(num, mid, tools);
+    box.appendChild(row);
+    autoGrow(ta);
+    if (i === focusIdx) {
+      const f = () => { if (document.activeElement !== ta) { ta.focus(); ta.select(); } row.scrollIntoView({ block: 'nearest' }); };
+      f(); setTimeout(f, 30);
+    }
+  });
 }
-function hitAt(p){
-  const f=fs();
-  for(let i=items.length-1;i>=0;i--){
-    const it=items[i],q=it.box;
-    if(q&&p.x>=q.x&&p.x<=q.x+q.w&&p.y>=q.y&&p.y<=q.y+q.h)return{i,mode:'label'};
-    if(Math.hypot(p.x-it.x2,p.y-it.y2)<f*1.2)return{i,mode:'tip'};
+const autoGrow = ta => { ta.style.height = 'auto'; ta.style.height = (ta.scrollHeight + 2) + 'px'; };
+addEventListener('resize', () => document.querySelectorAll('.step textarea').forEach(autoGrow));
+const markSel = () => document.querySelectorAll('.step').forEach((s, i) => s.classList.toggle('sel', i === sel));
+
+/* ---------- Historie (Zpět / Znovu) ---------- */
+function pushHistory(before) {
+  history.push(before !== undefined ? before : JSON.stringify(items));
+  if (history.length > 100) history.shift();
+  future = [];
+  $('undo').disabled = false; $('redo').disabled = true;
+}
+function undo() {
+  if (!history.length) return;
+  future.push(JSON.stringify(items));
+  items = JSON.parse(history.pop()); sel = -1;
+  render(); renderSteps();
+}
+function redo() {
+  if (!future.length) return;
+  history.push(JSON.stringify(items));
+  items = JSON.parse(future.pop()); sel = -1;
+  render(); renderSteps();
+}
+
+function select(i) { sel = i; render(); renderSteps(); }
+function move(i, d) {
+  pushHistory();
+  [items[i], items[i + d]] = [items[i + d], items[i]];
+  sel = i + d; render(); renderSteps();
+}
+function remove(i) {
+  pushHistory();
+  items.splice(i, 1); sel = -1; render(); renderSteps();
+}
+
+/* ---------- Myš / dotyk v náhledu ---------- */
+function pos(e) {
+  const r = c.getBoundingClientRect(), k = c.width / r.width;
+  return { x: (e.clientX - r.left) * k, y: (e.clientY - r.top) * k - titleBand() };
+}
+const inBox = (p, b, m) => b && p.x >= b.x - (m || 0) && p.x <= b.x + b.w + (m || 0) && p.y >= b.y - (m || 0) && p.y <= b.y + b.h + (m || 0);
+function distToSeg(p, a, b) {
+  const dx = b.x - a.x, dy = b.y - a.y, l = dx * dx + dy * dy;
+  const t = l ? Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / l)) : 0;
+  return Math.hypot(p.x - a.x - t * dx, p.y - a.y - t * dy);
+}
+function hitAt(p) {
+  const f = fs();
+  for (let i = items.length - 1; i >= 0; i--) {
+    const it = items[i];
+    if (it.type === 'arrow') {
+      if (Math.hypot(p.x - it.x2, p.y - it.y2) < f * 1.1) return { i, mode: 'tip' };
+      if (inBox(p, it.box, 2)) return { i, mode: 'move' };
+      if (distToSeg(p, { x: it.x1, y: it.y1 }, { x: it.x2, y: it.y2 }) < f * 0.5) return { i, mode: 'move' };
+    } else if (it.type === 'rect') {
+      if (inBox(p, handleRect(it, f), f * 0.4)) return { i, mode: 'resize' };
+      if (inBox(p, it.box, 2)) return { i, mode: 'move' };
+      const r = it.r, m = f * 0.6;
+      const nearEdge = inBox(p, r, m) && !inBox(p, { x: r.x + m, y: r.y + m, w: r.w - 2 * m, h: r.h - 2 * m });
+      if (nearEdge) return { i, mode: 'move' };
+    } else if (inBox(p, it.box, 2)) return { i, mode: 'move' };
   }
   return null;
 }
-function editText(i){
-  const t=prompt('Popis kroku:',items[i].text);
-  if(t!==null){items[i].text=t;render();}
-}
 
-c.onpointerdown=e=>{
-  if(!img)return;
-  const p=pos(e),h=hitAt(p);let mode;
-  if(h){sel=h.i;mode=h.mode;}
-  else{items.push({x1:p.x,y1:p.y,x2:p.x,y2:p.y,text:'',col:$('col').value});sel=items.length-1;mode='new';}
-  act={mode,ox:p.x,oy:p.y};
-  c.setPointerCapture(e.pointerId);render();
-};
-c.onpointermove=e=>{
-  const p=pos(e);
-  if(!act){const h=img&&hitAt(p);c.style.cursor=h?(h.mode==='label'?'move':'pointer'):'crosshair';return;}
-  const it=items[sel];
-  if(act.mode==='label'){it.x1+=p.x-act.ox;it.y1+=p.y-act.oy;}
-  else{it.x2=p.x;it.y2=p.y;}
-  act.ox=p.x;act.oy=p.y;render();
-};
-c.onpointerup=()=>{
-  if(!act)return;
-  const a=act,it=items[sel];act=null;
-  if(a.mode==='new'){
-    if(Math.hypot(it.x2-it.x1,it.y2-it.y1)>15){
-      const t=prompt('Popis kroku (např. „Zapnout vrstvu Vodovod“):');
-      if(t!==null)it.text=t;else{items.pop();sel=-1;}
-    }else{items.pop();sel=-1;}
+c.addEventListener('pointerdown', e => {
+  if (!img || e.button !== 0) return;
+  const p = pos(e), h = hitAt(p);
+  const before = JSON.stringify(items);
+  if (h) {
+    sel = h.i;
+    act = { mode: h.mode, ox: p.x, oy: p.y, before, moved: false };
+  } else {
+    const col = $('col').value;
+    const it = tool === 'badge'
+      ? { type: 'badge', x1: p.x, y1: p.y, x2: p.x, y2: p.y, text: '', col }
+      : { type: tool, x1: p.x, y1: p.y, x2: p.x, y2: p.y, text: '', col };
+    items.push(it);
+    sel = items.length - 1;
+    act = { mode: tool === 'badge' ? 'move' : 'new', ox: p.x, oy: p.y, before, moved: tool === 'badge', created: true };
   }
+  c.setPointerCapture(e.pointerId);
+  render(); markSel();
+});
+
+c.addEventListener('pointermove', e => {
+  if (!img) return;
+  const p = pos(e);
+  if (!act) {
+    const h = hitAt(p);
+    c.style.cursor = h ? (h.mode === 'resize' ? 'nwse-resize' : h.mode === 'tip' ? 'pointer' : 'move') : 'crosshair';
+    return;
+  }
+  const it = items[sel], dx = p.x - act.ox, dy = p.y - act.oy;
+  if (Math.abs(dx) + Math.abs(dy) > 0) act.moved = true;
+  if (act.mode === 'move') { it.x1 += dx; it.y1 += dy; it.x2 += dx; it.y2 += dy; }
+  else { it.x2 = p.x; it.y2 = p.y; }
+  act.ox = p.x; act.oy = p.y;
   render();
-};
-c.ondblclick=e=>{const h=img&&hitAt(pos(e));if(h)editText(h.i);};
+});
 
-function load(file){
-  if(!file||!file.type.startsWith('image/'))return;
-  const i=new Image();
-  i.onload=()=>{img=i;items=[];sel=-1;render();};
-  i.src=URL.createObjectURL(file);
+c.addEventListener('pointerup', () => {
+  if (!act) return;
+  const a = act, it = items[sel];
+  act = null;
+  if (a.created) {
+    const tooSmall = it.type !== 'badge' && Math.hypot(it.x2 - it.x1, it.y2 - it.y1) < fs() * 0.8;
+    if (tooSmall) { items.pop(); sel = -1; render(); renderSteps(); return; }
+    if (it.type === 'rect') { // normalizace rohů
+      const r = { x1: Math.min(it.x1, it.x2), y1: Math.min(it.y1, it.y2), x2: Math.max(it.x1, it.x2), y2: Math.max(it.y1, it.y2) };
+      Object.assign(it, r);
+    }
+    pushHistory(a.before);
+    render(); renderSteps(sel);      // fokus na popis nového kroku
+    return;
+  }
+  if (a.moved) {
+    if (it.type === 'rect') Object.assign(it, { x1: Math.min(it.x1, it.x2), y1: Math.min(it.y1, it.y2), x2: Math.max(it.x1, it.x2), y2: Math.max(it.y1, it.y2) });
+    pushHistory(a.before);
+  }
+  render(); renderSteps();
+});
+
+c.addEventListener('dblclick', e => {
+  const h = img && hitAt(pos(e));
+  if (h) { sel = h.i; render(); renderSteps(h.i); }
+});
+
+/* ---------- Načtení obrázku ---------- */
+function load(file) {
+  if (!file || !file.type || !file.type.startsWith('image/')) { toast('Vložte obrázek (PNG, JPG…).', true); return; }
+  if (items.length && !confirm('Načíst nový screenshot? Současné anotace se smažou.')) return;
+  const i = new Image();
+  i.onload = () => {
+    img = i; items = []; sel = -1; history = []; future = [];
+    $('drop').classList.add('hidden'); $('stage').classList.remove('hidden');
+    render(); renderSteps();
+    if (window.PreviewActions) PreviewActions.update();
+  };
+  i.onerror = () => toast('Obrázek se nepodařilo načíst.', true);
+  i.src = URL.createObjectURL(file);
 }
-$('file').onchange=e=>load(e.target.files[0]);
-addEventListener('paste',e=>{for(const it of e.clipboardData.items)if(it.type.startsWith('image/'))load(it.getAsFile());});
-addEventListener('dragover',e=>e.preventDefault());
-addEventListener('drop',e=>{e.preventDefault();load(e.dataTransfer.files[0]);});
-addEventListener('keydown',e=>{
-  if((e.key==='Delete'||e.key==='Backspace')&&sel>=0&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName)){
-    e.preventDefault();items.splice(sel,1);sel=-1;render();
+$('file').onchange = e => { load(e.target.files[0]); e.target.value = ''; };
+$('file2').onchange = e => { load(e.target.files[0]); e.target.value = ''; };
+addEventListener('paste', e => {
+  if (/INPUT|TEXTAREA/.test(document.activeElement.tagName) && !e.clipboardData.files.length) return;
+  for (const it of e.clipboardData.items) if (it.type.startsWith('image/')) { e.preventDefault(); load(it.getAsFile()); return; }
+});
+const pv = $('preview');
+pv.addEventListener('dragover', e => { e.preventDefault(); pv.classList.add('over'); $('drop').classList.add('over'); });
+pv.addEventListener('dragleave', e => { if (!pv.contains(e.relatedTarget)) { pv.classList.remove('over'); $('drop').classList.remove('over'); } });
+pv.addEventListener('drop', e => { e.preventDefault(); pv.classList.remove('over'); $('drop').classList.remove('over'); load(e.dataTransfer.files[0]); });
+addEventListener('dragover', e => e.preventDefault());
+addEventListener('drop', e => e.preventDefault());
+
+/* ---------- Ovládání ---------- */
+document.querySelectorAll('.tool').forEach(b => b.onclick = () => setTool(b.dataset.tool));
+function setTool(t) {
+  tool = t;
+  document.querySelectorAll('.tool').forEach(b => b.classList.toggle('active', b.dataset.tool === t));
+}
+['title', 'subtitle'].forEach(id => $(id).oninput = () => render());
+['numbered', 'listBelow'].forEach(id => $(id).onchange = () => render());
+$('size').oninput = () => { $('sizeVal').textContent = $('size').value + ' %'; render(); };
+$('sizeVal').textContent = $('size').value + ' %';
+$('col').onfocus = () => { $('col')._before = JSON.stringify(items); };
+$('col').oninput = () => { if (sel >= 0) { items[sel].col = $('col').value; render(); } };
+$('col').onchange = () => { if (sel >= 0) { pushHistory($('col')._before); renderSteps(); } };
+$('undo').onclick = undo;
+$('redo').onclick = redo;
+$('clear').onclick = () => {
+  if (!items.length) return;
+  if (!confirm('Smazat všechny šipky, rámečky a značky?')) return;
+  pushHistory(); items = []; sel = -1; render(); renderSteps();
+};
+
+addEventListener('keydown', e => {
+  const typing = /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName);
+  const k = e.key.toLowerCase();
+  if ((e.ctrlKey || e.metaKey) && k === 'z' && !typing) { e.preventDefault(); e.shiftKey ? redo() : undo(); return; }
+  if ((e.ctrlKey || e.metaKey) && k === 'y' && !typing) { e.preventDefault(); redo(); return; }
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && k === 'c') { e.preventDefault(); copyImg(); return; }
+  if (typing) return;
+  if ((e.key === 'Delete' || e.key === 'Backspace') && sel >= 0) { e.preventDefault(); remove(sel); }
+  else if (e.key === 'Escape') { sel = -1; render(); renderSteps(); }
+  else if (!e.ctrlKey && !e.metaKey && !e.altKey && { a: 1, r: 1, z: 1 }[k]) setTool({ a: 'arrow', r: 'rect', z: 'badge' }[k]);
+  else if (sel >= 0 && e.key.startsWith('Arrow')) {
+    const s = e.shiftKey ? 10 : 1, d = { ArrowLeft: [-s, 0], ArrowRight: [s, 0], ArrowUp: [0, -s], ArrowDown: [0, s] }[e.key];
+    const it = items[sel]; it.x1 += d[0]; it.x2 += d[0]; it.y1 += d[1]; it.y2 += d[1];
+    e.preventDefault(); render();
   }
 });
-$('edit').onclick=()=>{if(sel>=0)editText(sel);};
-$('del').onclick=()=>{if(sel>=0){items.splice(sel,1);sel=-1;render();}};
-$('undo').onclick=()=>{items.pop();sel=-1;render();};
-$('clear').onclick=()=>{items=[];sel=-1;render();};
-$('title').oninput=()=>render();
-$('col').oninput=()=>{if(sel>=0)items[sel].col=$('col').value;render();};
-function snapshot(cb){render(false);c.toBlob(cb);render();}
-$('save').onclick=()=>snapshot(b=>{
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(b);
-  a.download='kontrola-'+($('title').value||'navod').replace(/\W+/g,'-')+'.png';
-  a.click();
+
+// Upozornění při zavření s rozpracovanými anotacemi
+addEventListener('beforeunload', e => { if (items.length) { e.preventDefault(); e.returnValue = ''; } });
+
+/* ---------- Export ---------- */
+function snapshot(cb) {
+  if (!img) { toast('Nejdřív vložte screenshot.', true); return; }
+  render(false); c.toBlob(b => { render(); cb(b); }, 'image/png');
+}
+function fileName() {
+  const t = ($('title').value || 'napoveda').normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return 'napoveda-' + (t || 'obrazek') + '.png';
+}
+$('save').onclick = () => snapshot(b => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(b); a.download = fileName();
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  toast('Uloženo: ' + a.download);
 });
-$('copy').onclick=()=>snapshot(b=>{
-  navigator.clipboard.write([new ClipboardItem({'image/png':b})])
-    .then(()=>alert('Obrázek je ve schránce, vložte ho do e-mailu (Ctrl+V).'),
-          ()=>alert('Kopírování se nezdařilo, použijte Uložit PNG.'));
-});
-render();
+function copyImg() {
+  snapshot(b => {
+    if (!navigator.clipboard || !window.ClipboardItem) { toast('Prohlížeč neumí kopírovat obrázky – použijte Uložit PNG.', true); return; }
+    navigator.clipboard.write([new ClipboardItem({ 'image/png': b })])
+      .then(() => toast('Obrázek je ve schránce – vložte ho do e-mailu nebo dokumentu (Ctrl+V).'),
+            () => toast('Kopírování se nezdařilo, použijte Uložit PNG.', true));
+  });
+}
+$('copy').onclick = copyImg;
+
+let toastT;
+function toast(msg, err) {
+  const el = $('toast');
+  el.textContent = msg; el.classList.toggle('err', !!err); el.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), err ? 4500 : 2600);
+}
+
+renderSteps();
 </script>
 </body>
 </html>

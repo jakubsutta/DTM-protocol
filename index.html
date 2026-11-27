@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="favicon.svg?v=20261125d" type="image/svg+xml">
     <title>J.E.N.D.A. – Jednoduché Efektivní Nástroje Do Atomiconu</title>
-    <link rel="stylesheet" href="assets/css/hub.css?v=20261127a">
+    <link rel="stylesheet" href="assets/css/hub.css?v=20261127g">
 </head>
 
 <body>
@@ -987,7 +987,7 @@
                     </a>
                     <a href="./tools/experimentalni/navod-kontrola.html" target="_blank" rel="noopener noreferrer"
                         class="card experimental exp-navod" data-tool-id="exp-navod"
-                        title="Generátor návodu pro kontrolu dat v GISAdmin">
+                        title="Generátor rychlé nápovědy – screenshot se šipkami a kroky">
                         <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
                             title="Přidat do oblíbených" tabindex="-1">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -999,8 +999,8 @@
                                 <use href="#icon-navod-kontrola" xlink:href="#icon-navod-kontrola" />
                             </svg></div>
                         <div class="card-body">
-                            <div class="card-title">Generátor návodu</div>
-                            <div class="card-desc">kontrola dat v GISAdmin</div>
+                            <div class="card-title">Generátor rychlé nápovědy</div>
+                            <div class="card-desc">screenshot se šipkami a kroky</div>
                         </div>
                     </a>
                     <a href="./tools/experimentalni/Obec-GA-banner.html" target="_blank" rel="noopener noreferrer"
@@ -1062,9 +1062,11 @@
                     <span class="btn-label" id="view-mode-label">Seznam</span>
                 </button>
 
-                <!-- Přepínač na Tmavý režim -->
+                <!-- Volba vzhledu: rozbalovací nabídka Světlý / Tmavý / Liquid Glass (ikona = aktuální motiv) -->
+                <div class="theme-picker" id="theme-picker">
                 <button type="button" id="theme-toggle" class="panel-btn theme-toggle"
-                    aria-label="Přepnout tmavý / světlý režim" title="Přepnout tmavý / světlý režim">
+                    aria-haspopup="menu" aria-expanded="false" aria-controls="theme-menu"
+                    aria-label="Vzhled" title="Vzhled">
                     <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="5"></circle>
@@ -1081,8 +1083,66 @@
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                     </svg>
-                    <span class="btn-label" id="theme-mode-label">Motiv</span>
+                    <svg class="icon-glass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2.7 6.3 8.4a8 8 0 1 0 11.4 0z"></path>
+                        <path d="M8.5 13.5a3.5 3.5 0 0 0 3 3.4"></path>
+                    </svg>
+                    <svg class="theme-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                    <span class="btn-label" id="theme-mode-label">Vzhled</span>
                 </button>
+                <div class="theme-menu" id="theme-menu" role="menu" aria-label="Vzhled">
+                    <div class="theme-menu-title">Vzhled</div>
+                    <button type="button" class="theme-option" role="menuitemradio" aria-checked="false" data-theme="light">
+                        <svg class="theme-option-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                            <line x1="1" y1="12" x2="3" y2="12"></line>
+                            <line x1="21" y1="12" x2="23" y2="12"></line>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                        </svg>
+                        <span class="theme-option-text">
+                            <span class="theme-option-name">Světlý</span>
+                            <span class="theme-option-desc">klasický denní vzhled</span>
+                        </span>
+                        <svg class="theme-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </button>
+                    <button type="button" class="theme-option" role="menuitemradio" aria-checked="false" data-theme="dark">
+                        <svg class="theme-option-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                        <span class="theme-option-text">
+                            <span class="theme-option-name">Tmavý</span>
+                            <span class="theme-option-desc">noční náměstí, šetří oči</span>
+                        </span>
+                        <svg class="theme-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </button>
+                    <button type="button" class="theme-option" role="menuitemradio" aria-checked="false" data-theme="glass">
+                        <svg class="theme-option-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M12 2.7 6.3 8.4a8 8 0 1 0 11.4 0z"></path>
+                            <path d="M8.5 13.5a3.5 3.5 0 0 0 3 3.4"></path>
+                        </svg>
+                        <span class="theme-option-text">
+                            <span class="theme-option-name">Liquid Glass</span>
+                            <span class="theme-option-desc">průsvitné sklo nad fotkou</span>
+                        </span>
+                        <svg class="theme-option-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </button>
+                </div>
+                </div>
             </div>
         </div>
 
@@ -1751,20 +1811,80 @@
                 });
             }
 
-            // Přepínač tmavého / světlého režimu (Dark / Light Theme)
+            // Volba vzhledu: rozbalovací nabídka Světlý / Tmavý / Liquid Glass
+            // (ukládá se do 'dtm_theme'; metodika DTM hodnotu 'glass' bere jako světlý motiv)
+            const themePicker = document.getElementById('theme-picker');
             const themeToggleBtn = document.getElementById('theme-toggle');
-            const savedTheme = localStorage.getItem('dtm_theme');
+            const themeOptions = Array.prototype.slice.call(document.querySelectorAll('#theme-menu .theme-option'));
+            const THEME_ORDER = ['light', 'dark', 'glass'];
+            const THEME_NAMES = { light: 'Světlý', dark: 'Tmavý', glass: 'Liquid Glass' };
+            let savedTheme = null;
+            try { savedTheme = localStorage.getItem('dtm_theme'); } catch (e) { /* bez úložiště */ }
 
-            if (savedTheme === 'dark') {
-                document.body.classList.add('dark-theme');
-            } else if (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                document.body.classList.add('dark-theme');
+            let currentTheme = THEME_ORDER.indexOf(savedTheme) !== -1 ? savedTheme
+                : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+            function applyHubTheme(theme) {
+                document.body.classList.toggle('dark-theme', theme === 'dark');
+                document.body.classList.toggle('glass-theme', theme === 'glass');
+                themeOptions.forEach(function (opt) {
+                    opt.setAttribute('aria-checked', opt.dataset.theme === theme ? 'true' : 'false');
+                });
+                if (themeToggleBtn) {
+                    const text = 'Vzhled: ' + THEME_NAMES[theme];
+                    themeToggleBtn.title = text;
+                    themeToggleBtn.setAttribute('aria-label', text);
+                }
+            }
+            applyHubTheme(currentTheme);
+
+            function setThemeMenuOpen(open, focusTarget) {
+                if (!themePicker || !themeToggleBtn) return;
+                themePicker.classList.toggle('open', open);
+                themeToggleBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+                if (open) {
+                    const active = themeOptions.filter(function (o) { return o.dataset.theme === currentTheme; })[0];
+                    if (active) active.focus();
+                } else if (focusTarget) {
+                    themeToggleBtn.focus();
+                }
             }
 
-            if (themeToggleBtn) {
-                themeToggleBtn.addEventListener('click', function () {
-                    const isDark = document.body.classList.toggle('dark-theme');
-                    localStorage.setItem('dtm_theme', isDark ? 'dark' : 'light');
+            if (themePicker && themeToggleBtn) {
+                themeToggleBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    setThemeMenuOpen(!themePicker.classList.contains('open'));
+                });
+
+                themeOptions.forEach(function (opt) {
+                    opt.addEventListener('click', function () {
+                        currentTheme = opt.dataset.theme;
+                        applyHubTheme(currentTheme);
+                        try { localStorage.setItem('dtm_theme', currentTheme); } catch (e) { /* bez úložiště */ }
+                        setThemeMenuOpen(false, true);
+                    });
+                });
+
+                // Klávesnice v nabídce: šipky nahoru/dolů, Esc zavře
+                themePicker.addEventListener('keydown', function (e) {
+                    if (!themePicker.classList.contains('open')) return;
+                    const idx = themeOptions.indexOf(document.activeElement);
+                    if (e.key === 'Escape') {
+                        e.preventDefault();
+                        setThemeMenuOpen(false, true);
+                    } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        const step = e.key === 'ArrowDown' ? 1 : -1;
+                        const next = (idx + step + themeOptions.length) % themeOptions.length;
+                        themeOptions[idx === -1 ? 0 : next].focus();
+                    }
+                });
+
+                // Klik mimo nabídku ji zavře
+                document.addEventListener('click', function (e) {
+                    if (themePicker.classList.contains('open') && !themePicker.contains(e.target)) {
+                        setThemeMenuOpen(false);
+                    }
                 });
             }
 
@@ -1974,6 +2094,7 @@
     </div>
 
     <script src="assets/js/jenda.js?v=20261126d"></script>
+    <script src="assets/js/liquid-glass.js?v=20261127d" defer></script>
 </body>
 
 </html>

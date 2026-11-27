@@ -1,90 +1,260 @@
 <!DOCTYPE html><html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Generátor bannerů – Mapový portál</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%2364748b%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><style>@media(prefers-color-scheme:dark){:root{stroke:%2394a3b8}}</style><rect x=%222.5%22 y=%224.5%22 width=%2219%22 height=%2211%22 rx=%222%22/><path d=%22M5.5 8.5h6%22/><path d=%22M5.5 11.5h4%22/><rect x=%2214%22 y=%228%22 width=%225%22 height=%224%22 rx=%221%22/><path d=%22M8 15.5L6.5 20%22/><path d=%22M16 15.5L17.5 20%22/><path d=%22M5 20h3%22/><path d=%22M16 20h3%22/></svg>">
+<title>Generátor banneru GISAdmin</title>
 <link rel="icon" href="banner-favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/css/preview-actions.css">
+<script src="../../assets/js/preview-actions.js" defer></script>
 <style>
-:root{--o:#ea521f;--b:#4483fc;--g:#f3f5f2;--t:#26292b;--m:#5d6368;--r:6px}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--t);background:var(--g);height:100vh;display:flex;flex-direction:column;font-size:14px}
-header{height:54px;background:#fff;border-bottom:1px solid #e0e4dc;display:flex;align-items:center;gap:16px;padding:0 18px;flex:none}
-header img{height:24px}header h1{font-size:16px}header h1 span{color:var(--m);font-weight:400}
-main{flex:1;display:flex;min-height:0}
-aside{width:400px;flex:none;background:#fff;border-right:1px solid #e0e4dc;overflow:auto;padding:14px}
-.sec{border:1px solid #e3e6e0;border-radius:var(--r);padding:12px;margin-bottom:12px}
-.sec h3{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--o);margin-bottom:10px}
-label{display:block;font-size:12px;color:var(--m);margin:8px 0 3px}
-label.cb{display:flex;gap:8px;align-items:center;color:var(--t);font-size:13px;margin:6px 0}
-input[type=text],input[type=number],textarea,select{width:100%;border:1.5px solid #cdd2ca;border-radius:var(--r);padding:7px 9px;font:inherit;background:#fff}
-textarea{resize:vertical;min-height:62px}
-input[type=range]{width:100%}
-input[type=color]{width:100%;height:34px;border:1.5px solid #cdd2ca;border-radius:var(--r);padding:2px;background:#fff}
+/* ==========================================================================
+   Generátor banneru GISAdmin na obecní web – motiv #ea521f
+   ========================================================================== */
+:root{--o:#ea521f;--o-dark:#bd3203;--o-light:#fdece5;--o-soft:#f7c2ad;
+  --bg:#eef0ec;--panel:#fff;--fg:#26292b;--muted:#5d6368;--bd:#dde1d9;--input:#fff;--danger:#c62828;--r:6px}
+@media (prefers-color-scheme:dark){:root{--o:#f26b3a;--o-dark:#ff8a5c;--o-light:#3a1d12;--o-soft:#6b2d16;
+  --bg:#111416;--panel:#191d20;--fg:#e6e8e9;--muted:#9aa1a6;--bd:#2e3438;--input:#202528;--danger:#ef5350}}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font:13px/1.4 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;color:var(--fg);background:var(--bg)}
+.app{display:grid;grid-template-columns:400px 1fr;min-height:100vh}
+.form-panel{background:var(--panel);border-right:1px solid var(--bd);max-height:100vh;position:sticky;top:0;overflow-y:auto;padding:0 16px 24px}
+.panel-header{display:flex;align-items:center;gap:10px;padding:14px 0 6px}
+.back{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:6px;color:var(--muted);background:var(--o-light);border:1px solid var(--o-soft);text-decoration:none;flex-shrink:0;transition:transform .15s}
+.back:hover{color:var(--o);transform:translateX(-2px)}
+.back svg{width:16px;height:16px}
+h1{font-size:14px;margin:0}
+.sub{font-size:11px;color:var(--muted)}
+.section-label{display:flex;justify-content:space-between;align-items:center;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--o);margin:16px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--o-light)}
+label{display:block;font-size:11px;font-weight:600;color:var(--muted);margin:7px 0 3px}
+label b{color:var(--fg)}
+label.cb{display:flex;gap:7px;align-items:center;color:var(--fg);font-size:12.5px;font-weight:400;margin:5px 0;cursor:pointer}
+input[type=text],input[type=number],textarea,select{width:100%;border:1px solid var(--bd);border-radius:var(--r);padding:5px 8px;font:inherit;background:var(--input);color:var(--fg);outline:none}
+input:focus,textarea:focus,select:focus{border-color:var(--o);box-shadow:0 0 0 2px var(--o-light)}
+textarea{resize:vertical;min-height:58px}
+input[type=range]{width:100%;accent-color:var(--o)}
+input[type=checkbox]{accent-color:var(--o)}
+input[type=color]{width:100%;height:30px;border:1px solid var(--bd);border-radius:var(--r);padding:2px;background:var(--input);cursor:pointer}
+input[type=file]{font-size:11.5px;max-width:100%}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-.btn{background:var(--o);color:#fff;border:0;border-radius:var(--r);padding:9px 14px;font-weight:700;cursor:pointer;font-size:14px}
-.btn.g{background:var(--g);color:var(--t);border:1px solid #d5d9d1;font-weight:600}.btn.b{background:var(--b)}
-.btns{display:flex;gap:8px;flex-wrap:wrap}
-#view{flex:1;display:flex;align-items:center;justify-content:center;padding:24px;min-width:0;background:repeating-conic-gradient(#e9ece7 0% 25%,#f3f5f2 0% 50%) 0 0/20px 20px}
-#stage{box-shadow:0 12px 40px rgba(0,0,0,.25);line-height:0}
-#stage svg{display:block;width:min(70vh,560px);height:min(70vh,560px)}
-pre{background:var(--g);border-radius:var(--r);padding:8px;font-size:11px;white-space:pre-wrap;word-break:break-all;margin-top:8px}
-.hint{font-size:11px;color:var(--m);margin-top:4px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--panel);color:var(--o);border:1px solid var(--o-soft);border-radius:var(--r);padding:6px 10px;font:inherit;font-weight:600;cursor:pointer}
+.btn:hover{background:var(--o-light)}
+.btn.on{background:var(--o);color:#fff;border-color:var(--o)}
+.btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.search{display:grid;grid-template-columns:1fr auto;gap:6px}
+.hint{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.45}
+.hint.ok{color:#2e7d32}.hint.err{color:var(--danger)}
+pre{background:var(--bg);border:1px solid var(--bd);border-radius:var(--r);padding:8px;font-size:11px;white-space:pre-wrap;word-break:break-all;margin:6px 0 0}
+.link-btn{border:none;background:none;padding:0;font:inherit;font-size:11px;font-weight:600;color:var(--o);cursor:pointer;text-transform:none;letter-spacing:0}
+.link-btn:hover{text-decoration:underline}
+#view{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:28px 90px 28px 28px;min-width:0;background:repeating-conic-gradient(#e6e9e3 0% 25%,#f1f3ef 0% 50%) 0 0/20px 20px}
+@media (prefers-color-scheme:dark){#view{background:repeating-conic-gradient(#15191b 0% 25%,#1b2023 0% 50%) 0 0/20px 20px}}
+#stage{box-shadow:0 12px 40px rgba(0,0,0,.28);line-height:0;touch-action:none;user-select:none}
+#stage svg{display:block;width:min(calc(100vh - 110px),640px);height:min(calc(100vh - 110px),640px)}
+#stage.pan{cursor:grab}#stage.panning{cursor:grabbing}#stage.pin{cursor:move}
+.view-hint{font-size:11.5px;color:var(--muted);background:var(--panel);border:1px solid var(--bd);border-radius:999px;padding:4px 12px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);padding:9px 16px;border-radius:8px;background:#263238;color:#fff;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:200}
+.toast.show{opacity:1;transform:translate(-50%,0)}.toast.err{background:var(--danger)}
+/* Záložky a karty panelu */
+.form-panel{padding:0 14px 24px}
+.tabs{position:sticky;top:0;z-index:5;display:grid;grid-template-columns:repeat(4,1fr);gap:2px;padding:3px;margin:4px 0 12px;background:var(--bg);border:1px solid var(--bd);border-radius:8px;box-shadow:0 6px 8px -6px rgba(0,0,0,.12)}
+.tab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;border:1px solid transparent;border-radius:6px;background:none;color:var(--muted);font:inherit;font-size:11px;font-weight:600;cursor:pointer}
+.tab svg{width:16px;height:16px}
+.tab:hover{color:var(--fg)}
+.tab.active{background:var(--panel);color:var(--o);border-color:var(--bd);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.pane{display:none}.pane.active{display:block}
+.card{border:1px solid var(--bd);border-radius:8px;padding:10px 12px 12px;margin-bottom:10px;background:var(--panel)}
+.card-title{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12.5px;font-weight:700;color:var(--fg);margin-bottom:4px}
+.card-title .opt,.opt{font-weight:400;font-size:11px;color:var(--muted)}
+label.cb.inline{margin:0;font-size:11.5px;color:var(--muted)}
+.lbl-row{display:flex;justify-content:space-between;align-items:baseline}
+.lbl-row b{font-weight:700;color:var(--fg);font-variant-numeric:tabular-nums}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:4px 0 8px}
+.seg.three{grid-template-columns:repeat(3,1fr)}
+.btn.primary{background:var(--o);color:#fff;border-color:var(--o)}
+.btn.primary:hover{background:var(--o-dark)}
+.btn.full{width:100%;margin-top:8px}
+.colors{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.color{display:flex;align-items:center;gap:8px;margin:0;padding:5px 6px;border:1px solid var(--bd);border-radius:var(--r);cursor:pointer;color:var(--fg);font-size:12px;font-weight:600}
+.color input{width:30px;height:24px;flex-shrink:0;padding:1px}
+.color small{display:block;font-weight:400;font-size:10.5px;color:var(--muted)}
+.file-row{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center}
+.pin-row{display:flex;align-items:center;justify-content:space-between;margin-top:4px}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:0 8px;margin-top:6px}
+details.more{margin-top:6px}
+details.more summary{cursor:pointer;font-size:11.5px;font-weight:600;color:var(--muted)}
+details.more summary:hover{color:var(--o)}
+#snip{max-height:120px;overflow:auto}
+@media (max-width:900px){.app{grid-template-columns:1fr}.form-panel{position:static;max-height:none;border-right:none;border-bottom:1px solid var(--bd)}#view{padding:16px 70px 24px 16px}#stage svg{width:min(100%,500px);height:auto}}
 </style></head><body>
-<header><img id="hl" alt=""><h1>Generátor bannerů <span>· mapový portál · export do PNG</span></h1></header>
-<main>
-<aside>
- <div class="sec"><h3>Texty</h3>
-  <div class="row"><div><label>Nadpis – řádek 1</label><input type="text" data-k="title1"></div><div><label>Nadpis – řádek 2 (barevný)</label><input type="text" data-k="title2"></div></div>
-  <label>Velikost nadpisu: <b id="v_titleSize"></b></label><input type="range" min="36" max="84" data-k="titleSize">
-  <div class="row"><div><label>Text tlačítka</label><input type="text" data-k="btn"></div><div><label>Velikost textu tlačítka: <b id="v_btnSize"></b></label><input type="range" min="24" max="64" data-k="btnSize"></div></div>
-  <label class="cb"><input type="checkbox" data-k="cursor"> Zobrazit ikonu kurzoru v tlačítku</label>
-  <label>Adresa pod tlačítkem</label><input type="text" data-k="url"><label class="cb"><input type="checkbox" data-k="showUrl"> Zobrazit adresu</label>
-  <label>Štítky (každý na nový řádek, max 4)</label><textarea data-k="tags"></textarea><label class="cb"><input type="checkbox" data-k="showTags"> Zobrazit štítky</label>
-  <label>Název obce (pod nadpisem, volitelné)</label><input type="text" data-k="obec">
- </div>
- <div class="sec"><h3>Vzhled</h3>
-  <div class="row3"><div><label>Oranžová</label><input type="color" data-k="cO"></div><div><label>Modrá (tlačítko)</label><input type="color" data-k="cB"></div><div><label>Tmavá</label><input type="color" data-k="cD"></div></div>
-    <label>Výška bílého bloku (rovná linka): <b id="v_L"></b></label><input type="range" min="150" max="330" data-k="L">
-  <label>Poloha tlačítka: <b id="v_btnY"></b></label><input type="range" min="190" max="360" data-k="btnY">
-  <div class="row"><div><label>Pozadí footeru</label><input type="color" data-k="cF"></div><div><label>Logo ve footeru</label><select data-k="logoTone"><option value="auto">Automaticky</option><option value="orig">Původní barvy</option><option value="white">Bílé</option></select></div></div>
-  <div class="btns" style="margin-top:8px"><button class="btn g" id="bPre1">Styl GISAdmin</button><button class="btn g" id="bPre2">Styl tmavý</button></div>
- </div>
- <div class="sec"><h3>Mapový podklad</h3>
-  <div class="row"><div><label>Podklad dole (hlavní)</label><select data-k="mapBottom"><option value="orto">Ortofoto ČÚZK</option><option value="osm">Základní mapa (OSM)</option><option value="aerial">Letecká (generovaná)</option><option value="basic">Základní (generovaná)</option><option value="img">Vlastní obrázek</option></select></div>
-  <div><label>Podklad nahoře (přechod)</label><select data-k="mapTop"><option value="none">— bez přechodu —</option><option value="osm">Základní mapa (OSM)</option><option value="orto">Ortofoto ČÚZK</option><option value="basic">Základní (generovaná)</option><option value="aerial">Letecká (generovaná)</option><option value="img">Vlastní obrázek</option></select></div></div>
-  <div id="mixbox"><label>Délka přechodu (px): <b id="v_mixAmt"></b></label><input type="range" min="20" max="320" data-k="mixAmt"></div>
-  <div id="real"><label>Najít místo (obec, adresa)</label><div class="row" style="grid-template-columns:1fr auto"><input type="text" data-k="place" placeholder="např. Opatovice nad Labem"><button class="btn g" id="bFind">Najít</button></div>
-   <div class="row"><div><label>Šířka (lat)</label><input type="number" step="0.0001" data-k="lat"></div><div><label>Délka (lon)</label><input type="number" step="0.0001" data-k="lon"></div></div>
-   <label>Přiblížení: <b id="v_zoom"></b></label><input type="range" min="13" max="19.5" step="0.25" data-k="zoom">
-   <label class="cb"><input type="checkbox" data-k="pin"> Špendlík na mapě</label><div class="row"><div><label>Špendlík X</label><input type="range" min="40" max="460" data-k="pinX"></div><div><label>Špendlík Y</label><input type="range" min="250" max="440" data-k="pinY"></div></div>
-   <div class="hint" id="tstat">Podklady se načítají ze služeb ČÚZK a OpenStreetMap (nutné připojení k internetu).</div></div>
-  <div id="gen"><div class="row"><div><label>Varianta generované mapy (seed)</label><input type="number" data-k="seed" min="1" max="9999"></div><div><label>&nbsp;</label><button class="btn g" id="bRand" style="width:100%">Náhodná</button></div></div>
-   <label class="cb"><input type="checkbox" data-k="cad"> Katastr (hranice parcel)</label><label class="cb"><input type="checkbox" data-k="dtm"> DTM (modré obrysy)</label><label class="cb"><input type="checkbox" data-k="net"> Sítě (čárkované linie)</label><label class="cb"><input type="checkbox" data-k="hl"> Zvýrazněná parcela + špendlík</label></div>
-  <div id="imgbox" style="display:none"><label>Nahrát obrázek podkladu</label><input type="file" accept="image/*" id="fBg"><label>Přiblížení: <b id="v_bgZ"></b></label><input type="range" min="100" max="300" data-k="bgZ"><div class="row"><div><label>Posun X</label><input type="range" min="-100" max="100" data-k="bgX"></div><div><label>Posun Y</label><input type="range" min="-100" max="100" data-k="bgY"></div></div></div>
- </div>
- <div class="sec"><h3>Logo a erb</h3>
-  <div class="btns"><button class="btn g" id="lG">Logo GISAdmin</button><button class="btn g" id="lA">Logo Atomicon</button><button class="btn g" id="lN">Bez loga</button></div>
-  <label>Vlastní logo (PNG/SVG/JPG)</label><input type="file" accept="image/*" id="fLogo">
-  <label>Výška loga ve footeru: <b id="v_logoH"></b></label><input type="range" min="16" max="44" data-k="logoH">
-  <label>Erb / znak obce (vpravo nahoře)</label><input type="file" accept="image/*" id="fErb"><button class="btn g" id="eN" style="margin-top:6px">Odebrat erb</button>
- </div>
- <div class="sec"><h3>Export</h3>
-  <label>Velikost PNG</label><select data-k="px"><option value="500">500 × 500 px</option><option value="600">600 × 600 px</option><option value="800">800 × 800 px</option><option value="1000">1000 × 1000 px (2×, doporučeno)</option><option value="1500">1500 × 1500 px</option></select>
-  <label>Název souboru</label><input type="text" data-k="fname">
-  <div class="btns" style="margin-top:10px"><button class="btn" id="bPng">Stáhnout PNG</button><button class="btn b" id="bSvg">Stáhnout SVG</button></div>
-  <label style="margin-top:12px">Odkaz portálu (pro HTML kód)</label><input type="text" data-k="link" placeholder="https://gisadmin.atomicon.cz/public/…">
-  <pre id="snip"></pre><button class="btn g" id="bCopy" style="margin-top:6px">Kopírovat HTML kód</button>
-  <div class="hint">Nastavení se ukládá v tomto prohlížeči. <a href="#" id="bReset">Obnovit výchozí</a></div>
- </div>
+<div class="app">
+<aside class="form-panel">
+ <header class="panel-header">
+  <a class="back" href="../../index.html" title="Zpět na rozcestník"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg></a>
+  <div><h1>Generátor banneru GISAdmin</h1><div class="sub">Čtvercový banner mapového portálu na obecní web</div></div>
+ </header>
+
+ <nav class="tabs" role="tablist">
+  <button type="button" class="tab active" data-tab="t-texty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>Texty</button>
+  <button type="button" class="tab" data-tab="t-vzhled"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.6-.7 1.6-1.6 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.9.7-1.6 1.6-1.6H16c3.1 0 5.6-2.5 5.6-5.6C21.6 6 17.3 2 12 2z"/></svg>Vzhled</button>
+  <button type="button" class="tab" data-tab="t-mapa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>Mapa</button>
+  <button type="button" class="tab" data-tab="t-export"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Export</button>
+ </nav>
+
+ <!-- ===== TEXTY ===== -->
+ <section class="pane active" id="t-texty">
+  <div class="card">
+   <div class="card-title">Nadpis</div>
+   <label>Řádek 1 (tmavý)</label><input type="text" data-k="title1">
+   <label>Řádek 2 (barevný)</label><input type="text" data-k="title2">
+   <label class="lbl-row"><span>Max. velikost písma</span><b><span id="v_titleSize"></span> px</b></label>
+   <input type="range" min="36" max="84" data-k="titleSize">
+   <div class="hint" id="fitNote"></div>
+   <label>Název obce pod nadpisem <span class="opt">(nepovinné)</span></label><input type="text" data-k="obec" placeholder="např. Městys Lomnice">
+  </div>
+
+  <div class="card">
+   <div class="card-title">Tlačítko</div>
+   <label>Text tlačítka</label><input type="text" data-k="btn">
+   <label class="lbl-row"><span>Velikost písma</span><b><span id="v_btnSize"></span> px</b></label>
+   <input type="range" min="24" max="64" data-k="btnSize">
+   <label class="cb"><input type="checkbox" data-k="cursor"> Ikona kurzoru</label>
+   <label class="cb"><input type="checkbox" data-k="showUrl"> Adresa pod tlačítkem</label>
+   <input type="text" data-k="url" placeholder="gisadmin.atomicon.cz">
+  </div>
+
+  <div class="card">
+   <div class="card-title">Štítky v patičce <label class="cb inline"><input type="checkbox" data-k="showTags"> zobrazit</label></div>
+   <textarea data-k="tags" rows="4"></textarea>
+   <div class="hint">Každý štítek na nový řádek, nejvýše 5.</div>
+  </div>
+ </section>
+
+ <!-- ===== VZHLED ===== -->
+ <section class="pane" id="t-vzhled">
+  <div class="card">
+   <div class="card-title">Barvy</div>
+   <div class="seg"><button class="btn" id="bPre1" type="button">Styl GISAdmin</button><button class="btn" id="bPre2" type="button">Styl tmavý</button></div>
+   <div class="colors">
+    <label class="color"><input type="color" data-k="cO"><span>Zvýraznění<small>linka, 2. řádek</small></span></label>
+    <label class="color"><input type="color" data-k="cB"><span>Tlačítko</span></label>
+    <label class="color"><input type="color" data-k="cD"><span>Tmavá<small>text, štítky</small></span></label>
+    <label class="color"><input type="color" data-k="cF"><span>Patička</span></label>
+   </div>
+  </div>
+
+  <div class="card">
+   <div class="card-title">Rozvržení</div>
+   <label class="cb"><input type="checkbox" data-k="autoL"> Výška bílého bloku podle textu</label>
+   <div id="Lbox"><label class="lbl-row"><span>Výška bílého bloku</span><b><span id="v_L"></span> px</b></label><input type="range" min="120" max="330" data-k="L"></div>
+   <label class="lbl-row"><span>Odsazení tlačítka pod linkou</span><b><span id="v_btnGap"></span> px</b></label>
+   <input type="range" min="0" max="160" data-k="btnGap">
+  </div>
+
+  <div class="card">
+   <div class="card-title">Logo v patičce</div>
+   <div class="seg three"><button class="btn" id="lG" type="button">GISAdmin</button><button class="btn" id="lA" type="button">Atomicon</button><button class="btn" id="lN" type="button">Bez loga</button></div>
+   <label>Vlastní logo <span class="opt">(PNG, SVG, JPG)</span></label><input type="file" accept="image/*" id="fLogo">
+   <div class="row">
+    <div><label class="lbl-row"><span>Výška</span><b><span id="v_logoH"></span> px</b></label><input type="range" min="16" max="44" data-k="logoH"></div>
+    <div><label>Barva loga</label><select data-k="logoTone"><option value="auto">Automaticky</option><option value="orig">Původní</option><option value="white">Bílé</option></select></div>
+   </div>
+  </div>
+
+  <div class="card">
+   <div class="card-title">Erb / znak obce <span class="opt">vpravo nahoře</span></div>
+   <div class="file-row"><input type="file" accept="image/*" id="fErb"><button class="btn" id="eN" type="button">Odebrat</button></div>
+  </div>
+ </section>
+
+ <!-- ===== MAPA ===== -->
+ <section class="pane" id="t-mapa">
+  <div class="card">
+   <div class="card-title">Podklad</div>
+   <div class="row">
+    <div><label>Hlavní (dole)</label><select data-k="mapBottom"><option value="orto">Ortofoto ČÚZK</option><option value="osm">Základní mapa (OSM)</option><option value="aerial">Letecká (generovaná)</option><option value="basic">Základní (generovaná)</option><option value="img">Vlastní obrázek</option></select></div>
+    <div><label>Přechod (nahoře)</label><select data-k="mapTop"><option value="none">– bez přechodu –</option><option value="osm">Základní mapa (OSM)</option><option value="orto">Ortofoto ČÚZK</option><option value="basic">Základní (generovaná)</option><option value="aerial">Letecká (generovaná)</option><option value="img">Vlastní obrázek</option></select></div>
+   </div>
+   <div id="mixbox"><label class="lbl-row"><span>Délka přechodu</span><b><span id="v_mixAmt"></span> px</b></label><input type="range" min="20" max="320" data-k="mixAmt"></div>
+  </div>
+
+  <div class="card" id="real">
+   <div class="card-title">Místo na mapě</div>
+   <div class="file-row"><input type="text" data-k="place" placeholder="Obec nebo adresa…" id="placeInp"><button class="btn primary" id="bFind" type="button">Najít</button></div>
+   <div class="hint" id="tstat">Mapu lze posouvat i tažením v náhledu, kolečkem přiblížit.</div>
+   <label class="lbl-row"><span>Přiblížení</span><b id="v_zoom"></b></label>
+   <input type="range" min="13" max="19.5" step="0.25" data-k="zoom">
+   <div class="pin-row"><label class="cb"><input type="checkbox" data-k="pin"> Špendlík</label><button type="button" class="link-btn" id="bPinC" title="Přesunout špendlík pod tlačítko">Doprostřed</button></div>
+   <label class="cb"><input type="checkbox" data-k="attrib"> Uvést zdroj mapy (© ČÚZK / OSM)</label>
+   <details class="more"><summary>Souřadnice</summary>
+    <div class="row"><div><label>Šířka (lat)</label><input type="number" step="0.0001" data-k="lat"></div><div><label>Délka (lon)</label><input type="number" step="0.0001" data-k="lon"></div></div>
+   </details>
+  </div>
+
+  <div class="card" id="gen">
+   <div class="card-title">Generovaná mapa</div>
+   <div class="file-row"><input type="number" data-k="seed" min="1" max="9999" title="Varianta"><button class="btn" id="bRand" type="button">Jiná varianta</button></div>
+   <div class="checks">
+    <label class="cb"><input type="checkbox" data-k="cad"> Katastr</label><label class="cb"><input type="checkbox" data-k="dtm"> DTM obrysy</label>
+    <label class="cb"><input type="checkbox" data-k="net"> Sítě</label><label class="cb"><input type="checkbox" data-k="hl"> Parcela + špendlík</label>
+   </div>
+  </div>
+
+  <div class="card" id="imgbox" style="display:none">
+   <div class="card-title">Vlastní obrázek</div>
+   <input type="file" accept="image/*" id="fBg">
+   <label class="lbl-row"><span>Přiblížení</span><b><span id="v_bgZ"></span> %</b></label><input type="range" min="100" max="300" data-k="bgZ">
+   <div class="row"><div><label>Posun X</label><input type="range" min="-100" max="100" data-k="bgX"></div><div><label>Posun Y</label><input type="range" min="-100" max="100" data-k="bgY"></div></div>
+  </div>
+ </section>
+
+ <!-- ===== EXPORT ===== -->
+ <section class="pane" id="t-export">
+  <div class="card">
+   <div class="card-title">Obrázek</div>
+   <div class="row">
+    <div><label>Velikost PNG</label><select data-k="px"><option value="500">500 × 500 px</option><option value="600">600 × 600 px</option><option value="800">800 × 800 px</option><option value="1000">1000 × 1000 px (doporučeno)</option><option value="1500">1500 × 1500 px</option></select></div>
+    <div><label>Název souboru</label><input type="text" data-k="fname"></div>
+   </div>
+   <div class="hint">Stažení PNG / SVG a kopírování obrázku jsou v liště vpravo od náhledu.</div>
+  </div>
+  <div class="card">
+   <div class="card-title">Kód pro obecní web</div>
+   <label>Odkaz na mapový portál</label><input type="text" data-k="link" placeholder="https://gisadmin.atomicon.cz/public/…">
+   <label>Popis obrázku (alt)</label><input type="text" data-k="alt" placeholder="Mapový portál GISAdmin">
+   <pre id="snip"></pre>
+   <button class="btn full" id="bCopy" type="button">Kopírovat HTML kód</button>
+  </div>
+  <div class="hint">Nastavení se ukládá v tomto prohlížeči.</div>
+ </section>
 </aside>
-<div id="view"><div id="stage"></div></div>
+
+<main id="view">
+ <div id="stage" title="Mapu posunete tažením, kolečkem přiblížíte; špendlík přesunete tažením"></div>
+ <div class="view-hint" id="viewHint">Mapu posunete tažením, kolečkem myši přiblížíte · špendlík přetáhnete</div>
+ <div class="preview-actions" data-anchor="#stage"
+      style="--pa-primary-bg:#ea521f;--pa-primary-hover:#bd3203;--pa-secondary-bg:#fdece5;--pa-secondary-fg:#bd3203;--pa-secondary-hover:#f7c2ad">
+  <button type="button" class="preview-action preview-action-primary" id="bPng" title="Stáhnout PNG">
+   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+   <span class="preview-action-label">PNG</span></button>
+  <button type="button" class="preview-action" id="bCopyImg" title="Kopírovat obrázek do schránky">
+   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+   <span class="preview-action-label">Kopírovat</span></button>
+  <button type="button" class="preview-action" id="bSvg" title="Stáhnout SVG (vektor)">
+   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13l2 4 2-4M15 13h-1.5a1 1 0 0 0 0 2h1a1 1 0 0 1 0 2H13"/></svg>
+   <span class="preview-action-label">SVG</span></button>
+  <button type="button" class="preview-action preview-action-danger" id="bReset" title="Obnovit výchozí nastavení">
+   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+   <span class="preview-action-label">Obnovit</span></button>
+ </div>
 </main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 const LOGO_G="data:image/png;base64,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",LOGO_A="data:image/png;base64,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";
-const DEF={title1:'MAPOVÝ',title2:'PORTÁL',titleSize:62,btn:'VSTOUPIT',btnSize:48,cursor:true,url:'gisadmin.atomicon.cz',showUrl:true,tags:'KATASTR\nDTM ČR\nÚP\nPASPORTY',showTags:true,obec:'',cO:'#ea521f',cB:'#4483fc',cD:'#26292b',L:196,btnY:214,mapBottom:'orto',mapTop:'osm',cF:'#ffffff',logoTone:'auto',seed:8,cad:true,dtm:true,net:true,hl:true,lat:49.5938,lon:17.2509,zoom:17.5,mixAmt:150,pin:true,pinX:376,pinY:396,place:'',bgZ:100,bgX:0,bgY:0,logoH:26,px:'1000',fname:'banner-mapovy-portal',link:'',logo:LOGO_G,logoAsp:595/94,erb:null,erbAsp:1,bg:null,bgAsp:1};
+const DEF={title1:'MAPOVÝ',title2:'PORTÁL',titleSize:62,btn:'VSTOUPIT',btnSize:48,cursor:true,url:'gisadmin.atomicon.cz',showUrl:true,tags:'KATASTR\nDTM ČR\nÚP\nPASPORTY',showTags:true,obec:'',cO:'#ea521f',cB:'#4483fc',cD:'#26292b',L:196,btnY:214,mapBottom:'orto',mapTop:'osm',cF:'#ffffff',logoTone:'auto',seed:8,cad:true,dtm:true,net:true,hl:true,lat:49.5938,lon:17.2509,zoom:17.5,mixAmt:150,pin:true,pinX:376,pinY:396,place:'',bgZ:100,bgX:0,bgY:0,logoH:26,px:'1000',fname:'banner-mapovy-portal',link:'',alt:'',autoL:true,btnGap:18,attrib:true,logo:LOGO_G,logoAsp:595/94,erb:null,erbAsp:1,bg:null,bgAsp:1};
 let S=Object.assign({},DEF);
 try{const j=JSON.parse(localStorage.getItem('bannerGen3')||'null');if(j)S=Object.assign(S,j)}catch(e){}
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-$('#hl').src=LOGO_G;
+
 /* ---- měření textu ---- */
 const mctx=document.createElement('canvas').getContext('2d');
 const FONT='Arial, Helvetica, sans-serif';
@@ -126,71 +296,162 @@ function tileList(lat,lon,zoom,url){const z=Math.max(1,Math.min(19,Math.floor(zo
  const out=[];for(let y=Math.floor((py-half)/256);y<=Math.floor((py+half)/256);y++){if(y<0||y>=M)continue;for(let x=Math.floor((px-half)/256);x<=Math.floor((px+half)/256);x++){const xx=((x%M)+M)%M;out.push({u:url.replace('{z}',z).replace('{x}',xx).replace('{y}',y),X:250+(x*256-px)*s,Y:250+(y*256-py)*s,W:256*s})}}return out}
 async function toData(u){const r=await fetch(u,{mode:'cors'});if(!r.ok)throw new Error('HTTP '+r.status);const b=await r.blob();return await new Promise((res,rej)=>{const f=new FileReader();f.onload=()=>res(f.result);f.onerror=rej;f.readAsDataURL(b)})}
 const needs=S=>[...new Set([S.mapBottom,S.mapTop].filter(k=>k==='orto'||k==='osm'))];
-async function loadTiles(){const my=++tBusy;const st=$('#tstat');const key=`${S.lat}|${S.lon}|${S.zoom}`;const lay=needs(S);if(!lay.length)return;
- for(const L of lay){if(TL[L]&&TL[L].key===key&&TL[L].ok)continue;st.textContent='Načítám podklad ('+(L==='orto'?'ortofoto':'základní mapa')+')…';
-  const list=tileList(+S.lat,+S.lon,+S.zoom,URLS[L]);let fail=0;
+async function loadTiles(){const my=++tBusy;const st=$('#tstat');const la=+S.lat,lo=+S.lon,zo=+S.zoom;const key=`${S.lat}|${S.lon}|${S.zoom}`;const lay=needs(S);if(!lay.length)return;
+ for(const L of lay){if(TL[L]&&TL[L].key===key&&TL[L].ok)continue;st.className='hint';st.textContent='Načítám podklad ('+(L==='orto'?'ortofoto':'základní mapa')+')…';
+  const list=tileList(la,lo,zo,URLS[L]);let fail=0;
   const items=await Promise.all(list.map(async it=>{try{return Object.assign({},it,{href:await toData(it.u)})}catch(e){fail++;return null}}));
-  if(my!==tBusy)return;TL[L]={key,items:items.filter(Boolean),ok:items.some(Boolean),fail,total:list.length}}
- const bad=lay.filter(L=>!(TL[L]&&TL[L].ok));st.innerHTML=bad.length?'<b style="color:#c0392b">Podklad se nepodařilo načíst</b> ('+bad.join(', ')+') – zkontrolujte připojení; zatím se zobrazuje generovaná mapa.':'Podklad načten ✔';render()}
+  if(my!==tBusy)return;if(!items.some(Boolean)&&TL[L]&&TL[L].ok)continue;TL[L]={key,lat:la,lon:lo,zoom:zo,items:items.filter(Boolean),ok:items.some(Boolean),fail,total:list.length}}
+ const bad=lay.filter(L=>!(TL[L]&&TL[L].key===key&&TL[L].ok));st.className='hint '+(bad.length?'err':'ok');st.textContent=bad.length?'Podklad se nepodařilo načíst ('+bad.join(', ')+') – zkontrolujte připojení.':'Podklad načten ✔';render()}
 function scheduleTiles(){clearTimeout(tTimer);tTimer=setTimeout(loadTiles,350)}
 function tilesReady(S){const key=`${S.lat}|${S.lon}|${S.zoom}`;return needs(S).every(L=>TL[L]&&TL[L].key===key&&TL[L].ok)}
 const tileImgs=(L,extra='')=>TL[L].items.map(i=>`<image href="${i.href}" x="${i.X.toFixed(2)}" y="${i.Y.toFixed(2)}" width="${(i.W+0.7).toFixed(2)}" height="${(i.W+0.7).toFixed(2)}" preserveAspectRatio="none"${extra}/>`).join('');
+/* ---- Mercator: světové pixely při daném zoomu ---- */
+function merc(lat,lon,z){const n=256*Math.pow(2,z),sn=Math.sin(lat*Math.PI/180);return[(lon+180)/360*n,(0.5-Math.log((1+sn)/(1-sn))/(4*Math.PI))*n]}
+function unmerc(x,y,z){const n=256*Math.pow(2,z),lon=x/n*360-180,m=Math.PI-2*Math.PI*y/n;return[180/Math.PI*Math.atan(0.5*(Math.exp(m)-Math.exp(-m))),lon]}
+/* Dlaždice z posledního načtení – při posunu/přiblížení se jen přetransformují,
+   než se dotáhnou nové (žádné problikávání generované mapy). */
+function tilesSVG(k){const T=TL[k];const key=`${S.lat}|${S.lon}|${S.zoom}`;
+ if(T.key===key)return`<g>${tileImgs(k)}</g>`;
+ const[ox,oy]=merc(T.lat,T.lon,T.zoom),[nx,ny]=merc(+S.lat,+S.lon,+S.zoom),s=Math.pow(2,S.zoom-T.zoom);
+ return`<rect width="500" height="500" fill="#c9cdc4"/><g transform="translate(${(250-nx).toFixed(2)} ${(250-ny).toFixed(2)}) scale(${s}) translate(${(ox-250).toFixed(2)} ${(oy-250).toFixed(2)})">${tileImgs(k)}</g>`}
 /* ---- sestavení banneru ---- */
-function build(S,px){const L=+S.L,O=S.cO,D=S.cD,B=S.cB;const F=`font-family="${FONT}" font-weight="700"`;
- const key=`${S.lat}|${S.lon}|${S.zoom}`;
+let LAY={L:196,fy:450,map:false};
+function build(S,px){const O=S.cO,D=S.cD,B=S.cB;const F=`font-family="${FONT}" font-weight="700"`;
+ // Erb
+ let erbW=0;const erbH=84;if(S.erb)erbW=Math.min(erbH*S.erbAsp,120);
+ // Nadpis – oba řádky stejnou velikostí, zmenšit, aby se vešly
+ const maxTW=444-(erbW?erbW+14:0);let sz=+S.titleSize;
+ const fits=s=>Math.max(tw(S.title1||'',s,-2),tw(S.title2||'',s,-2))<=maxTW;
+ while(!fits(sz)&&sz>20)sz--;
+ const shrunk=sz<+S.titleSize;
+ const has1=!!(S.title1||'').trim(),has2=!!(S.title2||'').trim();
+ const y1=20+sz*.77,y2=has1?y1+sz*.98:y1;
+ let bottom=has1||has2?(has2?y2:y1)+sz*.22:20;
+ // Název obce
+ let obecSVG='';
+ if(S.obec){let fs=24;const maxw=444-(erbW?erbW+14:0);while(tw(S.obec,fs)>maxw&&fs>11)fs--;const oy=bottom+fs+8;obecSVG=`<text x="30" y="${oy.toFixed(1)}" ${F} font-size="${fs}" fill="${D}">${esc(S.obec)}</text>`;bottom=oy+fs*.25}
+ if(erbW)bottom=Math.max(bottom,22+erbH);
+ // Výška bílého bloku
+ const L=S.autoL?Math.round(Math.min(330,Math.max(120,bottom+18))):+S.L;
+ // Patička
+ const lh=+S.logoH,lw=lh*S.logoAsp,FH=Math.max(50,lh+24),fy=500-FH;
+ // Tlačítko – pod linkou, ale nikdy ne do patičky
+ const bh=92,urlH=S.showUrl&&S.url?30:0;let by=L+17+(+S.btnGap);by=Math.min(by,fy-10-bh-urlH);by=Math.max(by,L+17);
+ const btnOverflow=by+bh+urlH>fy-4;
+ LAY={L,fy,by,bh,map:needs(S).length>0,sz,shrunk,btnOverflow};
  const layerSVG=k=>{if(k==='img'){if(!S.bg)return'<rect width="500" height="500" fill="#8a867c"/>';const z=S.bgZ/100,w=500*z;let W=w,H=w/S.bgAsp;if(H<500*z){H=500*z;W=H*S.bgAsp}return`<image href="${S.bg}" x="${(500-W)/2+S.bgX*2}" y="${(500-H)/2+S.bgY*2}" width="${W}" height="${H}" preserveAspectRatio="xMidYMid slice"/>`}
-  if(k==='orto'||k==='osm'){if(TL[k]&&TL[k].key===key&&TL[k].ok)return`<g>${tileImgs(k)}</g>`;return mapSVG(Object.assign({},S,{mapStyle:k==='orto'?'aerial':'basic'}))}
+  if(k==='orto'||k==='osm'){if(TL[k]&&TL[k].ok)return tilesSVG(k);return mapSVG(Object.assign({},S,{mapStyle:k==='orto'?'aerial':'basic'}))}
   return mapSVG(Object.assign({},S,{mapStyle:k}))};
  let bg=layerSVG(S.mapBottom);
  if(S.mapTop&&S.mapTop!=='none'){const a=+S.mixAmt;bg=`<defs><linearGradient id="mixg" gradientUnits="userSpaceOnUse" x1="0" y1="${L}" x2="0" y2="${L+a}"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity="1"/></linearGradient><mask id="mixm"><rect width="500" height="500" fill="url(#mixg)"/></mask></defs><g>${layerSVG(S.mapTop)}</g><g mask="url(#mixm)">${layerSVG(S.mapBottom)}</g>`}
- if(S.pin&&needs(S).length)bg+=`<g transform="translate(${S.pinX} ${S.pinY})"><ellipse cx="0" cy="0" rx="9" ry="3.5" fill="#000" opacity=".3"/><path d="M12 1a8 8 0 0 0-8 8c0 6 8 14 8 14s8-8 8-14a8 8 0 0 0-8-8z" fill="${O}" stroke="#fff" stroke-width="1.3" transform="translate(-18 -34.5) scale(1.5)"/><circle cx="0" cy="-21" r="5.4" fill="#fff"/></g>`
- const sz=+S.titleSize,y1=20+sz*.77,y2=y1+sz*.98;
+ if(S.pin&&needs(S).length)bg+=`<g transform="translate(${S.pinX} ${S.pinY})"><ellipse cx="0" cy="0" rx="9" ry="3.5" fill="#000" opacity=".3"/><path d="M12 1a8 8 0 0 0-8 8c0 6 8 14 8 14s8-8 8-14a8 8 0 0 0-8-8z" fill="${O}" stroke="#fff" stroke-width="1.3" transform="translate(-18 -34.5) scale(1.5)"/><circle cx="0" cy="-21" r="5.4" fill="#fff"/></g>`;
  let o=`<g id="Mapa-pozadi">${bg}</g>`;
+ // Uvedení zdroje mapy (licence ČÚZK / OSM)
+ if(S.attrib){const used=[S.mapBottom,S.mapTop];const src=[];if(used.includes('orto'))src.push('© ČÚZK');if(used.includes('osm'))src.push('© přispěvatelé OpenStreetMap');
+  if(src.length)o+=`<g id="Zdroj"><text x="492" y="${fy-6}" text-anchor="end" font-family="${FONT}" font-size="8.5" fill="#fff" stroke="#000" stroke-opacity=".55" stroke-width="2" paint-order="stroke" stroke-linejoin="round">${esc(src.join(' · '))}</text></g>`}
  o+=`<g id="Bily-blok"><rect x="0" y="0" width="500" height="${L}" fill="#fff"/></g>`;
  o+=`<g id="Linka"><rect x="0" y="${L}" width="500" height="12" fill="${O}"/><rect x="0" y="${L+12}" width="500" height="5" fill="${D}"/></g>`;
- o+=`<g id="Nadpis"><text x="28" y="${y1.toFixed(1)}" ${F} font-size="${sz}" letter-spacing="-2" fill="${D}">${esc(S.title1)}</text><text x="28" y="${y2.toFixed(1)}" ${F} font-size="${sz}" letter-spacing="-2" fill="${O}">${esc(S.title2)}</text></g>`;
- let rt='';if(S.erb){const h=84,w=Math.min(h*S.erbAsp,120);rt+=`<image href="${S.erb}" x="${472-w}" y="22" width="${w}" height="${h}" preserveAspectRatio="xMaxYMin meet"/>`}
- if(S.obec){let fs=24;const maxw=S.erb?330:440;while(tw(S.obec,fs)>maxw&&fs>11)fs--;rt+=`<text x="30" y="${(y2+fs+14).toFixed(1)}" ${F} font-size="${fs}" fill="${D}">${esc(S.obec)}</text>`}
+ o+=`<g id="Nadpis">${has1?`<text x="28" y="${y1.toFixed(1)}" ${F} font-size="${sz}" letter-spacing="-2" fill="${D}">${esc(S.title1)}</text>`:''}${has2?`<text x="28" y="${y2.toFixed(1)}" ${F} font-size="${sz}" letter-spacing="-2" fill="${O}">${esc(S.title2)}</text>`:''}</g>`;
+ let rt=obecSVG;if(erbW)rt+=`<image href="${S.erb}" x="${472-erbW}" y="22" width="${erbW}" height="${erbH}" preserveAspectRatio="xMaxYMin meet"/>`;
  if(rt)o+=`<g id="Obec">${rt}</g>`;
- // button (bez ohraničení) + kurzor
- const by=+S.btnY,bh=92;let bs=+S.btnSize;const curW=S.cursor?58:0,maxT=412-44-curW;while(tw(S.btn,bs,1)>maxT&&bs>12)bs--;
+ // Tlačítko + kurzor
+ let bs=+S.btnSize;const curW=S.cursor?58:0,maxT=412-44-curW;while(tw(S.btn,bs,1)>maxT&&bs>12)bs--;
  const textW=tw(S.btn,bs,1),tot=textW+curW,x0=250-tot/2;
  o+=`<g id="Tlacitko"><rect x="44" y="${by}" width="412" height="${bh}" rx="6" fill="${B}"/><text x="${x0.toFixed(1)}" y="${(by+bh/2+bs*.35).toFixed(1)}" ${F} font-size="${bs}" letter-spacing="1" fill="#fff">${esc(S.btn)}</text></g>`;
  if(S.cursor){const cx=x0+textW+24,cy=by+bh/2-22,A='M0 0L0 17.5L4.3 13.6L7.1 20L9.9 18.8L7.1 12.6L12.9 12.6Z';
   o+=`<g id="Kurzor"><g transform="translate(${(cx+3).toFixed(1)} ${(cy+4).toFixed(1)}) scale(2.3)" opacity=".35"><path d="${A}" fill="#000"/></g><g transform="translate(${cx.toFixed(1)} ${cy.toFixed(1)}) scale(2.3)"><g stroke="#fff" stroke-width="1.5" stroke-linecap="round" fill="none"><path d="M-3.2 -0.5L-7.6 -2"/><path d="M-1.8 -3.4L-5 -6.8"/><path d="M1.2 -4.2L1.8 -8.8"/></g><path d="${A}" fill="#fff" stroke="#1f2326" stroke-width="1.15" stroke-linejoin="round"/></g></g>`}
- if(S.showUrl&&S.url)o+=`<g id="Adresa"><text x="250" y="${by+bh+25}" text-anchor="middle" ${F} font-size="15" letter-spacing=".5" fill="#fff" stroke="#000" stroke-opacity=".6" stroke-width="2.4" paint-order="stroke" stroke-linejoin="round">${esc(S.url)}</text></g>`;
- // footer
- const lh=+S.logoH,lw=lh*S.logoAsp,FH=Math.max(50,lh+24),fy=500-FH;
+ if(urlH)o+=`<g id="Adresa"><text x="250" y="${by+bh+25}" text-anchor="middle" ${F} font-size="15" letter-spacing=".5" fill="#fff" stroke="#000" stroke-opacity=".6" stroke-width="2.4" paint-order="stroke" stroke-linejoin="round">${esc(S.url)}</text></g>`;
+ // Patička
  const lum=h=>{const n=parseInt(h.slice(1),16);return(0.299*(n>>16)+0.587*((n>>8)&255)+0.114*(n&255))/255};const dark=lum(S.cF)<.5;const white=S.logoTone==='white'||(S.logoTone==='auto'&&dark);
  let foot=`<rect x="0" y="${fy}" width="500" height="${FH}" fill="${S.cF}"/><rect x="0" y="${fy}" width="500" height="3" fill="${O}"/>`;
  let lend=0;if(S.logo){foot+=`<image href="${S.logo}" x="16" y="${(fy+3+(FH-3-lh)/2).toFixed(1)}" width="${lw.toFixed(1)}" height="${lh}"${white?' filter="url(#lw)"':''}/>`;lend=16+lw}
- const tg=S.showTags?S.tags.split('\n').map(s=>s.trim()).filter(Boolean).slice(0,5):[];
+ const tg=S.showTags?String(S.tags).split('\n').map(s=>s.trim()).filter(Boolean).slice(0,5):[];
  if(tg.length){let fs=12;const gap=5,pad=7,avail=500-12-(lend+14);const need=f=>tg.reduce((a,t)=>a+tw(t,f,.3)+pad*2,0)+gap*(tg.length-1);while(need(fs)>avail&&fs>7)fs-=.5;
   let x=500-12-need(fs),tags='';const th=fs+10,ty=fy+3+(FH-3-th)/2;for(const t of tg){const w=tw(t,fs,.3)+pad*2;tags+=`<rect x="${x.toFixed(1)}" y="${ty.toFixed(1)}" width="${w.toFixed(1)}" height="${th.toFixed(1)}" rx="6" fill="${dark?'#ffffff':D}"${dark?' fill-opacity=".16"':''}/><text x="${(x+pad).toFixed(1)}" y="${(ty+th/2+fs*.35).toFixed(1)}" ${F} font-size="${fs}" letter-spacing=".3" fill="#fff">${esc(t)}</text>`;x+=w+gap}foot+=tags}
  o+=`<g id="Footer">${foot}</g>`;
  return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${px}" height="${px}" viewBox="0 0 500 500"><defs><clipPath id="pl"><rect width="500" height="500"/></clipPath><filter id="lw" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0"/></filter></defs><g clip-path="url(#pl)">${o}</g></svg>`}
+
 /* ---- UI ---- */
-function sync(){$$('[data-k]').forEach(e=>{const k=e.dataset.k;if(e.type==='checkbox')e.checked=!!S[k];else e.value=S[k];const v=$('#v_'+k);if(v)v.textContent=S[k]})
- const ks=[S.mapBottom,S.mapTop];$('#real').style.display=ks.some(k=>k==='orto'||k==='osm')?'block':'none';$('#gen').style.display=ks.some(k=>k==='aerial'||k==='basic')?'block':'none';$('#imgbox').style.display=ks.includes('img')?'block':'none';$('#mixbox').style.display=S.mapTop!=='none'?'block':'none'}
+function sync(){$$('[data-k]').forEach(e=>{const k=e.dataset.k;if(document.activeElement===e)return;if(e.type==='checkbox')e.checked=!!S[k];else e.value=S[k];const v=$('#v_'+k);if(v)v.textContent=S[k]});
+ const ks=[S.mapBottom,S.mapTop];$('#real').style.display=ks.some(k=>k==='orto'||k==='osm')?'block':'none';$('#gen').style.display=ks.some(k=>k==='aerial'||k==='basic')?'block':'none';$('#imgbox').style.display=ks.includes('img')?'block':'none';$('#mixbox').style.display=S.mapTop!=='none'?'block':'none';
+ $('#Lbox').style.display=S.autoL?'none':'block'}
+let rq=0;
 function render(){$('#stage').innerHTML=build(S,500);
- const url=S.link||'https://gisadmin.atomicon.cz/public/…';$('#snip').textContent=`<a href="${url}" target="_blank" rel="noopener"><img src="${S.fname}.png" width="500" height="500" alt="Mapový portál GISAdmin"></a>`;
- try{localStorage.setItem('bannerGen3',JSON.stringify(S))}catch(e){}}
-$$('[data-k]').forEach(e=>{const h=()=>{const k=e.dataset.k;S[k]=e.type==='checkbox'?e.checked:(e.type==='range'||e.type==='number'?+e.value:e.value);const v=$('#v_'+k);if(v)v.textContent=S[k];if(k==='mapBottom'||k==='mapTop')sync();if(['mapBottom','mapTop','lat','lon','zoom'].includes(k))scheduleTiles();render()};e.addEventListener('input',h);e.addEventListener('change',h)});
-function readImg(file,cb){const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>cb(r.result,im.naturalWidth/im.naturalHeight||1);im.src=r.result};r.readAsDataURL(file)}
+ $('#fitNote').textContent=LAY.shrunk?`Nadpis je zmenšený na ${LAY.sz} px, aby se vešel.`:'';if(typeof markActive==='function')markActive();
+ $('#viewHint').style.display=LAY.map?'':'none';
+ const url=S.link||'https://gisadmin.atomicon.cz/public/…',alt=S.alt||('Mapový portál GISAdmin'+(S.obec?' – '+S.obec:''));
+ $('#snip').textContent=`<a href="${esc(url)}" target="_blank" rel="noopener"><img src="${esc((S.fname||'banner')+'.png')}" width="500" height="500" alt="${esc(alt)}"></a>`;
+ clearTimeout(rq);rq=setTimeout(()=>{try{localStorage.setItem('bannerGen3',JSON.stringify(S))}catch(e){}},300)}
+let raf=0;const renderSoon=()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;render()})};
+$$('[data-k]').forEach(e=>{const h=()=>{const k=e.dataset.k;S[k]=e.type==='checkbox'?e.checked:(e.type==='range'||e.type==='number'?+e.value:e.value);const v=$('#v_'+k);if(v)v.textContent=S[k];if(['mapBottom','mapTop','autoL'].includes(k))sync();if(['mapBottom','mapTop','lat','lon','zoom'].includes(k))scheduleTiles();renderSoon()};e.addEventListener('input',h);e.addEventListener('change',h)});
+function readImg(file,cb){const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>cb(r.result,im.naturalWidth/im.naturalHeight||1);im.onerror=()=>toast('Obrázek nelze načíst.',true);im.src=r.result};r.readAsDataURL(file)}
 $('#fBg').onchange=e=>e.target.files[0]&&readImg(e.target.files[0],(d,a)=>{S.bg=d;S.bgAsp=a;render()});
 $('#fLogo').onchange=e=>e.target.files[0]&&readImg(e.target.files[0],(d,a)=>{S.logo=d;S.logoAsp=a;render()});
 $('#fErb').onchange=e=>e.target.files[0]&&readImg(e.target.files[0],(d,a)=>{S.erb=d;S.erbAsp=a;render()});
-$('#eN').onclick=()=>{S.erb=null;render()};
+$('#eN').onclick=()=>{S.erb=null;$('#fErb').value='';render()};
 $('#lG').onclick=()=>{S.logo=LOGO_G;S.logoAsp=595/94;render()};$('#lA').onclick=()=>{S.logo=LOGO_A;S.logoAsp=513/95;render()};$('#lN').onclick=()=>{S.logo=null;render()};
-$('#bFind').onclick=async()=>{const q=S.place;if(!q)return;$('#tstat').textContent='Hledám…';try{const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(q));const j=await r.json();if(!j.length){$('#tstat').textContent='Místo nenalezeno.';return}S.lat=+(+j[0].lat).toFixed(5);S.lon=+(+j[0].lon).toFixed(5);S.zoom=Math.max(S.zoom,17);sync();render();loadTiles()}catch(e){$('#tstat').textContent='Hledání selhalo: '+e.message}};
+
+// Výchozí výška špendlíku: mezi tlačítkem (s adresou) a patičkou
+const pinHome=()=>Math.round(Math.min(LAY.fy-6,(LAY.by+LAY.bh+(S.showUrl&&S.url?30:0)+LAY.fy)/2+18));
+/* ---- Hledání místa (Nominatim / OSM) ---- */
+async function findPlace(){const q=(S.place||'').trim();if(!q)return;const st=$('#tstat');st.className='hint';st.textContent='Hledám…';
+ try{const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=cz&accept-language=cs&q='+encodeURIComponent(q));const j=await r.json();
+  if(!j.length){st.className='hint err';st.textContent='Místo nenalezeno – zkuste přesnější název.';return}
+  S.lat=+(+j[0].lat).toFixed(6);S.lon=+(+j[0].lon).toFixed(6);S.zoom=Math.max(S.zoom,17);S.pinX=250;S.pinY=pinHome();
+  st.textContent=j[0].display_name;sync();render();loadTiles()}
+ catch(e){st.className='hint err';st.textContent='Hledání selhalo: '+e.message}}
+$('#bFind').onclick=findPlace;
+$('#bPinC').onclick=()=>{S.pin=true;S.pinX=250;S.pinY=pinHome();sync();render()};
+$('#placeInp').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();findPlace()}});
+
 $('#bRand').onclick=()=>{S.seed=1+Math.floor(Math.random()*9998);sync();render()};
 $('#bPre1').onclick=()=>{Object.assign(S,{cO:'#ea521f',cB:'#4483fc',cD:'#26292b',cF:'#ffffff'});sync();render()};
 $('#bPre2').onclick=()=>{Object.assign(S,{cO:'#ea521f',cB:'#26292b',cD:'#26292b',cF:'#26292b'});sync();render()};
-$('#bReset').onclick=e=>{e.preventDefault();S=Object.assign({},DEF);sync();render()};
+$('#bReset').onclick=()=>{if(!confirm('Obnovit výchozí nastavení banneru? Texty, barvy, loga i poloha mapy se vrátí na výchozí.'))return;S=Object.assign({},DEF);sync();render();loadTiles()};
+
+/* ---- Posun mapy a špendlíku myší, přiblížení kolečkem ---- */
+const stage=$('#stage');
+const svgPt=e=>{const r=stage.getBoundingClientRect();return{x:(e.clientX-r.left)*500/r.width,y:(e.clientY-r.top)*500/r.height,k:500/r.width}};
+const onPin=p=>S.pin&&LAY.map&&Math.hypot(p.x-S.pinX,p.y-(S.pinY-20))<22;
+const onMap=p=>LAY.map&&p.y>LAY.L+17&&p.y<LAY.fy&&!(p.x>=44&&p.x<=456&&p.y>=LAY.by&&p.y<=LAY.by+LAY.bh);
+let drag=null;
+stage.addEventListener('pointerdown',e=>{if(e.button!==0)return;const p=svgPt(e);
+ if(onPin(p))drag={mode:'pin',p,x0:S.pinX,y0:S.pinY};
+ else if(onMap(p)){const[mx,my]=merc(+S.lat,+S.lon,+S.zoom);drag={mode:'pan',p,mx,my,px0:S.pinX,py0:S.pinY};stage.classList.add('panning')}
+ if(drag){stage.setPointerCapture(e.pointerId);e.preventDefault()}});
+stage.addEventListener('pointermove',e=>{const p=svgPt(e);
+ if(!drag){stage.classList.toggle('pin',onPin(p));stage.classList.toggle('pan',!onPin(p)&&onMap(p));return}
+ const dx=p.x-drag.p.x,dy=p.y-drag.p.y;
+ if(drag.mode==='pin'){S.pinX=Math.round(Math.max(12,Math.min(488,drag.x0+dx)));S.pinY=Math.round(Math.max(LAY.L+50,Math.min(LAY.fy,drag.y0+dy)))}
+ else{const[la,lo]=unmerc(drag.mx-dx,drag.my-dy,+S.zoom);S.lat=+la.toFixed(6);S.lon=+lo.toFixed(6);if(S.pin){S.pinX=Math.round(drag.px0+dx);S.pinY=Math.round(drag.py0+dy)}}
+ renderSoon()});
+const endDrag=()=>{if(!drag)return;const m=drag.mode;drag=null;stage.classList.remove('panning');if(m==='pan'){sync();scheduleTiles()}render()};
+stage.addEventListener('pointerup',endDrag);stage.addEventListener('pointercancel',endDrag);
+stage.addEventListener('wheel',e=>{if(!LAY.map)return;const p=svgPt(e);if(!onMap(p)&&!onPin(p))return;e.preventDefault();
+ const z0=+S.zoom,z1=Math.max(13,Math.min(19.5,z0+(e.deltaY<0?.25:-.25)));if(z1===z0)return;
+ // přiblížení kolem kurzoru
+ const[cx,cy]=merc(+S.lat,+S.lon,z0),wx=cx+(p.x-250),wy=cy+(p.y-250),k=Math.pow(2,z1-z0);
+ const[la,lo]=unmerc(wx*k-(p.x-250),wy*k-(p.y-250),z1);
+ if(S.pin){S.pinX=Math.round(p.x+(S.pinX-p.x)*k);S.pinY=Math.round(p.y+(S.pinY-p.y)*k)}
+ S.lat=+la.toFixed(6);S.lon=+lo.toFixed(6);S.zoom=z1;sync();renderSoon();scheduleTiles()},{passive:false});
+
+/* ---- Export ---- */
 function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
-window.exportPNG=async function(){if(needs(S).length&&!tilesReady(S))await loadTiles();return new Promise((res,rej)=>{const px=+S.px,svg=build(S,px);const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=c.height=px;const x=c.getContext('2d');x.drawImage(im,0,0,px,px);c.toBlob(b=>{dl(b,(S.fname||'banner')+'.png');res(b)},'image/png')};im.onerror=()=>rej(new Error('export selhal'));im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg)})};
-$('#bPng').onclick=()=>window.exportPNG().catch(e=>alert(e.message));
-$('#bSvg').onclick=()=>dl(new Blob([build(S,500)],{type:'image/svg+xml'}),(S.fname||'banner')+'.svg');
-$('#bCopy').onclick=()=>{navigator.clipboard.writeText($('#snip').textContent).then(()=>{$('#bCopy').textContent='Zkopírováno ✔';setTimeout(()=>$('#bCopy').textContent='Kopírovat HTML kód',1500)}).catch(()=>{})};
+async function pngBlob(){if(needs(S).length&&!tilesReady(S)){toast('Čekám na dočtení mapového podkladu…');await loadTiles()}
+ return new Promise((res,rej)=>{const px=+S.px,svg=build(S,px);const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=c.height=px;const x=c.getContext('2d');x.drawImage(im,0,0,px,px);c.toBlob(b=>b?res(b):rej(new Error('Export selhal.')),'image/png')};im.onerror=()=>rej(new Error('Export selhal.'));im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg)})}
+window.exportPNG=async()=>{const b=await pngBlob();dl(b,(S.fname||'banner')+'.png');toast('Uloženo: '+(S.fname||'banner')+'.png');return b};
+$('#bPng').onclick=()=>window.exportPNG().catch(e=>toast(e.message,true));
+$('#bCopyImg').onclick=async()=>{try{if(!window.ClipboardItem)throw new Error('Prohlížeč neumí kopírovat obrázky – použijte PNG.');
+ await navigator.clipboard.write([new ClipboardItem({'image/png':pngBlob()})]);toast('Banner je ve schránce (Ctrl+V).')}catch(e){toast(e.message||'Kopírování selhalo.',true)}};
+$('#bSvg').onclick=async()=>{if(needs(S).length&&!tilesReady(S))await loadTiles();dl(new Blob([build(S,500)],{type:'image/svg+xml'}),(S.fname||'banner')+'.svg')};
+$('#bCopy').onclick=()=>{navigator.clipboard.writeText($('#snip').textContent).then(()=>toast('HTML kód zkopírován.'),()=>toast('Kopírování selhalo.',true))};
+let toastT;function toast(m,err){const el=$('#toast');el.textContent=m;el.classList.toggle('err',!!err);el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),err?4500:2600)}
+/* ---- Záložky panelu a zvýraznění aktivních voleb ---- */
+function showTab(id){$$('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));$$('.pane').forEach(p=>p.classList.toggle('active',p.id===id));try{localStorage.setItem('bannerGen-tab',id)}catch(e){}}
+$$('.tab').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+try{const t=localStorage.getItem('bannerGen-tab');if(t&&document.getElementById(t))showTab(t)}catch(e){}
+function markActive(){$('#lG').classList.toggle('on',S.logo===LOGO_G);$('#lA').classList.toggle('on',S.logo===LOGO_A);$('#lN').classList.toggle('on',!S.logo);
+ const p1=S.cO==='#ea521f'&&S.cB==='#4483fc'&&S.cD==='#26292b'&&S.cF==='#ffffff',p2=S.cO==='#ea521f'&&S.cB==='#26292b'&&S.cD==='#26292b'&&S.cF==='#26292b';
+ $('#bPre1').classList.toggle('on',p1);$('#bPre2').classList.toggle('on',p2)}
 sync();render();if(needs(S).length)loadTiles();
 </script></body></html>

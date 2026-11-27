@@ -399,5 +399,22 @@ MapApp.data = {
         }).addTo(state.map);
 
         ui.updateDecorations();
+    },
+
+    // Ovládací prvky záložky Data (import SHP, kategorie, symboly, popisky)
+    wireEvents() {
+        const bind = (id, ev, fn) => document.getElementById(id)?.addEventListener(ev, fn);
+        bind('btnLoadShp', 'click', () => this.loadShp());
+        bind('categoryField', 'change', () => this.onCategoryFieldChange());
+        bind('btnRandomizeColors', 'click', () => this.randomizeCategoryColors());
+        bind('pointType', 'change', () => { MapApp.ui.toggleSymbolMode(); this.updateVectorStyle(); });
+        ['symFillColor', 'symStrokeColor', 'symShape', 'symSize', 'symStrokeWidth',
+            'lineOutlineEnable', 'lineOutlineColor', 'lineOutlineWidth', 'iconSize', 'iconAngle']
+            .forEach(id => bind(id, 'change', () => this.updateVectorStyle()));
+        ['iconUrl', 'svgCodeText'].forEach(id => bind(id, 'input', () => this.updateVectorStyle()));
+        bind('labelField', 'change', () => this.updateVectorStyle());
+        bind('labelFontSize', 'input', () => MapApp.labels.updateLabelStyles());
+        bind('labelFontColor', 'input', () => MapApp.labels.updateLabelStyles());
+        bind('btnToggleLabelEdit', 'click', () => MapApp.labels.toggleLabelEditMode());
     }
 };

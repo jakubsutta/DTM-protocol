@@ -332,17 +332,7 @@ h1.brand-title .brand-dot {
     transition: transform 0.2s ease;
 }
 
-.theme-toggle .icon-moon {
-    display: none;
-}
-
-body.dark-theme .theme-toggle .icon-sun {
-    display: none;
-}
-
-body.dark-theme .theme-toggle .icon-moon {
-    display: block;
-}
+/* Ikony přepínače: viz blok „Volba vzhledu“ na konci souboru */
 
 /* ---- Dropdown pro Další nástroje ---- */
 .tools-dropdown {
@@ -1398,11 +1388,6 @@ body.dark-theme .theme-toggle .icon-moon {
     flex-shrink: 0;
 }
 
-/* Ikony v přepínači tmavého režimu */
-.theme-toggle .icon-sun { display: none; }
-.theme-toggle .icon-moon { display: block; }
-body.dark-theme .theme-toggle .icon-sun { display: block; }
-body.dark-theme .theme-toggle .icon-moon { display: none; }
 
 /* Scrollovatelné tělo panelu pro sekce */
 .panel-body {
@@ -3167,4 +3152,606 @@ body.dark-theme .main-header {
         linear-gradient(180deg, rgba(234, 82, 31, 0.14), rgba(234, 82, 31, 0.08)),
         #0f172a;
     border-bottom-color: rgba(234, 82, 31, 0.30);
+}
+
+/* ==========================================================================
+   Motiv „Liquid Glass“ (třetí volba vzhledu, třída body.glass-theme)
+   Vychází ze světlého motivu. Podle zásad Apple Liquid Glass:
+   - sklo jen na „funkční vrstvě“ (hlavička, postranní panel, rozbalovací
+     nabídky, modální okno) – plovoucí ovládání nad obsahem,
+   - sklo je čiré a LÁME světlo na okrajích (assets/js/liquid-glass.js, SVG
+     displacement – jen Chromium; jinde záloha s rozostřením),
+   - hrany mají odlesk podle zdroje světla (poloha kurzoru: --lg-lx, --lg-ly),
+   - ovládací prvky na skle reagují „želé“ pružinou, ne dalším sklem,
+   - obsah (karty) je obyčejná neprůhledná plocha – žádný glassmorphismus,
+   - text na skle je v plné (primární) barvě kvůli kontrastu.
+   ========================================================================== */
+body.glass-theme {
+    /* směr světla (-1…1), přepisuje liquid-glass.js podle kurzoru */
+    --lg-lx: 0.4;
+    --lg-ly: 1;
+
+    /* záloha bez lomu (Firefox, Safari): rozostření + sytost */
+    --lg-blur: blur(14px) saturate(180%);
+
+    /* tónování skla: shora světlejší (odražené světlo), dole čiřejší */
+    --lg-tint: linear-gradient(180deg, rgba(255, 255, 255, 0.50) 0%, rgba(255, 255, 255, 0.30) 100%);
+    --lg-tint-strong: linear-gradient(180deg, rgba(255, 255, 255, 0.62) 0%, rgba(255, 255, 255, 0.44) 100%);
+
+    /* hrana skla: ostrý odlesk ze strany světla, slabší protiodlesk,
+       vlasová linka, vnitřní záře a měkký stín pod sklem */
+    --lg-rim:
+        inset calc(var(--lg-lx) * 1.5px) calc(var(--lg-ly) * 1.5px) 0 -0.5px rgba(255, 255, 255, 0.95),
+        inset calc(var(--lg-lx) * -1.2px) calc(var(--lg-ly) * -1.2px) 0 -0.5px rgba(255, 255, 255, 0.55),
+        inset 0 0 0 0.5px rgba(255, 255, 255, 0.45),
+        inset 0 0 18px rgba(255, 255, 255, 0.28);
+    /* iOS 27: ztmavená vnější hrana (definice skla nad světlou fotkou) */
+    --lg-shadow:
+        var(--lg-rim),
+        0 0 0 0.5px rgba(15, 23, 42, 0.14),
+        0 10px 32px rgba(15, 23, 42, 0.16),
+        0 1px 3px rgba(15, 23, 42, 0.08);
+
+    /* odsazení plovoucího skla od okrajů okna a zaoblení (soustředné rohy) */
+    --lg-gap: 10px;
+    --lg-radius-bar: 22px;
+    --lg-radius-panel: 28px;
+
+    /* standardní materiál pro obsah (Apple .regularMaterial): silné rozostření,
+       vyšší sytost, světlé tónování – žádný lom, rámeček ani lesk */
+    --lg-material: rgba(255, 255, 255, 0.70);
+    --lg-material-hover: rgba(255, 255, 255, 0.86);
+    --lg-material-blur: blur(28px) saturate(150%);
+
+    /* pružina pro „tekuté“ reakce */
+    --lg-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    --lg-edge: rgba(255, 255, 255, 0.40);
+    --lg-control: rgba(255, 255, 255, 0.30);
+    --lg-control-hover: rgba(255, 255, 255, 0.62);
+}
+
+/* Pozadí: fotka náměstí ostřejší a sytější – sklo musí mít co lámat */
+body.glass-theme .bg-blurred {
+    filter: blur(1px) saturate(1.2);
+}
+
+body.glass-theme .bg-blurred::after {
+    background: rgba(240, 242, 255, 0.10);
+}
+
+/* ---- Funkční vrstva: sklo ---- */
+body.glass-theme .main-header,
+body.glass-theme .side-panel,
+body.glass-theme .dropdown-menu,
+body.glass-theme .search-expand-bar,
+body.glass-theme .changelog-modal-container {
+    background: var(--lg-tint);
+    backdrop-filter: var(--lg-blur);
+    -webkit-backdrop-filter: var(--lg-blur);
+    border-color: var(--lg-edge);
+    box-shadow: var(--lg-shadow);
+}
+
+/* Chromium: skutečný lom světla (filtr generuje liquid-glass.js) */
+html.lg-refract body.glass-theme .main-header,
+html.lg-refract body.glass-theme .side-panel,
+html.lg-refract body.glass-theme .dropdown-menu,
+html.lg-refract body.glass-theme .theme-menu,
+html.lg-refract body.glass-theme .changelog-modal-container {
+    backdrop-filter: var(--lg-filter, var(--lg-blur));
+    -webkit-backdrop-filter: var(--lg-filter, var(--lg-blur));
+}
+
+/* Lišta a sidebar PLUJÍ nad obsahem: odsazené od okrajů okna, zaoblené,
+   lom světla tak běží po celém obvodu (jako sidebar a toolbar v macOS/iPadOS 26) */
+body.glass-theme .main-header {
+    width: auto;
+    margin: var(--lg-gap) var(--lg-gap) 0 calc(var(--lg-gap) + 2px);
+    top: var(--lg-gap);
+    border: none;
+    border-radius: var(--lg-radius-bar);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0.34) 100%);
+}
+
+body.glass-theme .header-inner {
+    padding: 0 12px 0 10px;
+}
+
+/* sidebar je větší prvek → hustší sklo kvůli čitelnosti (HIG) */
+body.glass-theme .side-panel {
+    margin: var(--lg-gap) var(--lg-gap) var(--lg-gap) 0;
+    top: var(--lg-gap);
+    height: calc(100vh - 2 * var(--lg-gap));
+    border: none;
+    border-radius: var(--lg-radius-panel);
+    background: var(--lg-tint-strong);
+}
+
+/* Okrajový efekt při scrollu (scroll edge effect): obsah nad plovoucí lištou
+   se u horní hrany okna rozpustí místo ostrého řezu */
+body.glass-theme .main-layout-area::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: calc(var(--lg-gap) + 26px);
+    z-index: 24;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(236, 240, 250, 0.92) 0%, rgba(236, 240, 250, 0.55) 45%, rgba(236, 240, 250, 0) 100%);
+}
+
+/* Hlavička a patička panelu jsou součástí jednoho skla (žádné sklo na skle) */
+body.glass-theme .panel-header,
+body.glass-theme .panel-footer {
+    background: rgba(255, 255, 255, 0.14);
+}
+
+body.glass-theme .panel-header {
+    border-bottom-color: rgba(255, 255, 255, 0.55);
+}
+
+body.glass-theme .panel-footer {
+    border-top-color: rgba(255, 255, 255, 0.55);
+}
+
+body.glass-theme .side-panel.is-scrolled .panel-header,
+body.glass-theme .side-panel.has-more .panel-footer {
+    box-shadow: none;
+}
+
+body.glass-theme .panel-section {
+    border-color: rgba(255, 255, 255, 0.50);
+}
+
+body.glass-theme .dropdown-menu {
+    border-radius: 18px;
+}
+
+body.glass-theme .dropdown-header {
+    background: transparent;
+    border-bottom-color: rgba(255, 255, 255, 0.55);
+}
+
+/* ---- Ovládací prvky na skle: výplň (ne další sklo), kapsle, želé pružina ---- */
+body.glass-theme .header-action-btn,
+body.glass-theme .theme-toggle,
+body.glass-theme .panel-btn,
+body.glass-theme .column-collapse-btn {
+    background: var(--lg-control);
+    border-color: transparent;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.85),
+        inset 0 0 0 0.5px rgba(255, 255, 255, 0.6),
+        0 1px 3px rgba(15, 23, 42, 0.08);
+    color: #0f172a;
+    transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease,
+        transform 0.38s var(--lg-spring);
+}
+
+body.glass-theme .header-action-btn,
+body.glass-theme .panel-btn,
+body.glass-theme .theme-toggle {
+    border-radius: 999px;
+}
+
+body.glass-theme .header-action-btn:hover,
+body.glass-theme .theme-toggle:hover,
+body.glass-theme .panel-btn:hover,
+body.glass-theme .column-collapse-btn:hover {
+    background: var(--lg-control-hover);
+    border-color: transparent;
+    color: #ea521f;
+    transform: scale(1.06);
+}
+
+/* stisk: kapka se „nafoukne“ a rozsvítí */
+body.glass-theme .header-action-btn:active,
+body.glass-theme .theme-toggle:active,
+body.glass-theme .panel-btn:active,
+body.glass-theme .column-collapse-btn:active,
+body.glass-theme .theme-picker.open .theme-toggle {
+    transform: scale(1.12);
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 1),
+        inset 0 0 10px rgba(255, 255, 255, 0.9),
+        0 4px 14px rgba(15, 23, 42, 0.14);
+    transition-duration: 0.12s, 0.12s, 0.12s, 0.25s;
+}
+
+body.glass-theme .panel-search-input {
+    background: var(--lg-control);
+    border-color: transparent;
+    border-radius: 999px;
+    box-shadow:
+        inset 0 1px 3px rgba(15, 23, 42, 0.10),
+        inset 0 0 0 0.5px rgba(255, 255, 255, 0.6);
+    color: #0f172a;
+}
+
+body.glass-theme .panel-search-input:focus {
+    background: rgba(255, 255, 255, 0.85);
+    border-color: #ea521f;
+}
+
+body.glass-theme .panel-search-input::placeholder {
+    color: #334155;
+}
+
+body.glass-theme .search-kbd-badge,
+body.glass-theme .column-count {
+    background: rgba(255, 255, 255, 0.55);
+    border-color: rgba(255, 255, 255, 0.8);
+    color: #334155;
+}
+
+/* Text na skle v plné barvě (sekundární šedé mají na skle slabý kontrast) */
+body.glass-theme .brand-desc,
+body.glass-theme .notice-secondary,
+body.glass-theme .panel-section-title,
+body.glass-theme .panel-tool-desc,
+body.glass-theme .changelog-list li {
+    color: #1e293b;
+}
+
+/* ---- Obsahová vrstva: standardní materiál (ne sklo) ----
+   Apple: „Don't use Liquid Glass in the content layer … use standard materials“.
+   Karty nad fotkou = .regularMaterial: fotka prosvítá rozostřená a sytá,
+   barva nástroje (ikona) je značka v obsahu, okraje bez rámečku a lesku. */
+body.glass-theme .column-header {
+    padding: 5px 5px 5px 10px;
+    background: var(--lg-material);
+    backdrop-filter: var(--lg-material-blur);
+    -webkit-backdrop-filter: var(--lg-material-blur);
+    border: none;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+}
+
+body.glass-theme .column-title {
+    font-weight: 800;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+body.glass-theme .card {
+    background-color: var(--lg-material);
+    backdrop-filter: var(--lg-material-blur);
+    -webkit-backdrop-filter: var(--lg-material-blur);
+    border-color: transparent;
+    border-radius: 18px;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.09), 0 1px 2px rgba(15, 23, 42, 0.05);
+    transition: background-color 0.2s ease, background-image 0.2s ease,
+        box-shadow 0.25s ease, transform 0.35s var(--lg-spring);
+}
+
+/* najetí: materiál zhoustne a nabere tón barvy nástroje */
+body.glass-theme .card:hover {
+    background-color: var(--lg-material-hover);
+    background-image: linear-gradient(var(--bg), var(--bg));
+    border-color: transparent;
+    box-shadow: 0 10px 26px rgba(15, 23, 42, 0.13), 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+body.glass-theme .card:active {
+    transform: scale(0.98);
+    transition-duration: 0.2s, 0.2s, 0.2s, 0.12s;
+}
+
+/* soustředné rohy: ikona = poloměr karty − vnitřní odsazení */
+body.glass-theme .card-icon {
+    border-radius: 11px;
+}
+
+body.glass-theme .card-title {
+    color: #0f172a;
+}
+
+body.glass-theme .card-desc {
+    color: #1e293b;
+    opacity: 0.78;
+}
+
+body.glass-theme .card.experimental {
+    background-color: rgba(255, 255, 255, 0.40);
+}
+
+/* Boxy uvnitř panelu: výplň, ne další sklo */
+body.glass-theme .changelog-box {
+    background: rgba(255, 255, 255, 0.50);
+    border-color: transparent;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), inset 0 0 0 0.5px rgba(255, 255, 255, 0.6);
+    border-radius: 14px;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+/* ---- Modální okno historie změn: sklo nad ztlumeným pozadím ---- */
+body.glass-theme .changelog-modal-overlay {
+    background: rgba(15, 23, 42, 0.30);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+body.glass-theme .changelog-modal-container {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.80), rgba(255, 255, 255, 0.70));
+    border-radius: 28px;
+    transition: transform 0.45s var(--lg-spring);
+}
+
+body.glass-theme .changelog-modal-header {
+    background: transparent;
+    border-bottom-color: rgba(255, 255, 255, 0.6);
+}
+
+/* ---- Úzké okno: panel pod obsahem ---- */
+@media (max-width: 1280px) {
+    body.glass-theme .side-panel {
+        width: auto;
+        max-width: none;
+        height: auto;
+        margin: 16px var(--lg-gap) var(--lg-gap);
+        background: var(--lg-tint-strong);
+        border: none;
+        box-shadow: var(--lg-shadow);
+    }
+}
+
+/* ---- Lesk pod kurzorem na ovládacích prvcích (interaktivní sklo „ožije“ na dotyk) ---- */
+body.glass-theme .header-action-btn:hover,
+body.glass-theme .theme-toggle:hover,
+body.glass-theme .panel-btn:hover,
+body.glass-theme .column-collapse-btn:hover {
+    background:
+        radial-gradient(circle at var(--lg-mx, 50%) var(--lg-my, 30%), rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0) 70%),
+        var(--lg-control-hover);
+}
+
+/* ---- Přístupnost: omezená průhlednost / vyšší kontrast → téměř neprůhledné plochy ---- */
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+    body.glass-theme {
+        --lg-tint: linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95));
+        --lg-tint-strong: linear-gradient(rgba(255, 255, 255, 0.97), rgba(255, 255, 255, 0.97));
+        --lg-control: rgba(255, 255, 255, 0.95);
+        --lg-edge: rgba(148, 163, 184, 0.9);
+        --lg-material: rgba(255, 255, 255, 0.96);
+        --lg-material-hover: #ffffff;
+        --lg-material-blur: none;
+    }
+
+    body.glass-theme .bg-blurred::after {
+        background: rgba(240, 242, 255, 0.55);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.glass-theme .header-action-btn,
+    body.glass-theme .theme-toggle,
+    body.glass-theme .panel-btn,
+    body.glass-theme .column-collapse-btn,
+    body.glass-theme .card {
+        transition-property: background, color, box-shadow;
+    }
+
+    body.glass-theme .header-action-btn:hover,
+    body.glass-theme .theme-toggle:hover,
+    body.glass-theme .panel-btn:hover,
+    body.glass-theme .column-collapse-btn:hover,
+    body.glass-theme .header-action-btn:active,
+    body.glass-theme .theme-toggle:active,
+    body.glass-theme .panel-btn:active,
+    body.glass-theme .column-collapse-btn:active,
+    body.glass-theme .theme-picker.open .theme-toggle {
+        transform: none;
+    }
+}
+
+/* ==========================================================================
+   Volba vzhledu – tlačítko s rozbalovací nabídkou (Světlý / Tmavý / Liquid Glass)
+   Ikona na tlačítku = aktuální motiv.
+   ========================================================================== */
+.theme-picker {
+    position: relative;
+    display: flex;
+}
+
+.theme-toggle .icon-moon,
+.theme-toggle .icon-glass { display: none; }
+body.dark-theme .theme-toggle .icon-sun,
+body.glass-theme .theme-toggle .icon-sun { display: none; }
+body.dark-theme .theme-toggle .icon-moon { display: block; }
+body.glass-theme .theme-toggle .icon-glass { display: block; }
+
+/* Tlačítko je o kousek širší kvůli šipce nabídky */
+.panel-header .panel-btn.theme-toggle {
+    flex: 0 0 auto;
+    width: auto;
+    padding: 0 6px 0 8px;
+    gap: 2px;
+}
+
+.theme-toggle .theme-chevron {
+    width: 11px !important;
+    height: 11px !important;
+    opacity: 0.6;
+    transition: transform 0.2s ease;
+}
+
+.theme-picker.open .theme-toggle .theme-chevron {
+    transform: rotate(180deg);
+}
+
+.theme-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    width: 212px;
+    padding: 5px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 11px;
+    box-shadow: 0 12px 30px -6px rgba(15, 23, 42, 0.22), 0 4px 10px rgba(15, 23, 42, 0.05);
+    z-index: 70;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px) scale(0.98);
+    transform-origin: top right;
+    transition: opacity 0.16s ease, transform 0.16s ease, visibility 0.16s ease;
+}
+
+.theme-picker.open .theme-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+.theme-menu-title {
+    padding: 4px 8px 6px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #64748b;
+}
+
+.theme-option {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 7px 8px;
+    border: none;
+    border-radius: 7px;
+    background: transparent;
+    color: #0f172a;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.12s ease, color 0.12s ease;
+}
+
+.theme-option:hover,
+.theme-option:focus-visible {
+    background: #f1f5f9;
+    outline: none;
+}
+
+.theme-option-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    color: #475569;
+}
+
+.theme-option-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.theme-option-name {
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.theme-option-desc {
+    font-size: 10px;
+    color: #64748b;
+    line-height: 1.2;
+}
+
+.theme-option-check {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+    color: #ea521f;
+    visibility: hidden;
+}
+
+.theme-option[aria-checked="true"] {
+    background: rgba(234, 82, 31, 0.09);
+}
+
+.theme-option[aria-checked="true"] .theme-option-name,
+.theme-option[aria-checked="true"] .theme-option-icon {
+    color: #ea521f;
+}
+
+.theme-option[aria-checked="true"] .theme-option-check {
+    visibility: visible;
+}
+
+/* Tmavý motiv */
+body.dark-theme .theme-menu {
+    background: #1e293b;
+    border-color: #334155;
+    box-shadow: 0 12px 30px -6px rgba(0, 0, 0, 0.6);
+}
+
+body.dark-theme .theme-menu-title,
+body.dark-theme .theme-option-desc {
+    color: #94a3b8;
+}
+
+body.dark-theme .theme-option {
+    color: #e2e8f0;
+}
+
+body.dark-theme .theme-option-icon {
+    color: #cbd5e1;
+}
+
+body.dark-theme .theme-option:hover,
+body.dark-theme .theme-option:focus-visible {
+    background: #334155;
+}
+
+body.dark-theme .theme-option[aria-checked="true"] {
+    background: rgba(249, 115, 22, 0.14);
+}
+
+body.dark-theme .theme-option[aria-checked="true"] .theme-option-name,
+body.dark-theme .theme-option[aria-checked="true"] .theme-option-icon,
+body.dark-theme .theme-option-check {
+    color: #f97316;
+}
+
+/* Liquid Glass: nabídka je plovoucí ovládací prvek → sklo; položky jen výplň */
+body.glass-theme .theme-menu {
+    background: var(--lg-tint-strong);
+    transition: opacity 0.16s ease, transform 0.42s var(--lg-spring), visibility 0.16s ease;
+    transform: translateY(-4px) scale(0.6);
+    backdrop-filter: var(--lg-blur);
+    -webkit-backdrop-filter: var(--lg-blur);
+    border-color: var(--lg-edge);
+    border-radius: 16px;
+    box-shadow: var(--lg-shadow);
+}
+
+body.glass-theme .theme-option {
+    border-radius: 11px;
+}
+
+body.glass-theme .theme-option:hover,
+body.glass-theme .theme-option:focus-visible {
+    background: rgba(255, 255, 255, 0.65);
+}
+
+body.glass-theme .theme-menu-title,
+body.glass-theme .theme-option-desc {
+    color: #334155;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .theme-menu,
+    .theme-toggle .theme-chevron {
+        transition: none;
+    }
 }

@@ -2,54 +2,67 @@
 <html lang="cs">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>3D prohlížeč – GISAdmin</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Prohlížeč 3D dat</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%2364748b%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><style>@media(prefers-color-scheme:dark){:root{stroke:%2394a3b8}}</style><path d=%22M12 2.5L20.5 7.4V16.6L12 21.5L3.5 16.6V7.4L12 2.5Z%22/><path d=%22M12 12v9.5%22/><path d=%22M12 12L3.5 7.4%22/><path d=%22M12 12l8.5-4.6%22/></svg>">
 <link rel="icon" href="3d-favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap">
 <style>
-:root{--or:#e85417;--or-l:#ee8552;--bl:#4484f5;--nv:#0c4c98;--pan:#eeedec;--bd:#d2d6d8;--tx:#3e4041;--mu:#717273}
+/* Vzhled podle mapového portálu GISAdmin (oranžová linka, textové menu, ovládací prvky v rozích) */
+:root{--or:#e85417;--or-l:#ee8552;--bl:#4484f5;--pan:#eeedec;--bd:#d2d6d8;--tx:#3e4041;--mu:#717273;--bg:#fff;--card:#fff;--hover:#f4f4f4;--stage:#e7eaed}
+@media (prefers-color-scheme:dark){:root{--pan:#262b30;--bd:#3a4249;--tx:#e3e6e8;--mu:#9ba3aa;--bg:#15191c;--card:#1d2226;--hover:#2a3035;--stage:#262b30}}
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
-body{display:flex;flex-direction:column;padding:6px 7px 8px;background:#fff;color:var(--tx);font:13px/1.4 "Open Sans","Segoe UI",Helvetica,Arial,sans-serif}
+body{display:flex;flex-direction:column;padding:6px 7px 8px;background:var(--bg);color:var(--tx);font:13px/1.4 "Open Sans","Segoe UI",Helvetica,Arial,sans-serif}
 header{flex:none;border-bottom:2px solid var(--or-l)}
-.pt{margin-left:auto;font-size:12.5px;font-weight:600;color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-#ttl:not(:empty){color:var(--tx)}
 nav{display:flex;flex-wrap:wrap;align-items:center;gap:2px;padding:4px 0 6px}
-.mi{font:inherit;font-size:12.5px;color:#444;background:none;border:0;padding:3px 9px;cursor:pointer;border-radius:3px;display:inline-block}
-.mi:hover{color:var(--or);background:#f6f6f6}
+.mi{font:inherit;font-size:12.5px;color:var(--tx);background:none;border:0;padding:3px 9px;cursor:pointer;border-radius:3px;display:inline-flex;align-items:center;gap:5px}
+.mi:hover{color:var(--or);background:var(--hover)}
 .mi.on{color:var(--or);font-weight:600}
-.sep{width:1px;height:14px;background:#ccc;margin:0 4px}
-#stage{position:relative;flex:1;min-height:0;margin-top:8px;overflow:hidden;background:#e7eaed}
+.mi:disabled{opacity:.4;cursor:default;background:none;color:var(--tx)}
+.mi svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sep{width:1px;height:14px;background:var(--bd);margin:0 4px}
+.pt{margin-left:auto;font-size:12.5px;font-weight:600;color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;max-width:40%}
+#stage{position:relative;flex:1;min-height:0;margin-top:8px;overflow:hidden;background:var(--stage)}
 #stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block;outline:0}
-.lbar,.rbtn{position:absolute;z-index:5;border:2px solid rgba(0,0,0,.2);border-radius:4px;background:#fff;background-clip:padding-box}
+#stage.measuring canvas{cursor:crosshair}
+#stage.over::after{content:"Pusťte soubory sem";position:absolute;inset:8px;z-index:9;display:flex;align-items:center;justify-content:center;border:3px dashed var(--or);border-radius:6px;background:rgba(232,84,23,.08);color:var(--or);font-size:18px;font-weight:700;pointer-events:none}
+.lbar,.rbtn{position:absolute;z-index:5;border:2px solid rgba(0,0,0,.2);border-radius:4px;background:var(--card);background-clip:padding-box}
 .lbar{left:10px;top:10px}
 .rbtn{right:10px;top:10px}
-.lbar button,.rbtn button{display:flex;align-items:center;justify-content:center;width:30px;height:30px;padding:0;border:0;border-bottom:1px solid #ccc;background:#fff;color:#000;cursor:pointer;font:700 17px "Open Sans",Arial,sans-serif}
+.lbar button,.rbtn button{display:flex;align-items:center;justify-content:center;width:30px;height:30px;padding:0;border:0;border-bottom:1px solid var(--bd);background:var(--card);color:var(--tx);cursor:pointer;font:700 17px "Open Sans",Arial,sans-serif}
 .lbar button:last-child,.rbtn button{border-bottom:0}
-.lbar button:hover,.rbtn button:hover{background:#f4f4f4}
-.lbar svg{width:15px;height:15px;fill:none;stroke:#000;stroke-width:2;stroke-linecap:square;stroke-linejoin:miter}
-#help{position:absolute;z-index:6;top:10px;right:52px;width:236px;max-height:calc(100% - 20px);overflow:auto;background:var(--pan);border-radius:4px;padding:9px 11px 11px;box-shadow:0 1px 5px rgba(0,0,0,.25)}
+.lbar button:hover,.rbtn button:hover{background:var(--hover)}
+.lbar svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:square;stroke-linejoin:miter}
+#help{position:absolute;z-index:6;top:10px;right:52px;width:250px;max-height:calc(100% - 20px);overflow:auto;background:var(--pan);border-radius:4px;padding:9px 11px 11px;box-shadow:0 1px 5px rgba(0,0,0,.25)}
 #help h4{margin:0 0 9px;font-size:12px;font-weight:600;color:var(--or)}
 #help h4::before{content:"\25B6";font-size:9px;margin-right:7px}
-#help-x{position:absolute;right:8px;top:3px;font-size:24px;line-height:1;color:#000;cursor:pointer}
+#help-x{position:absolute;right:8px;top:3px;font-size:24px;line-height:1;color:var(--tx);cursor:pointer;background:none;border:0;padding:0}
 .tabs{display:flex;gap:2px;border-bottom:1px solid #e3c3b4;margin-bottom:9px}
 .tab{font:inherit;font-size:11px;padding:5px 9px;cursor:pointer;border:1px solid transparent;border-bottom:0;color:var(--mu);background:none}
-.tab.on{color:var(--or);font-weight:600;background:#fff6f2;border-color:#f0c9b8;border-radius:3px 3px 0 0}
+.tab.on{color:var(--or);font-weight:600;background:var(--card);border-color:#f0c9b8;border-radius:3px 3px 0 0}
 .pane{font-size:12px}
 .pane dt{font-weight:600;color:var(--tx)}
 .pane dt::before{content:"\25B6";font-size:8px;margin-right:6px;color:var(--mu)}
 .pane dd{margin:0 0 8px 14px;color:var(--mu)}
 .pane dl{margin:0}
-#info{position:absolute;z-index:5;left:10px;bottom:10px;background:rgba(255,255,255,.88);border:1px solid #999;padding:2px 7px;font-size:10.5px;color:#333}
-#drop{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:4;max-width:88%;text-align:center;background:#fff;border:2px dashed var(--or-l);border-radius:4px;padding:26px 34px}
+#info{position:absolute;z-index:5;left:10px;bottom:10px;max-width:calc(100% - 20px);background:var(--card);opacity:.93;border:1px solid var(--bd);border-radius:3px;padding:4px 8px;font-size:11px;color:var(--tx)}
+#info b{font-weight:600}
+#info .row{display:flex;flex-wrap:wrap;gap:4px 12px}
+#info .off{color:var(--mu);margin-top:2px}
+#drop{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:4;max-width:88%;text-align:center;background:var(--card);border:2px dashed var(--or-l);border-radius:4px;padding:26px 34px}
 #drop p{margin:6px 0 16px;color:var(--mu)}
+#drop small{display:block;margin-top:12px;color:var(--mu);font-size:11px}
 .btn-b{display:inline-block;background:var(--bl);color:#fff;border:0;border-radius:4px;padding:7px 16px;font:inherit;cursor:pointer}
 .btn-b:hover{background:#2f6fe0}
-#msg{position:absolute;z-index:7;left:50%;top:10px;transform:translateX(-50%);background:#fff;border:1px solid var(--bd);border-radius:4px;padding:6px 14px;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+#msg{position:absolute;z-index:7;left:50%;top:10px;transform:translateX(-50%);max-width:80%;background:var(--card);border:1px solid var(--bd);border-radius:4px;padding:6px 14px;box-shadow:0 1px 4px rgba(0,0,0,.15)}
 #msg.err{background:#fdeceb;border-color:#e0a79f;color:#a12b1c}
+#meas{position:absolute;z-index:5;right:10px;bottom:10px;min-width:190px;background:var(--card);border:1px solid var(--bd);border-left:3px solid var(--or);border-radius:3px;padding:6px 10px;font-size:12px}
+#meas b{color:var(--or)}
+#meas .mu{color:var(--mu);font-size:11px}
+.lbl{position:absolute;z-index:4;transform:translate(-50%,-130%);background:var(--or);color:#fff;font-size:11px;font-weight:700;padding:1px 6px;border-radius:3px;white-space:nowrap;pointer-events:none}
 .hidden{display:none!important}
-@media(max-width:760px){#help{right:10px;top:50px;width:auto;left:10px}.pt{display:none}}
+@media(max-width:760px){#help{right:10px;top:50px;width:auto;left:10px}.pt{display:none}.mi .tx{display:none}}
 </style>
 <script type="importmap">
 {"imports":{
@@ -60,13 +73,16 @@ nav{display:flex;flex-wrap:wrap;align-items:center;gap:2px;padding:4px 0 6px}
 <body>
 <header>
   <nav>
-    <label class="mi">Otevřít soubor<input id="file" type="file" hidden accept=".glb,.gltf,.obj,.stl,.fbx,.ply"></label>
+    <label class="mi" title="Otevřít model (u GLTF/OBJ vyberte i přidružené soubory .bin, .mtl a textury)">Otevřít soubor<input id="file" type="file" hidden multiple accept=".glb,.gltf,.bin,.obj,.mtl,.stl,.fbx,.ply,.png,.jpg,.jpeg,.webp"></label>
     <span class="sep"></span>
-    <button class="mi" id="m-reset" title="Klávesa R">Výchozí pohled</button>
-    <button class="mi on" id="b-grid">Mřížka</button>
-    <button class="mi" id="b-wire">Drátový model</button>
+    <button class="mi" id="m-reset" title="Klávesa R" disabled>Výchozí pohled</button>
+    <button class="mi on" id="b-grid" title="Klávesa G">Mřížka</button>
+    <button class="mi" id="b-wire" title="Klávesa W">Drátový model</button>
     <button class="mi" id="b-zup" title="Pro CAD/GIS modely, kde směr nahoru je osa Z">Osa Z nahoru</button>
     <button class="mi" id="b-dark">Tmavé pozadí</button>
+    <span class="sep"></span>
+    <button class="mi" id="b-measure" title="Měření vzdálenosti – klikněte na dva body modelu (M)" disabled>Měřit</button>
+    <button class="mi" id="b-shot" title="Uložit aktuální pohled jako PNG" disabled>Snímek</button>
     <div class="pt"><span id="ttl"></span></div>
   </nav>
 </header>
@@ -76,12 +92,13 @@ nav{display:flex;flex-wrap:wrap;align-items:center;gap:2px;padding:4px 0 6px}
     <button id="z-in" title="Přiblížit"><svg viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></svg></button>
     <button id="b-reset" title="Výchozí pohled (R)"><svg viewBox="0 0 16 16"><path d="M2 8l6-5 6 5M4 7v7h3V10h2v4h3V7"/></svg></button>
     <button id="z-out" title="Oddálit"><svg viewBox="0 0 16 16"><path d="M3 8h10"/></svg></button>
-    <button id="z-full" title="Celá obrazovka"><svg viewBox="0 0 16 16"><path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4"/></svg></button>
+    <button id="v-top" title="Pohled shora (T)"><svg viewBox="0 0 16 16"><rect x="3" y="3" width="10" height="10"/><path d="M8 6v4M6 8h4"/></svg></button>
+    <button id="z-full" title="Celá obrazovka (F)"><svg viewBox="0 0 16 16"><path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4"/></svg></button>
   </div>
-  <div class="rbtn"><button id="b-help" title="Nápověda">?</button></div>
+  <div class="rbtn"><button id="b-help" title="Nápověda (?)">?</button></div>
 
-  <div id="help">
-    <span id="help-x" title="Zavřít">×</span>
+  <div id="help" class="hidden">
+    <button type="button" id="help-x" title="Zavřít">×</button>
     <h4>Nápověda</h4>
     <div class="tabs"><button class="tab on" data-p="p1">Ovládání</button><button class="tab" data-p="p2">Formáty</button></div>
     <div class="pane" id="p1"><dl>
@@ -89,23 +106,29 @@ nav{display:flex;flex-wrap:wrap;align-items:center;gap:2px;padding:4px 0 6px}
       <dt>Posun</dt><dd>pravé tlačítko myši (nebo Shift + levé)</dd>
       <dt>Přiblížení / oddálení</dt><dd>kolečko myši</dd>
       <dt>Dotyková obrazovka</dt><dd>1 prst otáčí, 2 prsty posouvají a zoomují</dd>
-      <dt>Výchozí pohled</dt><dd>klávesa R nebo tlačítko domů</dd>
+      <dt>Měření</dt><dd>tlačítko Měřit (M), pak dva body na modelu; Esc měření ukončí</dd>
+      <dt>Klávesy</dt><dd>R výchozí pohled, T pohled shora, G mřížka, W drátový model, F celá obrazovka</dd>
     </dl></div>
     <div class="pane hidden" id="p2"><dl>
-      <dt>GLB / GLTF</dt><dd>doporučený formát, včetně textur</dd>
-      <dt>OBJ, STL, PLY</dt><dd>zobrazí se jednobarevně (PLY s barvami vrcholů zůstane barevný)</dd>
+      <dt>GLB</dt><dd>doporučený formát – vše v jednom souboru</dd>
+      <dt>GLTF</dt><dd>vyberte/přetáhněte najednou .gltf i .bin a textury</dd>
+      <dt>OBJ</dt><dd>s .mtl a texturami zobrazí materiály, jinak jednobarevně</dd>
+      <dt>STL, PLY</dt><dd>jednobarevně (PLY s barvami vrcholů zůstane barevný, bez ploch jako mračno bodů)</dd>
       <dt>FBX</dt><dd>včetně vložených materiálů</dd>
+      <dt>Souřadnice S-JTSK</dt><dd>velké souřadnice se automaticky posunou k počátku (kvůli přesnosti zobrazení); posun je uveden vlevo dole</dd>
       <dt>Osa Z nahoru</dt><dd>zapněte u CAD/GIS modelů, které jsou „položené“ na boku</dd>
     </dl></div>
   </div>
 
   <div id="drop">
     <strong>Přetáhněte sem 3D model</strong>
-    <p>Podporované formáty: GLB, GLTF, OBJ, STL, FBX, PLY</p>
-    <label class="btn-b">Vybrat soubor<input id="file2" type="file" hidden accept=".glb,.gltf,.obj,.stl,.fbx,.ply"></label>
+    <p>GLB, GLTF, OBJ, STL, FBX, PLY</p>
+    <label class="btn-b">Vybrat soubor<input id="file2" type="file" hidden multiple accept=".glb,.gltf,.bin,.obj,.mtl,.stl,.fbx,.ply,.png,.jpg,.jpeg,.webp"></label>
+    <small>U GLTF a OBJ vyberte i přidružené soubory (.bin, .mtl, textury).</small>
   </div>
   <div id="msg" class="hidden"></div>
   <div id="info" class="hidden"></div>
+  <div id="meas" class="hidden"></div>
 </div>
 
 <script type="module">
@@ -115,6 +138,7 @@ import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {DRACOLoader} from 'three/addons/loaders/DRACOLoader.js';
 import {MeshoptDecoder} from 'three/addons/libs/meshopt_decoder.module.js';
 import {OBJLoader} from 'three/addons/loaders/OBJLoader.js';
+import {MTLLoader} from 'three/addons/loaders/MTLLoader.js';
 import {STLLoader} from 'three/addons/loaders/STLLoader.js';
 import {FBXLoader} from 'three/addons/loaders/FBXLoader.js';
 import {PLYLoader} from 'three/addons/loaders/PLYLoader.js';
@@ -123,10 +147,13 @@ import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
 const $ = id => document.getElementById(id);
 const stage = $('stage');
 const params = new URLSearchParams(location.search);
-const st = {grid:true, wire:false, dark:false, zup:params.get('up') === 'z'};
+const prefersDark = matchMedia('(prefers-color-scheme: dark)').matches;
+const st = {grid:true, wire:false, dark:prefersDark, zup:params.get('up') === 'z'};
+const MODEL_EXT = ['glb', 'gltf', 'obj', 'stl', 'fbx', 'ply'];
+const fmt = (n, d = 2) => n.toLocaleString('cs', {maximumFractionDigits: d, minimumFractionDigits: 0});
 
 // --- scéna ---
-const renderer = new THREE.WebGLRenderer({antialias:true});
+const renderer = new THREE.WebGLRenderer({antialias:true, preserveDrawingBuffer:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 stage.prepend(renderer.domElement);
 const scene = new THREE.Scene();
@@ -138,25 +165,36 @@ scene.add(new THREE.HemisphereLight(0xffffff, 0x8899aa, 0.5));
 const sun = new THREE.DirectionalLight(0xffffff, 0.9);
 scene.add(sun, sun.target);
 
+// Stav měření (deklarováno předem – smyčka vykreslování ho používá hned od startu)
+let measuring = false, mPts = [], mObjs = [], labels = [];
+// Vykreslování jen při změně (šetří baterii a GPU)
+let dirty = true;
+const redraw = () => { dirty = true; };
+controls.addEventListener('change', redraw);
+
 function resize(){
   const w = stage.clientWidth, h = stage.clientHeight;
   renderer.setSize(w, h, false);
   camera.aspect = w / Math.max(h, 1);
   camera.updateProjectionMatrix();
+  redraw();
 }
 new ResizeObserver(resize).observe(stage);
 resize();
 
 (function loop(){
   requestAnimationFrame(loop);
-  controls.update();
+  controls.update();                 // tlumení dobíhá přes událost 'change'
+  if (!dirty) return;
+  dirty = false;
   sun.position.copy(camera.position);
   sun.target.position.copy(controls.target);
   renderer.render(scene, camera);
+  updateLabels();
 })();
 
 // --- stav a UI ---
-let holder = null, grid = null, home = null, span = 10;
+let holder = null, grid = null, home = null, span = 10, origin = null, sourceZup = null;
 
 function sync(){
   for (const k of Object.keys(st)) $('b-' + k).classList.toggle('on', st[k]);
@@ -166,28 +204,44 @@ function sync(){
     grid = new THREE.GridHelper(span, 20, st.dark ? 0x6b7884 : 0x9aa6b2, st.dark ? 0x38444f : 0xcfd6dd);
     scene.add(grid);
   }
-  if (holder) holder.traverse(o => { if (o.isMesh) [].concat(o.material).forEach(m => m.wireframe = st.wire); });
+  if (holder) holder.traverse(o => { if (o.isMesh && !o.userData.helper) [].concat(o.material).forEach(m => m.wireframe = st.wire); });
+  ['m-reset', 'b-measure', 'b-shot'].forEach(id => $(id).disabled = !holder);
+  redraw();
 }
 for (const k of ['grid', 'wire', 'dark']) $('b-' + k).onclick = () => { st[k] = !st[k]; sync(); };
-$('b-zup').onclick = () => { st.zup = !st.zup; if (holder) fit(); sync(); };
+$('b-zup').onclick = () => { st.zup = !st.zup; if (holder) { clearMeasure(); fit(); showInfo(); } sync(); };
 $('b-reset').onclick = reset;
 $('m-reset').onclick = reset;
+$('v-top').onclick = topView;
 function zoom(f){
   if (!home) return;
   const v = camera.position.clone().sub(controls.target);
   const d = THREE.MathUtils.clamp(v.length() * f, controls.minDistance, controls.maxDistance);
   camera.position.copy(controls.target).add(v.setLength(d));
+  controls.update();
 }
 $('z-in').onclick = () => zoom(0.8);
 $('z-out').onclick = () => zoom(1.25);
-$('z-full').onclick = () => document.fullscreenElement ? document.exitFullscreen() : stage.requestFullscreen();
+const fullscreen = () => document.fullscreenElement ? document.exitFullscreen() : stage.requestFullscreen();
+$('z-full').onclick = fullscreen;
 document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
   document.querySelectorAll('.tab').forEach(x => x.classList.toggle('on', x === t));
   document.querySelectorAll('.pane').forEach(p => p.classList.toggle('hidden', p.id !== t.dataset.p));
 });
 $('b-help').onclick = () => $('help').classList.toggle('hidden');
 $('help-x').onclick = () => $('help').classList.add('hidden');
-addEventListener('keydown', e => { if (e.key.toLowerCase() === 'r' && !e.ctrlKey && !e.metaKey) reset(); });
+addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+  const k = e.key.toLowerCase();
+  if (k === 'r') reset();
+  else if (k === 't') topView();
+  else if (k === 'g') { st.grid = !st.grid; sync(); }
+  else if (k === 'w') { st.wire = !st.wire; sync(); }
+  else if (k === 'f') fullscreen();
+  else if (k === 'm' && holder) toggleMeasure();
+  else if (k === '?') $('help').classList.toggle('hidden');
+  else if (k === 'escape') { if (measuring) toggleMeasure(false); $('help').classList.add('hidden'); }
+});
 
 function msg(text, err){
   const m = $('msg');
@@ -203,6 +257,36 @@ function reset(){
   controls.update();
 }
 
+function topView(){
+  if (!home) return;
+  const d = home.pos.distanceTo(home.target);
+  controls.target.copy(home.target);
+  camera.position.copy(home.target).add(new THREE.Vector3(0, d, 0.0001 * d));
+  controls.update();
+}
+
+/**
+ * Velké souřadnice (S-JTSK, UTM…) se ve float32 na GPU zaokrouhlují a model se „třese“.
+ * Geometrii proto přepočteme do světových souřadnic a posuneme ke středu (jen jednou při načtení).
+ * Posun počátku si pamatujeme pro výpis skutečných souřadnic.
+ */
+function recenterLarge(obj){
+  obj.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(obj);
+  if (box.isEmpty()) return null;
+  const c = box.getCenter(new THREE.Vector3());
+  if (Math.max(Math.abs(c.x), Math.abs(c.y), Math.abs(c.z)) < 1e4) return null;
+  const off = new THREE.Matrix4().makeTranslation(-c.x, -c.y, -c.z);
+  obj.traverse(o => {
+    if (!o.geometry) return;
+    o.geometry = o.geometry.clone();
+    o.geometry.applyMatrix4(new THREE.Matrix4().multiplyMatrices(off, o.matrixWorld));
+  });
+  // transformace už jsou „zapečené“ v geometrii
+  obj.traverse(o => { o.position.set(0, 0, 0); o.rotation.set(0, 0, 0); o.scale.set(1, 1, 1); o.updateMatrix(); });
+  return c;
+}
+
 function fit(){
   holder.rotation.set(st.zup ? -Math.PI / 2 : 0, 0, 0);
   holder.position.set(0, 0, 0);
@@ -211,19 +295,21 @@ function fit(){
   if (box.isEmpty()) throw new Error('Soubor neobsahuje žádnou zobrazitelnou geometrii.');
   const c = box.getCenter(new THREE.Vector3()), s = box.getSize(new THREE.Vector3());
   holder.position.set(-c.x, -box.min.y, -c.z);
+  holder.updateMatrixWorld(true);
   const r = Math.max(s.length() / 2, 1e-6);
   span = Math.max(Math.ceil(Math.max(s.x, s.z) * 2), 1);
   const target = new THREE.Vector3(0, s.y / 2, 0);
   camera.position.copy(target).add(new THREE.Vector3(1, 0.7, 1).normalize().multiplyScalar(r * 2.8));
-  camera.near = r / 200; camera.far = r * 200; camera.updateProjectionMatrix();
-  controls.minDistance = r * 0.05; controls.maxDistance = r * 30;
+  camera.near = r / 500; camera.far = r * 200; camera.updateProjectionMatrix();
+  controls.minDistance = r * 0.02; controls.maxDistance = r * 30;
   controls.target.copy(target); controls.update();
-  home = {pos: camera.position.clone(), target: target.clone()};
+  home = {pos: camera.position.clone(), target: target.clone(), size: s};
   return s;
 }
 
 function disposeHolder(){
   if (!holder) return;
+  clearMeasure();
   scene.remove(holder);
   holder.traverse(o => {
     if (o.geometry) o.geometry.dispose();
@@ -237,21 +323,51 @@ function disposeHolder(){
 
 // --- načítání ---
 const draco = new DRACOLoader().setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/libs/draco/gltf/');
-const gltfLoader = new GLTFLoader().setDRACOLoader(draco).setMeshoptDecoder(MeshoptDecoder);
 const grey = () => new THREE.MeshStandardMaterial({color:0xb8c2cc, roughness:0.7, metalness:0.1});
 
-async function parse(url, ext){
+/**
+ * Správce načítání, který přesměruje relativní odkazy (scene.bin, textury, .mtl)
+ * na soubory vybrané/přetažené spolu s modelem.
+ */
+function makeManager(fileMap){
+  const mgr = new THREE.LoadingManager();
+  if (fileMap) mgr.setURLModifier(url => {
+    if (url.startsWith('data:')) return url;
+    const name = decodeURIComponent(url.split(/[?#]/)[0].split(/[\\/]/).pop()).toLowerCase();
+    return fileMap.get(name) || url;
+  });
+  return mgr;
+}
+
+async function parse(url, ext, fileMap, mtlUrl){
+  const mgr = makeManager(fileMap);
   switch (ext) {
-    case 'glb': case 'gltf': return (await gltfLoader.loadAsync(url)).scene;
-    case 'fbx': return await new FBXLoader().loadAsync(url);
+    case 'glb': case 'gltf': {
+      const l = new GLTFLoader(mgr).setDRACOLoader(draco).setMeshoptDecoder(MeshoptDecoder);
+      return (await l.loadAsync(url)).scene;
+    }
+    case 'fbx': return await new FBXLoader(mgr).loadAsync(url);
     case 'obj': {
-      const o = await new OBJLoader().loadAsync(url);
+      const l = new OBJLoader(mgr);
+      if (mtlUrl) {
+        const mtl = await new MTLLoader(mgr).loadAsync(mtlUrl);
+        mtl.preload();
+        l.setMaterials(mtl);
+        return await l.loadAsync(url);
+      }
+      const o = await l.loadAsync(url);
       o.traverse(m => { if (m.isMesh) m.material = grey(); });
       return o;
     }
-    case 'stl': return new THREE.Mesh(await new STLLoader().loadAsync(url), grey());
+    case 'stl': {
+      const g = await new STLLoader(mgr).loadAsync(url);
+      g.computeVertexNormals();   // některé exporty zapisují nulové normály → černý model
+      const m = grey();
+      if (g.hasColors) { m.vertexColors = true; m.color.set(0xffffff); }
+      return new THREE.Mesh(g, m);
+    }
     case 'ply': {
-      const g = await new PLYLoader().loadAsync(url);
+      const g = await new PLYLoader(mgr).loadAsync(url);
       const col = !!g.attributes.color;
       if (g.index) {
         g.computeVertexNormals();
@@ -259,62 +375,187 @@ async function parse(url, ext){
         if (col) m.color.set(0xffffff);
         return new THREE.Mesh(g, m);
       }
-      return new THREE.Points(g, new THREE.PointsMaterial({size:Math.max(1e-6, 0.003), vertexColors:col, sizeAttenuation:true}));
+      return new THREE.Points(g, new THREE.PointsMaterial({size:0.003, vertexColors:col, sizeAttenuation:true, color: col ? 0xffffff : 0x55606a}));
     }
     default: throw new Error('Nepodporovaný formát: .' + ext);
   }
 }
 
-async function load(url, name){
+let lastName = '', lastStats = null;
+
+async function load(url, name, fileMap, mtlUrl){
   const ext = name.split(/[?#]/)[0].split('.').pop().toLowerCase();
   msg('Načítám model…');
   try {
-    const obj = await parse(url, ext);
+    const obj = await parse(url, ext, fileMap, mtlUrl);
     disposeHolder();
+    origin = recenterLarge(obj);
+    // Modely ve velkých (geodetických) souřadnicích mají téměř vždy osu Z nahoru
+    if (origin && !params.has('up') && ext !== 'glb' && ext !== 'gltf') st.zup = true;
     holder = new THREE.Group();
     holder.add(obj);
-    let tri = 0;
+    let tri = 0, pts = 0, meshes = 0;
     obj.traverse(o => {
       if (o.isMesh) {
+        meshes++;
         [].concat(o.material).forEach(m => m.side = THREE.DoubleSide);
         const g = o.geometry;
         tri += (g.index ? g.index.count : g.attributes.position.count) / 3;
-      }
+      } else if (o.isPoints) pts += o.geometry.attributes.position.count;
     });
     scene.add(holder);
     const s = fit();
-    sync();
     if (obj.isPoints) obj.material.size = Math.max(s.length() / 400, 1e-6);
-    const f = n => n.toLocaleString('cs', {maximumFractionDigits: 2});
-    const ttl = $('ttl');
-    if (ttl) {
-      ttl.innerHTML = '';
-      ttl.textContent = decodeURIComponent(name.split(/[?#]/)[0].split('/').pop());
-    }
-    $('info').textContent = [decodeURIComponent(name.split(/[?#]/)[0].split('/').pop()), tri ? f(Math.round(tri)) + ' trojúhelníků' : '', f(s.x) + ' × ' + f(s.y) + ' × ' + f(s.z)].filter(Boolean).join(' | ');
-    $('info').classList.remove('hidden');
+    lastName = decodeURIComponent(name.split(/[?#]/)[0].split(/[\\/]/).pop());
+    lastStats = {tri, pts, meshes};
+    $('ttl').textContent = lastName;
+    document.title = lastName + ' – Prohlížeč 3D dat';
+    showInfo();
     $('drop').classList.add('hidden');
-    msg('');
+    sync();
+    const missing = fileMap ? [...missingRefs] : [];
+    msg(missing.length ? 'Chybí přidružené soubory: ' + missing.slice(0, 4).join(', ') + (missing.length > 4 ? '…' : '') : '', missing.length > 0);
+    if (missing.length) setTimeout(() => msg(''), 6000);
   } catch (e) {
     console.error(e);
-    msg('Model se nepodařilo načíst: ' + (e.message || e), true);
+    const hint = (ext === 'gltf' && !fileMap) || /404|fetch|Failed to load/i.test(e.message || '')
+      ? ' – u GLTF/OBJ vyberte najednou i přidružené soubory (.bin, .mtl, textury).' : '';
+    msg('Model se nepodařilo načíst: ' + (e.message || e) + hint, true);
   }
 }
 
-function openFile(f){
-  if (!f) return;
-  const url = URL.createObjectURL(f);
-  load(url, f.name).finally(() => setTimeout(() => URL.revokeObjectURL(url), 1000));
+function showInfo(){
+  if (!holder || !home) return;
+  const s = home.size, {tri, pts} = lastStats || {};
+  const parts = [`<b>${escapeHtml(lastName)}</b>`];
+  const pl = (n, a, b, c) => fmt(n, 0) + ' ' + (n === 1 ? a : n >= 2 && n <= 4 ? b : c);
+  if (tri) parts.push(pl(Math.round(tri), 'trojúhelník', 'trojúhelníky', 'trojúhelníků'));
+  if (pts) parts.push(pl(pts, 'bod', 'body', 'bodů'));
+  parts.push('rozměry ' + fmt(s.x) + ' × ' + fmt(s.z) + ' × ' + fmt(s.y) + ' (š × h × v)');
+  let html = `<div class="row">${parts.map(p => `<span>${p}</span>`).join('')}</div>`;
+  if (origin) html += `<div class="off">Model posunut k počátku o ${fmt(origin.x, 3)}; ${fmt(origin.y, 3)}; ${fmt(origin.z, 3)} (původní souřadnice)</div>`;
+  $('info').innerHTML = html;
+  $('info').classList.remove('hidden');
 }
-$('file').onchange = e => { openFile(e.target.files[0]); e.target.value = ''; };
-$('file2').onchange = e => { openFile(e.target.files[0]); e.target.value = ''; };
+
+const escapeHtml = t => String(t).replace(/[&<>"']/g, c => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[c]));
+
+// Sledování souborů, na které model odkazuje, ale nebyly přiloženy
+const missingRefs = new Set();
+
+function openFiles(list){
+  const files = [...(list || [])];
+  if (!files.length) return;
+  const main = files.find(f => MODEL_EXT.includes(f.name.split('.').pop().toLowerCase()));
+  if (!main) { msg('Mezi soubory chybí 3D model (GLB, GLTF, OBJ, STL, FBX, PLY).', true); return; }
+  const urls = [];
+  const fileMap = new Map();
+  files.forEach(f => { const u = URL.createObjectURL(f); urls.push(u); fileMap.set(f.name.toLowerCase(), u); });
+  // Odkazy, které nejsou mezi soubory, si zapamatujeme pro hlášku
+  missingRefs.clear();
+  const guard = new Proxy(fileMap, {get(t, p){
+    if (p === 'get') return k => { const v = t.get(k); if (!v && k.includes('.')) missingRefs.add(k); /* UUID z blob: adresy tečku nemá */ return v; };
+    const v = Reflect.get(t, p); return typeof v === 'function' ? v.bind(t) : v;
+  }});
+  const mtl = files.find(f => f.name.toLowerCase().endsWith('.mtl'));
+  const mainUrl = fileMap.get(main.name.toLowerCase());
+  load(mainUrl, main.name, files.length > 1 ? guard : null, mtl && main.name.toLowerCase().endsWith('.obj') ? fileMap.get(mtl.name.toLowerCase()) : null)
+    .finally(() => setTimeout(() => urls.forEach(u => URL.revokeObjectURL(u)), 3000));
+}
+$('file').onchange = e => { openFiles(e.target.files); e.target.value = ''; };
+$('file2').onchange = e => { openFiles(e.target.files); e.target.value = ''; };
+let dragDepth = 0;
+addEventListener('dragenter', e => { e.preventDefault(); if (++dragDepth === 1) stage.classList.add('over'); });
+addEventListener('dragleave', () => { if (--dragDepth <= 0) { dragDepth = 0; stage.classList.remove('over'); } });
 addEventListener('dragover', e => e.preventDefault());
-addEventListener('drop', e => { e.preventDefault(); openFile(e.dataTransfer.files[0]); });
+addEventListener('drop', e => { e.preventDefault(); dragDepth = 0; stage.classList.remove('over'); openFiles(e.dataTransfer.files); });
+
+// --- měření vzdálenosti ---
+const ray = new THREE.Raycaster();
+function toggleMeasure(on){
+  measuring = on === undefined ? !measuring : on;
+  $('b-measure').classList.toggle('on', measuring);
+  stage.classList.toggle('measuring', measuring);
+  if (measuring) { clearMeasure(); $('meas').innerHTML = 'Klikněte na <b>první bod</b> modelu.<div class="mu">Esc = konec měření</div>'; $('meas').classList.remove('hidden'); }
+  else { clearMeasure(); $('meas').classList.add('hidden'); }
+}
+$('b-measure').onclick = () => toggleMeasure();
+function clearMeasure(){
+  mObjs.forEach(o => { scene.remove(o); o.geometry?.dispose(); o.material?.dispose(); });
+  labels.forEach(l => l.el.remove());
+  mObjs = []; mPts = []; labels = [];
+  redraw();
+}
+function marker(p){
+  const r = (home ? home.size.length() : 10) / 250;
+  const m = new THREE.Mesh(new THREE.SphereGeometry(r, 16, 12), new THREE.MeshBasicMaterial({color:0xe85417, depthTest:false}));
+  m.renderOrder = 10; m.position.copy(p); m.userData.helper = true;
+  scene.add(m); mObjs.push(m);
+}
+// Světový bod → skutečné souřadnice modelu (před otočením osy a posunem k počátku)
+function modelCoord(p){
+  const local = holder.worldToLocal(p.clone());
+  if (origin) local.add(origin);
+  return local;
+}
+let downAt = null;
+renderer.domElement.addEventListener('pointerdown', e => { downAt = [e.clientX, e.clientY]; });
+renderer.domElement.addEventListener('pointerup', e => {
+  if (!measuring || !holder || !downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 4) return;
+  const r = renderer.domElement.getBoundingClientRect();
+  ray.setFromCamera(new THREE.Vector2((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1), camera);
+  ray.params.Points.threshold = (home ? home.size.length() : 1) / 300;
+  const hit = ray.intersectObject(holder, true)[0];
+  if (!hit) return;
+  if (mPts.length === 2) clearMeasure();
+  mPts.push(hit.point.clone());
+  marker(hit.point);
+  if (mPts.length === 2) {
+    const [a, b] = mPts;
+    const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([a, b]), new THREE.LineBasicMaterial({color:0xe85417, depthTest:false}));
+    line.renderOrder = 10; scene.add(line); mObjs.push(line);
+    const ma = modelCoord(a), mb = modelCoord(b);
+    const d = a.distanceTo(b), dv = Math.abs(b.y - a.y), dh = Math.hypot(b.x - a.x, b.z - a.z);
+    const el = document.createElement('div');
+    el.className = 'lbl'; el.textContent = fmt(d, 3);
+    stage.appendChild(el);
+    labels.push({el, pos: a.clone().add(b).multiplyScalar(0.5)});
+    $('meas').innerHTML = `Vzdálenost: <b>${fmt(d, 3)}</b><br>vodorovně ${fmt(dh, 3)} · výškový rozdíl ${fmt(dv, 3)}`
+      + `<div class="mu">Bod 1: ${fmt(ma.x, 3)}; ${fmt(ma.y, 3)}; ${fmt(ma.z, 3)}<br>Bod 2: ${fmt(mb.x, 3)}; ${fmt(mb.y, 3)}; ${fmt(mb.z, 3)}<br>Další klik začne nové měření · Esc konec</div>`;
+  } else {
+    $('meas').innerHTML = 'Klikněte na <b>druhý bod</b>.<div class="mu">Esc = konec měření</div>';
+  }
+  redraw();
+});
+function updateLabels(){
+  if (!labels.length) return;
+  const w = stage.clientWidth, h = stage.clientHeight;
+  labels.forEach(l => {
+    const v = l.pos.clone().project(camera);
+    l.el.style.display = v.z > 1 ? 'none' : '';
+    l.el.style.left = ((v.x + 1) / 2 * w) + 'px';
+    l.el.style.top = ((1 - v.y) / 2 * h) + 'px';
+  });
+}
+
+// --- snímek pohledu ---
+$('b-shot').onclick = () => {
+  renderer.render(scene, camera);
+  renderer.domElement.toBlob(b => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(b);
+    a.download = (lastName.replace(/\.[^.]+$/, '') || 'model') + '-pohled.png';
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }, 'image/png');
+};
 
 // odkaz z mapy: 3d-prohlizec.html?model=modely/objekt1.glb[&up=z]
 sync();
 const m = params.get('model');
 if (m) load(m, m);
+// Při první návštěvě ukázat nápovědu
+try { if (!localStorage.getItem('jenda-3d-help')) { $('help').classList.remove('hidden'); localStorage.setItem('jenda-3d-help', '1'); } } catch (e) { /* nevadí */ }
 </script>
 </body>
 </html>
