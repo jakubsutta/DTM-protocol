@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="favicon.svg?v=20261125d" type="image/svg+xml">
     <title>J.E.N.D.A. – Jednoduché Efektivní Nástroje Do Atomiconu</title>
-    <link rel="stylesheet" href="assets/css/hub.css?v=20261125d">
+    <link rel="stylesheet" href="assets/css/hub.css?v=20261127a">
 </head>
 
 <body>
@@ -40,6 +40,14 @@
             <path d="M13.5 5.7L17 9l-3.5 3.3" />
             <path d="M20 15H7.5" />
             <path d="M10.5 18.3L7 15l3.5-3.3" />
+        </symbol>
+        <symbol id="icon-handover-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="5" y="4" width="14" height="17" rx="2" />
+            <path d="M9 2.8h6v2.6H9z" />
+            <path d="M9 10h6" />
+            <path d="M9 13.5h6" />
+            <path d="M9 17h4" />
         </symbol>
         <symbol id="icon-komunikace" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
             stroke-linecap="round" stroke-linejoin="round">
@@ -413,6 +421,23 @@
                                 <div class="card-body">
                                     <div class="card-title">Předávací protokol</div>
                                     <div class="card-desc">předávací protokol - Atomicon</div>
+                                </div>
+                            </a>
+                            <a href="./tools/protokoly/Protokol-predavaci-tisk.html" target="_blank" rel="noopener noreferrer"
+                                class="card predani-tisk" data-tool-id="predani-tisk" title="Předávací protokol pro tisk">
+                                <button type="button" class="card-fav-btn" aria-label="Označit jako oblíbené"
+                                    title="Přidat do oblíbených" tabindex="-1">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                    </svg>
+                                </button>
+                                <div class="card-icon"><svg>
+                                        <use href="#icon-handover-list" xlink:href="#icon-handover-list" />
+                                    </svg></div>
+                                <div class="card-body">
+                                    <div class="card-title">Předávací protokol pro tisk</div>
+                                    <div class="card-desc">seznam dodaných produktů do balíku</div>
                                 </div>
                             </a>
                             <a href="./apps/jvf-validator/index.html" target="_blank" rel="noopener noreferrer"
@@ -1089,12 +1114,12 @@
                         </svg>
                         Novinky
                     </span>
-                    <span class="changelog-date" title="Zobrazit historii změn">26. 11. 2026</span>
+                    <span class="changelog-date" title="Zobrazit historii změn">27. 11. 2026</span>
                 </div>
                 <ul class="changelog-list">
+                    <li><span class="changelog-arrow">→</span><span class="changelog-text">nový Předávací protokol pro tisk</span></li>
                     <li><span class="changelog-arrow">→</span><span class="changelog-text">Obecní parcely: nový vzhled</span></li>
                     <li><span class="changelog-arrow">→</span><span class="changelog-text">panel akcí vpravo i u protokolů a exportů</span></li>
-                    <li><span class="changelog-arrow">→</span><span class="changelog-text">nové logo &amp; barvy karet podle nástrojů</span></li>
                 </ul>
                 <button type="button" class="changelog-more-btn" id="changelog-open-modal" aria-label="Zobrazit starší novinky a historii změn">
                     <span>Zobrazit celou historii (7 verzí)</span>
@@ -1807,11 +1832,22 @@
                 </button>
             </div>
             <div class="changelog-modal-body">
-                <!-- 26. 11. 2026 -->
+                <!-- 27. 11. 2026 -->
                 <div class="changelog-timeline-item is-current">
                     <div class="changelog-timeline-header">
-                        <span class="changelog-timeline-date">26. 11. 2026</span>
+                        <span class="changelog-timeline-date">27. 11. 2026</span>
                         <span class="changelog-timeline-tag">Aktuální verze</span>
+                    </div>
+                    <ul class="changelog-timeline-list">
+                        <li><span class="tl-arrow">→</span><strong>Předávací protokol pro tisk:</strong> Nový nástroj v sekci protokolů – průvodní seznam do balíku při zasílání více pasportů obci. Obsahuje jen „Seznam dodaných produktů“ v odrážkách (Enter přidá další položku) a podpis pouze předávajícího (jednatel / v zastoupení); vlastní světlejší zelený motiv.</li>
+                    </ul>
+                </div>
+
+                <!-- 26. 11. 2026 -->
+                <div class="changelog-timeline-item">
+                    <div class="changelog-timeline-header">
+                        <span class="changelog-timeline-date">26. 11. 2026</span>
+                        <span class="changelog-timeline-tag tag-past">Verze</span>
                     </div>
                     <ul class="changelog-timeline-list">
                         <li><span class="tl-arrow">→</span><strong>Obecní parcely:</strong> Nový vzhled – tři kroky (vložení výpisu LV, nalezené parcely, export) na širší obrazovce vedle sebe, přehled parcel podle katastrálních území se zvýrazněním parcel se stavbou, ukazatel průběhu stahování z ČÚZK a barevný výsledek exportu včetně seznamu parcel, které v RÚIAN chybí; podpora tmavého režimu.</li>

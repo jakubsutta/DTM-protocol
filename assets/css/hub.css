@@ -1085,6 +1085,7 @@ body.dark-theme .theme-toggle .icon-moon {
 .card.vlozeni       { --c: #ea521f; --bg: rgba(234, 82, 31, 0.10); }
 .card.validace      { --c: #4483fc; --bg: rgba(68, 131, 252, 0.10); }
 .card.predani       { --c: #43a047; --bg: rgba(67, 160, 71, 0.10); }
+.card.predani-tisk  { --c: #689f38; --bg: rgba(104, 159, 56, 0.10); }
 .card.jvf-validator { --c: #8b0000; --bg: rgba(139, 0, 0, 0.10); }
 
 .card.export        { --c: #d4cc30; --bg: rgba(212, 204, 48, 0.16); }
